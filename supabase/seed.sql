@@ -1,0 +1,3 @@
+-- Seed data is only used for local development.
+-- Test users are created via Supabase Auth API during testing.
+-- The seed_case_tasks trigger handles task creation automatically.
