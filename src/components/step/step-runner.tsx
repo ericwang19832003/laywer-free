@@ -16,6 +16,8 @@ interface StepRunnerProps {
   onConfirm: () => Promise<void>
   onSave?: () => Promise<void>
   skipReview?: boolean
+  onBeforeReview?: () => Promise<void>
+  reviewButtonLabel?: string
 }
 
 export function StepRunner({
@@ -28,6 +30,8 @@ export function StepRunner({
   onConfirm,
   onSave,
   skipReview = false,
+  onBeforeReview,
+  reviewButtonLabel,
 }: StepRunnerProps) {
   const [phase, setPhase] = useState<'input' | 'review'>('input')
   const [loading, setLoading] = useState(false)
@@ -80,8 +84,23 @@ export function StepRunner({
                     {loading ? 'Saving...' : "I'm ready"}
                   </Button>
                 ) : (
-                  <Button onClick={() => setPhase('review')} disabled={loading}>
-                    Review &rarr;
+                  <Button
+                    onClick={async () => {
+                      if (onBeforeReview) {
+                        setLoading(true)
+                        try {
+                          await onBeforeReview()
+                          setPhase('review')
+                        } finally {
+                          setLoading(false)
+                        }
+                      } else {
+                        setPhase('review')
+                      }
+                    }}
+                    disabled={loading}
+                  >
+                    {loading ? 'Processing...' : (reviewButtonLabel ?? 'Review \u2192')}
                   </Button>
                 )}
                 {onSave && !skipReview && (
