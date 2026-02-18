@@ -8,3 +8,9 @@ export const createDeadlineSchema = z.object({
 })
 
 export type CreateDeadlineInput = z.infer<typeof createDeadlineSchema>
+
+export const confirmAnswerDeadlineSchema = z.object({
+  confirmed_due_at: z.string().datetime(),
+})
+
+export type ConfirmAnswerDeadlineInput = z.infer<typeof confirmAnswerDeadlineSchema>

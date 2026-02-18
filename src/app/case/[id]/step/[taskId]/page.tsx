@@ -3,6 +3,9 @@ import { WelcomeStep } from '@/components/step/welcome-step'
 import { IntakeStep } from '@/components/step/intake-step'
 import { UploadReturnOfServiceStep } from '@/components/step/upload-return-of-service-step'
 import { ConfirmServiceFactsStep } from '@/components/step/confirm-service-facts-step'
+import { PreservationLetterStep } from '@/components/step/preservation-letter-step'
+import { WaitForAnswerStep } from '@/components/step/wait-for-answer-step'
+import { CheckDocketForAnswerStep } from '@/components/step/check-docket-for-answer-step'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -79,6 +82,13 @@ export default async function StepPage({
           existingMetadata={task.metadata}
         />
       )
+    case 'preservation_letter':
+      return (
+        <PreservationLetterStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
     case 'upload_return_of_service':
       return (
         <UploadReturnOfServiceStep
@@ -89,6 +99,21 @@ export default async function StepPage({
     case 'confirm_service_facts':
       return (
         <ConfirmServiceFactsStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
+    case 'wait_for_answer':
+      return (
+        <WaitForAnswerStep
+          caseId={id}
+          taskId={taskId}
+          dueAt={task.due_at}
+        />
+      )
+    case 'check_docket_for_answer':
+      return (
+        <CheckDocketForAnswerStep
           caseId={id}
           taskId={taskId}
         />

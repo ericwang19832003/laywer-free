@@ -41,7 +41,7 @@ function describeEvent(event: TimelineEvent): string {
     case 'task_status_changed': {
       const to = event.payload?.to as string | undefined
       const title = event.task_title ?? 'a step'
-      if (to === 'done') return `Completed: ${title}`
+      if (to === 'completed' || to === 'done') return `Completed: ${title}`
       if (to === 'in_progress') return `Started: ${title}`
       return `Updated: ${title}`
     }
@@ -49,6 +49,29 @@ function describeEvent(event: TimelineEvent): string {
       return `New step available: ${event.task_title ?? 'a step'}`
     case 'deadline_created':
       return `Deadline added: ${(event.payload?.key as string) ?? 'a deadline'}`
+    case 'answer_deadline_confirmed':
+      return 'Answer deadline confirmed'
+    case 'service_facts_confirmed':
+      return 'Service details confirmed'
+    case 'document_uploaded':
+      return 'Return of service uploaded'
+    case 'disclaimer_acknowledged':
+      return 'Disclaimer acknowledged'
+    case 'preservation_letter_draft_generated':
+      return 'Preservation letter drafted'
+    case 'preservation_letter_draft_saved':
+      return 'Preservation letter saved'
+    case 'preservation_letter_sent': {
+      const to = event.payload?.to_email as string | undefined
+      const status = event.payload?.status as string | undefined
+      if (status === 'failed') return 'Preservation letter send failed'
+      return to ? `Preservation letter sent to ${to}` : 'Preservation letter sent'
+    }
+    case 'gatekeeper_run': {
+      const count = (event.payload?.actions_applied as string[])?.length ?? 0
+      if (count === 0) return 'Case rules evaluated'
+      return `Case rules updated (${count} ${count === 1 ? 'change' : 'changes'})`
+    }
     default:
       return event.kind.replace(/_/g, ' ')
   }

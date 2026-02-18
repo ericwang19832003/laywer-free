@@ -31,11 +31,40 @@ interface Deadline {
  */
 const KEY_LABELS: Record<string, string> = {
   answer_deadline: 'Answer Deadline',
+  answer_deadline_estimated: 'Answer Deadline (Estimated)',
+  answer_deadline_confirmed: 'Answer Deadline (Confirmed)',
+  check_docket_after_answer_deadline: 'Check Docket',
+  default_earliest_info: 'Earliest Default Info',
   hearing_date: 'Hearing Date',
 }
 
 function formatDeadlineKey(key: string): string {
-  return KEY_LABELS[key] ?? key
+  return KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function daysUntil(dateStr: string): number {
+  const date = new Date(dateStr)
+  const now = new Date()
+  return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function formatCountdown(dateStr: string): string | null {
+  const days = daysUntil(dateStr)
+  if (days < 0) return 'Past due'
+  if (days === 0) return 'Due today'
+  if (days === 1) return 'Due tomorrow'
+  if (days <= 14) return `${days} days left`
+  return null
+}
+
+/**
+ * Filter deadlines: if a confirmed answer deadline exists,
+ * hide the estimated one (confirmed supersedes it).
+ */
+function filterDeadlines(deadlines: Deadline[]): Deadline[] {
+  const hasConfirmed = deadlines.some((d) => d.key === 'answer_deadline_confirmed')
+  if (!hasConfirmed) return deadlines
+  return deadlines.filter((d) => d.key !== 'answer_deadline_estimated')
 }
 
 /**
@@ -135,7 +164,7 @@ export default async function DeadlinesPage({
     )
   }
 
-  const deadlineList = (deadlines || []) as Deadline[]
+  const deadlineList = filterDeadlines((deadlines || []) as Deadline[])
 
   return (
     <div className="min-h-screen bg-warm-bg">
@@ -180,7 +209,10 @@ export default async function DeadlinesPage({
                         }`}
                       >
                         {formatDate(deadline.due_at)}
-                        {isWithinDays(deadline.due_at, 7) && ' — coming up soon'}
+                        {(() => {
+                          const countdown = formatCountdown(deadline.due_at)
+                          return countdown ? ` — ${countdown}` : ''
+                        })()}
                       </p>
                     </div>
                     <Badge variant="secondary" className="text-xs shrink-0">
