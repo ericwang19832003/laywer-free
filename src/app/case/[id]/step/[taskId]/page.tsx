@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { WelcomeStep } from '@/components/step/welcome-step'
 import { IntakeStep } from '@/components/step/intake-step'
 import { UploadReturnOfServiceStep } from '@/components/step/upload-return-of-service-step'
+import { ConfirmServiceFactsStep } from '@/components/step/confirm-service-facts-step'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -81,6 +82,13 @@ export default async function StepPage({
     case 'upload_return_of_service':
       return (
         <UploadReturnOfServiceStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
+    case 'confirm_service_facts':
+      return (
+        <ConfirmServiceFactsStep
           caseId={id}
           taskId={taskId}
         />

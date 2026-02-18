@@ -12,6 +12,48 @@ export const maxDuration = 60
 const IMAGE_MIMES = ['image/jpeg', 'image/png']
 const MIN_TEXT_LENGTH = 50
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: caseId } = await params
+    const { supabase, error: authError } = await getAuthenticatedClient()
+    if (authError) return authError
+
+    // Get most recent non-failed extraction for this case
+    const { data: extraction, error } = await supabase!
+      .from('document_extractions')
+      .select('id, case_id, court_document_id, extractor, status, confidence, fields, confirmed_by_user, confirmed_fields, created_at')
+      .eq('case_id', caseId)
+      .neq('status', 'failed')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Failed to load extraction' },
+        { status: 500 }
+      )
+    }
+
+    if (!extraction) {
+      return NextResponse.json(
+        { error: 'No extraction found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ extraction })
+  } catch {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
