@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { confirmServiceFactsSchema } from '@/lib/schemas/service-facts'
+import { computeDeadlinesFromServiceFacts } from '@/lib/rules/tx-v1'
+import { calculateReminderDates } from '@/lib/rules/reminders'
 
 export async function POST(
   request: NextRequest,
@@ -94,7 +96,61 @@ export async function POST(
       })
       .eq('id', extraction_id)
 
-    // Write timeline event
+    // --- Generate deadlines (idempotent: delete old system deadlines first) ---
+    // Delete existing system-generated deadlines for this case
+    // (reminders cascade-delete via FK)
+    await supabase!
+      .from('deadlines')
+      .delete()
+      .eq('case_id', caseId)
+      .eq('source', 'system')
+
+    // Compute new deadlines from confirmed service facts
+    const computed = computeDeadlinesFromServiceFacts({ served_at, return_filed_at })
+    const createdDeadlines: { id: string; key: string; due_at: string }[] = []
+
+    for (const dl of computed) {
+      const { data: deadline, error: dlError } = await supabase!
+        .from('deadlines')
+        .insert({
+          case_id: caseId,
+          key: dl.key,
+          due_at: dl.due_at,
+          source: 'system',
+          rationale: dl.rationale,
+        })
+        .select('id, key, due_at')
+        .single()
+
+      if (dlError || !deadline) {
+        console.error(`Failed to create deadline ${dl.key}:`, dlError?.message)
+        continue
+      }
+
+      createdDeadlines.push(deadline)
+
+      // Create reminders at -7d, -3d, -1d (only future dates)
+      const reminderDates = calculateReminderDates(dl.due_at)
+      if (reminderDates.length > 0) {
+        const remindersToInsert = reminderDates.map((sendAt) => ({
+          case_id: caseId,
+          deadline_id: deadline.id,
+          channel: 'email' as const,
+          send_at: sendAt.toISOString(),
+          status: 'scheduled' as const,
+        }))
+
+        const { error: remErr } = await supabase!
+          .from('reminders')
+          .insert(remindersToInsert)
+
+        if (remErr) {
+          console.error(`Failed to create reminders for ${dl.key}:`, remErr.message)
+        }
+      }
+    }
+
+    // Write timeline events
     await supabase!.from('task_events').insert({
       case_id: caseId,
       kind: 'service_facts_confirmed',
@@ -109,7 +165,22 @@ export async function POST(
       },
     })
 
-    return NextResponse.json({ service_facts: serviceFacts }, { status: 201 })
+    if (createdDeadlines.length > 0) {
+      await supabase!.from('task_events').insert({
+        case_id: caseId,
+        kind: 'deadlines_generated',
+        payload: {
+          calc_version: 'TX_V1',
+          deadlines: createdDeadlines.map((d) => ({
+            id: d.id,
+            key: d.key,
+            due_at: d.due_at,
+          })),
+        },
+      })
+    }
+
+    return NextResponse.json({ service_facts: serviceFacts, deadlines: createdDeadlines }, { status: 201 })
   } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
