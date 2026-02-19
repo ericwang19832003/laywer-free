@@ -20,7 +20,7 @@ export async function POST(
       )
     }
 
-    const { task_id, doc_type, content_text, sha256 } = parsed.data
+    const { task_id, doc_type, content_text, sha256, metadata } = parsed.data
 
     // Verify case exists (RLS handles ownership)
     const { data: caseData, error: caseError } = await supabase!
@@ -58,6 +58,7 @@ export async function POST(
         status: 'draft',
         content_text,
         sha256,
+        metadata: metadata ?? {},
       })
       .select()
       .single()
@@ -75,7 +76,7 @@ export async function POST(
         case_id: caseId,
         task_id: task_id ?? null,
         kind: 'preservation_letter_draft_generated',
-        payload: { document_id: doc.id, version: nextVersion, doc_type },
+        payload: { document_id: doc.id, version: nextVersion, doc_type, generator: metadata?.generator ?? 'template' },
       },
       {
         case_id: caseId,

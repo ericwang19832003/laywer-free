@@ -60,6 +60,15 @@ export function PreservationLetterStep({
   const [acknowledged, setAcknowledged] = useState(false)
   const [savedDocumentId, setSavedDocumentId] = useState<string | null>(null)
 
+  // AI state
+  const [useAi, setUseAi] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [generatorMeta, setGeneratorMeta] = useState<{
+    generator: 'template' | 'openai'
+    model?: string
+    prompt_version?: string
+  }>({ generator: 'template' })
+
   // Send state
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<'sent' | 'failed' | null>(null)
@@ -79,6 +88,43 @@ export function PreservationLetterStep({
     setAcknowledged(false)
     setSavedDocumentId(null)
     setSendResult(null)
+    setAiError(null)
+
+    // Try AI path if enabled
+    if (useAi) {
+      try {
+        const res = await fetch('/api/ai/preservation-letter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: caseSummary,
+            incident_date: incidentDate || undefined,
+            evidence_categories: selectedCategories,
+            tone,
+            opponent_name: opponentName || undefined,
+            // NOTE: opponentEmail intentionally excluded
+          }),
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          setGeneratedLetter(data.body)
+          setGeneratorMeta({
+            generator: 'openai',
+            model: data._meta?.model,
+            prompt_version: data._meta?.prompt_version,
+          })
+          return
+        }
+
+        // AI failed — fall through to template
+        setAiError('AI generation unavailable. Showing template draft instead.')
+      } catch {
+        setAiError('AI generation unavailable. Showing template draft instead.')
+      }
+    }
+
+    // Template path (default or AI fallback)
     const result = generatePreservationLetter({
       opponent_name: opponentName || undefined,
       incident_date: incidentDate || undefined,
@@ -88,6 +134,7 @@ export function PreservationLetterStep({
       tone,
     })
     setGeneratedLetter(result.body)
+    setGeneratorMeta({ generator: 'template' })
   }
 
   /** Save draft, acknowledge disclaimer, complete task */
@@ -114,6 +161,7 @@ export function PreservationLetterStep({
         doc_type: 'preservation_letter',
         content_text: generatedLetter,
         sha256,
+        metadata: generatorMeta,
       }),
     })
 
@@ -205,10 +253,22 @@ export function PreservationLetterStep({
   const reviewContent = (
     <div className="space-y-4">
       <div className="rounded-md border border-warm-border bg-warm-bg p-4">
+        {generatorMeta.generator === 'openai' && (
+          <span className="inline-block rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-medium mb-3">
+            AI-assisted draft
+          </span>
+        )}
         <pre className="whitespace-pre-wrap text-sm text-warm-text font-sans leading-relaxed">
           {generatedLetter}
         </pre>
       </div>
+
+      {/* AI fallback warning */}
+      {aiError && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="text-sm text-amber-800">{aiError}</p>
+        </div>
+      )}
 
       {/* Prominent disclaimer */}
       <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 space-y-1.5">
@@ -426,6 +486,25 @@ export function PreservationLetterStep({
               </button>
             ))}
           </div>
+        </div>
+
+        {/* AI toggle */}
+        <div className="rounded-md border border-warm-border px-4 py-3">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <Checkbox
+              checked={useAi}
+              onCheckedChange={(checked) => setUseAi(checked === true)}
+              className="mt-0.5"
+            />
+            <div>
+              <p className="text-sm font-medium text-warm-text">
+                Use AI to improve wording
+              </p>
+              <p className="text-xs text-warm-muted mt-0.5">
+                Optional. Uses AI to refine the letter&apos;s language. You&apos;ll still review before sending.
+              </p>
+            </div>
+          </label>
         </div>
       </div>
     </StepRunner>
