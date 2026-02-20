@@ -86,3 +86,11 @@ export const uploadResponseSchema = z.object({
 })
 
 export type UploadResponseInput = z.infer<typeof uploadResponseSchema>
+
+// ---- Confirm discovery response deadline ----
+
+export const confirmDiscoveryDeadlineSchema = z.object({
+  due_at: z.string().datetime(),
+})
+
+export type ConfirmDiscoveryDeadlineInput = z.infer<typeof confirmDiscoveryDeadlineSchema>

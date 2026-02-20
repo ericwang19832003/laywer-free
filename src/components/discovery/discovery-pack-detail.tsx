@@ -16,6 +16,7 @@ import {
   SendIcon,
   InboxIcon,
   AlertTriangleIcon,
+  CalendarIcon,
 } from 'lucide-react'
 import type {
   DiscoveryPack,
@@ -159,6 +160,11 @@ export function DiscoveryPackDetail({
           onLogAdded={(log) => setLogs((prev) => [log, ...prev])}
           onStatusChange={(updated) => setPack(updated)}
         />
+      )}
+
+      {/* Section C½: Response deadline */}
+      {(pack.status === 'served' || pack.status === 'responses_pending') && (
+        <DeadlineSection packId={pack.id} />
       )}
 
       {/* Section D: Responses inbox */}
@@ -686,6 +692,103 @@ function ServiceSection({
                 Cancel
               </Button>
             </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ============================================
+// Section C½: Response Deadline
+// ============================================
+
+function DeadlineSection({ packId }: { packId: string }) {
+  const [dueAt, setDueAt] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [savedDate, setSavedDate] = useState<string | null>(null)
+
+  async function handleSubmit() {
+    if (!dueAt) return
+    setSubmitting(true)
+    setError(null)
+
+    try {
+      const isoDate = new Date(dueAt).toISOString()
+      const res = await fetch(`/api/discovery/packs/${packId}/deadline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ due_at: isoDate }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to set deadline')
+      }
+
+      const { deadline } = await res.json()
+      setSavedDate(deadline.due_at)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <Card>
+      <CardContent className="py-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="size-4 text-calm-indigo" />
+          <h2 className="font-medium text-warm-text">Response due date</h2>
+        </div>
+
+        {savedDate ? (
+          <div className="space-y-2">
+            <div className="rounded-md border border-calm-green/30 bg-calm-green/5 px-3 py-2.5">
+              <p className="text-sm font-medium text-warm-text">
+                Response due: {formatDate(savedDate)}
+              </p>
+              <p className="text-xs text-warm-muted mt-1">
+                We&apos;ll remind you at 7, 3, and 1 day(s) before.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSavedDate(null)}
+            >
+              Update date
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="deadline-due-at">Due date</Label>
+              <Input
+                id="deadline-due-at"
+                type="datetime-local"
+                value={dueAt}
+                onChange={(e) => setDueAt(e.target.value)}
+              />
+              <p className="text-xs text-warm-muted">
+                Based on the date you provided. Please follow your court&apos;s rules.
+              </p>
+            </div>
+
+            {error && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            <Button
+              onClick={handleSubmit}
+              disabled={!dueAt || submitting}
+            >
+              {submitting ? 'Setting...' : 'Set response due date'}
+            </Button>
           </div>
         )}
       </CardContent>

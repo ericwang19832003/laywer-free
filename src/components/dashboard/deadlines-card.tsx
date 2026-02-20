@@ -22,6 +22,7 @@ const KEY_LABELS: Record<string, string> = {
   answer_deadline_confirmed: 'Answer Deadline',
   check_docket_after_answer_deadline: 'Check Docket',
   default_earliest_info: 'Earliest Default Info',
+  discovery_response_due_confirmed: 'Discovery Response Due',
 }
 
 function formatKeyLabel(key: string): string {
