@@ -48,20 +48,21 @@ export async function POST(
       )
     }
 
-    // Delete any existing discovery_response_due_confirmed deadline for this case.
+    // Delete any existing deadline for THIS pack only.
     // FK cascade on reminders table deletes associated reminders automatically.
+    const packKey = `discovery_response_due_confirmed:${packId}`
     await supabase!
       .from('deadlines')
       .delete()
       .eq('case_id', pack.case_id)
-      .eq('key', 'discovery_response_due_confirmed')
+      .eq('key', packKey)
 
-    // Insert confirmed discovery response deadline
+    // Insert confirmed discovery response deadline scoped to this pack
     const { data: deadline, error: dlError } = await supabase!
       .from('deadlines')
       .insert({
         case_id: pack.case_id,
-        key: 'discovery_response_due_confirmed',
+        key: packKey,
         due_at,
         source: 'user_confirmed',
         rationale: `Discovery response deadline for "${pack.title}" (pack ${packId})`,
