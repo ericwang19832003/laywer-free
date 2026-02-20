@@ -39,7 +39,7 @@ export async function GET(
           .order('item_no'),
         supabase!
           .from('discovery_service_logs')
-          .select('id, served_at, method, recipient, notes')
+          .select('id, served_at, service_method, served_to_name, served_to_email, served_to_address, notes')
           .eq('pack_id', packId)
           .order('served_at', { ascending: false }),
         supabase!
@@ -105,9 +105,12 @@ export async function GET(
               day: 'numeric',
             })
           : 'Date unknown'
+        const recipient = [log.served_to_name, log.served_to_email, log.served_to_address]
+          .filter(Boolean)
+          .join(', ') || 'N/A'
         serviceTxt += `${date}\n`
-        serviceTxt += `  Method:    ${log.method ?? 'N/A'}\n`
-        serviceTxt += `  Recipient: ${log.recipient ?? 'N/A'}\n`
+        serviceTxt += `  Method:    ${log.service_method ?? 'N/A'}\n`
+        serviceTxt += `  Recipient: ${recipient}\n`
         if (log.notes) serviceTxt += `  Notes:     ${log.notes}\n`
         serviceTxt += '\n'
       }
