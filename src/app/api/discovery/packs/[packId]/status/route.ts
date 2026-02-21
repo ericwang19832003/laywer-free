@@ -78,6 +78,17 @@ export async function PATCH(
       },
     })
 
+    // Record template acknowledgment when transitioning to ready
+    if (targetStatus === 'ready' && parsed.data.acknowledged) {
+      await supabase!.from('task_events').insert({
+        case_id: pack.case_id,
+        kind: 'discovery_template_acknowledged',
+        payload: {
+          pack_id: packId,
+        },
+      })
+    }
+
     return NextResponse.json({ pack: updated })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

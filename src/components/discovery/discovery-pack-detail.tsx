@@ -1,12 +1,20 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import {
   CheckCircleIcon,
   CircleIcon,
@@ -17,6 +25,9 @@ import {
   InboxIcon,
   AlertTriangleIcon,
   CalendarIcon,
+  BookOpenIcon,
+  Loader2Icon,
+  InfoIcon,
 } from 'lucide-react'
 import type {
   DiscoveryPack,
@@ -51,6 +62,13 @@ function formatFileSize(bytes: number | null): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+interface DiscoveryExample {
+  id: string
+  item_type: string
+  title: string
+  example_text: string
 }
 
 const TAB_KEYS = ['rfp', 'rog', 'rfa'] as const
@@ -130,6 +148,13 @@ export function DiscoveryPackDetail({
 
   return (
     <div className="space-y-8">
+      <div className="flex items-start gap-2.5 rounded-md border border-warm-border bg-warm-bg px-3.5 py-3">
+        <InfoIcon className="size-4 text-warm-muted mt-0.5 shrink-0" />
+        <p className="text-sm text-warm-muted">
+          This tool helps you organize and draft discovery requests. It does not provide legal advice.
+        </p>
+      </div>
+
       <StatusProgress status={pack.status} />
 
       {/* Section A: Add Items (draft only) */}
@@ -146,6 +171,7 @@ export function DiscoveryPackDetail({
       {pack.status === 'draft' && items.length > 0 && (
         <ReviewSection
           packId={pack.id}
+          caseId={caseId}
           itemCount={items.length}
           onStatusChange={(updated) => setPack(updated)}
         />
@@ -213,6 +239,7 @@ function AddItemsSection({
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warnings, setWarnings] = useState<string[]>([])
+  const [examplesOpen, setExamplesOpen] = useState(false)
 
   async function handleAdd() {
     if (!promptText.trim()) return
@@ -308,6 +335,24 @@ function AddItemsSection({
           maxLength={5000}
         />
 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setExamplesOpen(true)}
+          className="text-warm-muted hover:text-warm-text"
+          type="button"
+        >
+          <BookOpenIcon className="size-3.5" />
+          Browse common examples
+        </Button>
+
+        <ExamplesDialog
+          open={examplesOpen}
+          onOpenChange={setExamplesOpen}
+          activeTab={activeTab}
+          onSelectExample={(text) => setPromptText(text)}
+        />
+
         {/* Warnings */}
         {warnings.length > 0 && (
           <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 space-y-1">
@@ -336,6 +381,149 @@ function AddItemsSection({
         </Button>
       </CardContent>
     </Card>
+  )
+}
+
+// ============================================
+// Examples Dialog
+// ============================================
+
+function ExamplesDialog({
+  open,
+  onOpenChange,
+  activeTab,
+  onSelectExample,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  activeTab: (typeof TAB_KEYS)[number]
+  onSelectExample: (text: string) => void
+}) {
+  const [dialogTab, setDialogTab] = useState(activeTab)
+  const [examples, setExamples] = useState<DiscoveryExample[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const fetchedRef = useRef(false)
+
+  // Sync dialogTab to parent activeTab when dialog opens
+  useEffect(() => {
+    if (open) {
+      setDialogTab(activeTab)
+    }
+  }, [open, activeTab])
+
+  // Fetch all examples once when dialog first opens
+  useEffect(() => {
+    if (!open || fetchedRef.current) return
+    fetchedRef.current = true
+
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+
+    fetch('/api/discovery/examples?dispute_type=general')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load examples')
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setExamples(data.examples ?? [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Something went wrong')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [open])
+
+  const filtered = examples.filter((e) => e.item_type === dialogTab)
+
+  function handleSelect(text: string) {
+    onSelectExample(text)
+    onOpenChange(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] flex flex-col sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Common examples</DialogTitle>
+          <DialogDescription>
+            Browse examples to use as a starting point.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Tabs */}
+        <div className="flex gap-1 rounded-lg bg-warm-bg p-1" role="tablist">
+          {TAB_KEYS.map((key) => (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={dialogTab === key}
+              onClick={() => setDialogTab(key)}
+              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                dialogTab === key
+                  ? 'bg-white text-warm-text shadow-sm'
+                  : 'text-warm-muted hover:text-warm-text'
+              }`}
+            >
+              {ITEM_TYPE_SHORT[key]}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2Icon className="size-5 text-warm-muted animate-spin" />
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && filtered.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-sm text-warm-muted">No examples available for {ITEM_TYPE_SHORT[dialogTab]}.</p>
+            </div>
+          )}
+
+          {!loading &&
+            filtered.map((example) => (
+              <div
+                key={example.id}
+                className="rounded-md border border-warm-border p-4 space-y-2"
+              >
+                <p className="text-sm font-medium text-warm-text">{example.title}</p>
+                <p className="text-sm text-warm-muted line-clamp-3 whitespace-pre-line">
+                  {example.example_text}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSelect(example.example_text)}
+                >
+                  Use this example
+                </Button>
+              </div>
+            ))}
+        </div>
+
+        {/* Disclaimer */}
+        <p className="text-xs text-warm-muted text-center pt-2 border-t border-warm-border">
+          These examples are general templates. You are responsible for reviewing and adapting them.
+        </p>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -399,15 +587,18 @@ function ItemsList({ items }: { items: DiscoveryItem[] }) {
 
 function ReviewSection({
   packId,
+  caseId,
   itemCount,
   onStatusChange,
 }: {
   packId: string
+  caseId: string
   itemCount: number
   onStatusChange: (pack: DiscoveryPack) => void
 }) {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [acknowledged, setAcknowledged] = useState(false)
 
   async function handleMarkReady() {
     setUpdating(true)
@@ -417,7 +608,7 @@ function ReviewSection({
       const res = await fetch(`/api/discovery/packs/${packId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'ready' }),
+        body: JSON.stringify({ status: 'ready', acknowledged: true }),
       })
 
       if (!res.ok) {
@@ -440,14 +631,26 @@ function ReviewSection({
         <h2 className="font-medium text-warm-text">Review your pack</h2>
         <p className="text-sm text-warm-muted">
           You have {itemCount} request{itemCount !== 1 ? 's' : ''} ready to go.
-          Once marked ready, you won't be able to add more items.
+          Once marked ready, you won&apos;t be able to add more items.
         </p>
+
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <Checkbox
+            checked={acknowledged}
+            onCheckedChange={(checked) => setAcknowledged(checked === true)}
+            className="mt-0.5"
+          />
+          <span className="text-sm text-warm-text select-none">
+            I understand these requests are informational templates and not legal advice.
+          </span>
+        </label>
+
         {error && (
           <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
             <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
-        <Button onClick={handleMarkReady} disabled={updating}>
+        <Button onClick={handleMarkReady} disabled={!acknowledged || updating}>
           {updating ? 'Updating...' : 'Mark ready for service'}
         </Button>
       </CardContent>

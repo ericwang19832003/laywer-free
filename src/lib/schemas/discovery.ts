@@ -46,6 +46,7 @@ export type AddItemInput = z.infer<typeof addItemSchema>
 
 export const updatePackStatusSchema = z.object({
   status: z.enum(DISCOVERY_PACK_STATUSES),
+  acknowledged: z.boolean().optional(),
 })
 
 export type UpdatePackStatusInput = z.infer<typeof updatePackStatusSchema>
