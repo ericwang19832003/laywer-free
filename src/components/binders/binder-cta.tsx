@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { PackageIcon, Loader2Icon } from 'lucide-react'
+import { PackageIcon, Loader2Icon, AlertTriangleIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -28,6 +28,36 @@ export function BinderCta({ caseId, exhibitSetId }: BinderCtaProps) {
   const [includeTimeline, setIncludeTimeline] = useState(false)
   const [includeDeadlines, setIncludeDeadlines] = useState(false)
   const [includeAllEvidence, setIncludeAllEvidence] = useState(false)
+  const [totalBytes, setTotalBytes] = useState<number | null>(null)
+
+  const SIZE_THRESHOLD = 250 * 1024 * 1024 // 250 MB
+
+  const loadSize = useCallback(async () => {
+    if (!exhibitSetId) return
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('exhibits')
+      .select('evidence_items(file_size)')
+      .eq('exhibit_set_id', exhibitSetId)
+
+    if (data) {
+      const total = data.reduce((sum, ex) => {
+        const ev = ex.evidence_items as unknown as { file_size: number | null } | null
+        return sum + (ev?.file_size ?? 0)
+      }, 0)
+      setTotalBytes(total)
+    }
+  }, [exhibitSetId])
+
+  useEffect(() => {
+    if (open) loadSize()
+  }, [open, loadSize])
+
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+  }
 
   async function handleGenerate() {
     if (!exhibitSetId) return
@@ -115,6 +145,16 @@ export function BinderCta({ caseId, exhibitSetId }: BinderCtaProps) {
               Choose what to include in your binder. Your exhibits are always included.
             </DialogDescription>
           </DialogHeader>
+
+          {totalBytes !== null && totalBytes > SIZE_THRESHOLD && (
+            <div className="flex items-start gap-2 rounded-lg border border-calm-amber/30 bg-calm-amber/5 px-3 py-2.5">
+              <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-calm-amber" />
+              <p className="text-xs text-warm-text">
+                Your exhibits total ~{formatBytes(totalBytes)}. This binder may
+                be large and take extra time to generate.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-4 py-2">
             <ToggleOption

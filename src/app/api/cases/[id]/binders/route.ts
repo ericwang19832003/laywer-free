@@ -51,6 +51,19 @@ export async function POST(
       )
     }
 
+    // Guard: return existing binder if one is already queued or building
+    const { data: existing } = await supabase!
+      .from('trial_binders')
+      .select('*')
+      .eq('exhibit_set_id', parsed.data.exhibit_set_id)
+      .in('status', ['queued', 'building'])
+      .limit(1)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json({ binder: existing }, { status: 200 })
+    }
+
     // Create trial_binders row
     const { data: binder, error: insertError } = await supabase!
       .from('trial_binders')
