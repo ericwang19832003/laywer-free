@@ -13,7 +13,7 @@ export async function GET(
     // Fetch binder (RLS ensures ownership via case)
     const { data: binder, error: fetchError } = await supabase!
       .from('trial_binders')
-      .select('storage_path, title')
+      .select('id, case_id, storage_path, title')
       .eq('id', binderId)
       .eq('status', 'ready')
       .single()
@@ -37,6 +37,15 @@ export async function GET(
         { status: 500 }
       )
     }
+
+    // Fire-and-forget: record download event in timeline
+    supabase!.from('task_events').insert({
+      case_id: binder.case_id,
+      kind: 'trial_binder_downloaded',
+      payload: { binder_id: binder.id, title: binder.title },
+    }).then(({ error: evErr }) => {
+      if (evErr) console.warn('Failed to write download event:', evErr.message)
+    })
 
     return NextResponse.json({ url: signedUrl.signedUrl })
   } catch {
