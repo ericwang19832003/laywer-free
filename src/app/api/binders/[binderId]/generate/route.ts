@@ -4,7 +4,7 @@ import { PassThrough } from 'stream'
 import archiver from 'archiver'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSummaryPdf } from '@/lib/binder/generate-summary-pdf'
-import { exhibitFileName } from '@/lib/binder/safe-filename'
+import { exhibitFileName, safeFileName } from '@/lib/binder/safe-filename'
 import type { BinderOptions } from '@/lib/schemas/trial-binders'
 
 export const runtime = 'nodejs'
@@ -217,6 +217,39 @@ export async function POST(
       }
     }
 
+    // ⑥b Download all evidence files if option is set
+    const allEvidenceFiles: { name: string; buffer: Buffer }[] = []
+
+    if (options.include_all_evidence) {
+      const exhibitedIds = new Set(exhibitRows.map((ex) => ex.evidence_item_id))
+
+      const { data: allEvidence } = await supabase!
+        .from('evidence_items')
+        .select('id, file_name, storage_path')
+        .eq('case_id', caseId)
+        .order('created_at', { ascending: true })
+
+      for (const item of allEvidence ?? []) {
+        if (exhibitedIds.has(item.id)) continue // already in exhibits folder
+        if (!item.storage_path) continue
+
+        try {
+          const { data: fileData, error: dlError } = await supabase!.storage
+            .from('case-documents')
+            .download(item.storage_path)
+
+          if (dlError || !fileData) continue
+
+          allEvidenceFiles.push({
+            name: safeFileName(item.file_name),
+            buffer: Buffer.from(await fileData.arrayBuffer()),
+          })
+        } catch {
+          // Skip — non-exhibited evidence failures are not critical
+        }
+      }
+    }
+
     // ⑦ Build ZIP
     const passthrough = new PassThrough()
     const archive = archiver('zip', { zlib: { level: 5 } })
@@ -236,6 +269,11 @@ export async function POST(
     // Exhibits folder
     for (const file of exhibitFiles) {
       archive.append(file.buffer, { name: `05_Exhibits/${file.name}` })
+    }
+
+    // All evidence folder (non-exhibited items)
+    for (const file of allEvidenceFiles) {
+      archive.append(file.buffer, { name: `06_All_Evidence/${file.name}` })
     }
 
     // Skipped files manifest (if any downloads failed)
