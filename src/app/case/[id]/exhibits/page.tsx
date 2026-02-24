@@ -9,6 +9,7 @@ import {
   type EvidenceItem,
 } from '@/components/exhibits/exhibits-manager'
 import { Button } from '@/components/ui/button'
+import { BinderCta } from '@/components/binders/binder-cta'
 
 export default async function ExhibitsPage({
   params,
@@ -81,6 +82,10 @@ export default async function ExhibitsPage({
           initialExhibits={exhibits}
           evidenceItems={(evidenceRes.data ?? []) as EvidenceItem[]}
         />
+
+        <div className="mt-6">
+          <BinderCta caseId={caseId} exhibitSetId={activeSet?.id ?? null} />
+        </div>
 
         <LegalDisclaimer />
       </main>

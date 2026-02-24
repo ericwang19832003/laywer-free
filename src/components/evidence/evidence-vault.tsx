@@ -23,7 +23,8 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import { UploadIcon, FileIcon, TrashIcon, DownloadIcon } from 'lucide-react'
+import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 
 // ── Types ──────────────────────────────────────────────
 
@@ -96,6 +97,10 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<EvidenceItem | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Exhibit state
+  const [exhibitMap, setExhibitMap] = useState<Record<string, string>>({})
+  const [addingExhibit, setAddingExhibit] = useState<string | null>(null)
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -183,6 +188,59 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
     }
     const { url } = await res.json()
     window.open(url, '_blank')
+  }
+
+  async function handleAddToExhibits(item: EvidenceItem) {
+    setAddingExhibit(item.id)
+    try {
+      // 1. Fetch existing exhibit sets
+      const setsRes = await fetch(`/api/cases/${caseId}/exhibit-sets`)
+      if (!setsRes.ok) throw new Error('Failed to load exhibit sets')
+      const { exhibit_sets } = await setsRes.json()
+
+      let setId: string
+
+      if (exhibit_sets.length > 0) {
+        // Use the first (and typically only) set
+        setId = exhibit_sets[0].id
+      } else {
+        // Auto-create one with numeric numbering
+        const createRes = await fetch(`/api/cases/${caseId}/exhibit-sets`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numbering_style: 'numeric' }),
+        })
+        if (!createRes.ok) throw new Error('Failed to create exhibit set')
+        const { exhibit_set } = await createRes.json()
+        setId = exhibit_set.id
+      }
+
+      // 2. Add the exhibit
+      const addRes = await fetch(`/api/exhibit-sets/${setId}/exhibits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_item_id: item.id }),
+      })
+
+      if (addRes.status === 409) {
+        toast('Already in your exhibits.')
+        return
+      }
+
+      if (!addRes.ok) {
+        const err = await addRes.json()
+        toast.error(err.error || 'Something went wrong. Please try again.')
+        return
+      }
+
+      const { exhibit } = await addRes.json()
+      setExhibitMap((prev) => ({ ...prev, [item.id]: exhibit.exhibit_no }))
+      toast.success(`Added as Exhibit ${exhibit.exhibit_no}.`)
+    } catch {
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setAddingExhibit(null)
+    }
   }
 
   const filteredEvidence =
@@ -375,6 +433,25 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
+                      {exhibitMap[item.id] ? (
+                        <Badge variant="secondary" className="font-mono text-xs">
+                          Ex. {exhibitMap[item.id]}
+                        </Badge>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => handleAddToExhibits(item)}
+                          disabled={addingExhibit === item.id}
+                          title="Add to Exhibits"
+                        >
+                          {addingExhibit === item.id ? (
+                            <Loader2Icon className="size-3.5 animate-spin" />
+                          ) : (
+                            <StampIcon className="size-3.5" />
+                          )}
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon-xs"
