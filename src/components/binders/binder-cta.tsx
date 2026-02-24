@@ -93,7 +93,7 @@ export function BinderCta({ caseId, exhibitSetId }: BinderCtaProps) {
       const { binder } = await createRes.json()
 
       // 2. Fire build (don't await — navigate immediately)
-      fetch(`/api/binders/${binder.id}/build`, {
+      fetch(`/api/binders/${binder.id}/generate`, {
         method: 'POST',
         headers: { 'Cookie': document.cookie },
       }).catch(() => {
