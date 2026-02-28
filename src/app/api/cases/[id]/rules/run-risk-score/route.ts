@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { runCaseRiskScoring } from '@/lib/rules/run-case-risk'
+import { computeAndStoreCaseHealth } from '@/lib/rules/compute-case-health'
 
 export async function POST(
   request: NextRequest,
@@ -25,7 +25,7 @@ export async function POST(
       )
     }
 
-    const result = await runCaseRiskScoring(supabase!, caseId)
+    const result = await computeAndStoreCaseHealth(supabase!, caseId)
 
     return NextResponse.json(result)
   } catch {
