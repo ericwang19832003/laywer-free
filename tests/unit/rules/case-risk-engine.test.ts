@@ -67,6 +67,16 @@ describe('calculateCaseRisk — deadline risk', () => {
     expect(result.deadline_risk).toBe(0)
   })
 
+  it('scores +20 for a deadline due today (day 0 boundary)', () => {
+    const result = calculateCaseRisk(
+      makeInput({
+        deadlines: [{ key: 'answer_deadline_confirmed', due_at: '2026-03-15T23:59:00Z' }],
+      }),
+      NOW
+    )
+    expect(result.deadline_risk).toBe(20)
+  })
+
   it('takes max across multiple deadlines (not cumulative)', () => {
     const result = calculateCaseRisk(
       makeInput({
@@ -253,6 +263,26 @@ describe('calculateCaseRisk — activity risk', () => {
   it('scores +40 when no task events at all', () => {
     const result = calculateCaseRisk(
       makeInput({ taskEvents: [] }),
+      NOW
+    )
+    expect(result.activity_risk).toBe(40)
+  })
+
+  it('scores +20 at exactly 14 days boundary', () => {
+    const result = calculateCaseRisk(
+      makeInput({
+        taskEvents: [{ created_at: '2026-03-01T12:00:00Z' }], // exactly 14 days before NOW
+      }),
+      NOW
+    )
+    expect(result.activity_risk).toBe(20)
+  })
+
+  it('scores +40 at exactly 30 days boundary', () => {
+    const result = calculateCaseRisk(
+      makeInput({
+        taskEvents: [{ created_at: '2026-02-13T12:00:00Z' }], // exactly 30 days before NOW
+      }),
       NOW
     )
     expect(result.activity_risk).toBe(40)

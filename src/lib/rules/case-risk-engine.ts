@@ -66,6 +66,8 @@ function scoreDeadlineRisk(
       points = 10
       rule = 'deadline_within_7_days'
       detail = `Deadline "${dl.key}" is due in ${days} day(s)`
+    } else {
+      continue
     }
 
     if (points > maxScore) {
@@ -101,6 +103,8 @@ function scoreResponseRisk(
       points = 30
       rule = 'discovery_response_due_soon'
       detail = `Discovery response due in ${days} day(s) with no response`
+    } else {
+      continue
     }
 
     if (points > maxScore) {
@@ -192,6 +196,7 @@ function scoreActivityRisk(
   return { score: 0, items }
 }
 
+/** Maps overall health score (100 = healthy, 0 = worst) to a risk label. */
 function toRiskLevel(score: number): RiskLevel {
   if (score >= 80) return 'low'
   if (score >= 60) return 'moderate'
