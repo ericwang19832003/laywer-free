@@ -5,6 +5,18 @@ import { NextStepCard } from '@/components/dashboard/next-step-card'
 import { DeadlinesCard } from '@/components/dashboard/deadlines-card'
 import { ProgressCard } from '@/components/dashboard/progress-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
+import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
+
+interface EscalationAlert {
+  id: string
+  case_id: string
+  deadline_id: string
+  escalation_level: number
+  message: string
+  triggered_at: string
+  due_at: string
+  deadline_key: string
+}
 
 interface DashboardData {
   next_task: {
@@ -41,6 +53,28 @@ export default async function DashboardPage({
     p_case_id: id,
   })
 
+  const { data: escalationData } = await supabase
+    .from('reminder_escalations')
+    .select('id, case_id, deadline_id, escalation_level, message, triggered_at, deadlines(due_at, key)')
+    .eq('case_id', id)
+    .eq('acknowledged', false)
+    .order('escalation_level', { ascending: false })
+    .order('triggered_at', { ascending: false })
+
+  const alerts: EscalationAlert[] = (escalationData ?? []).map((row: Record<string, unknown>) => {
+    const deadline = row.deadlines as { due_at: string; key: string } | null
+    return {
+      id: row.id as string,
+      case_id: row.case_id as string,
+      deadline_id: row.deadline_id as string,
+      escalation_level: row.escalation_level as number,
+      message: row.message as string,
+      triggered_at: row.triggered_at as string,
+      due_at: deadline?.due_at ?? '',
+      deadline_key: deadline?.key ?? '',
+    }
+  })
+
   if (error || data === null) {
     return (
       <div className="min-h-screen bg-warm-bg">
@@ -65,6 +99,7 @@ export default async function DashboardPage({
         />
 
         <div className="space-y-6">
+          <PriorityAlertsSection caseId={id} alerts={alerts} />
           <NextStepCard caseId={id} nextTask={dashboard.next_task} />
           <DeadlinesCard caseId={id} deadlines={dashboard.upcoming_deadlines} />
           <ProgressCard tasksSummary={dashboard.tasks_summary} />
