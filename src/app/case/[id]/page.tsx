@@ -6,17 +6,7 @@ import { DeadlinesCard } from '@/components/dashboard/deadlines-card'
 import { ProgressCard } from '@/components/dashboard/progress-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
-
-interface EscalationAlert {
-  id: string
-  case_id: string
-  deadline_id: string
-  escalation_level: number
-  message: string
-  triggered_at: string
-  due_at: string
-  deadline_key: string
-}
+import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
 
 interface DashboardData {
   next_task: {
@@ -49,19 +39,21 @@ export default async function DashboardPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc('get_case_dashboard', {
-    p_case_id: id,
-  })
+  const [dashboardResult, escalationResult] = await Promise.all([
+    supabase.rpc('get_case_dashboard', { p_case_id: id }),
+    supabase
+      .from('reminder_escalations')
+      .select('id, case_id, deadline_id, escalation_level, message, triggered_at, deadlines(due_at, key)')
+      .eq('case_id', id)
+      .eq('acknowledged', false)
+      .order('escalation_level', { ascending: false })
+      .order('triggered_at', { ascending: false }),
+  ])
 
-  const { data: escalationData } = await supabase
-    .from('reminder_escalations')
-    .select('id, case_id, deadline_id, escalation_level, message, triggered_at, deadlines(due_at, key)')
-    .eq('case_id', id)
-    .eq('acknowledged', false)
-    .order('escalation_level', { ascending: false })
-    .order('triggered_at', { ascending: false })
+  const { data, error } = dashboardResult
+  const { data: escalationData } = escalationResult
 
-  const alerts: EscalationAlert[] = (escalationData ?? []).map((row: Record<string, unknown>) => {
+  const alerts: ReminderEscalation[] = (escalationData ?? []).map((row: Record<string, unknown>) => {
     const deadline = row.deadlines as { due_at: string; key: string } | null
     return {
       id: row.id as string,
