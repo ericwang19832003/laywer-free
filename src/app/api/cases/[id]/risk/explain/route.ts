@@ -54,7 +54,13 @@ export async function POST(
       )
     }
 
-    const breakdown = Array.isArray(riskScore.breakdown) ? riskScore.breakdown : []
+    // Extract breakdown items: array (fresh from risk engine) or object with items key (from previous explain call)
+    const rawBreakdown = riskScore.breakdown
+    const breakdown = Array.isArray(rawBreakdown)
+      ? rawBreakdown
+      : Array.isArray(rawBreakdown?.items)
+        ? rawBreakdown.items
+        : []
     const riskInput = {
       overall_score: riskScore.overall_score,
       risk_level: riskScore.risk_level as 'low' | 'moderate' | 'elevated' | 'high',
@@ -103,11 +109,9 @@ export async function POST(
       }
     }
 
-    // Persist explanation into the breakdown JSONB
+    // Persist explanation into the breakdown JSONB (always use consistent object shape)
     const updatedBreakdown = {
-      ...(typeof riskScore.breakdown === 'object' && !Array.isArray(riskScore.breakdown)
-        ? riskScore.breakdown
-        : { items: breakdown }),
+      items: breakdown,
       ai_explanation: explanation,
       _meta: {
         model: source === 'ai' ? AI_MODEL : null,
