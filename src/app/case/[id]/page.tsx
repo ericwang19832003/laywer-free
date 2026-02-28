@@ -6,6 +6,7 @@ import { DeadlinesCard } from '@/components/dashboard/deadlines-card'
 import { ProgressCard } from '@/components/dashboard/progress-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
+import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
 
 interface DashboardData {
@@ -39,7 +40,7 @@ export default async function DashboardPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [dashboardResult, escalationResult] = await Promise.all([
+  const [dashboardResult, escalationResult, riskScoreResult] = await Promise.all([
     supabase.rpc('get_case_dashboard', { p_case_id: id }),
     supabase
       .from('reminder_escalations')
@@ -48,10 +49,18 @@ export default async function DashboardPage({
       .eq('acknowledged', false)
       .order('escalation_level', { ascending: false })
       .order('triggered_at', { ascending: false }),
+    supabase
+      .from('case_risk_scores')
+      .select('id, overall_score, deadline_risk, response_risk, evidence_risk, activity_risk, risk_level, breakdown, created_at')
+      .eq('case_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const { data, error } = dashboardResult
   const { data: escalationData } = escalationResult
+  const { data: riskScoreData } = riskScoreResult
 
   const alerts: ReminderEscalation[] = (escalationData ?? []).map((row: Record<string, unknown>) => {
     const deadline = row.deadlines as { due_at: string; key: string } | null
@@ -93,6 +102,7 @@ export default async function DashboardPage({
         <div className="space-y-6">
           <PriorityAlertsSection caseId={id} alerts={alerts} />
           <NextStepCard caseId={id} nextTask={dashboard.next_task} />
+          <CaseHealthCard caseId={id} riskScore={riskScoreData} />
           <DeadlinesCard caseId={id} deadlines={dashboard.upcoming_deadlines} />
           <ProgressCard tasksSummary={dashboard.tasks_summary} />
           <TimelineCard events={dashboard.recent_events} />

@@ -9,6 +9,7 @@ import type {
   DiscoveryItem,
   ServiceLog,
   DiscoveryResponse,
+  ObjectionReviewSummary,
 } from '@/components/discovery/types'
 
 export default async function DiscoveryPackPage({
@@ -20,7 +21,7 @@ export default async function DiscoveryPackPage({
   const supabase = await createClient()
 
   // Fetch pack + related data in parallel
-  const [packRes, itemsRes, logsRes, responsesRes] = await Promise.all([
+  const [packRes, itemsRes, logsRes, responsesRes, reviewsRes] = await Promise.all([
     supabase
       .from('discovery_packs')
       .select('*')
@@ -42,7 +43,50 @@ export default async function DiscoveryPackPage({
       .select('*')
       .eq('pack_id', packId)
       .order('received_at', { ascending: false }),
+    supabase
+      .from('objection_reviews')
+      .select('id, response_id, status, error, created_at')
+      .eq('pack_id', packId)
+      .order('created_at', { ascending: false }),
   ])
+
+  // Build review summaries with follow-up counts
+  const rawReviews = (reviewsRes.data ?? []) as Array<{
+    id: string
+    response_id: string
+    status: string
+    error: string | null
+    created_at: string
+  }>
+
+  let reviewSummaries: ObjectionReviewSummary[] = rawReviews.map((r) => ({
+    ...r,
+    follow_up_count: 0,
+  }))
+
+  // Fetch follow-up counts for completed reviews
+  const completedIds = rawReviews
+    .filter((r) => r.status === 'completed' || r.status === 'needs_review')
+    .map((r) => r.id)
+
+  if (completedIds.length > 0) {
+    const { data: followUpCounts } = await supabase
+      .from('objection_items')
+      .select('review_id')
+      .in('review_id', completedIds)
+      .eq('follow_up_flag', true)
+
+    if (followUpCounts) {
+      const countMap = new Map<string, number>()
+      for (const row of followUpCounts) {
+        countMap.set(row.review_id, (countMap.get(row.review_id) ?? 0) + 1)
+      }
+      reviewSummaries = reviewSummaries.map((r) => ({
+        ...r,
+        follow_up_count: countMap.get(r.id) ?? 0,
+      }))
+    }
+  }
 
   if (packRes.error || !packRes.data) {
     return (
@@ -79,6 +123,7 @@ export default async function DiscoveryPackPage({
           initialItems={(itemsRes.data ?? []) as DiscoveryItem[]}
           initialLogs={(logsRes.data ?? []) as ServiceLog[]}
           initialResponses={(responsesRes.data ?? []) as DiscoveryResponse[]}
+          initialReviews={reviewSummaries}
         />
 
         <LegalDisclaimer />

@@ -72,6 +72,23 @@ function describeEvent(event: TimelineEvent): string {
       if (count === 0) return 'Case rules evaluated'
       return `Case rules updated (${count} ${count === 1 ? 'change' : 'changes'})`
     }
+    case 'objection_review_created':
+      return 'Objection review started'
+    case 'objection_text_extracted': {
+      const status = event.payload?.status as string | undefined
+      if (status === 'needs_review') return 'Text extraction needs review'
+      return 'Response text extracted'
+    }
+    case 'objection_classified': {
+      const itemCount = event.payload?.items_count as number | undefined
+      return itemCount
+        ? `Objections classified (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`
+        : 'Objections classified'
+    }
+    case 'objection_review_confirmed':
+      return 'Objection review confirmed'
+    case 'meet_and_confer_generated':
+      return 'Meet-and-confer note drafted'
     default:
       return event.kind.replace(/_/g, ' ')
   }
