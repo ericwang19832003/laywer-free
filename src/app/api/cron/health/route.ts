@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeAndStoreCaseHealth } from '@/lib/rules/compute-case-health'
 
+const BATCH_SIZE = 5
+const PAGE_SIZE = 1000
+
 export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
   if (!cronSecret) {
@@ -15,44 +18,62 @@ export async function GET(request: NextRequest) {
   const supabase = createAdminClient()
   const now = new Date()
 
-  // Load all active cases
-  const { data: cases, error: casesError } = await supabase
-    .from('cases')
-    .select('id')
-    .eq('status', 'active')
+  // Load all active cases with pagination to avoid Supabase row limits
+  const allCases: { id: string }[] = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('cases')
+      .select('id')
+      .eq('status', 'active')
+      .range(from, from + PAGE_SIZE - 1)
 
-  if (casesError) {
-    return NextResponse.json(
-      { error: 'Failed to fetch cases', details: casesError.message },
-      { status: 500 }
-    )
+    if (error) {
+      return NextResponse.json(
+        { error: 'Failed to fetch cases', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    if (!data || data.length === 0) break
+    allCases.push(...data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
   }
 
-  if (!cases || cases.length === 0) {
+  if (allCases.length === 0) {
     return NextResponse.json({ processed: 0, succeeded: 0, failed: 0, errors: [] })
   }
 
-  // Process sequentially to avoid overwhelming Supabase with concurrent queries
+  // Process in batches of BATCH_SIZE for bounded concurrency
   let succeeded = 0
   let failed = 0
   const errors: { case_id: string; message: string }[] = []
 
-  for (const c of cases) {
-    try {
-      await computeAndStoreCaseHealth(supabase, c.id, now)
-      succeeded++
-    } catch (err) {
-      failed++
-      errors.push({
-        case_id: c.id,
-        message: err instanceof Error ? err.message : String(err),
-      })
-      console.error(`[cron/health] Failed for case ${c.id}:`, err)
+  for (let i = 0; i < allCases.length; i += BATCH_SIZE) {
+    const batch = allCases.slice(i, i + BATCH_SIZE)
+    const results = await Promise.allSettled(
+      batch.map((c) => computeAndStoreCaseHealth(supabase, c.id, now))
+    )
+
+    for (let j = 0; j < results.length; j++) {
+      const result = results[j]
+      if (result.status === 'fulfilled') {
+        succeeded++
+      } else {
+        failed++
+        const err = result.reason
+        errors.push({
+          case_id: batch[j].id,
+          message: err instanceof Error ? err.message : String(err),
+        })
+        console.error(`[cron/health] Failed for case ${batch[j].id}:`, err)
+      }
     }
   }
 
   return NextResponse.json({
-    processed: cases.length,
+    processed: allCases.length,
     succeeded,
     failed,
     errors,
