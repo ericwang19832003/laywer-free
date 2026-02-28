@@ -233,7 +233,28 @@ export async function computeAndStoreCaseHealth(
   } else {
     const { error: insertError } = await supabase.from('case_risk_scores').insert(row)
 
-    if (insertError) throw new Error(`Failed to persist risk score: ${insertError.message}`)
+    // Handle race condition: another request may have inserted first (unique index guard)
+    if (insertError && insertError.code === '23505') {
+      const { data: raced } = await supabase
+        .from('case_risk_scores')
+        .select('id')
+        .eq('case_id', caseId)
+        .gte('computed_at', todayStart.toISOString())
+        .lt('computed_at', todayEnd.toISOString())
+        .limit(1)
+        .maybeSingle()
+
+      if (raced) {
+        const { error: updateError } = await supabase
+          .from('case_risk_scores')
+          .update(row)
+          .eq('id', raced.id)
+
+        if (updateError) throw new Error(`Failed to update risk score: ${updateError.message}`)
+      }
+    } else if (insertError) {
+      throw new Error(`Failed to persist risk score: ${insertError.message}`)
+    }
   }
 
   return result
