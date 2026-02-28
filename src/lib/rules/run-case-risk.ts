@@ -77,7 +77,7 @@ export async function runCaseRiskScoring(
       .from('task_events')
       .select('id', { count: 'exact', head: true })
       .eq('case_id', caseId)
-      .eq('kind', 'discovery_response_uploaded')
+      .eq('kind', 'discovery_response_received')
 
     if (drError) throw new Error(`Failed to check discovery responses: ${drError.message}`)
     discoveryResponseDeadlines.push({
