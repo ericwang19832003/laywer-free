@@ -61,7 +61,7 @@ export default async function DashboardPage({
       .maybeSingle(),
     supabase
       .from('case_risk_scores')
-      .select('overall_score')
+      .select('id, overall_score')
       .eq('case_id', id)
       .lte('computed_at', sevenDaysAgo)
       .order('computed_at', { ascending: false })
@@ -69,7 +69,7 @@ export default async function DashboardPage({
       .maybeSingle(),
     supabase
       .from('case_risk_scores')
-      .select('overall_score')
+      .select('id, overall_score')
       .eq('case_id', id)
       .lte('computed_at', thirtyDaysAgo)
       .order('computed_at', { ascending: false })
@@ -80,8 +80,11 @@ export default async function DashboardPage({
   const { data, error } = dashboardResult
   const { data: escalationData } = escalationResult
   const { data: riskScoreData } = riskScoreResult
-  const { data: score7dData } = score7dResult
-  const { data: score30dData } = score30dResult
+  // Exclude historical scores that are the same row as the current score (stale case)
+  const { data: raw7d } = score7dResult
+  const { data: raw30d } = score30dResult
+  const score7dData = raw7d && riskScoreData && raw7d.id !== riskScoreData.id ? raw7d : null
+  const score30dData = raw30d && riskScoreData && raw30d.id !== riskScoreData.id ? raw30d : null
 
   const alerts: ReminderEscalation[] = (escalationData ?? []).map((row: Record<string, unknown>) => {
     const deadline = row.deadlines as { due_at: string; key: string } | null
