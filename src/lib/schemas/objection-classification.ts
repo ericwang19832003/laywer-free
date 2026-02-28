@@ -49,7 +49,7 @@ export const confirmItemSchema = z.object({
 export type ConfirmItem = z.infer<typeof confirmItemSchema>
 
 export const confirmReviewSchema = z.object({
-  items: z.array(confirmItemSchema).min(1),
+  items: z.array(confirmItemSchema),
 })
 
 export type ConfirmReviewInput = z.infer<typeof confirmReviewSchema>

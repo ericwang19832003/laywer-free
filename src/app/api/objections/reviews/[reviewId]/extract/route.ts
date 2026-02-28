@@ -104,8 +104,8 @@ export async function POST(
         text = await extractTextFromPdf(buffer)
       }
 
-      // If PDF text extraction failed/short or input is an image, use OCR
-      if (text.length < MIN_TEXT_LENGTH || IMAGE_MIMES.includes(response.mime_type)) {
+      // For images, use OCR directly (tesseract cannot process raw PDF buffers)
+      if (IMAGE_MIMES.includes(response.mime_type)) {
         text = await extractTextFromImage(buffer, response.mime_type)
         extractor = 'ocr'
       }

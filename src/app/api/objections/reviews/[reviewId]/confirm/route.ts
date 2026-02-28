@@ -44,6 +44,31 @@ export async function POST(
       )
     }
 
+    // Fetch all items for this review to verify completeness
+    const { data: allItems, error: fetchItemsError } = await supabase!
+      .from('objection_items')
+      .select('id')
+      .eq('review_id', reviewId)
+
+    if (fetchItemsError) {
+      return NextResponse.json(
+        { error: 'Failed to fetch review items', details: fetchItemsError.message },
+        { status: 500 }
+      )
+    }
+
+    // Verify all items are accounted for (unless there are zero items)
+    const expectedIds = new Set((allItems ?? []).map((i: { id: string }) => i.id))
+    const submittedIds = new Set(parsed.data.items.map((i) => i.id))
+
+    if (expectedIds.size > 0 && expectedIds.size !== submittedIds.size) {
+      const missing = [...expectedIds].filter((id) => !submittedIds.has(id))
+      return NextResponse.json(
+        { error: 'All items must be included to confirm the review', missing_item_ids: missing },
+        { status: 422 }
+      )
+    }
+
     // Update each item
     for (const item of parsed.data.items) {
       const { error: itemError } = await supabase!

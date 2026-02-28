@@ -265,9 +265,9 @@ describe('confirmReviewSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('rejects empty items array', () => {
+  it('accepts empty items array (zero-objection reviews)', () => {
     const result = confirmReviewSchema.safeParse({ items: [] })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 
   it('rejects missing items key', () => {
