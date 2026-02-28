@@ -109,6 +109,7 @@ export async function runCaseRiskScoring(
   const { error: insertError } = await supabase.from('case_risk_scores').insert({
     case_id: caseId,
     overall_score: result.overall_score,
+    health_score: result.overall_score,
     deadline_risk: result.deadline_risk,
     response_risk: result.response_risk,
     evidence_risk: result.evidence_risk,

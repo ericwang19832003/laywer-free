@@ -14,7 +14,8 @@ ALTER TABLE public.case_risk_scores
 -- ── Backfill ─────────────────────────────────────────────────────
 
 UPDATE public.case_risk_scores
-   SET health_score = overall_score
+   SET health_score = overall_score,
+       computed_at  = created_at
  WHERE health_score IS NULL;
 
 -- ── Index ────────────────────────────────────────────────────────
