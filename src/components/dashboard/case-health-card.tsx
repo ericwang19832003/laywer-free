@@ -2,11 +2,20 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDownIcon, Loader2Icon } from 'lucide-react'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Loader2Icon,
+  TrendingUpIcon,
+  TrendingDownIcon,
+  MinusIcon,
+  RefreshCwIcon,
+  ChevronDownIcon,
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+
+// ── Types ────────────────────────────────────────────────────────
 
 interface CaseRiskScore {
   id: string
@@ -15,42 +24,20 @@ interface CaseRiskScore {
   response_risk: number
   evidence_risk: number
   activity_risk: number
-  risk_level: 'low' | 'moderate' | 'elevated' | 'high'
+  risk_level: string
   breakdown: unknown
-  created_at: string
+  computed_at: string | null
+}
+
+interface HistoricalScore {
+  overall_score: number
 }
 
 interface CaseHealthCardProps {
   caseId: string
   riskScore: CaseRiskScore | null
-}
-
-const RISK_COLORS: Record<string, { badge: string; score: string; bar: string }> = {
-  low:      { badge: 'bg-calm-green/10 text-calm-green', score: 'text-calm-green', bar: 'bg-calm-green' },
-  moderate: { badge: 'bg-calm-indigo/10 text-calm-indigo', score: 'text-calm-indigo', bar: 'bg-calm-indigo' },
-  elevated: { badge: 'bg-calm-amber/10 text-calm-amber', score: 'text-calm-amber', bar: 'bg-calm-amber' },
-  high:     { badge: 'bg-red-500/10 text-red-500', score: 'text-red-500', bar: 'bg-red-500' },
-}
-
-const RISK_LABELS: Record<string, string> = {
-  low: 'Good',
-  moderate: 'Fair',
-  elevated: 'Needs Attention',
-  high: 'Needs Focus',
-}
-
-const SUBSCORE_LABELS: Record<string, string> = {
-  deadline_risk: 'Deadlines',
-  response_risk: 'Discovery Responses',
-  evidence_risk: 'Evidence & Exhibits',
-  activity_risk: 'Case Activity',
-}
-
-const SUBSCORE_MAX: Record<string, number> = {
-  deadline_risk: 40,
-  response_risk: 50,
-  evidence_risk: 40,
-  activity_risk: 40,
+  score7DaysAgo?: HistoricalScore | null
+  score30DaysAgo?: HistoricalScore | null
 }
 
 interface Explanation {
@@ -58,25 +45,54 @@ interface Explanation {
   focus_areas: string[]
 }
 
-function normalizeBreakdown(breakdown: unknown): { items: unknown[]; explanation: Explanation | null } {
-  if (Array.isArray(breakdown)) return { items: breakdown, explanation: null }
-  const obj = breakdown as Record<string, unknown> | null
-  return {
-    items: Array.isArray(obj?.items) ? (obj!.items as unknown[]) : [],
-    explanation: (obj?.ai_explanation as Explanation) ?? null,
-  }
+// ── Helpers ──────────────────────────────────────────────────────
+
+function getHealthStyle(score: number) {
+  if (score >= 85) return { label: 'Great', badgeCls: 'bg-calm-green/10 text-calm-green', scoreCls: 'text-calm-green' }
+  if (score >= 70) return { label: 'Good', badgeCls: 'bg-calm-indigo/10 text-calm-indigo', scoreCls: 'text-calm-indigo' }
+  if (score >= 50) return { label: 'Needs Attention', badgeCls: 'bg-calm-amber/10 text-calm-amber', scoreCls: 'text-calm-amber' }
+  return { label: 'Critical', badgeCls: 'bg-red-500/10 text-red-500', scoreCls: 'text-red-500' }
 }
 
-export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
-  const [expanded, setExpanded] = useState(false)
+function getBarColor(value: number) {
+  if (value >= 85) return 'bg-calm-green'
+  if (value >= 70) return 'bg-calm-indigo'
+  if (value >= 50) return 'bg-calm-amber'
+  return 'bg-red-500'
+}
+
+function formatUpdatedAt(dateStr: string): string {
+  const diffMs = Date.now() - new Date(dateStr).getTime()
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  if (diffHours < 1) return 'Updated just now'
+  if (diffHours < 24) return `Updated ${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays === 1) return 'Updated yesterday'
+  return `Updated ${diffDays} days ago`
+}
+
+function extractExplanation(breakdown: unknown): Explanation | null {
+  if (!breakdown || typeof breakdown !== 'object') return null
+  const obj = breakdown as Record<string, unknown>
+  const ai = obj.ai_explanation as Explanation | undefined
+  return ai?.summary ? ai : null
+}
+
+// ── Component ────────────────────────────────────────────────────
+
+export function CaseHealthCard({
+  caseId,
+  riskScore,
+  score7DaysAgo,
+  score30DaysAgo,
+}: CaseHealthCardProps) {
   const [recalculating, setRecalculating] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const [explaining, setExplaining] = useState(false)
   const [explanation, setExplanation] = useState<Explanation | null>(() =>
-    riskScore ? normalizeBreakdown(riskScore.breakdown).explanation : null
+    riskScore ? extractExplanation(riskScore.breakdown) : null
   )
   const router = useRouter()
-
-  const colors = riskScore ? RISK_COLORS[riskScore.risk_level] ?? RISK_COLORS.low : RISK_COLORS.low
 
   async function handleRecalculate() {
     setRecalculating(true)
@@ -85,8 +101,7 @@ export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
       if (!res.ok) throw new Error()
       setExplanation(null)
       router.refresh()
-      if (expanded) {
-        // Auto re-explain after recalculate when expanded
+      if (detailsOpen) {
         await handleExplain()
       }
     } catch {
@@ -104,21 +119,22 @@ export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
       const data = await res.json()
       setExplanation({ summary: data.summary, focus_areas: data.focus_areas })
     } catch {
-      toast.error('Could not load explanation. Please try again.')
+      toast.error('Could not load details. Please try again.')
     } finally {
       setExplaining(false)
     }
   }
 
-  function handleToggleExpand() {
-    const willExpand = !expanded
-    setExpanded(willExpand)
-    if (willExpand && !explanation && !explaining) {
+  function handleViewDetails() {
+    const willOpen = !detailsOpen
+    setDetailsOpen(willOpen)
+    if (willOpen && !explanation && !explaining) {
       handleExplain()
     }
   }
 
-  // Empty state
+  // ── Empty state ──────────────────────────────────────────────
+
   if (!riskScore) {
     return (
       <Card>
@@ -126,7 +142,7 @@ export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
           <CardTitle className="text-lg text-warm-text">Case Health</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-warm-muted text-sm mb-4">
+          <p className="text-sm text-warm-muted mb-4">
             Get a health check on your case to see where things stand.
           </p>
           <Button
@@ -143,7 +159,26 @@ export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
     )
   }
 
-  const subscoreKeys = ['deadline_risk', 'response_risk', 'evidence_risk', 'activity_risk'] as const
+  // ── Computed values ──────────────────────────────────────────
+
+  const style = getHealthStyle(riskScore.overall_score)
+
+  const subHealth = [
+    { label: 'Deadline Health', value: Math.min(100, Math.max(0, 100 - riskScore.deadline_risk)) },
+    { label: 'Response Health', value: Math.min(100, Math.max(0, 100 - riskScore.response_risk)) },
+    { label: 'Evidence Health', value: Math.min(100, Math.max(0, 100 - riskScore.evidence_risk)) },
+    { label: 'Activity Health', value: Math.min(100, Math.max(0, 100 - riskScore.activity_risk)) },
+  ]
+
+  const trends: { label: string; diff: number }[] = []
+  if (score7DaysAgo) {
+    trends.push({ label: '7 days ago', diff: riskScore.overall_score - score7DaysAgo.overall_score })
+  }
+  if (score30DaysAgo) {
+    trends.push({ label: '30 days ago', diff: riskScore.overall_score - score30DaysAgo.overall_score })
+  }
+
+  // ── Render ───────────────────────────────────────────────────
 
   return (
     <Card>
@@ -151,64 +186,101 @@ export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
         <CardTitle className="text-lg text-warm-text">Case Health</CardTitle>
       </CardHeader>
 
-      <CardContent>
-        {/* Score hero */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-baseline gap-1">
-            <span className={`text-4xl font-semibold tabular-nums ${colors.score}`}>
+      <CardContent className="space-y-6">
+        {/* ── Score hero ──────────────────────────────────────── */}
+        <div>
+          <div className="flex items-center gap-3">
+            <span
+              className={`text-5xl font-semibold tabular-nums tracking-tight ${style.scoreCls}`}
+            >
               {riskScore.overall_score}
             </span>
-            <span className="text-sm text-warm-muted">/100</span>
+            <div className="flex flex-col gap-1.5">
+              <Badge variant="secondary" className={`border-0 ${style.badgeCls}`}>
+                {style.label}
+              </Badge>
+              {riskScore.computed_at && (
+                <span className="text-[11px] text-warm-muted leading-none">
+                  {formatUpdatedAt(riskScore.computed_at)}
+                </span>
+              )}
+            </div>
           </div>
-          <Badge variant="secondary" className={`border-0 ${colors.badge}`}>
-            {RISK_LABELS[riskScore.risk_level] ?? riskScore.risk_level}
-          </Badge>
+
+          {/* ── Trends ──────────────────────────────────────── */}
+          {trends.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              {trends.map((t) => {
+                const positive = t.diff > 0
+                const negative = t.diff < 0
+                const Icon = positive ? TrendingUpIcon : negative ? TrendingDownIcon : MinusIcon
+                const color = positive
+                  ? 'text-calm-green'
+                  : negative
+                    ? 'text-calm-amber'
+                    : 'text-warm-muted'
+                const prefix = positive ? '+' : ''
+
+                return (
+                  <span key={t.label} className={`flex items-center gap-1 text-xs ${color}`}>
+                    <Icon className="h-3 w-3 flex-shrink-0" />
+                    {prefix}
+                    {t.diff} vs {t.label}
+                  </span>
+                )
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Sub-scores */}
-        <div className="mt-6 space-y-3">
-          {subscoreKeys.map((key) => {
-            const value = riskScore[key]
-            const max = SUBSCORE_MAX[key]
-            const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0
-            const fillColor =
-              value === 0 ? 'bg-calm-green' : pct > 50 ? colors.bar : 'bg-calm-amber'
-
-            return (
-              <div key={key}>
-                <div className="flex justify-between mb-1">
-                  <span className="text-xs font-medium text-warm-muted">
-                    {SUBSCORE_LABELS[key]}
-                  </span>
-                  <span className="text-xs text-warm-muted">
-                    {value === 0 ? 'Good' : `${value} pts`}
-                  </span>
-                </div>
-                <div className="h-1.5 rounded-full bg-warm-border">
-                  <div
-                    className={`h-1.5 rounded-full transition-all ${fillColor}`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+        {/* ── Sub-health bars ─────────────────────────────────── */}
+        <div className="space-y-3">
+          {subHealth.map((item) => (
+            <div key={item.label}>
+              <div className="flex justify-between mb-1">
+                <span className="text-xs font-medium text-warm-muted">{item.label}</span>
+                <span className="text-xs tabular-nums text-warm-muted">{item.value}</span>
               </div>
-            )
-          })}
+              <div className="h-1.5 rounded-full bg-warm-border">
+                <div
+                  className={`h-1.5 rounded-full transition-all ${getBarColor(item.value)}`}
+                  style={{ width: `${item.value}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Expand toggle */}
-        <button
-          className="mt-4 flex items-center gap-1 text-xs font-medium text-warm-muted hover:text-warm-text transition-colors"
-          onClick={handleToggleExpand}
-        >
-          <ChevronDownIcon
-            className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
-          />
-          {expanded ? 'Less detail' : 'More detail'}
-        </button>
+        {/* ── Actions ─────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            size="sm"
+            onClick={handleRecalculate}
+            disabled={recalculating}
+          >
+            {recalculating ? (
+              <Loader2Icon className="mr-2 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCwIcon className="mr-2 h-3.5 w-3.5" />
+            )}
+            Recalculate
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleViewDetails}
+            className="text-warm-muted"
+          >
+            <ChevronDownIcon
+              className={`mr-1.5 h-3.5 w-3.5 transition-transform ${detailsOpen ? 'rotate-180' : ''}`}
+            />
+            {detailsOpen ? 'Hide details' : 'View details'}
+          </Button>
+        </div>
 
-        {/* Expanded section */}
-        {expanded && (
-          <div className="border-t border-warm-border mt-4 pt-4 space-y-4">
+        {/* ── Expanded details ────────────────────────────────── */}
+        {detailsOpen && (
+          <div className="border-t border-warm-border pt-4 space-y-3">
             {explaining ? (
               <div className="flex items-center gap-2 text-sm text-warm-muted">
                 <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
@@ -234,25 +306,14 @@ export function CaseHealthCard({ caseId, riskScore }: CaseHealthCardProps) {
                 )}
               </>
             ) : null}
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRecalculate}
-              disabled={recalculating}
-            >
-              {recalculating && <Loader2Icon className="mr-2 h-3.5 w-3.5 animate-spin" />}
-              Recalculate
-            </Button>
           </div>
         )}
-      </CardContent>
 
-      <CardFooter>
-        <p className="text-xs text-warm-muted">
+        {/* ── Disclaimer ──────────────────────────────────────── */}
+        <p className="text-[11px] leading-relaxed text-warm-muted">
           This score reflects case management factors only and does not evaluate legal merit.
         </p>
-      </CardFooter>
+      </CardContent>
     </Card>
   )
 }

@@ -40,7 +40,10 @@ export default async function DashboardPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [dashboardResult, escalationResult, riskScoreResult] = await Promise.all([
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+  const [dashboardResult, escalationResult, riskScoreResult, score7dResult, score30dResult] = await Promise.all([
     supabase.rpc('get_case_dashboard', { p_case_id: id }),
     supabase
       .from('reminder_escalations')
@@ -51,9 +54,25 @@ export default async function DashboardPage({
       .order('triggered_at', { ascending: false }),
     supabase
       .from('case_risk_scores')
-      .select('id, overall_score, deadline_risk, response_risk, evidence_risk, activity_risk, risk_level, breakdown, created_at')
+      .select('id, overall_score, deadline_risk, response_risk, evidence_risk, activity_risk, risk_level, breakdown, computed_at')
       .eq('case_id', id)
-      .order('created_at', { ascending: false })
+      .order('computed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('case_risk_scores')
+      .select('overall_score')
+      .eq('case_id', id)
+      .lte('computed_at', sevenDaysAgo)
+      .order('computed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('case_risk_scores')
+      .select('overall_score')
+      .eq('case_id', id)
+      .lte('computed_at', thirtyDaysAgo)
+      .order('computed_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
   ])
@@ -61,6 +80,8 @@ export default async function DashboardPage({
   const { data, error } = dashboardResult
   const { data: escalationData } = escalationResult
   const { data: riskScoreData } = riskScoreResult
+  const { data: score7dData } = score7dResult
+  const { data: score30dData } = score30dResult
 
   const alerts: ReminderEscalation[] = (escalationData ?? []).map((row: Record<string, unknown>) => {
     const deadline = row.deadlines as { due_at: string; key: string } | null
@@ -102,7 +123,12 @@ export default async function DashboardPage({
         <div className="space-y-6">
           <PriorityAlertsSection caseId={id} alerts={alerts} />
           <NextStepCard caseId={id} nextTask={dashboard.next_task} />
-          <CaseHealthCard caseId={id} riskScore={riskScoreData} />
+          <CaseHealthCard
+            caseId={id}
+            riskScore={riskScoreData}
+            score7DaysAgo={score7dData}
+            score30DaysAgo={score30dData}
+          />
           <DeadlinesCard caseId={id} deadlines={dashboard.upcoming_deadlines} />
           <ProgressCard tasksSummary={dashboard.tasks_summary} />
           <TimelineCard events={dashboard.recent_events} />
