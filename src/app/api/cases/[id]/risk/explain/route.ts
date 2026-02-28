@@ -9,6 +9,10 @@ import {
   RISK_EXPLANATION_SYSTEM_PROMPT,
 } from '@/lib/risk/explain'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
+const AI_MODEL = 'gpt-4o-mini'
 const PROMPT_VERSION = '1.0.0'
 
 export async function POST(
@@ -19,6 +23,20 @@ export async function POST(
     const { id: caseId } = await params
     const { supabase, error: authError } = await getAuthenticatedClient()
     if (authError) return authError
+
+    // Verify case exists (RLS handles ownership)
+    const { data: caseData, error: caseError } = await supabase!
+      .from('cases')
+      .select('id')
+      .eq('id', caseId)
+      .single()
+
+    if (caseError || !caseData) {
+      return NextResponse.json(
+        { error: 'Case not found' },
+        { status: 404 }
+      )
+    }
 
     // Load latest risk score for this case
     const { data: riskScore, error: riskError } = await supabase!
@@ -57,7 +75,7 @@ export async function POST(
         const userPrompt = buildExplanationPrompt(riskInput)
 
         const completion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
+          model: AI_MODEL,
           temperature: 0.4,
           response_format: { type: 'json_object' },
           messages: [
@@ -80,8 +98,8 @@ export async function POST(
             }
           }
         }
-      } catch {
-        // AI failed — static fallback already set
+      } catch (err) {
+        console.error('AI risk explanation failed, using static fallback:', err instanceof Error ? err.message : err)
       }
     }
 
@@ -92,21 +110,25 @@ export async function POST(
         : { items: breakdown }),
       ai_explanation: explanation,
       _meta: {
-        model: source === 'ai' ? 'gpt-4o-mini' : null,
+        model: source === 'ai' ? AI_MODEL : null,
         prompt_version: PROMPT_VERSION,
         source,
       },
     }
 
-    await supabase!
+    const { error: updateError } = await supabase!
       .from('case_risk_scores')
       .update({ breakdown: updatedBreakdown })
       .eq('id', riskScore.id)
 
+    if (updateError) {
+      console.error('Failed to persist risk explanation:', updateError.message)
+    }
+
     return NextResponse.json({
       ...explanation,
       _meta: {
-        model: source === 'ai' ? 'gpt-4o-mini' : null,
+        model: source === 'ai' ? AI_MODEL : null,
         prompt_version: PROMPT_VERSION,
         source,
       },
