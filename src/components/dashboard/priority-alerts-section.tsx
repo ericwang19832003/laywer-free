@@ -28,11 +28,14 @@ function formatDueDate(dateStr: string): string {
 
 export function PriorityAlertsSection({ caseId, alerts: initialAlerts }: PriorityAlertsSectionProps) {
   const [alerts, setAlerts] = useState(initialAlerts)
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
   const router = useRouter()
 
   if (alerts.length === 0) return null
 
   async function handleAcknowledge(id: string) {
+    if (pendingIds.has(id)) return
+    setPendingIds((s) => new Set(s).add(id))
     const previous = alerts
     setAlerts((current) => current.filter((a) => a.id !== id))
 
@@ -51,6 +54,8 @@ export function PriorityAlertsSection({ caseId, alerts: initialAlerts }: Priorit
     } catch {
       setAlerts(previous)
       toast.error('Could not acknowledge this alert. Please try again.')
+    } finally {
+      setPendingIds((s) => { const next = new Set(s); next.delete(id); return next })
     }
   }
 

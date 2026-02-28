@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { toast } from 'sonner'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 
 // Mock next/link
@@ -194,6 +195,41 @@ describe('PriorityAlertsSection', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Your answer deadline is tomorrow (March 15, 2026).')).toBeInTheDocument()
+      })
+    })
+
+    it('shows error toast on API failure', async () => {
+      global.fetch = vi.fn().mockResolvedValue({ ok: false, json: () => Promise.resolve({ error: 'Not found' }) })
+
+      render(<PriorityAlertsSection caseId="case-001" alerts={[makeAlert()]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }))
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Could not acknowledge this alert. Please try again.'
+        )
+      })
+    })
+
+    it('restores card on network exception', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network failure'))
+
+      render(<PriorityAlertsSection caseId="case-001" alerts={[makeAlert()]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Your answer deadline is tomorrow (March 15, 2026).')).toBeInTheDocument()
+      })
+    })
+
+    it('calls router.refresh on successful acknowledge', async () => {
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ success: true }) })
+
+      render(<PriorityAlertsSection caseId="case-001" alerts={[makeAlert()]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }))
+
+      await waitFor(() => {
+        expect(mockRefresh).toHaveBeenCalled()
       })
     })
 
