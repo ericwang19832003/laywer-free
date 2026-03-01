@@ -74,14 +74,22 @@ export default async function StepPage({
   switch (task.task_key) {
     case 'welcome':
       return <WelcomeStep caseId={id} taskId={taskId} />
-    case 'intake':
+    case 'intake': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('county, court_type, dispute_type')
+        .eq('id', id)
+        .single()
+
       return (
         <IntakeStep
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
         />
       )
+    }
     case 'preservation_letter':
       return (
         <PreservationLetterStep
