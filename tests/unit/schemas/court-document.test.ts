@@ -149,8 +149,11 @@ describe('constants', () => {
     expect(MAX_FILE_SIZE).toBe(10 * 1024 * 1024)
   })
 
-  it('DOC_TYPES contains return_of_service', () => {
+  it('DOC_TYPES contains all doc types', () => {
     expect(DOC_TYPES).toContain('return_of_service')
-    expect(DOC_TYPES).toHaveLength(1)
+    expect(DOC_TYPES).toContain('petition')
+    expect(DOC_TYPES).toContain('answer')
+    expect(DOC_TYPES).toContain('general_denial')
+    expect(DOC_TYPES).toHaveLength(4)
   })
 })
