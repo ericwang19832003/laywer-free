@@ -1,11 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -15,36 +13,104 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  recommendCourt,
+  type DisputeType,
+  type AmountRange,
+  type CircumstanceFlags,
+} from '@/lib/rules/court-recommendation'
+import { WizardProgress } from './wizard/wizard-progress'
+import { RoleStep } from './wizard/role-step'
+import { DisputeTypeStep } from './wizard/dispute-type-step'
+import { AmountStep } from './wizard/amount-step'
+import { CircumstancesStep } from './wizard/circumstances-step'
+import { RecommendationStep } from './wizard/recommendation-step'
+
+const TOTAL_STEPS = 5
+
+interface WizardState {
+  step: number
+  role: 'plaintiff' | 'defendant' | ''
+  disputeType: DisputeType | ''
+  amount: AmountRange | ''
+  circumstances: CircumstanceFlags
+  county: string
+}
+
+type WizardAction =
+  | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
+  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
+  | { type: 'SET_AMOUNT'; amount: AmountRange }
+  | { type: 'SET_CIRCUMSTANCES'; circumstances: CircumstanceFlags }
+  | { type: 'SET_COUNTY'; county: string }
+  | { type: 'NEXT_STEP' }
+  | { type: 'PREV_STEP' }
+  | { type: 'RESET' }
+
+const initialState: WizardState = {
+  step: 1,
+  role: '',
+  disputeType: '',
+  amount: '',
+  circumstances: {
+    realProperty: false,
+    outOfState: false,
+    governmentEntity: false,
+    federalLaw: false,
+  },
+  county: '',
+}
+
+function reducer(state: WizardState, action: WizardAction): WizardState {
+  switch (action.type) {
+    case 'SET_ROLE':
+      return { ...state, role: action.role, step: 2 }
+    case 'SET_DISPUTE_TYPE':
+      return { ...state, disputeType: action.disputeType, step: 3 }
+    case 'SET_AMOUNT':
+      return { ...state, amount: action.amount, step: 4 }
+    case 'SET_CIRCUMSTANCES':
+      return { ...state, circumstances: action.circumstances }
+    case 'SET_COUNTY':
+      return { ...state, county: action.county }
+    case 'NEXT_STEP':
+      return { ...state, step: Math.min(state.step + 1, TOTAL_STEPS) }
+    case 'PREV_STEP':
+      return { ...state, step: Math.max(state.step - 1, 1) }
+    case 'RESET':
+      return initialState
+    default:
+      return state
+  }
+}
 
 export function NewCaseDialog() {
   const [open, setOpen] = useState(false)
-  const [role, setRole] = useState<'plaintiff' | 'defendant' | ''>('')
-  const [county, setCounty] = useState('')
-  const [courtType, setCourtType] = useState('')
+  const [state, dispatch] = useReducer(reducer, initialState)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
-    if (!role) {
-      setError('Please select your role.')
-      return
-    }
+  async function handleAccept(courtOverride: string | null) {
+    if (!state.role) return
 
     setLoading(true)
     setError(null)
 
+    const courtType =
+      courtOverride ??
+      (state.disputeType && state.amount
+        ? recommendCourt({
+            disputeType: state.disputeType,
+            amount: state.amount,
+            circumstances: state.circumstances,
+          }).recommended
+        : 'unknown')
+
     try {
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
 
       const res = await fetch('/api/cases', {
         method: 'POST',
@@ -55,9 +121,10 @@ export function NewCaseDialog() {
             : {}),
         },
         body: JSON.stringify({
-          role,
-          ...(county.trim() ? { county: county.trim() } : {}),
-          ...(courtType ? { court_type: courtType } : {}),
+          role: state.role,
+          court_type: courtType,
+          ...(state.disputeType ? { dispute_type: state.disputeType } : {}),
+          ...(state.county.trim() ? { county: state.county.trim() } : {}),
         }),
       })
 
@@ -81,14 +148,20 @@ export function NewCaseDialog() {
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen)
     if (!nextOpen) {
-      // Reset form when closing
-      setRole('')
-      setCounty('')
-      setCourtType('')
+      dispatch({ type: 'RESET' })
       setError(null)
       setLoading(false)
     }
   }
+
+  const recommendation =
+    state.disputeType && state.amount
+      ? recommendCourt({
+          disputeType: state.disputeType,
+          amount: state.amount,
+          circumstances: state.circumstances,
+        })
+      : null
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -101,74 +174,60 @@ export function NewCaseDialog() {
         <DialogHeader>
           <DialogTitle>Start a new case</DialogTitle>
           <DialogDescription>
-            A few quick details to get you organized.
+            We&apos;ll help you figure out the right court.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role selector */}
-          <div className="space-y-2">
-            <Label>I am the...</Label>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setRole('plaintiff')}
-                className={`flex-1 rounded-md border px-4 py-2.5 text-sm font-medium transition-colors ${
-                  role === 'plaintiff'
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
-                }`}
-              >
-                Plaintiff
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('defendant')}
-                className={`flex-1 rounded-md border px-4 py-2.5 text-sm font-medium transition-colors ${
-                  role === 'defendant'
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
-                }`}
-              >
-                Defendant
-              </button>
-            </div>
-          </div>
 
-          {/* County */}
-          <div className="space-y-2">
-            <Label htmlFor="county">County (optional)</Label>
-            <Input
-              id="county"
-              value={county}
-              onChange={(e) => setCounty(e.target.value)}
-              placeholder="e.g. Travis County"
-            />
-          </div>
+        <WizardProgress
+          currentStep={state.step}
+          totalSteps={TOTAL_STEPS}
+          onBack={() => dispatch({ type: 'PREV_STEP' })}
+        />
 
-          {/* Court type */}
-          <div className="space-y-2">
-            <Label htmlFor="court-type">Court type (optional)</Label>
-            <Select value={courtType} onValueChange={setCourtType}>
-              <SelectTrigger className="w-full" id="court-type">
-                <SelectValue placeholder="Select a court type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="jp">JP Court</SelectItem>
-                <SelectItem value="county">County Court</SelectItem>
-                <SelectItem value="district">District Court</SelectItem>
-                <SelectItem value="unknown">I&apos;m not sure</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {state.step === 1 && (
+          <RoleStep
+            value={state.role}
+            onSelect={(role) => dispatch({ type: 'SET_ROLE', role })}
+          />
+        )}
 
-          {error && (
-            <p className="text-sm text-calm-amber">{error}</p>
-          )}
+        {state.step === 2 && (
+          <DisputeTypeStep
+            value={state.disputeType}
+            onSelect={(disputeType) =>
+              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType })
+            }
+          />
+        )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating...' : 'Get Started'}
-          </Button>
-        </form>
+        {state.step === 3 && (
+          <AmountStep
+            value={state.amount}
+            onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
+          />
+        )}
+
+        {state.step === 4 && (
+          <CircumstancesStep
+            value={state.circumstances}
+            onChange={(circumstances) =>
+              dispatch({ type: 'SET_CIRCUMSTANCES', circumstances })
+            }
+            onContinue={() => dispatch({ type: 'NEXT_STEP' })}
+          />
+        )}
+
+        {state.step === 5 && recommendation && (
+          <RecommendationStep
+            recommendation={recommendation}
+            county={state.county}
+            onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
+            onAccept={handleAccept}
+            loading={loading}
+          />
+        )}
+
+        {error && <p className="text-sm text-calm-amber">{error}</p>}
       </DialogContent>
     </Dialog>
   )
