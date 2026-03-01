@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   Loader2Icon,
   TrendingUpIcon,
   TrendingDownIcon,
   MinusIcon,
   RefreshCwIcon,
-  ChevronDownIcon,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -40,11 +40,6 @@ interface CaseHealthCardProps {
   score30DaysAgo?: HistoricalScore | null
 }
 
-interface Explanation {
-  summary: string
-  focus_areas: string[]
-}
-
 // ── Helpers ──────────────────────────────────────────────────────
 
 function getHealthStyle(score: number) {
@@ -71,13 +66,6 @@ function formatUpdatedAt(dateStr: string): string {
   return `Updated ${diffDays} days ago`
 }
 
-function extractExplanation(breakdown: unknown): Explanation | null {
-  if (!breakdown || typeof breakdown !== 'object') return null
-  const obj = breakdown as Record<string, unknown>
-  const ai = obj.ai_explanation as Explanation | undefined
-  return ai?.summary ? ai : null
-}
-
 // ── Component ────────────────────────────────────────────────────
 
 export function CaseHealthCard({
@@ -87,11 +75,6 @@ export function CaseHealthCard({
   score30DaysAgo,
 }: CaseHealthCardProps) {
   const [recalculating, setRecalculating] = useState(false)
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const [explaining, setExplaining] = useState(false)
-  const [explanation, setExplanation] = useState<Explanation | null>(() =>
-    riskScore ? extractExplanation(riskScore.breakdown) : null
-  )
   const router = useRouter()
 
   async function handleRecalculate() {
@@ -99,37 +82,11 @@ export function CaseHealthCard({
     try {
       const res = await fetch(`/api/cases/${caseId}/rules/run-risk-score`, { method: 'POST' })
       if (!res.ok) throw new Error()
-      setExplanation(null)
       router.refresh()
-      if (detailsOpen) {
-        await handleExplain()
-      }
     } catch {
       toast.error('Could not recalculate. Please try again.')
     } finally {
       setRecalculating(false)
-    }
-  }
-
-  async function handleExplain() {
-    setExplaining(true)
-    try {
-      const res = await fetch(`/api/cases/${caseId}/risk/explain`, { method: 'POST' })
-      if (!res.ok) throw new Error()
-      const data = await res.json()
-      setExplanation({ summary: data.summary, focus_areas: data.focus_areas })
-    } catch {
-      toast.error('Could not load details. Please try again.')
-    } finally {
-      setExplaining(false)
-    }
-  }
-
-  function handleViewDetails() {
-    const willOpen = !detailsOpen
-    setDetailsOpen(willOpen)
-    if (willOpen && !explanation && !explaining) {
-      handleExplain()
     }
   }
 
@@ -265,49 +222,10 @@ export function CaseHealthCard({
             )}
             Recalculate
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleViewDetails}
-            className="text-warm-muted"
-          >
-            <ChevronDownIcon
-              className={`mr-1.5 h-3.5 w-3.5 transition-transform ${detailsOpen ? 'rotate-180' : ''}`}
-            />
-            {detailsOpen ? 'Hide details' : 'View details'}
+          <Button variant="ghost" size="sm" asChild className="text-warm-muted">
+            <Link href={`/case/${caseId}/health`}>View details</Link>
           </Button>
         </div>
-
-        {/* ── Expanded details ────────────────────────────────── */}
-        {detailsOpen && (
-          <div className="border-t border-warm-border pt-4 space-y-3">
-            {explaining ? (
-              <div className="flex items-center gap-2 text-sm text-warm-muted">
-                <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-                Analyzing your case...
-              </div>
-            ) : explanation ? (
-              <>
-                <p className="text-sm leading-relaxed text-warm-text">
-                  {explanation.summary}
-                </p>
-                {explanation.focus_areas.length > 0 && (
-                  <ul className="space-y-2">
-                    {explanation.focus_areas.map((area, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <span
-                          className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-calm-indigo"
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm text-warm-text">{area}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            ) : null}
-          </div>
-        )}
 
         {/* ── Disclaimer ──────────────────────────────────────── */}
         <p className="text-[11px] leading-relaxed text-warm-muted">
