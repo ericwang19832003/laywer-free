@@ -106,6 +106,7 @@ export async function computeAndStoreCaseHealth(
     .from('task_events')
     .select('created_at')
     .eq('case_id', caseId)
+    .neq('kind', 'health_alert_triggered')
 
   if (teError) throw new Error(`Failed to load task events: ${teError.message}`)
 
