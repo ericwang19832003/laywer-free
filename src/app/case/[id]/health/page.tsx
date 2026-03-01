@@ -18,7 +18,8 @@ function extractExplanation(breakdown: unknown): Explanation | null {
   if (!breakdown || typeof breakdown !== 'object') return null
   const obj = breakdown as Record<string, unknown>
   const ai = obj.ai_explanation as Explanation | undefined
-  return ai?.summary ? ai : null
+  if (!ai?.summary) return null
+  return { summary: ai.summary, focus_areas: ai.focus_areas ?? [] }
 }
 
 function formatDate(dateStr: string): string {
