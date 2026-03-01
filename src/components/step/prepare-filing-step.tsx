@@ -126,7 +126,6 @@ export function PrepareFilingStep({
       setDraft(data.draft)
     } catch (err) {
       setGenError(err instanceof Error ? err.message : 'Failed to generate document')
-      throw err
     } finally {
       setGenerating(false)
     }
@@ -195,6 +194,13 @@ export function PrepareFilingStep({
       reviewButtonLabel="Generate Draft →"
     >
       <div className="space-y-8">
+        {genError && (
+          <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
+            <p className="text-sm text-warm-text">{genError}</p>
+            <p className="text-xs text-warm-muted mt-1">Review your information below and try again.</p>
+          </div>
+        )}
+
         {/* Court info summary */}
         <div className="rounded-lg border border-warm-border bg-white p-4 space-y-1">
           <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">Filing for</p>

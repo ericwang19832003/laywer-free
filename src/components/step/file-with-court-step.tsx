@@ -59,6 +59,9 @@ export function FileWithCourtStep({
   }
 
   async function handleConfirm() {
+    if (!allChecked) {
+      throw new Error('Please complete all checklist items before finishing this step.')
+    }
     const metadata = { checklist, confirmation_number: confirmationNumber || null }
     await patchTask('in_progress', metadata)
     await patchTask('completed')
