@@ -72,12 +72,14 @@ export function PriorityAlertsSection({ caseId, alerts: initialAlerts }: Priorit
           className={`rounded-lg border-l-4 px-4 py-3 ${LEVEL_STYLES[alert.escalation_level] ?? LEVEL_STYLES[1]}`}
         >
           <p className="text-sm text-warm-text">{alert.message}</p>
-          <p className="text-xs text-warm-muted mt-1">
-            Due: {formatDueDate(alert.due_at)}
-          </p>
+          {alert.due_at && (
+            <p className="text-xs text-warm-muted mt-1">
+              Due: {formatDueDate(alert.due_at)}
+            </p>
+          )}
           <div className="flex gap-2 mt-3">
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/case/${caseId}/deadlines`}>Review</Link>
+              <Link href={alert.deadline_id ? `/case/${caseId}/deadlines` : `/case/${caseId}/health`}>Review</Link>
             </Button>
             <Button
               variant="ghost"

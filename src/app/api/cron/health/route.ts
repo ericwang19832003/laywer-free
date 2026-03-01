@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeAndStoreCaseHealth } from '@/lib/rules/compute-case-health'
+import { evaluateHealthAlert, insertHealthAlertIfNeeded } from '@/lib/rules/health-alert'
 
 const BATCH_SIZE = 5
 const PAGE_SIZE = 1000
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
   // Process in batches of BATCH_SIZE for bounded concurrency
   let succeeded = 0
   let failed = 0
+  let healthAlertsTriggered = 0
   const errors: { case_id: string; message: string }[] = []
 
   for (let i = 0; i < allCases.length; i += BATCH_SIZE) {
@@ -60,6 +62,27 @@ export async function GET(request: NextRequest) {
       const result = results[j]
       if (result.status === 'fulfilled') {
         succeeded++
+
+        // Evaluate and insert health alert if score is concerning
+        try {
+          const action = evaluateHealthAlert(batch[j].id, result.value.overall_score, now)
+          if (action) {
+            const inserted = await insertHealthAlertIfNeeded(supabase, action)
+            if (inserted) {
+              healthAlertsTriggered++
+              await supabase.from('task_events').insert({
+                case_id: batch[j].id,
+                kind: 'health_alert_triggered',
+                payload: {
+                  escalation_level: action.escalation_level,
+                  overall_score: result.value.overall_score,
+                },
+              })
+            }
+          }
+        } catch (alertErr) {
+          console.error(`[cron/health] Health alert failed for case ${batch[j].id}:`, alertErr)
+        }
       } else {
         failed++
         const err = result.reason
@@ -76,6 +99,7 @@ export async function GET(request: NextRequest) {
     processed: allCases.length,
     succeeded,
     failed,
+    healthAlertsTriggered,
     errors,
   })
 }

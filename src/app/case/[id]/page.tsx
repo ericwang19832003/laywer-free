@@ -91,7 +91,7 @@ export default async function DashboardPage({
     return {
       id: row.id as string,
       case_id: row.case_id as string,
-      deadline_id: row.deadline_id as string,
+      deadline_id: (row.deadline_id as string | null) ?? null,
       escalation_level: row.escalation_level as number,
       message: row.message as string,
       triggered_at: row.triggered_at as string,
