@@ -6,6 +6,8 @@ import { ConfirmServiceFactsStep } from '@/components/step/confirm-service-facts
 import { PreservationLetterStep } from '@/components/step/preservation-letter-step'
 import { WaitForAnswerStep } from '@/components/step/wait-for-answer-step'
 import { CheckDocketForAnswerStep } from '@/components/step/check-docket-for-answer-step'
+import { PrepareFilingStep } from '@/components/step/prepare-filing-step'
+import { FileWithCourtStep } from '@/components/step/file-with-court-step'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -90,6 +92,52 @@ export default async function StepPage({
         />
       )
     }
+    case 'prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('role, court_type, county, dispute_type')
+        .eq('id', id)
+        .single()
+
+      if (!caseRow || caseRow.court_type === 'unknown') {
+        return (
+          <div className="max-w-2xl mx-auto px-4 py-8">
+            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
+            <Card><CardContent className="pt-6 text-center py-12">
+              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
+              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
+            </CardContent></Card>
+          </div>
+        )
+      }
+
+      return (
+        <PrepareFilingStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow}
+        />
+      )
+    }
+
+    case 'file_with_court': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('role, court_type, county')
+        .eq('id', id)
+        .single()
+
+      return (
+        <FileWithCourtStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? { role: 'plaintiff', court_type: 'district', county: null }}
+        />
+      )
+    }
+
     case 'preservation_letter':
       return (
         <PreservationLetterStep
