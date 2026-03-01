@@ -12,7 +12,7 @@ describe('createCaseSchema', () => {
       role: 'defendant',
       county: 'Travis',
       court_type: 'district',
-      dispute_type: 'landlord',
+      dispute_type: 'landlord_tenant',
     })
     expect(result.success).toBe(true)
   })
@@ -37,5 +37,22 @@ describe('createCaseSchema', () => {
     if (result.success) {
       expect(result.data.court_type).toBe('unknown')
     }
+  })
+
+  it('accepts federal as court_type', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', court_type: 'federal' })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts known dispute_type values', () => {
+    for (const dt of ['debt_collection', 'landlord_tenant', 'personal_injury', 'contract', 'property', 'family', 'other']) {
+      const result = createCaseSchema.safeParse({ role: 'plaintiff', dispute_type: dt })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects unknown dispute_type values', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', dispute_type: 'invalid_type' })
+    expect(result.success).toBe(false)
   })
 })
