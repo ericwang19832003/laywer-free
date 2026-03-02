@@ -210,4 +210,200 @@ describe('evaluateGatekeeperRules', () => {
     const actions = evaluateGatekeeperRules(makeInput())
     expect(actions).toEqual([])
   })
+
+  // ── Rule 7: case_removed → unlock understand_removal ────
+  it('unlocks understand_removal when docket result is case_removed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('check_docket_for_answer', 'completed', { docket_result: 'case_removed' }),
+          makeTask('understand_removal', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'understand_removal' },
+    ])
+  })
+
+  it('does not unlock understand_removal for other docket results', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('check_docket_for_answer', 'completed', { docket_result: 'answer_filed' }),
+          makeTask('understand_removal', 'locked'),
+          makeTask('upload_answer', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions.some(a => a.type === 'unlock_task' && a.task_key === 'understand_removal')).toBe(false)
+  })
+
+  // ── Rule 8: understand_removal → choose_removal_strategy ──
+  it('unlocks choose_removal_strategy when understand_removal completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('understand_removal', 'completed'),
+          makeTask('choose_removal_strategy', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'choose_removal_strategy' },
+    ])
+  })
+
+  // ── Rule 9: strategy=accept → prepare_amended_complaint ──
+  it('unlocks prepare_amended_complaint when strategy includes accept', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('choose_removal_strategy', 'completed', { strategy: 'accept' }),
+          makeTask('prepare_amended_complaint', 'locked'),
+          makeTask('prepare_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'prepare_amended_complaint' },
+    ])
+  })
+
+  // ── Rule 10: strategy=remand → prepare_remand_motion ──
+  it('unlocks prepare_remand_motion when strategy includes remand', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('choose_removal_strategy', 'completed', { strategy: 'remand' }),
+          makeTask('prepare_amended_complaint', 'locked'),
+          makeTask('prepare_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'prepare_remand_motion' },
+    ])
+  })
+
+  // ── Rule 9+10: strategy=both → both branches ──
+  it('unlocks both branches when strategy is both', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('choose_removal_strategy', 'completed', { strategy: 'both' }),
+          makeTask('prepare_amended_complaint', 'locked'),
+          makeTask('prepare_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    const keys = actions.map(a => a.type === 'unlock_task' ? a.task_key : null).filter(Boolean)
+    expect(keys).toContain('prepare_amended_complaint')
+    expect(keys).toContain('prepare_remand_motion')
+  })
+
+  // ── Rule 11: prepare_amended_complaint → file_amended_complaint ──
+  it('unlocks file_amended_complaint when prepare_amended_complaint completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('prepare_amended_complaint', 'completed'),
+          makeTask('file_amended_complaint', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'file_amended_complaint' },
+    ])
+  })
+
+  // ── Rule 12: file_amended_complaint → rule_26f_prep ──
+  it('unlocks rule_26f_prep when file_amended_complaint completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('file_amended_complaint', 'completed'),
+          makeTask('rule_26f_prep', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'rule_26f_prep' },
+    ])
+  })
+
+  // ── Rule 13: rule_26f_prep → mandatory_disclosures ──
+  it('unlocks mandatory_disclosures when rule_26f_prep completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('rule_26f_prep', 'completed'),
+          makeTask('mandatory_disclosures', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'mandatory_disclosures' },
+    ])
+  })
+
+  // ── Rule 14: prepare_remand_motion → file_remand_motion ──
+  it('unlocks file_remand_motion when prepare_remand_motion completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('prepare_remand_motion', 'completed'),
+          makeTask('file_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'file_remand_motion' },
+    ])
+  })
+
+  // ── Removal mutual exclusivity with other branches ──
+  it('only unlocks removal branch for case_removed — not default or answer', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('check_docket_for_answer', 'completed', { docket_result: 'case_removed' }),
+          makeTask('default_packet_prep', 'locked'),
+          makeTask('upload_answer', 'locked'),
+          makeTask('understand_removal', 'locked'),
+        ],
+      })
+    )
+
+    const keys = actions.map(a => a.type === 'unlock_task' ? a.task_key : null).filter(Boolean)
+    expect(keys).toContain('understand_removal')
+    expect(keys).not.toContain('default_packet_prep')
+    expect(keys).not.toContain('upload_answer')
+  })
+
+  // ── mandatory_disclosures → discovery_starter_pack ──
+  it('unlocks discovery_starter_pack when mandatory_disclosures completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('mandatory_disclosures', 'completed'),
+          makeTask('discovery_starter_pack', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'discovery_starter_pack' },
+    ])
+  })
 })

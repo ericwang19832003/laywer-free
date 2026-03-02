@@ -99,5 +99,74 @@ export function evaluateGatekeeperRules(input: GatekeeperInput): GatekeeperActio
     actions.push({ type: 'unlock_task', task_key: 'discovery_starter_pack' })
   }
 
+  // ── Federal Removal Branch ──────────────────────────────
+
+  const understandRemovalTask = findTask(tasks, 'understand_removal')
+  const chooseStrategyTask = findTask(tasks, 'choose_removal_strategy')
+  const prepAmendedTask = findTask(tasks, 'prepare_amended_complaint')
+  const fileAmendedTask = findTask(tasks, 'file_amended_complaint')
+  const prepRemandTask = findTask(tasks, 'prepare_remand_motion')
+  const fileRemandTask = findTask(tasks, 'file_remand_motion')
+  const rule26fTask = findTask(tasks, 'rule_26f_prep')
+  const mandatoryDisclosuresTask = findTask(tasks, 'mandatory_disclosures')
+
+  // Rule 7: Branch — case_removed → unlock understand_removal
+  if (
+    checkDocketTask?.status === 'completed' &&
+    checkDocketTask.metadata?.docket_result === 'case_removed' &&
+    understandRemovalTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'understand_removal' })
+  }
+
+  // Rule 8: understand_removal → choose_removal_strategy
+  if (understandRemovalTask?.status === 'completed' && chooseStrategyTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'choose_removal_strategy' })
+  }
+
+  // Rule 9: strategy includes accept → prepare_amended_complaint
+  const strategy = chooseStrategyTask?.metadata?.strategy as string | undefined
+  if (
+    chooseStrategyTask?.status === 'completed' &&
+    (strategy === 'accept' || strategy === 'both') &&
+    prepAmendedTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'prepare_amended_complaint' })
+  }
+
+  // Rule 10: strategy includes remand → prepare_remand_motion
+  if (
+    chooseStrategyTask?.status === 'completed' &&
+    (strategy === 'remand' || strategy === 'both') &&
+    prepRemandTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'prepare_remand_motion' })
+  }
+
+  // Rule 11: prepare_amended_complaint → file_amended_complaint
+  if (prepAmendedTask?.status === 'completed' && fileAmendedTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'file_amended_complaint' })
+  }
+
+  // Rule 12: file_amended_complaint → rule_26f_prep
+  if (fileAmendedTask?.status === 'completed' && rule26fTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'rule_26f_prep' })
+  }
+
+  // Rule 13: rule_26f_prep → mandatory_disclosures
+  if (rule26fTask?.status === 'completed' && mandatoryDisclosuresTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'mandatory_disclosures' })
+  }
+
+  // Rule 14: prepare_remand_motion → file_remand_motion
+  if (prepRemandTask?.status === 'completed' && fileRemandTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'file_remand_motion' })
+  }
+
+  // Rule 15: mandatory_disclosures → discovery_starter_pack (removal path)
+  if (mandatoryDisclosuresTask?.status === 'completed' && discoveryTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'discovery_starter_pack' })
+  }
+
   return actions
 }
