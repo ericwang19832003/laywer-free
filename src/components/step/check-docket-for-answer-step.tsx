@@ -8,7 +8,7 @@ interface CheckDocketForAnswerStepProps {
   taskId: string
 }
 
-type DocketResult = 'no_answer' | 'answer_filed' | null
+type DocketResult = 'no_answer' | 'answer_filed' | 'case_removed' | null
 
 export function CheckDocketForAnswerStep({
   caseId,
@@ -50,14 +50,18 @@ export function CheckDocketForAnswerStep({
         <p className="text-warm-text mt-0.5">
           {result === 'no_answer'
             ? 'No answer was filed'
-            : 'An answer was filed'}
+            : result === 'answer_filed'
+              ? 'An answer was filed'
+              : 'The case was removed to federal court'}
         </p>
       </div>
       <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
         <p className="text-sm text-amber-800">
           {result === 'no_answer'
             ? 'This will start the default judgment process. You\'ll prepare a default judgment packet to submit to the court.'
-            : 'This means the case is contested. You\'ll upload the answer and move into the discovery phase.'}
+            : result === 'answer_filed'
+              ? 'This means the case is contested. You\'ll upload the answer and move into the discovery phase.'
+              : 'The defendant has moved your case to federal court. We\'ll guide you through your response options.'}
         </p>
       </div>
     </div>
@@ -109,6 +113,25 @@ export function CheckDocketForAnswerStep({
           </p>
           <p className="text-xs text-warm-muted mt-1">
             The other side responded. The case will move into the discovery phase.
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setResult('case_removed')}
+          className={`w-full rounded-md border px-4 py-4 text-left transition-colors ${
+            result === 'case_removed'
+              ? 'border-primary bg-primary/5'
+              : 'border-warm-border hover:border-warm-text'
+          }`}
+        >
+          <p className={`text-sm font-medium ${
+            result === 'case_removed' ? 'text-primary' : 'text-warm-text'
+          }`}>
+            The case was removed to federal court
+          </p>
+          <p className="text-xs text-warm-muted mt-1">
+            The defendant filed a Notice of Removal. Your case has been transferred to a federal district court.
           </p>
         </button>
       </div>
