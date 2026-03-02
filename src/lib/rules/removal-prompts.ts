@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 interface PartyInfo {
   full_name: string
   address?: string
@@ -27,6 +29,36 @@ export interface RemandMotionFacts {
   remand_grounds: string[]
   additional_arguments?: string
 }
+
+const partySchema = z.object({
+  full_name: z.string().min(1),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
+})
+
+export const amendedComplaintFactsSchema = z.object({
+  your_info: partySchema,
+  opposing_parties: z.array(partySchema).min(1),
+  description: z.string().min(1),
+  federal_case_number: z.string(),
+  jurisdiction_basis: z.enum(['diversity', 'federal_question', 'both']),
+  amount_sought: z.number().optional(),
+  claim_details: z.string().optional(),
+  other_relief: z.string().optional(),
+  request_jury_trial: z.boolean(),
+})
+
+export const remandMotionFactsSchema = z.object({
+  your_info: partySchema,
+  opposing_parties: z.array(partySchema).min(1),
+  federal_case_number: z.string(),
+  original_court: z.string().min(1),
+  removal_date: z.string().min(1),
+  remand_grounds: z.array(z.string()).min(1),
+  additional_arguments: z.string().optional(),
+})
 
 interface Prompt {
   system: string

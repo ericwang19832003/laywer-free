@@ -6,8 +6,8 @@ import { buildFilingPrompt } from '@/lib/rules/filing-prompts'
 import {
   buildAmendedComplaintPrompt,
   buildRemandMotionPrompt,
-  type AmendedComplaintFacts,
-  type RemandMotionFacts,
+  amendedComplaintFactsSchema,
+  remandMotionFactsSchema,
 } from '@/lib/rules/removal-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
@@ -44,12 +44,24 @@ export async function POST(
     let auditDocType = 'original'
 
     if (documentType === 'amended_complaint') {
-      const facts = body.facts as AmendedComplaintFacts
-      prompt = buildAmendedComplaintPrompt(facts)
+      const parsed = amendedComplaintFactsSchema.safeParse(body.facts)
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Validation failed', details: parsed.error.issues },
+          { status: 422 }
+        )
+      }
+      prompt = buildAmendedComplaintPrompt(parsed.data)
       auditDocType = 'amended_complaint'
     } else if (documentType === 'motion_to_remand') {
-      const facts = body.facts as RemandMotionFacts
-      prompt = buildRemandMotionPrompt(facts)
+      const parsed = remandMotionFactsSchema.safeParse(body.facts)
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Validation failed', details: parsed.error.issues },
+          { status: 422 }
+        )
+      }
+      prompt = buildRemandMotionPrompt(parsed.data)
       auditDocType = 'motion_to_remand'
     } else {
       // Original filing (petition/answer)
