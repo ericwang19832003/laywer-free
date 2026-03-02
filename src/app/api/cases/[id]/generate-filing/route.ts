@@ -3,6 +3,12 @@ import Anthropic from '@anthropic-ai/sdk'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateFilingRequestSchema } from '@/lib/schemas/filing'
 import { buildFilingPrompt } from '@/lib/rules/filing-prompts'
+import {
+  buildAmendedComplaintPrompt,
+  buildRemandMotionPrompt,
+  type AmendedComplaintFacts,
+  type RemandMotionFacts,
+} from '@/lib/rules/removal-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 export const runtime = 'nodejs'
@@ -32,17 +38,31 @@ export async function POST(
     }
 
     const body = await request.json()
-    const parsed = generateFilingRequestSchema.safeParse(body)
+    const documentType = body.document_type as string | undefined
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.issues },
-        { status: 422 }
-      )
+    let prompt: { system: string; user: string }
+    let auditDocType = 'original'
+
+    if (documentType === 'amended_complaint') {
+      const facts = body.facts as AmendedComplaintFacts
+      prompt = buildAmendedComplaintPrompt(facts)
+      auditDocType = 'amended_complaint'
+    } else if (documentType === 'motion_to_remand') {
+      const facts = body.facts as RemandMotionFacts
+      prompt = buildRemandMotionPrompt(facts)
+      auditDocType = 'motion_to_remand'
+    } else {
+      // Original filing (petition/answer)
+      const parsed = generateFilingRequestSchema.safeParse(body)
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Validation failed', details: parsed.error.issues },
+          { status: 422 }
+        )
+      }
+      const { facts } = parsed.data
+      prompt = buildFilingPrompt(facts)
     }
-
-    const { facts } = parsed.data
-    const prompt = buildFilingPrompt(facts)
 
     const anthropic = new Anthropic()
     const message = await anthropic.messages.create({
@@ -69,9 +89,8 @@ export async function POST(
       case_id: caseId,
       kind: 'filing_draft_generated',
       payload: {
-        court_type: facts.court_type,
-        role: facts.role,
-        dispute_type: facts.dispute_type,
+        document_type: auditDocType,
+        court_type: caseData.court_type,
       },
     })
 
