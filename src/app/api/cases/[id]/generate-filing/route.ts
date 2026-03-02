@@ -18,6 +18,30 @@ import {
   motionToCompelFactsSchema,
   buildMotionToCompelPrompt,
 } from '@/lib/motions/configs/motion-to-compel'
+import {
+  summaryJudgmentFactsSchema,
+  buildSummaryJudgmentPrompt,
+} from '@/lib/motions/configs/motion-summary-judgment'
+import {
+  settlementDemandFactsSchema,
+  buildSettlementDemandPrompt,
+} from '@/lib/motions/configs/settlement-demand'
+import {
+  continuanceFactsSchema,
+  buildContinuancePrompt,
+} from '@/lib/motions/configs/motion-continuance'
+import {
+  mtdResponseFactsSchema,
+  buildMtdResponsePrompt,
+} from '@/lib/motions/configs/mtd-response'
+import {
+  noticeOfAppealFactsSchema,
+  buildNoticeOfAppealPrompt,
+} from '@/lib/motions/configs/notice-of-appeal'
+import {
+  appellateBriefFactsSchema,
+  buildAppellateBriefPrompt,
+} from '@/lib/motions/configs/appellate-brief'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 /* ------------------------------------------------------------------ */
@@ -47,6 +71,30 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   motion_to_compel: {
     schema: motionToCompelFactsSchema,
     buildPrompt: buildMotionToCompelPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_summary_judgment: {
+    schema: summaryJudgmentFactsSchema,
+    buildPrompt: buildSummaryJudgmentPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  settlement_demand: {
+    schema: settlementDemandFactsSchema,
+    buildPrompt: buildSettlementDemandPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_continuance: {
+    schema: continuanceFactsSchema,
+    buildPrompt: buildContinuancePrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  mtd_response: {
+    schema: mtdResponseFactsSchema,
+    buildPrompt: buildMtdResponsePrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  notice_of_appeal: {
+    schema: noticeOfAppealFactsSchema,
+    buildPrompt: buildNoticeOfAppealPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  appellate_brief: {
+    schema: appellateBriefFactsSchema,
+    buildPrompt: buildAppellateBriefPrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 
