@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { ZodType } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateFilingRequestSchema } from '@/lib/schemas/filing'
 import { buildFilingPrompt } from '@/lib/rules/filing-prompts'
@@ -13,7 +14,41 @@ import {
   buildDefaultJudgmentPrompt,
   defaultJudgmentFactsSchema,
 } from '@/lib/rules/default-judgment-prompts'
+import {
+  motionToCompelFactsSchema,
+  buildMotionToCompelPrompt,
+} from '@/lib/motions/configs/motion-to-compel'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
+
+/* ------------------------------------------------------------------ */
+/*  Motion registry — add new motion types here instead of if/else    */
+/* ------------------------------------------------------------------ */
+
+interface RegistryEntry {
+  schema: ZodType
+  buildPrompt: (facts: Record<string, unknown>) => { system: string; user: string }
+}
+
+// Each buildPrompt expects its own typed facts, but after Zod validation
+// the data matches — the `unknown` cast bridges the generic registry type.
+const MOTION_REGISTRY: Record<string, RegistryEntry> = {
+  amended_complaint: {
+    schema: amendedComplaintFactsSchema,
+    buildPrompt: buildAmendedComplaintPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_to_remand: {
+    schema: remandMotionFactsSchema,
+    buildPrompt: buildRemandMotionPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  default_judgment: {
+    schema: defaultJudgmentFactsSchema,
+    buildPrompt: buildDefaultJudgmentPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_to_compel: {
+    schema: motionToCompelFactsSchema,
+    buildPrompt: buildMotionToCompelPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+}
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -47,38 +82,20 @@ export async function POST(
     let prompt: { system: string; user: string }
     let auditDocType = 'original'
 
-    if (documentType === 'amended_complaint') {
-      const parsed = amendedComplaintFactsSchema.safeParse(body.facts)
+    if (documentType && MOTION_REGISTRY[documentType]) {
+      const handler = MOTION_REGISTRY[documentType]
+      const parsed = handler.schema.safeParse(body.facts)
       if (!parsed.success) {
         return NextResponse.json(
           { error: 'Validation failed', details: parsed.error.issues },
           { status: 422 }
         )
       }
-      prompt = buildAmendedComplaintPrompt(parsed.data)
-      auditDocType = 'amended_complaint'
-    } else if (documentType === 'motion_to_remand') {
-      const parsed = remandMotionFactsSchema.safeParse(body.facts)
-      if (!parsed.success) {
-        return NextResponse.json(
-          { error: 'Validation failed', details: parsed.error.issues },
-          { status: 422 }
-        )
-      }
-      prompt = buildRemandMotionPrompt(parsed.data)
-      auditDocType = 'motion_to_remand'
-    } else if (documentType === 'default_judgment') {
-      const parsed = defaultJudgmentFactsSchema.safeParse(body.facts)
-      if (!parsed.success) {
-        return NextResponse.json(
-          { error: 'Validation failed', details: parsed.error.issues },
-          { status: 422 }
-        )
-      }
-      prompt = buildDefaultJudgmentPrompt(parsed.data)
-      auditDocType = 'default_judgment'
+      prompt = handler.buildPrompt(parsed.data as Record<string, unknown>)
+      auditDocType = documentType
     } else {
-      // Original filing (petition/answer)
+      // Original filing (petition/answer) — uses generateFilingRequestSchema
+      // which validates the whole body (not body.facts), so it stays separate.
       const parsed = generateFilingRequestSchema.safeParse(body)
       if (!parsed.success) {
         return NextResponse.json(

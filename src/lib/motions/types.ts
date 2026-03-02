@@ -33,10 +33,9 @@ export interface MotionConfig {
 
   fields: FieldConfig[]
   schema: ZodType
-  buildPrompt: (facts: Record<string, unknown>) => {
-    system: string
-    user: string
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Each config's buildPrompt
+  // accepts its own typed facts; Zod validates at runtime before the call.
+  buildPrompt: (facts: any) => { system: string; user: string }
   documentType: string
 
   taskKey?: string // if it can appear as a gatekeeper task
