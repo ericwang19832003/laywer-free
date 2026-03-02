@@ -17,6 +17,9 @@ import { PrepareRemandMotionStep } from '@/components/step/prepare-remand-motion
 import { FileRemandMotionStep } from '@/components/step/file-remand-motion-step'
 import { Rule26fPrepStep } from '@/components/step/rule-26f-prep-step'
 import { MandatoryDisclosuresStep } from '@/components/step/mandatory-disclosures-step'
+import { UploadAnswerStep } from '@/components/step/upload-answer-step'
+import { EvidenceVaultStep } from '@/components/step/evidence-vault-step'
+import { DefaultPacketPrepStep } from '@/components/step/default-packet-prep-step'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -183,6 +186,13 @@ export default async function StepPage({
           taskId={taskId}
         />
       )
+    case 'upload_answer':
+      return (
+        <UploadAnswerStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
     case 'discovery_starter_pack': {
       const { data: caseRow } = await supabase
         .from('cases')
@@ -310,6 +320,41 @@ export default async function StepPage({
           taskId={taskId}
         />
       )
+    case 'evidence_vault':
+      return <EvidenceVaultStep caseId={id} taskId={taskId} />
+    case 'default_packet_prep': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('court_type, county').eq('id', id).single()
+
+      const { data: serviceFacts } = await supabase
+        .from('service_facts').select('served_at').eq('case_id', id).maybeSingle()
+
+      const { data: answerDeadline } = await supabase
+        .from('deadlines').select('due_at')
+        .eq('case_id', id).eq('key', 'answer_deadline_confirmed').maybeSingle()
+
+      const { data: filingTask } = await supabase
+        .from('tasks').select('metadata')
+        .eq('case_id', id).eq('task_key', 'prepare_filing').maybeSingle()
+
+      const filingMeta = filingTask?.metadata as Record<string, unknown> | null
+
+      return (
+        <DefaultPacketPrepStep
+          caseId={id} taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={{ court_type: caseRow?.court_type ?? 'district', county: caseRow?.county ?? null }}
+          serviceData={serviceFacts ? {
+            service_date: serviceFacts.served_at,
+            answer_deadline: answerDeadline?.due_at ?? null,
+          } : null}
+          partyData={filingMeta?.your_info ? {
+            your_info: filingMeta.your_info as { full_name: string; address?: string },
+            opposing_parties: (filingMeta.opposing_parties as { full_name: string; address?: string }[]) ?? [],
+          } : null}
+        />
+      )
+    }
     default:
       return (
         <div className="max-w-2xl mx-auto px-4 py-8">
