@@ -13,6 +13,8 @@ export const DOC_TYPES = [
   'petition',
   'answer',
   'general_denial',
+  'amended_complaint',
+  'motion_to_remand',
 ] as const
 
 export const courtDocumentSchema = z.object({
