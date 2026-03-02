@@ -41,6 +41,7 @@ export function FileWithCourtStep({
   const [confirmationNumber, setConfirmationNumber] = useState(
     (meta.confirmation_number as string) ?? ''
   )
+  const [checklistError, setChecklistError] = useState<string | null>(null)
 
   const allChecked = Object.entries(checklist)
     .filter(([key]) => key !== 'confirmation_number')
@@ -60,8 +61,10 @@ export function FileWithCourtStep({
 
   async function handleConfirm() {
     if (!allChecked) {
-      throw new Error('Please complete all checklist items before finishing this step.')
+      setChecklistError('Please complete all checklist items before finishing this step.')
+      throw new Error('Checklist incomplete')
     }
+    setChecklistError(null)
     const metadata = { checklist, confirmation_number: confirmationNumber || null }
     await patchTask('in_progress', metadata)
     await patchTask('completed')
@@ -104,7 +107,13 @@ export function FileWithCourtStep({
           />
         </div>
 
-        {!allChecked && (
+        {checklistError && (
+          <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
+            <p className="text-sm text-warm-text">{checklistError}</p>
+          </div>
+        )}
+
+        {!allChecked && !checklistError && (
           <p className="text-xs text-warm-muted">
             Complete all checklist items to finish this step.
           </p>

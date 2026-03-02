@@ -113,6 +113,27 @@ BEGIN
     WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
   END IF;
 
+  -- evidence_vault → preservation_letter
+  IF NEW.task_key = 'evidence_vault' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
+    UPDATE public.tasks
+    SET status = 'todo', unlocked_at = now()
+    WHERE case_id = NEW.case_id AND task_key = 'preservation_letter' AND status = 'locked';
+  END IF;
+
+  -- preservation_letter → upload_return_of_service
+  IF NEW.task_key = 'preservation_letter' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
+    UPDATE public.tasks
+    SET status = 'todo', unlocked_at = now()
+    WHERE case_id = NEW.case_id AND task_key = 'upload_return_of_service' AND status = 'locked';
+  END IF;
+
+  -- upload_return_of_service → confirm_service_facts
+  IF NEW.task_key = 'upload_return_of_service' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
+    UPDATE public.tasks
+    SET status = 'todo', unlocked_at = now()
+    WHERE case_id = NEW.case_id AND task_key = 'confirm_service_facts' AND status = 'locked';
+  END IF;
+
   RETURN NEW;
 END;
 $$;
@@ -136,3 +157,13 @@ WHERE NOT EXISTS (
   SELECT 1 FROM public.tasks t
   WHERE t.case_id = c.id AND t.task_key = 'file_with_court'
 );
+
+-- 5) Backfill: unlock prepare_filing for cases where intake is already completed
+UPDATE public.tasks
+SET status = 'todo', unlocked_at = now()
+WHERE task_key = 'prepare_filing'
+  AND status = 'locked'
+  AND case_id IN (
+    SELECT case_id FROM public.tasks
+    WHERE task_key = 'intake' AND status = 'completed'
+  );
