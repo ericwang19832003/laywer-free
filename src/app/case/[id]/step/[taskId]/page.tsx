@@ -9,6 +9,14 @@ import { CheckDocketForAnswerStep } from '@/components/step/check-docket-for-ans
 import { PrepareFilingStep } from '@/components/step/prepare-filing-step'
 import { FileWithCourtStep } from '@/components/step/file-with-court-step'
 import { DiscoveryStarterPackStep } from '@/components/step/discovery-starter-pack-step'
+import { UnderstandRemovalStep } from '@/components/step/understand-removal-step'
+import { ChooseRemovalStrategyStep } from '@/components/step/choose-removal-strategy-step'
+import { PrepareAmendedComplaintStep } from '@/components/step/prepare-amended-complaint-step'
+import { FileAmendedComplaintStep } from '@/components/step/file-amended-complaint-step'
+import { PrepareRemandMotionStep } from '@/components/step/prepare-remand-motion-step'
+import { FileRemandMotionStep } from '@/components/step/file-remand-motion-step'
+import { Rule26fPrepStep } from '@/components/step/rule-26f-prep-step'
+import { MandatoryDisclosuresStep } from '@/components/step/mandatory-disclosures-step'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -190,6 +198,118 @@ export default async function StepPage({
         />
       )
     }
+    case 'understand_removal':
+      return (
+        <UnderstandRemovalStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
+    case 'choose_removal_strategy': {
+      const { data: remandDeadline } = await supabase
+        .from('deadlines')
+        .select('due_at')
+        .eq('case_id', id)
+        .eq('key', 'remand_motion_deadline')
+        .single()
+
+      return (
+        <ChooseRemovalStrategyStep
+          caseId={id}
+          taskId={taskId}
+          remandDeadline={remandDeadline?.due_at ?? null}
+        />
+      )
+    }
+    case 'prepare_amended_complaint': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, dispute_type')
+        .eq('id', id)
+        .single()
+
+      // Try to get federal case number from understand_removal metadata
+      const { data: removalTask } = await supabase
+        .from('tasks')
+        .select('metadata')
+        .eq('case_id', id)
+        .eq('task_key', 'understand_removal')
+        .single()
+
+      return (
+        <PrepareAmendedComplaintStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={{
+            court_type: caseRow?.court_type ?? 'federal',
+            county: caseRow?.county ?? null,
+            dispute_type: caseRow?.dispute_type ?? null,
+            federal_case_number: (removalTask?.metadata as Record<string, unknown>)?.federal_case_number as string | null ?? null,
+          }}
+        />
+      )
+    }
+    case 'file_amended_complaint':
+      return (
+        <FileAmendedComplaintStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'prepare_remand_motion': {
+      // Get removal date + federal case number from understand_removal metadata
+      const { data: removalTask } = await supabase
+        .from('tasks')
+        .select('metadata')
+        .eq('case_id', id)
+        .eq('task_key', 'understand_removal')
+        .single()
+
+      const removalMeta = removalTask?.metadata as Record<string, unknown> | null
+
+      return (
+        <PrepareRemandMotionStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          removalDate={(removalMeta?.removal_date as string) ?? null}
+          federalCaseNumber={(removalMeta?.federal_case_number as string) ?? null}
+        />
+      )
+    }
+    case 'file_remand_motion': {
+      const { data: remandDeadline } = await supabase
+        .from('deadlines')
+        .select('due_at')
+        .eq('case_id', id)
+        .eq('key', 'remand_motion_deadline')
+        .single()
+
+      return (
+        <FileRemandMotionStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          remandDeadline={remandDeadline?.due_at ?? null}
+        />
+      )
+    }
+    case 'rule_26f_prep':
+      return (
+        <Rule26fPrepStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
+    case 'mandatory_disclosures':
+      return (
+        <MandatoryDisclosuresStep
+          caseId={id}
+          taskId={taskId}
+        />
+      )
     default:
       return (
         <div className="max-w-2xl mx-auto px-4 py-8">
