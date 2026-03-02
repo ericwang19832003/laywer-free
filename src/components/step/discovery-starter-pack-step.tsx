@@ -26,6 +26,7 @@ function ExpandableSection({
       <button
         type="button"
         onClick={onToggle}
+        aria-expanded={isOpen}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
         <span className="text-sm font-medium text-warm-text">{title}</span>
