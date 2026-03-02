@@ -156,6 +156,7 @@ describe('constants', () => {
     expect(DOC_TYPES).toContain('general_denial')
     expect(DOC_TYPES).toContain('amended_complaint')
     expect(DOC_TYPES).toContain('motion_to_remand')
-    expect(DOC_TYPES).toHaveLength(6)
+    expect(DOC_TYPES).toContain('default_judgment_packet')
+    expect(DOC_TYPES).toHaveLength(7)
   })
 })

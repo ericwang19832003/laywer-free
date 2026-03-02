@@ -15,6 +15,7 @@ export const DOC_TYPES = [
   'general_denial',
   'amended_complaint',
   'motion_to_remand',
+  'default_judgment_packet',
 ] as const
 
 export const courtDocumentSchema = z.object({
