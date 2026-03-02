@@ -9,6 +9,10 @@ import {
   amendedComplaintFactsSchema,
   remandMotionFactsSchema,
 } from '@/lib/rules/removal-prompts'
+import {
+  buildDefaultJudgmentPrompt,
+  defaultJudgmentFactsSchema,
+} from '@/lib/rules/default-judgment-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 export const runtime = 'nodejs'
@@ -63,6 +67,16 @@ export async function POST(
       }
       prompt = buildRemandMotionPrompt(parsed.data)
       auditDocType = 'motion_to_remand'
+    } else if (documentType === 'default_judgment') {
+      const parsed = defaultJudgmentFactsSchema.safeParse(body.facts)
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Validation failed', details: parsed.error.issues },
+          { status: 422 }
+        )
+      }
+      prompt = buildDefaultJudgmentPrompt(parsed.data)
+      auditDocType = 'default_judgment'
     } else {
       // Original filing (petition/answer)
       const parsed = generateFilingRequestSchema.safeParse(body)
