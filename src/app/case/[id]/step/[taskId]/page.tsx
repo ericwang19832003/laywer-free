@@ -8,6 +8,7 @@ import { WaitForAnswerStep } from '@/components/step/wait-for-answer-step'
 import { CheckDocketForAnswerStep } from '@/components/step/check-docket-for-answer-step'
 import { PrepareFilingStep } from '@/components/step/prepare-filing-step'
 import { FileWithCourtStep } from '@/components/step/file-with-court-step'
+import { DiscoveryStarterPackStep } from '@/components/step/discovery-starter-pack-step'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -174,6 +175,21 @@ export default async function StepPage({
           taskId={taskId}
         />
       )
+    case 'discovery_starter_pack': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type')
+        .eq('id', id)
+        .single()
+
+      return (
+        <DiscoveryStarterPackStep
+          caseId={id}
+          taskId={taskId}
+          courtType={caseRow?.court_type ?? 'district'}
+        />
+      )
+    }
     default:
       return (
         <div className="max-w-2xl mx-auto px-4 py-8">
