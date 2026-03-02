@@ -7,6 +7,7 @@ import { ProgressCard } from '@/components/dashboard/progress-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
+import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
 
 interface DashboardData {
@@ -100,6 +101,38 @@ export default async function DashboardPage({
     }
   })
 
+  // Discovery card data
+  const { data: discoveryTaskRow } = await supabase
+    .from('tasks')
+    .select('id, status')
+    .eq('case_id', id)
+    .eq('task_key', 'discovery_starter_pack')
+    .maybeSingle()
+
+  let discoveryPackCount = 0
+  let discoveryServedCount = 0
+  let discoveryItemCount = 0
+
+  if (discoveryTaskRow?.status === 'completed') {
+    const { data: packs } = await supabase
+      .from('discovery_packs')
+      .select('id, status')
+      .eq('case_id', id)
+
+    const packList = packs ?? []
+    discoveryPackCount = packList.length
+    discoveryServedCount = packList.filter((p: { status: string }) => p.status === 'served').length
+
+    if (packList.length > 0) {
+      const { count } = await supabase
+        .from('discovery_items')
+        .select('id', { count: 'exact', head: true })
+        .in('pack_id', packList.map((p: { id: string }) => p.id))
+
+      discoveryItemCount = count ?? 0
+    }
+  }
+
   if (error || data === null) {
     return (
       <div className="min-h-screen bg-warm-bg">
@@ -133,6 +166,13 @@ export default async function DashboardPage({
             score30DaysAgo={score30dData}
           />
           <DeadlinesCard caseId={id} deadlines={dashboard.upcoming_deadlines} />
+          <DiscoveryCard
+            caseId={id}
+            discoveryTask={discoveryTaskRow}
+            packCount={discoveryPackCount}
+            servedCount={discoveryServedCount}
+            itemCount={discoveryItemCount}
+          />
           <ProgressCard tasksSummary={dashboard.tasks_summary} />
           <TimelineCard events={dashboard.recent_events} />
         </div>
