@@ -70,6 +70,17 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
     return null
   }, [])
 
+  function resetExtractionState() {
+    setExtractionId(null)
+    setExtractionWarning(null)
+    setIsGeneralDenial(false)
+    setAffirmativeDefenses('')
+    setHasCounterclaim(false)
+    setCounterclaimSummary('')
+    setKeyAdmissions('')
+    setKeyDenials('')
+  }
+
   function handleFileSelect(file: File) {
     const validationError = validateFile(file)
     if (validationError) {
@@ -80,6 +91,7 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
     setError(null)
     setSelectedFile(file)
     setUploadedDoc(null)
+    resetExtractionState()
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
