@@ -36,6 +36,29 @@ export async function runAndApplyGatekeeper(
     throw new Error(`Failed to load deadlines: ${dlError?.message}`)
   }
 
+  // Fetch discovery response deadline
+  const { data: discoveryDeadline } = await supabase
+    .from('deadlines')
+    .select('due_at')
+    .eq('case_id', caseId)
+    .eq('key', 'discovery_response_deadline')
+    .maybeSingle()
+
+  // Fetch trial date
+  const { data: trialDeadline } = await supabase
+    .from('deadlines')
+    .select('due_at')
+    .eq('case_id', caseId)
+    .eq('key', 'trial_date')
+    .maybeSingle()
+
+  // Fetch completed motion types
+  const { data: completedMotions } = await supabase
+    .from('motions')
+    .select('motion_type')
+    .eq('case_id', caseId)
+    .in('status', ['finalized', 'filed'])
+
   // Evaluate rules
   const actions = evaluateGatekeeperRules({
     tasks: tasks.map((t) => ({
@@ -52,6 +75,13 @@ export async function runAndApplyGatekeeper(
       source: d.source,
     })),
     now: effectiveNow,
+    discoveryResponseDue: discoveryDeadline?.due_at
+      ? new Date(discoveryDeadline.due_at)
+      : null,
+    trialDate: trialDeadline?.due_at
+      ? new Date(trialDeadline.due_at)
+      : null,
+    completedMotionTypes: completedMotions?.map((m) => m.motion_type) ?? [],
   })
 
   if (actions.length === 0) {

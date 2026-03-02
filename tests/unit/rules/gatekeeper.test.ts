@@ -406,4 +406,114 @@ describe('evaluateGatekeeperRules', () => {
       { type: 'unlock_task', task_key: 'discovery_starter_pack' },
     ])
   })
+
+  // ── Rule 16: motion to compel ──────────────────────────
+  describe('Rule 16 — motion to compel', () => {
+    it('unlocks motion_to_compel when discovery_starter_pack completed AND response overdue', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'completed'),
+          makeTask('motion_to_compel', 'locked'),
+        ],
+        discoveryResponseDue: new Date('2026-02-01'),
+        now: new Date('2026-02-15'), // after deadline
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).toContainEqual({ type: 'unlock_task', task_key: 'motion_to_compel' })
+    })
+
+    it('does NOT unlock when response deadline not yet passed', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'completed'),
+          makeTask('motion_to_compel', 'locked'),
+        ],
+        discoveryResponseDue: new Date('2026-03-01'),
+        now: new Date('2026-02-15'), // before deadline
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'motion_to_compel' }))
+    })
+
+    it('does NOT unlock when discovery_starter_pack not completed', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'todo'),
+          makeTask('motion_to_compel', 'locked'),
+        ],
+        discoveryResponseDue: new Date('2026-02-01'),
+        now: new Date('2026-02-15'),
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'motion_to_compel' }))
+    })
+
+    it('does NOT unlock when motion_to_compel already unlocked', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'completed'),
+          makeTask('motion_to_compel', 'todo'), // already unlocked
+        ],
+        discoveryResponseDue: new Date('2026-02-01'),
+        now: new Date('2026-02-15'),
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'motion_to_compel' }))
+    })
+  })
+
+  // ── Rule 17: trial prep checklist ──────────────────────
+  describe('Rule 17 — trial prep checklist', () => {
+    it('unlocks trial_prep_checklist when trial date within 60 days', () => {
+      const trialDate = new Date('2026-04-01')
+      const input = makeInput({
+        tasks: [makeTask('trial_prep_checklist', 'locked')],
+        trialDate,
+        now: new Date('2026-03-01'), // 31 days away
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).toContainEqual({ type: 'unlock_task', task_key: 'trial_prep_checklist' })
+    })
+
+    it('does NOT unlock when trial date >60 days away', () => {
+      const trialDate = new Date('2026-06-01')
+      const input = makeInput({
+        tasks: [makeTask('trial_prep_checklist', 'locked')],
+        trialDate,
+        now: new Date('2026-03-01'), // 92 days away
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'trial_prep_checklist' }))
+    })
+
+    it('does NOT unlock when no trial date set', () => {
+      const input = makeInput({
+        tasks: [makeTask('trial_prep_checklist', 'locked')],
+        now: new Date('2026-03-01'),
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'trial_prep_checklist' }))
+    })
+  })
+
+  // ── Rule 18: appellate brief ───────────────────────────
+  describe('Rule 18 — appellate brief', () => {
+    it('unlocks appellate_brief when notice_of_appeal in completedMotionTypes', () => {
+      const input = makeInput({
+        tasks: [makeTask('appellate_brief', 'locked')],
+        completedMotionTypes: ['notice_of_appeal'],
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).toContainEqual({ type: 'unlock_task', task_key: 'appellate_brief' })
+    })
+
+    it('does NOT unlock when notice_of_appeal not completed', () => {
+      const input = makeInput({
+        tasks: [makeTask('appellate_brief', 'locked')],
+        completedMotionTypes: [],
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'appellate_brief' }))
+    })
+  })
 })

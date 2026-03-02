@@ -27,6 +27,10 @@ export interface GatekeeperInput {
   tasks: GatekeeperTask[]
   deadlines: GatekeeperDeadline[]
   now: Date
+  // Motion builder fields
+  discoveryResponseDue?: Date | null
+  trialDate?: Date | null
+  completedMotionTypes?: string[]
 }
 
 export type GatekeeperAction =
@@ -166,6 +170,38 @@ export function evaluateGatekeeperRules(input: GatekeeperInput): GatekeeperActio
   // Rule 15: mandatory_disclosures → discovery_starter_pack (removal path)
   if (mandatoryDisclosuresTask?.status === 'completed' && discoveryTask?.status === 'locked') {
     actions.push({ type: 'unlock_task', task_key: 'discovery_starter_pack' })
+  }
+
+  // ── Motion Builder Rules ─────────────────────────────────
+
+  // Rule 16: motion to compel when discovery response overdue
+  const motionToCompel = findTask(tasks, 'motion_to_compel')
+  if (
+    discoveryTask?.status === 'completed' &&
+    motionToCompel?.status === 'locked' &&
+    input.discoveryResponseDue &&
+    input.now > input.discoveryResponseDue
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'motion_to_compel' })
+  }
+
+  // Rule 17: trial prep checklist when trial date within 60 days
+  const trialPrepChecklist = findTask(tasks, 'trial_prep_checklist')
+  if (
+    trialPrepChecklist?.status === 'locked' &&
+    input.trialDate &&
+    input.trialDate.getTime() - input.now.getTime() <= 60 * 24 * 60 * 60 * 1000
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'trial_prep_checklist' })
+  }
+
+  // Rule 18: appellate brief after notice of appeal completed
+  const appellateBrief = findTask(tasks, 'appellate_brief')
+  if (
+    appellateBrief?.status === 'locked' &&
+    input.completedMotionTypes?.includes('notice_of_appeal')
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'appellate_brief' })
   }
 
   return actions
