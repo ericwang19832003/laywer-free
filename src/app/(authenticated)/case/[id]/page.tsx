@@ -276,7 +276,7 @@ export default async function DashboardPage({
           )}
           <ProgressCard tasksSummary={dashboard!.tasks_summary} />
           <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
-          <TimelineCard events={dashboard!.recent_events} summary={timelineSummary} />
+          <TimelineCard caseId={id} events={dashboard!.recent_events} summary={timelineSummary} />
           <ShareCaseCard
             caseId={id}
             initialEnabled={shareData?.share_enabled ?? false}
