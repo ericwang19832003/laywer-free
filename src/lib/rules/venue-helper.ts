@@ -97,7 +97,25 @@ export function recommendVenue(input: {
         'Tex. Civ. Prac. & Rem. Code § 15.035'
       )
 
-    // Default: debt_collection, family, other, and anything else
+    case 'family': {
+      if (defendantCounty) {
+        return {
+          recommended_county: defendantCounty,
+          explanation: `File in ${defendantCounty} County. For divorce, you must have lived in this county for at least 90 days and in Texas for at least 6 months. For custody matters (SAPCR), file in the county where the children have lived for the past 6 months.`,
+          alternativeNote: incidentCounty && incidentCounty !== defendantCounty
+            ? `If your children primarily live in ${incidentCounty} County, you may need to file there for custody matters under § 103.001.`
+            : undefined,
+          rule_citation: 'Tex. Fam. Code § 6.301 (divorce); § 103.001 (SAPCR)',
+        }
+      }
+      return {
+        recommended_county: null,
+        explanation: 'For divorce, file in the county where you have lived for at least 90 days. For custody (SAPCR), file in the county where the child has lived for the past 6 months. For protective orders, file in the county where you or the respondent resides.',
+        rule_citation: 'Tex. Fam. Code § 6.301; § 103.001; § 82.003',
+      }
+    }
+
+    // Default: debt_collection, other, and anything else
     default: {
       if (defendantCounty) {
         return {

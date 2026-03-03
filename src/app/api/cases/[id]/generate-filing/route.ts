@@ -42,6 +42,28 @@ import {
   appellateBriefFactsSchema,
   buildAppellateBriefPrompt,
 } from '@/lib/motions/configs/appellate-brief'
+import { buildFamilyFilingPrompt } from '@/lib/rules/family-filing-prompts'
+import { familyFilingFactsSchema } from '@/lib/schemas/family-filing'
+import {
+  temporaryOrdersFactsSchema,
+  buildTemporaryOrdersPrompt,
+} from '@/lib/motions/configs/temporary-orders'
+import {
+  protectiveOrderFactsSchema,
+  buildProtectiveOrderPrompt,
+} from '@/lib/motions/configs/protective-order'
+import {
+  motionToModifyFactsSchema,
+  buildMotionToModifyPrompt,
+} from '@/lib/motions/configs/motion-to-modify'
+import {
+  motionForEnforcementFactsSchema,
+  buildMotionForEnforcementPrompt,
+} from '@/lib/motions/configs/motion-for-enforcement'
+import {
+  motionForMediationFactsSchema,
+  buildMotionForMediationPrompt,
+} from '@/lib/motions/configs/motion-for-mediation'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 /* ------------------------------------------------------------------ */
@@ -95,6 +117,56 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   appellate_brief: {
     schema: appellateBriefFactsSchema,
     buildPrompt: buildAppellateBriefPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Family filing types — all 7 sub-types use the same schema/prompt builder
+  family_divorce: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  family_custody: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  family_child_support: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  family_visitation: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  family_spousal_support: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  family_protective_order: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  family_modification: {
+    schema: familyFilingFactsSchema,
+    buildPrompt: buildFamilyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Family motions
+  temporary_orders: {
+    schema: temporaryOrdersFactsSchema,
+    buildPrompt: buildTemporaryOrdersPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  protective_order: {
+    schema: protectiveOrderFactsSchema,
+    buildPrompt: buildProtectiveOrderPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_to_modify: {
+    schema: motionToModifyFactsSchema,
+    buildPrompt: buildMotionToModifyPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_for_enforcement: {
+    schema: motionForEnforcementFactsSchema,
+    buildPrompt: buildMotionForEnforcementPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  motion_for_mediation: {
+    schema: motionForMediationFactsSchema,
+    buildPrompt: buildMotionForMediationPrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 

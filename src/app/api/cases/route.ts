@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, county, court_type, dispute_type } = parsed.data
+    const { role, county, court_type, dispute_type, family_sub_type } = parsed.data
 
     // Insert the case
     const { data: newCase, error: caseError } = await supabase!
@@ -37,6 +37,24 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create case', details: caseError.message },
         { status: 500 }
       )
+    }
+
+    // Insert family case details if this is a family case
+    if (family_sub_type) {
+      const { error: familyError } = await supabase!
+        .from('family_case_details')
+        .insert({
+          case_id: newCase.id,
+          family_sub_type,
+          domestic_violence_flag: family_sub_type === 'protective_order',
+        })
+
+      if (familyError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save family details', details: familyError.message },
+          { status: 500 }
+        )
+      }
     }
 
     // Fetch auto-created tasks (created by the seed_case_tasks trigger)

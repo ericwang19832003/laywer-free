@@ -23,6 +23,13 @@ import { EvidenceVaultStep } from '@/components/step/evidence-vault-step'
 import { DefaultPacketPrepStep } from '@/components/step/default-packet-prep-step'
 import { MotionBuilder } from '@/components/step/motion-builder'
 import { TrialPrepChecklistStep } from '@/components/step/trial-prep-checklist-step'
+import { FamilyIntakeStep } from '@/components/step/family/family-intake-step'
+import { SafetyScreeningStep } from '@/components/step/family/safety-screening-step'
+import { FamilyLawWizard } from '@/components/step/family-law-wizard'
+import { WaitingPeriodStep } from '@/components/step/family/waiting-period-step'
+import { TemporaryOrdersStep } from '@/components/step/family/temporary-orders-step'
+import { MediationStep } from '@/components/step/family/mediation-step'
+import { FinalOrdersStep } from '@/components/step/family/final-orders-step'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -395,6 +402,122 @@ export default async function StepPage({
       return <TrialPrepChecklistStep caseId={id} taskId={taskId} />
     case 'appellate_brief': {
       const config = MOTION_CONFIGS['appellate_brief']
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, role')
+        .eq('id', id)
+        .single()
+
+      return (
+        <MotionBuilder
+          config={config}
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
+        />
+      )
+    }
+    // Family law task chain steps
+    case 'family_intake':
+      return (
+        <FamilyIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'safety_screening':
+      return <SafetyScreeningStep caseId={id} taskId={taskId} />
+    case 'prepare_family_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('county')
+        .eq('id', id)
+        .single()
+
+      const { data: familyDetails } = await supabase
+        .from('family_case_details')
+        .select('*')
+        .eq('case_id', id)
+        .maybeSingle()
+
+      return (
+        <FamilyLawWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          familyDetails={familyDetails}
+          caseData={{ county: caseRow?.county ?? null }}
+        />
+      )
+    }
+    case 'waiting_period':
+      return <WaitingPeriodStep caseId={id} taskId={taskId} />
+    case 'temporary_orders':
+      return <TemporaryOrdersStep caseId={id} taskId={taskId} />
+    case 'mediation':
+      return <MediationStep caseId={id} taskId={taskId} />
+    case 'final_orders':
+      return <FinalOrdersStep caseId={id} taskId={taskId} />
+
+    // Family motions (filed from Motions page)
+    case 'protective_order': {
+      const config = MOTION_CONFIGS['protective_order']
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, role')
+        .eq('id', id)
+        .single()
+
+      return (
+        <MotionBuilder
+          config={config}
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
+        />
+      )
+    }
+    case 'motion_to_modify': {
+      const config = MOTION_CONFIGS['motion_to_modify']
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, role')
+        .eq('id', id)
+        .single()
+
+      return (
+        <MotionBuilder
+          config={config}
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
+        />
+      )
+    }
+    case 'motion_for_enforcement': {
+      const config = MOTION_CONFIGS['motion_for_enforcement']
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, role')
+        .eq('id', id)
+        .single()
+
+      return (
+        <MotionBuilder
+          config={config}
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
+        />
+      )
+    }
+    case 'motion_for_mediation': {
+      const config = MOTION_CONFIGS['motion_for_mediation']
       const { data: caseRow } = await supabase
         .from('cases')
         .select('court_type, county, role')

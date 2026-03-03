@@ -22,7 +22,7 @@ export interface FieldConfig {
   showWhen?: { field: string; value: unknown }
 }
 
-export type MotionCategory = 'discovery' | 'pretrial' | 'trial' | 'post_trial'
+export type MotionCategory = 'discovery' | 'pretrial' | 'trial' | 'post_trial' | 'family'
 
 export interface MotionConfig {
   key: string

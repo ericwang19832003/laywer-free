@@ -111,6 +111,72 @@ describe('recommendVenue', () => {
     expect(result.recommended_county).toBeNull()
     expect(result.explanation).toBe('We need at least one county to recommend where to file.')
   })
+
+  // -------------------------------------------------------------------------
+  // Family venue rules
+  // -------------------------------------------------------------------------
+  it('returns petitioner county with family domicile explanation', () => {
+    const result = recommendVenue({
+      disputeType: 'family',
+      defendantCounty: 'Travis',
+      incidentCounty: null,
+      propertyCounty: null,
+      contractCounty: null,
+    })
+    expect(result.recommended_county).toBe('Travis')
+    expect(result.explanation).toContain('90 days')
+    expect(result.explanation).toContain('6 months')
+    expect(result.rule_citation).toContain('Fam. Code')
+  })
+
+  it('includes SAPCR alternative when incident county differs', () => {
+    const result = recommendVenue({
+      disputeType: 'family',
+      defendantCounty: 'Harris',
+      incidentCounty: 'Dallas',
+      propertyCounty: null,
+      contractCounty: null,
+    })
+    expect(result.recommended_county).toBe('Harris')
+    expect(result.alternativeNote).toContain('Dallas County')
+    expect(result.alternativeNote).toContain('103.001')
+  })
+
+  it('returns null with guidance when no county provided for family', () => {
+    const result = recommendVenue({
+      disputeType: 'family',
+      defendantCounty: null,
+      incidentCounty: null,
+      propertyCounty: null,
+      contractCounty: null,
+    })
+    expect(result.recommended_county).toBeNull()
+    expect(result.explanation).toContain('divorce')
+    expect(result.explanation).toContain('custody')
+  })
+
+  it('cites Family Code not Civil Practice for family cases', () => {
+    const result = recommendVenue({
+      disputeType: 'family',
+      defendantCounty: 'Bexar',
+      incidentCounty: null,
+      propertyCounty: null,
+      contractCounty: null,
+    })
+    expect(result.rule_citation).not.toContain('Civ. Prac.')
+    expect(result.rule_citation).toContain('Fam. Code')
+  })
+
+  it('does not include SAPCR note when incident county matches defendant county', () => {
+    const result = recommendVenue({
+      disputeType: 'family',
+      defendantCounty: 'Travis',
+      incidentCounty: 'Travis',
+      propertyCounty: null,
+      contractCounty: null,
+    })
+    expect(result.alternativeNote).toBeUndefined()
+  })
 })
 
 // ---------------------------------------------------------------------------

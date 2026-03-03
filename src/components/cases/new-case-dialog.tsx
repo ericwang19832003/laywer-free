@@ -24,13 +24,20 @@ import { DisputeTypeStep } from './wizard/dispute-type-step'
 import { AmountStep } from './wizard/amount-step'
 import { CircumstancesStep } from './wizard/circumstances-step'
 import { RecommendationStep } from './wizard/recommendation-step'
+import {
+  FamilySubTypeStep,
+  type FamilySubType,
+} from './wizard/family-sub-type-step'
 
-const TOTAL_STEPS = 5
+function getTotalSteps(disputeType: DisputeType | ''): number {
+  return disputeType === 'family' ? 4 : 5
+}
 
 interface WizardState {
   step: number
   role: 'plaintiff' | 'defendant' | ''
   disputeType: DisputeType | ''
+  familySubType: FamilySubType | ''
   amount: AmountRange | ''
   circumstances: CircumstanceFlags
   county: string
@@ -39,6 +46,7 @@ interface WizardState {
 type WizardAction =
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
   | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
+  | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
   | { type: 'SET_AMOUNT'; amount: AmountRange }
   | { type: 'SET_CIRCUMSTANCES'; circumstances: CircumstanceFlags }
   | { type: 'SET_COUNTY'; county: string }
@@ -50,6 +58,7 @@ const initialState: WizardState = {
   step: 1,
   role: '',
   disputeType: '',
+  familySubType: '',
   amount: '',
   circumstances: {
     realProperty: false,
@@ -65,7 +74,15 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
     case 'SET_ROLE':
       return { ...state, role: action.role, step: 2 }
     case 'SET_DISPUTE_TYPE':
-      return { ...state, disputeType: action.disputeType, step: 3 }
+      // When switching away from family, clear the family sub-type
+      return {
+        ...state,
+        disputeType: action.disputeType,
+        familySubType: action.disputeType === 'family' ? state.familySubType : '',
+        step: 3,
+      }
+    case 'SET_FAMILY_SUB_TYPE':
+      return { ...state, familySubType: action.familySubType, step: 4 }
     case 'SET_AMOUNT':
       return { ...state, amount: action.amount, step: 4 }
     case 'SET_CIRCUMSTANCES':
@@ -73,7 +90,10 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
     case 'SET_COUNTY':
       return { ...state, county: action.county }
     case 'NEXT_STEP':
-      return { ...state, step: Math.min(state.step + 1, TOTAL_STEPS) }
+      return {
+        ...state,
+        step: Math.min(state.step + 1, getTotalSteps(state.disputeType)),
+      }
     case 'PREV_STEP':
       return { ...state, step: Math.max(state.step - 1, 1) }
     case 'RESET':
@@ -90,6 +110,9 @@ export function NewCaseDialog() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
+  const isFamily = state.disputeType === 'family'
+  const totalSteps = getTotalSteps(state.disputeType)
+
   async function handleAccept(courtOverride: string | null) {
     if (!state.role) return
 
@@ -98,13 +121,15 @@ export function NewCaseDialog() {
 
     const courtType =
       courtOverride ??
-      (state.disputeType && state.amount
-        ? recommendCourt({
-            disputeType: state.disputeType,
-            amount: state.amount,
-            circumstances: state.circumstances,
-          }).recommended
-        : 'unknown')
+      (isFamily
+        ? 'district'
+        : state.disputeType && state.amount
+          ? recommendCourt({
+              disputeType: state.disputeType,
+              amount: state.amount,
+              circumstances: state.circumstances,
+            }).recommended
+          : 'unknown')
 
     try {
       const supabase = createClient()
@@ -125,6 +150,9 @@ export function NewCaseDialog() {
           court_type: courtType,
           ...(state.disputeType ? { dispute_type: state.disputeType } : {}),
           ...(state.county.trim() ? { county: state.county.trim() } : {}),
+          ...(isFamily && state.familySubType
+            ? { family_sub_type: state.familySubType }
+            : {}),
         }),
       })
 
@@ -154,14 +182,22 @@ export function NewCaseDialog() {
     }
   }
 
-  const recommendation =
-    state.disputeType && state.amount
+  // Compute recommendation for civil (non-family) flow
+  const civilRecommendation =
+    !isFamily && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
         })
       : null
+
+  // Hardcoded recommendation for family flow
+  const familyRecommendation = {
+    recommended: 'district' as const,
+    reasoning: 'Family law cases are filed in District Court.',
+    confidence: 'high' as const,
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -180,7 +216,7 @@ export function NewCaseDialog() {
 
         <WizardProgress
           currentStep={state.step}
-          totalSteps={TOTAL_STEPS}
+          totalSteps={totalSteps}
           onBack={() => dispatch({ type: 'PREV_STEP' })}
         />
 
@@ -200,14 +236,33 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 3 && (
+        {state.step === 3 && isFamily && (
+          <FamilySubTypeStep
+            value={state.familySubType}
+            onSelect={(familySubType) =>
+              dispatch({ type: 'SET_FAMILY_SUB_TYPE', familySubType })
+            }
+          />
+        )}
+
+        {state.step === 3 && !isFamily && (
           <AmountStep
             value={state.amount}
             onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
           />
         )}
 
-        {state.step === 4 && (
+        {state.step === 4 && isFamily && (
+          <RecommendationStep
+            recommendation={familyRecommendation}
+            county={state.county}
+            onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
+            onAccept={handleAccept}
+            loading={loading}
+          />
+        )}
+
+        {state.step === 4 && !isFamily && (
           <CircumstancesStep
             value={state.circumstances}
             onChange={(circumstances) =>
@@ -217,9 +272,9 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 5 && recommendation && (
+        {state.step === 5 && !isFamily && civilRecommendation && (
           <RecommendationStep
-            recommendation={recommendation}
+            recommendation={civilRecommendation}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
