@@ -7,6 +7,7 @@ import { ProgressCard } from '@/components/dashboard/progress-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
+import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
@@ -171,6 +172,30 @@ export default async function DashboardPage({
     .eq('id', id)
     .single()
 
+  // AI cache fetches
+  const dashboard = data as DashboardData | null
+  const [taskDescResult, timelineSummaryResult, healthTipsResult, strategyResult] = await Promise.all([
+    // Task description for next task
+    dashboard?.next_task
+      ? supabase.from('tasks').select('metadata').eq('id', dashboard.next_task.id).single()
+      : Promise.resolve({ data: null }),
+    // Timeline summary cache
+    supabase.from('ai_cache').select('content').eq('case_id', id).eq('cache_key', 'timeline_summary').single(),
+    // Health tips cache
+    supabase.from('ai_cache').select('content').eq('case_id', id).eq('cache_key', 'health_tips').single(),
+    // Strategy cache
+    supabase.from('ai_cache').select('content, generated_at').eq('case_id', id).eq('cache_key', 'strategy').single(),
+  ])
+
+  const taskMeta = taskDescResult.data?.metadata as Record<string, unknown> | null
+  const taskDescription = (taskMeta?.ai_description as { description: string; importance: 'critical' | 'important' | 'helpful' } | undefined) ?? null
+
+  const timelineSummary = timelineSummaryResult.data?.content as { summary: string; key_milestones: string[] } | null
+
+  const aiTips = (healthTipsResult.data?.content as { tips: { tip: string; area: string }[] } | null)?.tips ?? null
+
+  const strategyRecs = (strategyResult.data?.content as { recommendations: { title: string; body: string; priority: string }[] } | null)?.recommendations ?? null
+
   if (error || data === null) {
     return (
       <div className="min-h-screen bg-warm-bg">
@@ -184,8 +209,6 @@ export default async function DashboardPage({
     )
   }
 
-  const dashboard = data as DashboardData
-
   return (
     <div className="min-h-screen bg-warm-bg">
       <main className="mx-auto max-w-2xl px-4 py-10">
@@ -196,14 +219,20 @@ export default async function DashboardPage({
 
         <div className="space-y-6">
           <PriorityAlertsSection caseId={id} alerts={alerts} />
-          <NextStepCard caseId={id} nextTask={dashboard.next_task} />
+          <NextStepCard caseId={id} nextTask={dashboard!.next_task} taskDescription={taskDescription} />
           <CaseHealthCard
             caseId={id}
             riskScore={riskScoreData}
             score7DaysAgo={score7dData}
             score30DaysAgo={score30dData}
+            aiTips={aiTips}
           />
-          <DeadlinesCard caseId={id} deadlines={dashboard.upcoming_deadlines} />
+          <StrategyCard
+            caseId={id}
+            recommendations={strategyRecs}
+            generatedAt={strategyResult.data?.generated_at ?? null}
+          />
+          <DeadlinesCard caseId={id} deadlines={dashboard!.upcoming_deadlines} />
           <DiscoveryCard
             caseId={id}
             discoveryTask={discoveryTaskRow}
@@ -245,9 +274,9 @@ export default async function DashboardPage({
               </CardContent>
             </Card>
           )}
-          <ProgressCard tasksSummary={dashboard.tasks_summary} />
+          <ProgressCard tasksSummary={dashboard!.tasks_summary} />
           <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
-          <TimelineCard events={dashboard.recent_events} />
+          <TimelineCard events={dashboard!.recent_events} summary={timelineSummary} />
           <ShareCaseCard
             caseId={id}
             initialEnabled={shareData?.share_enabled ?? false}

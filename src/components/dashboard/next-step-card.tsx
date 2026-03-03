@@ -12,9 +12,10 @@ interface NextStepCardProps {
     title: string
     status: string
   } | null
+  taskDescription?: { description: string; importance: 'critical' | 'important' | 'helpful' } | null
 }
 
-export function NextStepCard({ caseId, nextTask }: NextStepCardProps) {
+export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCardProps) {
   if (!nextTask) {
     return (
       <Card>
@@ -37,9 +38,27 @@ export function NextStepCard({ caseId, nextTask }: NextStepCardProps) {
       </CardHeader>
       <CardContent>
         <h3 className="text-lg font-semibold text-warm-text mb-1">{nextTask.title}</h3>
-        <p className="text-sm text-warm-muted mb-4">
-          This helps us organize your documents and timeline.
-        </p>
+        {taskDescription ? (
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                taskDescription.importance === 'critical'
+                  ? 'bg-red-100 text-red-700'
+                  : taskDescription.importance === 'important'
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
+                {taskDescription.importance === 'critical' ? 'Critical' :
+                 taskDescription.importance === 'important' ? 'Important' : 'Helpful'}
+              </span>
+            </div>
+            <p className="text-sm text-warm-muted">{taskDescription.description}</p>
+          </div>
+        ) : (
+          <p className="text-sm text-warm-muted mb-4">
+            This helps us organize your documents and timeline.
+          </p>
+        )}
         <Button asChild>
           <Link href={`/case/${caseId}/step/${nextTask.id}`}>
             Review &amp; Continue

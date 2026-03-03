@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon } from 'lucide-react'
+import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 
 // ── Types ──────────────────────────────────────────────
@@ -92,6 +92,10 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    suggested_category: string; relevance_note: string
+  } | null>(null)
+  const [categorizing, setCategorizing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Delete state
@@ -106,7 +110,10 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
     e.preventDefault()
     setDragOver(false)
     const dropped = e.dataTransfer.files[0]
-    if (dropped) setFile(dropped)
+    if (dropped) {
+      setFile(dropped)
+      suggestCategory(dropped)
+    }
   }, [])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -117,6 +124,28 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
   const handleDragLeave = useCallback(() => {
     setDragOver(false)
   }, [])
+
+  async function suggestCategory(selectedFile: File) {
+    setCategorizing(true)
+    setAiSuggestion(null)
+    try {
+      const res = await fetch(`/api/cases/${caseId}/evidence/categorize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_name: selectedFile.name, mime_type: selectedFile.type }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.suggestion) {
+          setAiSuggestion(data.suggestion)
+          if (!category) {
+            setCategory(data.suggestion.suggested_category)
+          }
+        }
+      }
+    } catch { /* silent */ }
+    setCategorizing(false)
+  }
 
   async function handleUpload() {
     if (!file) return
@@ -148,6 +177,7 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
       setCategory('')
       setNotes('')
       setCapturedAt('')
+      setAiSuggestion(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
@@ -276,7 +306,10 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
               className="hidden"
               onChange={(e) => {
                 const selected = e.target.files?.[0]
-                if (selected) setFile(selected)
+                if (selected) {
+                  setFile(selected)
+                  suggestCategory(selected)
+                }
               }}
             />
             <UploadIcon className="size-8 text-warm-muted mb-2" />
@@ -298,6 +331,19 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
               </div>
             )}
           </div>
+
+          {categorizing && (
+            <p className="text-xs text-warm-muted animate-pulse">Analyzing file...</p>
+          )}
+          {aiSuggestion && !categorizing && (
+            <div className="flex items-center gap-2 rounded-md bg-calm-indigo/10 px-3 py-2 text-sm">
+              <Sparkles className="h-4 w-4 text-calm-indigo" />
+              <span className="text-warm-muted">
+                Suggested: <strong className="text-warm-text">{aiSuggestion.suggested_category}</strong>
+                {' — '}{aiSuggestion.relevance_note}
+              </span>
+            </div>
+          )}
 
           {/* Category + Date row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

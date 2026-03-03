@@ -9,6 +9,7 @@ import {
   TrendingDownIcon,
   MinusIcon,
   RefreshCwIcon,
+  Lightbulb,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +39,7 @@ interface CaseHealthCardProps {
   riskScore: CaseRiskScore | null
   score7DaysAgo?: HistoricalScore | null
   score30DaysAgo?: HistoricalScore | null
+  aiTips?: { tip: string; area: string }[] | null
 }
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -73,6 +75,7 @@ export function CaseHealthCard({
   riskScore,
   score7DaysAgo,
   score30DaysAgo,
+  aiTips,
 }: CaseHealthCardProps) {
   const [recalculating, setRecalculating] = useState(false)
   const router = useRouter()
@@ -207,6 +210,24 @@ export function CaseHealthCard({
             </div>
           ))}
         </div>
+
+        {/* ── AI Tips ──────────────────────────────────────────── */}
+        {aiTips && aiTips.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-calm-amber" />
+              <span className="text-xs font-medium text-warm-muted">Tips</span>
+            </div>
+            <ul className="space-y-1.5">
+              {aiTips.map((item, i) => (
+                <li key={i} className="text-sm text-warm-muted flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-calm-amber shrink-0" />
+                  {item.tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* ── Actions ─────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-3">

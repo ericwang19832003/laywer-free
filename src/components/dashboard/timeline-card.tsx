@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Sparkles } from 'lucide-react'
 
 interface TimelineEvent {
   id: string
@@ -12,6 +13,7 @@ interface TimelineEvent {
 
 interface TimelineCardProps {
   events: TimelineEvent[]
+  summary?: { summary: string; key_milestones: string[] } | null
 }
 
 function relativeTime(dateStr: string): string {
@@ -94,13 +96,31 @@ function describeEvent(event: TimelineEvent): string {
   }
 }
 
-export function TimelineCard({ events }: TimelineCardProps) {
+export function TimelineCard({ events, summary }: TimelineCardProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg text-warm-text">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
+        {summary && (
+          <div className="mb-4 rounded-lg bg-calm-indigo/5 border border-calm-indigo/20 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-calm-indigo" />
+              <span className="text-xs font-medium text-calm-indigo">AI Summary</span>
+            </div>
+            <p className="text-sm text-warm-muted">{summary.summary}</p>
+            {summary.key_milestones.length > 0 && (
+              <ul className="text-xs text-warm-muted space-y-1">
+                {summary.key_milestones.map((m, i) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-calm-green mt-0.5">•</span> {m}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         {events.length === 0 ? (
           <p className="text-warm-muted text-sm">
             No activity yet. Complete your first step to see it here.
