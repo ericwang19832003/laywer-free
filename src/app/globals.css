@@ -104,3 +104,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print styles — hide chrome, show only document content */
+@media print {
+  nav,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: 'Times New Roman', Times, serif !important;
+  }
+
+  .max-w-4xl,
+  .max-w-2xl {
+    max-width: none !important;
+  }
+
+  @page {
+    margin: 1in;
+  }
+}
