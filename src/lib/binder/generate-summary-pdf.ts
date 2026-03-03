@@ -1,17 +1,15 @@
 import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from 'pdf-lib'
 
 // ── Layout constants ────────────────────────
-
 const PAGE_W = 612  // US Letter width (points)
 const PAGE_H = 792  // US Letter height
 const MARGIN = 72   // 1 inch
-
 const CONTENT_W = PAGE_W - MARGIN * 2  // 468pt usable
 
 const BODY_SIZE = 9
 const HEADER_SIZE = 10
-const LINE_HEIGHT = 14  // row line-height for body text
-const ROW_PAD = 4       // vertical padding between rows
+const LINE_HEIGHT = 14
+const ROW_PAD = 4
 
 // 5-column layout — widths sum to CONTENT_W (468)
 const COL = {
@@ -28,8 +26,6 @@ const LIGHT = rgb(0.45, 0.45, 0.45)
 const RULE  = rgb(0.82, 0.82, 0.82)
 
 // ── Text wrapping ───────────────────────────
-
-/** Break text into lines that fit within maxWidth at the given font/size */
 function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   if (!text) return ['']
   const words = text.split(/\s+/)
@@ -44,7 +40,6 @@ function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): 
       current = test
     } else {
       if (current) lines.push(current)
-      // If a single word is wider than the column, force it on its own line
       current = word
     }
   }
@@ -53,7 +48,6 @@ function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): 
 }
 
 // ── Types ───────────────────────────────────
-
 export interface ExhibitEntry {
   exhibit_no: string
   title: string
@@ -67,23 +61,47 @@ export interface SummaryPdfOptions {
   caseCounty: string | null
   caseRole: string
   generatedAt: string
+  partyNames?: { plaintiff: string; defendant: string }
+  causeNumber?: string
   exhibits: ExhibitEntry[]
   sections: string[]
 }
 
-// ── PDF Builder ─────────────────────────────
+// ── Section Divider ─────────────────────────
+function addDividerPage(doc: PDFDocument, sectionTitle: string, bold: PDFFont): void {
+  const page = doc.addPage([PAGE_W, PAGE_H])
+  const titleWidth = bold.widthOfTextAtSize(sectionTitle.toUpperCase(), 24)
+  page.drawText(sectionTitle.toUpperCase(), {
+    x: (PAGE_W - titleWidth) / 2,
+    y: PAGE_H / 2 + 12,
+    size: 24,
+    font: bold,
+    color: DARK,
+  })
+  // Centered rule below title
+  const ruleW = Math.min(titleWidth + 60, CONTENT_W)
+  page.drawLine({
+    start: { x: (PAGE_W - ruleW) / 2, y: PAGE_H / 2 - 4 },
+    end: { x: (PAGE_W + ruleW) / 2, y: PAGE_H / 2 - 4 },
+    thickness: 0.75,
+    color: RULE,
+  })
+}
 
+// ── PDF Builder ─────────────────────────────
 export async function generateSummaryPdf(opts: SummaryPdfOptions): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
   const regular = await doc.embedFont(StandardFonts.Helvetica)
   const bold = await doc.embedFont(StandardFonts.HelveticaBold)
 
+  // We build: cover → TOC placeholder → (divider + content) per section
+  // Then go back and fill in TOC with real page numbers
+
   // ── Cover page ──
-
   const cover = doc.addPage([PAGE_W, PAGE_H])
-  let y = PAGE_H - 220
+  let y = PAGE_H - 200
 
-  // Title (wrap if very long)
+  // Title
   const titleLines = wrapText(opts.title, bold, 26, CONTENT_W)
   for (const line of titleLines) {
     cover.drawText(line, { x: MARGIN, y, size: 26, font: bold, color: DARK })
@@ -100,49 +118,106 @@ export async function generateSummaryPdf(opts: SummaryPdfOptions): Promise<Uint8
   })
   y -= 16
 
-  const metaLines = [
-    opts.caseCounty ? `County: ${opts.caseCounty}` : null,
-    `Role: ${opts.caseRole.charAt(0).toUpperCase() + opts.caseRole.slice(1)}`,
-    `Generated: ${opts.generatedAt}`,
-    `Exhibits: ${opts.exhibits.length}`,
-  ].filter(Boolean) as string[]
+  // Metadata lines
+  const metaLines: string[] = []
+  if (opts.causeNumber) metaLines.push(`Cause No. ${opts.causeNumber}`)
+  if (opts.partyNames) {
+    metaLines.push(`Plaintiff: ${opts.partyNames.plaintiff}`)
+    metaLines.push(`Defendant: ${opts.partyNames.defendant}`)
+  }
+  if (opts.caseCounty) metaLines.push(`County: ${opts.caseCounty}`)
+  metaLines.push(`Role: ${opts.caseRole.charAt(0).toUpperCase() + opts.caseRole.slice(1)}`)
+  metaLines.push(`Generated: ${opts.generatedAt}`)
+  metaLines.push(`Exhibits: ${opts.exhibits.length}`)
 
   for (const line of metaLines) {
     cover.drawText(line, { x: MARGIN, y, size: 12, font: regular, color: MID })
     y -= 22
   }
 
-  // ── Table of Contents ──
-
+  // ── TOC page (placeholder — we'll fill page numbers after building all sections) ──
   const tocPage = doc.addPage([PAGE_W, PAGE_H])
-  y = PAGE_H - MARGIN
+  // TOC is page index 1 (0-based)
 
+  // Track section → page number mapping
+  const sectionPageNumbers: number[] = []
+
+  // ── Build sections with dividers ──
+  for (const section of opts.sections) {
+    // Divider page for this section
+    addDividerPage(doc, section, bold)
+    // Record the page number of the divider (1-based for display)
+    sectionPageNumbers.push(doc.getPageCount())
+
+    // If this section is "Exhibit Index", render the exhibit content after the divider
+    if (section.toLowerCase() === 'exhibit index') {
+      buildExhibitIndex(doc, opts.exhibits, regular, bold)
+    }
+  }
+
+  // ── Fill in TOC with real page numbers ──
+  y = PAGE_H - MARGIN
   tocPage.drawText('Table of Contents', { x: MARGIN, y, size: 18, font: bold, color: DARK })
   y -= 36
 
-  for (const section of opts.sections) {
-    tocPage.drawText(`•  ${section}`, { x: MARGIN + 8, y, size: 11, font: regular, color: MID })
+  for (let i = 0; i < opts.sections.length; i++) {
+    const label = opts.sections[i]
+    const pageNum = sectionPageNumbers[i]
+
+    // Section name on the left
+    tocPage.drawText(label, { x: MARGIN + 8, y, size: 11, font: regular, color: MID })
+
+    // Page number on the right
+    const numStr = String(pageNum)
+    const numWidth = regular.widthOfTextAtSize(numStr, 11)
+    tocPage.drawText(numStr, {
+      x: PAGE_W - MARGIN - numWidth,
+      y,
+      size: 11,
+      font: regular,
+      color: MID,
+    })
+
+    // Dot leader between name and number
+    const nameWidth = regular.widthOfTextAtSize(label, 11)
+    const dotStart = MARGIN + 8 + nameWidth + 8
+    const dotEnd = PAGE_W - MARGIN - numWidth - 8
+    if (dotEnd > dotStart) {
+      const dot = '.'
+      const dotWidth = regular.widthOfTextAtSize('. ', 11)
+      let dx = dotStart
+      while (dx < dotEnd) {
+        tocPage.drawText(dot, { x: dx, y, size: 11, font: regular, color: RULE })
+        dx += dotWidth
+      }
+    }
+
     y -= 22
   }
 
-  // ── Exhibit Index (multi-page) ──
+  return doc.save()
+}
 
+// ── Exhibit Index Builder (extracted from inline) ──
+function buildExhibitIndex(
+  doc: PDFDocument,
+  exhibits: ExhibitEntry[],
+  regular: PDFFont,
+  bold: PDFFont
+): void {
   let page: PDFPage = doc.addPage([PAGE_W, PAGE_H])
-  y = PAGE_H - MARGIN
+  let y = PAGE_H - MARGIN
 
-  /** Start a new index page with header row */
   function newIndexPage(): void {
     page = doc.addPage([PAGE_W, PAGE_H])
     y = PAGE_H - MARGIN
     drawIndexHeader()
   }
 
-  /** Draw the column headers + rule */
   function drawIndexHeader(): void {
     page.drawText('Exhibit Index', { x: MARGIN, y, size: 16, font: bold, color: DARK })
     y -= 28
 
-    // Column headers
     page.drawText('No.',      { x: COL.no.x,       y, size: HEADER_SIZE, font: bold, color: DARK })
     page.drawText('Title',    { x: COL.title.x,    y, size: HEADER_SIZE, font: bold, color: DARK })
     page.drawText('File',     { x: COL.file.x,     y, size: HEADER_SIZE, font: bold, color: DARK })
@@ -150,7 +225,6 @@ export async function generateSummaryPdf(opts: SummaryPdfOptions): Promise<Uint8
     page.drawText('Notes',    { x: COL.notes.x,    y, size: HEADER_SIZE, font: bold, color: DARK })
     y -= 4
 
-    // Header underline
     page.drawLine({
       start: { x: MARGIN, y },
       end: { x: PAGE_W - MARGIN, y },
@@ -160,68 +234,57 @@ export async function generateSummaryPdf(opts: SummaryPdfOptions): Promise<Uint8
     y -= LINE_HEIGHT
   }
 
+  if (exhibits.length === 0) {
+    drawIndexHeader()
+    y -= 12
+    page.drawText('No exhibits', { x: MARGIN + 8, y, size: BODY_SIZE, font: regular, color: LIGHT })
+    return
+  }
+
   drawIndexHeader()
 
-  for (const ex of opts.exhibits) {
-    // Pre-compute wrapped lines for each column
+  for (const ex of exhibits) {
     const titleLines = wrapText(ex.title || '—', regular, BODY_SIZE, COL.title.w - 4)
     const fileLines = wrapText(ex.file_name || '—', regular, BODY_SIZE, COL.file.w - 4)
     const notesLines = wrapText(ex.notes || '', regular, BODY_SIZE, COL.notes.w - 4)
     const categoryText = ex.category || '—'
 
-    // Row height = tallest column
     const maxLines = Math.max(titleLines.length, fileLines.length, notesLines.length, 1)
     const rowHeight = maxLines * LINE_HEIGHT + ROW_PAD
 
-    // Page break if needed
     if (y - rowHeight < MARGIN) {
       newIndexPage()
     }
 
     const rowTop = y
 
-    // No. (single line, top-aligned)
     page.drawText(ex.exhibit_no, { x: COL.no.x, y: rowTop, size: BODY_SIZE, font: bold, color: MID })
 
-    // Title (wrapped)
     for (let i = 0; i < titleLines.length; i++) {
       page.drawText(titleLines[i], {
-        x: COL.title.x,
-        y: rowTop - i * LINE_HEIGHT,
-        size: BODY_SIZE,
-        font: regular,
-        color: MID,
+        x: COL.title.x, y: rowTop - i * LINE_HEIGHT,
+        size: BODY_SIZE, font: regular, color: MID,
       })
     }
 
-    // File (wrapped)
     for (let i = 0; i < fileLines.length; i++) {
       page.drawText(fileLines[i], {
-        x: COL.file.x,
-        y: rowTop - i * LINE_HEIGHT,
-        size: BODY_SIZE,
-        font: regular,
-        color: LIGHT,
+        x: COL.file.x, y: rowTop - i * LINE_HEIGHT,
+        size: BODY_SIZE, font: regular, color: LIGHT,
       })
     }
 
-    // Category (single line)
     page.drawText(categoryText, { x: COL.category.x, y: rowTop, size: BODY_SIZE, font: regular, color: MID })
 
-    // Notes (wrapped)
     for (let i = 0; i < notesLines.length; i++) {
       page.drawText(notesLines[i], {
-        x: COL.notes.x,
-        y: rowTop - i * LINE_HEIGHT,
-        size: BODY_SIZE,
-        font: regular,
-        color: LIGHT,
+        x: COL.notes.x, y: rowTop - i * LINE_HEIGHT,
+        size: BODY_SIZE, font: regular, color: LIGHT,
       })
     }
 
     y -= rowHeight
 
-    // Row separator
     page.drawLine({
       start: { x: MARGIN, y: y + ROW_PAD / 2 },
       end: { x: PAGE_W - MARGIN, y: y + ROW_PAD / 2 },
@@ -229,6 +292,4 @@ export async function generateSummaryPdf(opts: SummaryPdfOptions): Promise<Uint8
       color: RULE,
     })
   }
-
-  return doc.save()
 }

@@ -14,12 +14,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import {
   Loader2Icon,
   CheckCircleIcon,
   FlagIcon,
   ShieldCheckIcon,
   FileTextIcon,
+  MailIcon,
 } from 'lucide-react'
 import { OBJECTION_LABELS } from '@/lib/schemas/objection-classification'
 import type { ObjectionLabel } from '@/lib/schemas/objection-classification'
@@ -143,6 +145,10 @@ export function ObjectionReviewEditor({ caseId, packId, review, initialItems }: 
   const [draftId, setDraftId] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [recipientEmail, setRecipientEmail] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sentAt, setSentAt] = useState<string | null>(null)
+  const [draftStatus, setDraftStatus] = useState<string>('draft')
 
   const followUpItems = items.filter((i) => i.follow_up_flag)
 
@@ -232,6 +238,33 @@ export function ObjectionReviewEditor({ caseId, packId, review, initialItems }: 
     }
   }, [review.id, router])
 
+  const handleSendDraft = useCallback(async () => {
+    if (!draftId || !recipientEmail) return
+    setSending(true)
+    setError(null)
+
+    try {
+      const res = await fetch(`/api/objections/reviews/${review.id}/meet-and-confer/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draft_id: draftId, recipient_email: recipientEmail }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? 'Failed to send email')
+      }
+
+      setSentAt(new Date().toISOString())
+      setDraftStatus('sent')
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setSending(false)
+    }
+  }, [draftId, recipientEmail, review.id, router])
+
   // ── Already confirmed ──────────────────────────
 
   if (confirmed) {
@@ -246,31 +279,52 @@ export function ObjectionReviewEditor({ caseId, packId, review, initialItems }: 
           </div>
         </div>
 
+        {review.model && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-warm-muted">
+            <span>Classified by AI on {new Date(review.created_at).toLocaleDateString()}</span>
+          </div>
+        )}
+
         {/* Read-only item summary */}
         <div className="space-y-3">
-          {items.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="pt-4 pb-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-warm-text">{itemTitle(item)}</p>
-                  {item.follow_up_flag && (
-                    <Badge variant="outline" className="text-xs shrink-0 border-calm-amber/30 text-calm-amber">
-                      <FlagIcon className="mr-1 size-3" />
-                      Follow up
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {item.labels.map((label) => (
-                    <Badge key={label} variant="secondary" className="text-xs">
-                      {LABEL_DISPLAY[label] ?? label}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-sm text-warm-muted">{item.neutral_summary}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {items.map((item) => {
+            const conf = confidenceLevel(item.confidence)
+            return (
+              <Card key={item.id}>
+                <CardContent className="pt-4 pb-4 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p className="text-sm font-medium text-warm-text">{itemTitle(item)}</p>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs shrink-0 ${
+                          conf.label === 'High' ? 'border-calm-green/30 text-calm-green' :
+                          conf.label === 'Medium' ? 'border-calm-amber/30 text-calm-amber' :
+                          'border-warm-border text-warm-muted'
+                        }`}
+                      >
+                        {conf.label}
+                      </Badge>
+                    </div>
+                    {item.follow_up_flag && (
+                      <Badge variant="outline" className="text-xs shrink-0 border-calm-amber/30 text-calm-amber">
+                        <FlagIcon className="mr-1 size-3" />
+                        Follow up
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {item.labels.map((label) => (
+                      <Badge key={label} variant="secondary" className="text-xs">
+                        {LABEL_DISPLAY[label] ?? label}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-sm text-warm-muted">{item.neutral_summary}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
 
         {/* Error banner */}
@@ -312,19 +366,63 @@ export function ObjectionReviewEditor({ caseId, packId, review, initialItems }: 
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
           <DialogContent className="max-h-[85vh] flex flex-col sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Meet-and-confer note</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                Meet-and-confer note
+                {draftStatus === 'sent' && (
+                  <Badge variant="secondary" className="text-xs bg-calm-green/10 text-calm-green border-calm-green/30">
+                    Sent
+                  </Badge>
+                )}
+              </DialogTitle>
               <DialogDescription>
-                Review the draft below. You can copy it or come back to it later.
+                {sentAt
+                  ? `Previously sent on ${new Date(sentAt).toLocaleDateString()}`
+                  : 'Edit the draft below, add a recipient, and send via email.'}
               </DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <pre className="whitespace-pre-wrap text-sm text-warm-text font-sans leading-relaxed">
-                {draftPreview}
-              </pre>
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
+              <Textarea
+                value={draftPreview ?? ''}
+                onChange={(e) => setDraftPreview(e.target.value)}
+                rows={12}
+                disabled={draftStatus === 'sent'}
+                className="text-sm font-sans leading-relaxed resize-none"
+              />
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-warm-muted">Recipient Email</label>
+                <Input
+                  type="email"
+                  placeholder="opposing.counsel@example.com"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  disabled={draftStatus === 'sent'}
+                />
+              </div>
             </div>
-            <p className="text-xs text-warm-muted text-center pt-2 border-t border-warm-border">
-              For reference only. This is not legal advice.
-            </p>
+            <div className="flex items-center justify-between pt-2 border-t border-warm-border">
+              <p className="text-xs text-warm-muted">
+                For reference only. This is not legal advice.
+              </p>
+              <Button
+                size="sm"
+                onClick={handleSendDraft}
+                disabled={sending || !recipientEmail || draftStatus === 'sent'}
+              >
+                {sending ? (
+                  <>
+                    <Loader2Icon className="mr-1.5 size-3.5 animate-spin" />
+                    Sending…
+                  </>
+                ) : draftStatus === 'sent' ? (
+                  'Already Sent'
+                ) : (
+                  <>
+                    <MailIcon className="mr-1.5 size-3.5" />
+                    Send via Email
+                  </>
+                )}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
