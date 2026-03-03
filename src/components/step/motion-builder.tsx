@@ -55,11 +55,10 @@ export function MotionBuilder({
     const initial: Record<string, unknown> = {}
 
     // 1. Hydrate from existingMetadata (resume path)
+    //    Hydrate ALL keys (not just config.fields) so party data, draft_text, etc. persist
     if (existingMetadata) {
-      for (const field of config.fields) {
-        if (existingMetadata[field.key] !== undefined) {
-          initial[field.key] = existingMetadata[field.key]
-        }
+      for (const [key, val] of Object.entries(existingMetadata)) {
+        if (val !== undefined) initial[key] = val
       }
     }
 
@@ -71,7 +70,11 @@ export function MotionBuilder({
         initial.county = caseData.county
     }
 
-    // 3. Ensure dynamic-list fields default to one empty row
+    // 3. Default party fields (required by all motion schemas)
+    if (!initial.your_info) initial.your_info = { ...EMPTY_PARTY }
+    if (!initial.opposing_parties) initial.opposing_parties = [{ ...EMPTY_PARTY }]
+
+    // 4. Ensure dynamic-list fields default to one empty row
     for (const field of config.fields) {
       if (field.type === 'dynamic-list' && !initial[field.key]) {
         const emptyRow: Record<string, unknown> = {}
@@ -82,7 +85,6 @@ export function MotionBuilder({
       }
       // Ensure party-picker defaults
       if (field.type === 'party-picker' && !initial[field.key]) {
-        // Convention: keys ending with "parties" are arrays; others are single
         if (field.key.includes('parties')) {
           initial[field.key] = [{ ...EMPTY_PARTY }]
         } else {
@@ -414,7 +416,7 @@ export function MotionBuilder({
               onChange={(e) =>
                 updateField(
                   field.key,
-                  e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                  e.target.value === '' ? undefined : parseFloat(e.target.value) || 0
                 )
               }
               placeholder={field.placeholder}
@@ -781,6 +783,41 @@ export function MotionBuilder({
             </p>
           </div>
         )}
+        {/* Auto-rendered party fields (required by all motion schemas) */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-warm-text">Your Information</h3>
+          {renderPartyFields('your_info', getSingleParty('your_info'), null)}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-warm-text">Opposing Party</h3>
+          {getPartyArray('opposing_parties').map((party, idx) => (
+            <div key={idx} className="space-y-3">
+              {idx > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-warm-muted">Party {idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeParty('opposing_parties', idx)}
+                    className="text-xs text-warm-muted hover:text-warm-text"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {renderPartyFields('opposing_parties', party, idx)}
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => addParty('opposing_parties')}
+          >
+            + Add another party
+          </Button>
+        </div>
+
         {renderSections()}
       </div>
     </StepRunner>
