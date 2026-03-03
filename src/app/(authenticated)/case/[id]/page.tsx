@@ -8,6 +8,8 @@ import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
+import { NotesCard } from '@/components/dashboard/notes-card'
+import { ShareCaseCard } from '@/components/dashboard/share-case-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -153,6 +155,22 @@ export default async function DashboardPage({
 
   const hasMotionActivity = motionTasks.some(t => t.status !== 'locked') || (motionsCount ?? 0) > 0
 
+  // Case notes
+  const { data: caseNotes } = await supabase
+    .from('case_notes')
+    .select('id, content, pinned, created_at, updated_at')
+    .eq('case_id', id)
+    .order('pinned', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  // Share data
+  const { data: shareData } = await supabase
+    .from('cases')
+    .select('share_token, share_enabled')
+    .eq('id', id)
+    .single()
+
   if (error || data === null) {
     return (
       <div className="min-h-screen bg-warm-bg">
@@ -228,7 +246,13 @@ export default async function DashboardPage({
             </Card>
           )}
           <ProgressCard tasksSummary={dashboard.tasks_summary} />
+          <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
           <TimelineCard events={dashboard.recent_events} />
+          <ShareCaseCard
+            caseId={id}
+            initialEnabled={shareData?.share_enabled ?? false}
+            initialToken={shareData?.share_token ?? null}
+          />
         </div>
 
         <LegalDisclaimer />

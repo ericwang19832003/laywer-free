@@ -8,7 +8,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
+
+type NotificationPrefs = {
+  deadline_approaching: boolean
+  task_unlocked: boolean
+  escalation_triggered: boolean
+}
+
+const DEFAULT_PREFS: NotificationPrefs = {
+  deadline_approaching: true,
+  task_unlocked: true,
+  escalation_triggered: true,
+}
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -19,6 +39,17 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [savingProfile, setSavingProfile] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+
+  // Notification preferences
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS)
+
+  // Data export
+  const [exporting, setExporting] = useState(false)
+
+  // Delete account
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   function getSupabase() {
     if (!supabaseRef.current) {
@@ -32,6 +63,14 @@ export default function SettingsPage() {
       if (data.user) {
         setEmail(data.user.email ?? '')
         setDisplayName(data.user.user_metadata?.display_name ?? '')
+        const prefs = data.user.user_metadata?.notification_prefs
+        if (prefs) {
+          setNotificationPrefs({
+            deadline_approaching: prefs.deadline_approaching ?? true,
+            task_unlocked: prefs.task_unlocked ?? true,
+            escalation_triggered: prefs.escalation_triggered ?? true,
+          })
+        }
       }
     })
   }, [])
@@ -76,6 +115,70 @@ export default function SettingsPage() {
     await getSupabase().auth.signOut()
     router.push('/login')
     router.refresh()
+  }
+
+  async function handleNotificationPrefChange(type: keyof NotificationPrefs, checked: boolean) {
+    const updatedPrefs = { ...notificationPrefs, [type]: checked }
+    setNotificationPrefs(updatedPrefs)
+    const { error } = await getSupabase().auth.updateUser({
+      data: { notification_prefs: updatedPrefs },
+    })
+    if (error) {
+      // Revert on failure
+      setNotificationPrefs(notificationPrefs)
+      toast.error('Failed to update notification preferences')
+    } else {
+      toast.success('Notification preferences updated')
+    }
+  }
+
+  async function handleExport() {
+    setExporting(true)
+    try {
+      const res = await fetch('/api/account/export')
+      if (!res.ok) {
+        throw new Error('Export failed')
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `lawyer-free-export-${new Date().toISOString().slice(0, 10)}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Data exported successfully')
+    } catch {
+      toast.error('Failed to export data')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmation !== 'DELETE') return
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: 'DELETE' }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to delete account')
+      }
+      toast.success('Account deleted')
+      router.push('/login')
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete account')
+    } finally {
+      setDeleting(false)
+      setShowDeleteDialog(false)
+      setDeleteConfirmation('')
+    }
   }
 
   return (
@@ -151,8 +254,110 @@ export default function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Notification Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Notification Preferences</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {([
+                { key: 'deadline_approaching' as const, label: 'Deadline reminders' },
+                { key: 'task_unlocked' as const, label: 'Task unlocked' },
+                { key: 'escalation_triggered' as const, label: 'Escalation alerts' },
+              ]).map(({ key, label }) => (
+                <label key={key} className="flex items-center justify-between cursor-pointer">
+                  <span className="text-sm text-warm-text">{label}</span>
+                  <input
+                    type="checkbox"
+                    checked={notificationPrefs[key]}
+                    className="h-4 w-4 rounded border-warm-border accent-calm-indigo"
+                    onChange={(e) => handleNotificationPrefChange(key, e.target.checked)}
+                  />
+                </label>
+              ))}
+              <p className="text-xs text-warm-muted">Controls which in-app notifications you receive.</p>
+            </CardContent>
+          </Card>
+
+          {/* Data Export */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Your Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-warm-muted mb-3">
+                Download all your case data as a JSON file. This includes cases, tasks, deadlines, notes, and activity history.
+              </p>
+              <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+                {exporting ? 'Preparing...' : 'Export My Data'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Danger Zone */}
+          <Card className="border-red-200">
+            <CardHeader>
+              <CardTitle className="text-base text-red-600">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-warm-muted">
+                Permanently delete your account and all associated data. This cannot be undone.
+              </p>
+              <Button
+                variant="outline"
+                className="border-red-200 text-red-600 hover:bg-red-50"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                Delete Account
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>
+              This action is permanent and cannot be undone. All your cases, documents, tasks, deadlines, and other data will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="deleteConfirmation">
+              Type <span className="font-mono font-bold text-red-600">DELETE</span> to confirm
+            </Label>
+            <Input
+              id="deleteConfirmation"
+              value={deleteConfirmation}
+              onChange={(e) => setDeleteConfirmation(e.target.value)}
+              placeholder="Type DELETE"
+              autoComplete="off"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setDeleteConfirmation('')
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              className="border-red-200 bg-red-600 text-white hover:bg-red-700"
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmation !== 'DELETE' || deleting}
+            >
+              {deleting ? 'Deleting...' : 'Permanently Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

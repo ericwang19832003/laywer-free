@@ -124,6 +124,36 @@ export async function GET(request: NextRequest) {
     console.error('Failed to insert escalation audit events:', auditError.message)
   }
 
+  // 8. Insert in-app notifications for each triggered escalation
+  if (actions.length > 0) {
+    const notifCaseIds = [...new Set(actions.map(a => a.case_id))]
+    const { data: caseUsers } = await supabase
+      .from('cases')
+      .select('id, user_id')
+      .in('id', notifCaseIds)
+
+    const userMap = new Map((caseUsers ?? []).map(c => [c.id, c.user_id]))
+
+    const notificationRows = actions
+      .map(a => {
+        const userId = userMap.get(a.case_id)
+        if (!userId) return null
+        return {
+          user_id: userId,
+          case_id: a.case_id,
+          type: 'escalation_triggered' as const,
+          title: a.escalation_level >= 3 ? 'Urgent Deadline Alert' : 'Deadline Reminder',
+          body: a.message,
+          link: `/case/${a.case_id}/deadlines`,
+        }
+      })
+      .filter(Boolean)
+
+    if (notificationRows.length > 0) {
+      await supabase.from('notifications').insert(notificationRows)
+    }
+  }
+
   return NextResponse.json({
     triggered: actions.length,
     escalations: actions.map((a) => ({
