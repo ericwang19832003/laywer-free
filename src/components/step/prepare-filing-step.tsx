@@ -85,6 +85,7 @@ export function PrepareFilingStep({
       counterclaim_details: isDefendant && hasCounterclaim ? counterclaimDetails || undefined : undefined,
       role: caseData.role as 'plaintiff' | 'defendant',
       dispute_type: caseData.dispute_type ?? undefined,
+      government_entity: false,
     }
   }
 

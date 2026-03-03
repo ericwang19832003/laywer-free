@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { StepRunner } from './step-runner'
 import { FilingChecklistComponent } from './filing/filing-checklist'
+import { ServiceGuide } from './filing/service-guide'
+import { FAQAccordion } from '@/components/ui/faq-accordion'
 import { FilingFeeCard } from './filing/filing-fee-card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +20,29 @@ interface FileWithCourtStepProps {
     county: string | null
   }
 }
+
+const FILING_FAQ = [
+  {
+    question: "Do I need a lawyer to file?",
+    answer: "No. Anyone can represent themselves in court. This is called filing 'pro se.' This tool helps you format documents, but it is not a substitute for legal advice."
+  },
+  {
+    question: "How much does it cost to file?",
+    answer: "Filing fees vary by court: JP Court ($35-$75), County Court ($200-$300), District Court ($250-$350), Federal Court ($405). If you cannot afford it, you can apply for a fee waiver."
+  },
+  {
+    question: "What if I make a mistake?",
+    answer: "You can amend (fix) your petition after filing. Courts are generally lenient with pro se filers. It is better to file and correct later than to wait."
+  },
+  {
+    question: "How long does a case take?",
+    answer: "Small claims (JP Court) typically resolve in 1-3 months. County/District Court cases can take 6-18 months. Federal cases often take 1-2 years."
+  },
+  {
+    question: "What happens after I file?",
+    answer: "You will need to 'serve' (deliver) the papers to the other party. They then have a deadline to respond. We will guide you through each step."
+  },
+]
 
 const DEFAULT_CHECKLIST: FilingChecklist = {
   account_created: false,
@@ -118,6 +143,15 @@ export function FileWithCourtStep({
             Complete all checklist items to finish this step.
           </p>
         )}
+
+        <div className="mt-8 pt-6 border-t border-warm-border">
+          <h2 className="text-sm font-semibold text-warm-text mb-4">After Filing: Serve the Other Party</h2>
+          <ServiceGuide courtType={caseData.court_type} county={caseData.county} />
+        </div>
+
+        <div className="mt-6">
+          <FAQAccordion items={FILING_FAQ} />
+        </div>
       </div>
     </StepRunner>
   )

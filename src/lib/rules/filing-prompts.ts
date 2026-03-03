@@ -67,6 +67,20 @@ function getDocumentFormat(courtType: string, role: string, isGeneralDenial?: bo
 export function buildFilingPrompt(facts: FilingFacts): FilingPrompt {
   const format = getDocumentFormat(facts.court_type, facts.role, facts.is_general_denial)
 
+  let governmentAddendum = ''
+  if (facts.government_entity) {
+    governmentAddendum = `
+
+GOVERNMENT ENTITY NOTICE:
+One or more defendants are government entities. You MUST include:
+- Reference to the Texas Tort Claims Act (Tex. Civ. Prac. & Rem. Code Ch. 101) if the claim involves personal injury, property damage, or wrongful death
+- A statement that proper notice was provided under § 101.101 (notice must be given within 6 months of the incident)
+- Note that sovereign immunity may limit available damages to actual damages only
+- Do NOT include punitive damages claims against government entities
+- Do NOT include claims for pain and suffering against government entities (not permitted under TTCA)
+- Include a note in the document flagging the special requirements for the filer to verify`
+  }
+
   const system = `You are a legal document formatting assistant. You help self-represented (pro se) litigants format their court filings.
 
 IMPORTANT RULES:
@@ -77,7 +91,23 @@ IMPORTANT RULES:
 - Use plain, clear language appropriate for a pro se filer.
 
 DOCUMENT FORMAT:
-${format}
+${format}${governmentAddendum}
+
+ANNOTATIONS:
+After the document text, output a section starting with "---ANNOTATIONS---" on its own line.
+Below that, output one annotation per line in this exact format:
+[N] SECTION_NAME: Plain-English explanation of what this section means and why it is in the document.
+
+Number annotations sequentially starting from 1. Cover these sections at minimum:
+- Caption (the header with court name and parties)
+- Parties (who is involved)
+- Facts/Allegations (your story)
+- Causes of Action or Claims (why this is wrong legally)
+- Damages/Relief (what you are asking for)
+- Prayer (the formal request to the court)
+- Signature Block (where you sign)
+
+Use simple language a high school student could understand. Do NOT use legal jargon in the explanations.
 
 Format the document professionally with proper legal formatting.`
 
@@ -115,6 +145,8 @@ Format the document professionally with proper legal formatting.`
     facts.has_counterclaim ? `Counterclaim:\n${facts.counterclaim_details ?? 'Details to be provided'}` : null,
   ].filter(Boolean).join('\n\n') : null
 
+  const governmentNote = facts.government_entity ? 'Note: Filing against government entity. Special rules apply.' : null
+
   const user = [
     `Role: ${facts.role}`,
     `Dispute type: ${facts.dispute_type ?? 'general'}`,
@@ -131,6 +163,7 @@ Format the document professionally with proper legal formatting.`
     '--- RELIEF ---',
     relief,
     defendantSection ? `\n--- DEFENDANT RESPONSE ---\n${defendantSection}` : null,
+    governmentNote,
   ].filter((s) => s !== null).join('\n')
 
   return { system, user }

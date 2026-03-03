@@ -7,6 +7,7 @@ import { PreservationLetterStep } from '@/components/step/preservation-letter-st
 import { WaitForAnswerStep } from '@/components/step/wait-for-answer-step'
 import { CheckDocketForAnswerStep } from '@/components/step/check-docket-for-answer-step'
 import { PrepareFilingStep } from '@/components/step/prepare-filing-step'
+import { PetitionWizard } from '@/components/step/petition-wizard'
 import { FileWithCourtStep } from '@/components/step/file-with-court-step'
 import { DiscoveryStarterPackStep } from '@/components/step/discovery-starter-pack-step'
 import { UnderstandRemovalStep } from '@/components/step/understand-removal-step'
@@ -114,6 +115,17 @@ export default async function StepPage({
         .eq('id', id)
         .single()
 
+      // Check if government_entity flag exists from case creation
+      const { data: intakeTask } = await supabase
+        .from('tasks')
+        .select('metadata')
+        .eq('case_id', id)
+        .eq('task_key', 'intake')
+        .maybeSingle()
+
+      const intakeMeta = intakeTask?.metadata as Record<string, unknown> | null
+      const governmentEntity = (intakeMeta?.government_entity as boolean) ?? false
+
       if (!caseRow || caseRow.court_type === 'unknown') {
         return (
           <div className="max-w-2xl mx-auto px-4 py-8">
@@ -127,11 +139,14 @@ export default async function StepPage({
       }
 
       return (
-        <PrepareFilingStep
+        <PetitionWizard
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
-          caseData={caseRow}
+          caseData={{
+            ...caseRow,
+            government_entity: governmentEntity,
+          }}
         />
       )
     }

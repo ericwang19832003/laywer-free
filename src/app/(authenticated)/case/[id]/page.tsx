@@ -13,6 +13,7 @@ import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import ProSeBanner from '@/components/dashboard/pro-se-banner'
 import Link from 'next/link'
 import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
 
@@ -216,6 +217,8 @@ export default async function DashboardPage({
           title="One step at a time."
           subtitle="You're in control. We'll guide the process and track deadlines."
         />
+
+        <ProSeBanner />
 
         <div className="space-y-6">
           <PriorityAlertsSection caseId={id} alerts={alerts} />

@@ -39,6 +39,7 @@ export const filingFactsSchema = z.object({
   // Context
   role: z.enum(['plaintiff', 'defendant']),
   dispute_type: z.string().optional(),
+  government_entity: z.boolean().optional().default(false),
 })
 
 export type FilingFacts = z.infer<typeof filingFactsSchema>

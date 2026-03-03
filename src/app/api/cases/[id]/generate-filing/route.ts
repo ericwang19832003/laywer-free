@@ -163,10 +163,34 @@ export async function POST(
       messages: [{ role: 'user', content: prompt.user }],
     })
 
-    const draft = message.content
+    const fullText = message.content
       .filter((block) => block.type === 'text')
       .map((block) => block.text)
       .join('\n')
+
+    const annotationMarker = '---ANNOTATIONS---'
+    const markerIndex = fullText.indexOf(annotationMarker)
+
+    let draft: string
+    let annotations: { id: number; section: string; text: string }[] = []
+
+    if (markerIndex !== -1) {
+      draft = fullText.substring(0, markerIndex).trim()
+      const annotationText = fullText.substring(markerIndex + annotationMarker.length).trim()
+      const lines = annotationText.split('\n').filter(line => line.trim())
+      for (const line of lines) {
+        const match = line.match(/^\[(\d+)\]\s+([^:]+):\s+(.+)$/)
+        if (match) {
+          annotations.push({
+            id: parseInt(match[1]),
+            section: match[2].trim(),
+            text: match[3].trim(),
+          })
+        }
+      }
+    } else {
+      draft = fullText
+    }
 
     if (!isFilingOutputSafe(draft)) {
       return NextResponse.json(
@@ -185,7 +209,7 @@ export async function POST(
       },
     })
 
-    return NextResponse.json({ draft })
+    return NextResponse.json({ draft, annotations })
   } catch (err) {
     console.error('[generate-filing] Error:', err)
     return NextResponse.json(
