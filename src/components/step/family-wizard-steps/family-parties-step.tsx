@@ -3,6 +3,7 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
+import { useState } from 'react'
 
 interface PartyInfo {
   full_name: string
@@ -25,9 +26,14 @@ export function FamilyPartiesStep({
   onPetitionerChange,
   onRespondentChange,
 }: FamilyPartiesStepProps) {
+  const [respondentAddressUnknown, setRespondentAddressUnknown] = useState(false)
+
   return (
     <div className="space-y-8">
       {/* Terminology explanation */}
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3 text-sm text-warm-text">
+        Petitioner = the person filing. Respondent = the other person.
+      </div>
       <HelpTooltip label="What do Petitioner and Respondent mean?">
         <p>
           In family law, the person filing is the &quot;Petitioner&quot; and the other
@@ -138,39 +144,58 @@ export function FamilyPartiesStep({
               address, you can use their work address or last known address.
             </p>
           </HelpTooltip>
-          <div className="space-y-2 mt-2">
-            <Input
-              id="respondent-address"
-              value={respondent.address ?? ''}
-              onChange={(e) => onRespondentChange({ ...respondent, address: e.target.value })}
-              placeholder="Street address"
-            />
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label htmlFor="respondent-city" className="text-xs text-warm-muted">City</Label>
+          <div className="space-y-3 mt-2">
+            <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
+              <input
+                type="checkbox"
+                checked={respondentAddressUnknown}
+                onChange={(e) => setRespondentAddressUnknown(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo"
+              />
+              <span className="text-sm text-warm-text">I don&apos;t know their address yet</span>
+            </label>
+
+            {respondentAddressUnknown ? (
+              <p className="text-xs text-warm-muted">
+                You can add a work or last known address later.
+              </p>
+            ) : (
+              <div className="space-y-2">
                 <Input
-                  id="respondent-city"
-                  value={respondent.city ?? ''}
-                  onChange={(e) => onRespondentChange({ ...respondent, city: e.target.value })}
+                  id="respondent-address"
+                  data-testid="respondent-address"
+                  value={respondent.address ?? ''}
+                  onChange={(e) => onRespondentChange({ ...respondent, address: e.target.value })}
+                  placeholder="Street address"
                 />
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label htmlFor="respondent-city" className="text-xs text-warm-muted">City</Label>
+                    <Input
+                      id="respondent-city"
+                      value={respondent.city ?? ''}
+                      onChange={(e) => onRespondentChange({ ...respondent, city: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="respondent-state" className="text-xs text-warm-muted">State</Label>
+                    <Input
+                      id="respondent-state"
+                      value={respondent.state ?? ''}
+                      onChange={(e) => onRespondentChange({ ...respondent, state: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="respondent-zip" className="text-xs text-warm-muted">Zip</Label>
+                    <Input
+                      id="respondent-zip"
+                      value={respondent.zip ?? ''}
+                      onChange={(e) => onRespondentChange({ ...respondent, zip: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="respondent-state" className="text-xs text-warm-muted">State</Label>
-                <Input
-                  id="respondent-state"
-                  value={respondent.state ?? ''}
-                  onChange={(e) => onRespondentChange({ ...respondent, state: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="respondent-zip" className="text-xs text-warm-muted">Zip</Label>
-                <Input
-                  id="respondent-zip"
-                  value={respondent.zip ?? ''}
-                  onChange={(e) => onRespondentChange({ ...respondent, zip: e.target.value })}
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

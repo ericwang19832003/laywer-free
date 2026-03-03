@@ -15,6 +15,7 @@ export type DisputeType =
   | 'contract'
   | 'property'
   | 'family'
+  | 'small_claims'
   | 'other'
 
 export type AmountRange =

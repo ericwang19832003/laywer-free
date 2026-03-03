@@ -177,6 +177,70 @@ describe('recommendVenue', () => {
     })
     expect(result.alternativeNote).toBeUndefined()
   })
+
+  // -------------------------------------------------------------------------
+  // Small claims venue rules
+  // -------------------------------------------------------------------------
+  describe('small claims venue', () => {
+    it('recommends defendant county for small claims', () => {
+      const result = recommendVenue({
+        disputeType: 'small_claims',
+        defendantCounty: 'Harris',
+        incidentCounty: null,
+        propertyCounty: null,
+        contractCounty: null,
+      })
+      expect(result.recommended_county).toBe('Harris')
+      expect(result.explanation).toContain('Harris County')
+      expect(result.explanation).toContain('Justice Court')
+    })
+
+    it('provides alternative when incident county differs', () => {
+      const result = recommendVenue({
+        disputeType: 'small_claims',
+        defendantCounty: 'Harris',
+        incidentCounty: 'Travis',
+        propertyCounty: null,
+        contractCounty: null,
+      })
+      expect(result.recommended_county).toBe('Harris')
+      expect(result.alternativeNote).toContain('Travis')
+    })
+
+    it('cites TRCP 502.4', () => {
+      const result = recommendVenue({
+        disputeType: 'small_claims',
+        defendantCounty: 'Harris',
+        incidentCounty: null,
+        propertyCounty: null,
+        contractCounty: null,
+      })
+      expect(result.rule_citation).toContain('TRCP 502.4')
+    })
+
+    it('returns null county when none provided', () => {
+      const result = recommendVenue({
+        disputeType: 'small_claims',
+        defendantCounty: null,
+        incidentCounty: null,
+        propertyCounty: null,
+        contractCounty: null,
+      })
+      expect(result.recommended_county).toBeNull()
+      expect(result.explanation).toContain('small claims')
+    })
+
+    it('no alternative when counties match', () => {
+      const result = recommendVenue({
+        disputeType: 'small_claims',
+        defendantCounty: 'Harris',
+        incidentCounty: 'Harris',
+        propertyCounty: null,
+        contractCounty: null,
+      })
+      expect(result.alternativeNote).toBeUndefined()
+    })
+  })
 })
 
 // ---------------------------------------------------------------------------

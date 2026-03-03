@@ -115,6 +115,24 @@ export function recommendVenue(input: {
       }
     }
 
+    case 'small_claims': {
+      if (defendantCounty) {
+        return {
+          recommended_county: defendantCounty,
+          explanation: `File in the Justice Court in ${defendantCounty} County, where the defendant resides. For small claims, you can also file in the county where the obligation was to be performed (e.g., where the work was done or where the property is located).`,
+          alternativeNote: incidentCounty && incidentCounty !== defendantCounty
+            ? `You may alternatively file in ${incidentCounty} County if that's where the events giving rise to the claim occurred.`
+            : undefined,
+          rule_citation: 'TRCP 502.4 (venue in justice court cases)',
+        }
+      }
+      return {
+        recommended_county: null,
+        explanation: 'For small claims, file in the county where the defendant lives, or where the obligation was to be performed. If the defendant is a business, file where the business has an office or representative.',
+        rule_citation: 'TRCP 502.4',
+      }
+    }
+
     // Default: debt_collection, other, and anything else
     default: {
       if (defendantCounty) {

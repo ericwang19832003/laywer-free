@@ -143,6 +143,9 @@ export function FamilyVenueStep({
               <p className="text-sm font-medium text-warm-text">
                 Recommended: {venue.recommended_county} County
               </p>
+              <p className="text-xs text-warm-muted">
+                Does this look right? You can edit the county above.
+              </p>
               <p className="text-sm text-warm-muted">{venue.explanation}</p>
               {venue.alternativeNote && (
                 <p className="text-xs text-warm-muted italic">{venue.alternativeNote}</p>

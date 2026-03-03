@@ -64,6 +64,9 @@ import {
   motionForMediationFactsSchema,
   buildMotionForMediationPrompt,
 } from '@/lib/motions/configs/motion-for-mediation'
+import { buildSmallClaimsFilingPrompt } from '@/lib/rules/small-claims-filing-prompts'
+import { smallClaimsFilingFactsSchema } from '@/lib/schemas/small-claims-filing'
+import { demandLetterFactsSchema, buildDemandLetterPrompt } from '@/lib/rules/demand-letter-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 /* ------------------------------------------------------------------ */
@@ -167,6 +170,44 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   motion_for_mediation: {
     schema: motionForMediationFactsSchema,
     buildPrompt: buildMotionForMediationPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Small claims filing types — all 8 sub-types use the same schema/prompt builder
+  small_claims_security_deposit: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_breach_of_contract: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_consumer_refund: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_property_damage: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_car_accident: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_neighbor_dispute: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_unpaid_loan: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  small_claims_other: {
+    schema: smallClaimsFilingFactsSchema,
+    buildPrompt: buildSmallClaimsFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Demand letter
+  demand_letter: {
+    schema: demandLetterFactsSchema,
+    buildPrompt: buildDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 

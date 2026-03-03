@@ -7,6 +7,7 @@ export const DISPUTE_TYPES = [
   'contract',
   'property',
   'family',
+  'small_claims',
   'other',
 ] as const
 
@@ -20,12 +21,26 @@ export const FAMILY_SUB_TYPES = [
   'modification',
 ] as const
 
+export const SMALL_CLAIMS_SUB_TYPES = [
+  'security_deposit',
+  'breach_of_contract',
+  'consumer_refund',
+  'property_damage',
+  'car_accident',
+  'neighbor_dispute',
+  'unpaid_loan',
+  'other',
+] as const
+
+export type SmallClaimsSubType = (typeof SMALL_CLAIMS_SUB_TYPES)[number]
+
 export const createCaseSchema = z.object({
   role: z.enum(['plaintiff', 'defendant']),
   county: z.string().optional(),
   court_type: z.enum(['jp', 'county', 'district', 'federal', 'unknown']).optional().default('unknown'),
   dispute_type: z.enum(DISPUTE_TYPES).optional(),
   family_sub_type: z.enum(FAMILY_SUB_TYPES).optional(),
+  small_claims_sub_type: z.enum(SMALL_CLAIMS_SUB_TYPES).optional(),
 })
 
 export type CreateCaseInput = z.infer<typeof createCaseSchema>

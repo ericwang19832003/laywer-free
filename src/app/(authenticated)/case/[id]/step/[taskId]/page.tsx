@@ -30,6 +30,12 @@ import { WaitingPeriodStep } from '@/components/step/family/waiting-period-step'
 import { TemporaryOrdersStep } from '@/components/step/family/temporary-orders-step'
 import { MediationStep } from '@/components/step/family/mediation-step'
 import { FinalOrdersStep } from '@/components/step/family/final-orders-step'
+import { SmallClaimsIntakeStep } from '@/components/step/small-claims/small-claims-intake-step'
+import { DemandLetterStep } from '@/components/step/small-claims/demand-letter-step'
+import { SmallClaimsWizard } from '@/components/step/small-claims-wizard'
+import { ServeDefendantStep } from '@/components/step/small-claims/serve-defendant-step'
+import { PrepareForHearingStep } from '@/components/step/small-claims/prepare-for-hearing-step'
+import { HearingDayStep } from '@/components/step/small-claims/hearing-day-step'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -534,6 +540,52 @@ export default async function StepPage({
         />
       )
     }
+    // Small claims task chain steps
+    case 'small_claims_intake':
+      return (
+        <SmallClaimsIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'prepare_demand_letter': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county').eq('id', id).single()
+      const { data: claimDetails } = await supabase
+        .from('small_claims_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <DemandLetterStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          claimDetails={claimDetails}
+          caseData={{ county: caseRow?.county ?? null }}
+        />
+      )
+    }
+    case 'prepare_small_claims_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county').eq('id', id).single()
+      const { data: claimDetails } = await supabase
+        .from('small_claims_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <SmallClaimsWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          claimDetails={claimDetails}
+          caseData={{ county: caseRow?.county ?? null }}
+        />
+      )
+    }
+    case 'serve_defendant':
+      return <ServeDefendantStep caseId={id} taskId={taskId} />
+    case 'prepare_for_hearing':
+      return <PrepareForHearingStep caseId={id} taskId={taskId} />
+    case 'hearing_day':
+      return <HearingDayStep caseId={id} taskId={taskId} />
+
     default:
       return (
         <div className="max-w-2xl mx-auto px-4 py-8">

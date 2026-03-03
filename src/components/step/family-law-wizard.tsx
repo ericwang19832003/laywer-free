@@ -14,6 +14,8 @@ import Link from 'next/link'
 
 // Import all family wizard steps
 import { FamilyPreflight } from './family-wizard-steps/family-preflight'
+import { FamilyWelcomeStep } from './family-wizard-steps/family-welcome-step'
+import { FamilyStepPreview } from './family-wizard-steps/family-step-preview'
 import { FamilyPartiesStep } from './family-wizard-steps/family-parties-step'
 import { MarriageStep } from './family-wizard-steps/marriage-step'
 import { ChildrenStep } from './family-wizard-steps/children-step'
@@ -69,6 +71,16 @@ interface FamilyLawWizardProps {
 /* ------------------------------------------------------------------ */
 
 function getStepsForSubType(subType: string): WizardStep[] {
+  const welcome: WizardStep = {
+    id: 'welcome',
+    title: 'Welcome',
+    subtitle: 'Here is what to expect in this process.',
+  }
+  const preview: WizardStep = {
+    id: 'preview',
+    title: 'Step Preview',
+    subtitle: 'A quick overview before we begin.',
+  }
   // Common steps present for all sub-types
   const preflight: WizardStep = {
     id: 'preflight',
@@ -135,21 +147,21 @@ function getStepsForSubType(subType: string): WizardStep[] {
 
   switch (subType) {
     case 'divorce':
-      return [preflight, parties, marriage, children, venue, grounds, custody, support, spousal, property, review]
+      return [welcome, preview, preflight, parties, marriage, children, venue, grounds, custody, support, spousal, property, review]
     case 'custody':
-      return [preflight, parties, children, venue, grounds, custody, support, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, custody, support, review]
     case 'child_support':
-      return [preflight, parties, children, venue, grounds, support, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, support, review]
     case 'visitation':
-      return [preflight, parties, children, venue, grounds, custody, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, custody, review]
     case 'spousal_support':
-      return [preflight, parties, marriage, venue, grounds, spousal, review]
+      return [welcome, preview, preflight, parties, marriage, venue, grounds, spousal, review]
     case 'protective_order':
-      return [preflight, parties, venue, grounds, review]
+      return [welcome, preview, preflight, parties, venue, grounds, review]
     case 'modification':
-      return [preflight, parties, children, venue, grounds, custody, support, spousal, existingOrders, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, custody, support, spousal, existingOrders, review]
     default:
-      return [preflight, parties, venue, grounds, review]
+      return [welcome, preview, preflight, parties, venue, grounds, review]
   }
 }
 
@@ -215,6 +227,7 @@ export function FamilyLawWizard({
   const familySubType = familyDetails?.family_sub_type ?? 'divorce'
 
   const steps = useMemo(() => getStepsForSubType(familySubType), [familySubType])
+  const totalEstimateMinutes = 25
 
   /* ---- Party info ---- */
   const [petitioner, setPetitioner] = useState<PartyInfo>(
@@ -770,6 +783,20 @@ export function FamilyLawWizard({
   function renderStep() {
     const stepId = steps[currentStep]?.id
     switch (stepId) {
+      case 'welcome':
+        return (
+          <FamilyWelcomeStep
+            onContinue={() => setCurrentStep(currentStep + 1)}
+          />
+        )
+      case 'preview':
+        return (
+          <FamilyStepPreview
+            steps={steps.filter((step) => !['welcome', 'preview'].includes(step.id))}
+            totalMinutes={totalEstimateMinutes}
+            onContinue={() => setCurrentStep(currentStep + 1)}
+          />
+        )
       case 'preflight':
         return (
           <FamilyPreflight
@@ -1003,7 +1030,7 @@ export function FamilyLawWizard({
       onSave={handleSave}
       onComplete={handleComplete}
       canAdvance={canAdvance}
-      totalEstimateMinutes={25}
+      totalEstimateMinutes={totalEstimateMinutes}
       completeButtonLabel={generating ? 'Generating...' : 'Generate My Document'}
     >
       {generating ? (

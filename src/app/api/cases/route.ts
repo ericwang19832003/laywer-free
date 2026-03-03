@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, county, court_type, dispute_type, family_sub_type } = parsed.data
+    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type } = parsed.data
 
     // Insert the case
     const { data: newCase, error: caseError } = await supabase!
@@ -52,6 +52,23 @@ export async function POST(request: NextRequest) {
       if (familyError) {
         return NextResponse.json(
           { error: 'Case created but failed to save family details', details: familyError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Insert small claims details if this is a small claims case
+    if (small_claims_sub_type) {
+      const { error: smallClaimsError } = await supabase!
+        .from('small_claims_details')
+        .insert({
+          case_id: newCase.id,
+          claim_sub_type: small_claims_sub_type,
+        })
+
+      if (smallClaimsError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save small claims details', details: smallClaimsError.message },
           { status: 500 }
         )
       }

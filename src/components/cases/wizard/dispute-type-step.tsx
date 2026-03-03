@@ -8,6 +8,7 @@ const DISPUTE_OPTIONS: { value: DisputeType; label: string; description: string 
   { value: 'contract', label: 'Business or contract dispute', description: 'Breach of agreement, partnership issues' },
   { value: 'property', label: 'Property or real estate', description: 'Land ownership, boundary, or title dispute' },
   { value: 'family', label: 'Family matter', description: 'Custody, divorce, or child support' },
+  { value: 'small_claims', label: 'Small claim', description: 'Dispute under $20,000 — deposit, refund, loan, etc.' },
   { value: 'other', label: 'Something else', description: "Doesn't fit the categories above" },
 ]
 
