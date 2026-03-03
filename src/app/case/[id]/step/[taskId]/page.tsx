@@ -20,6 +20,9 @@ import { MandatoryDisclosuresStep } from '@/components/step/mandatory-disclosure
 import { UploadAnswerStep } from '@/components/step/upload-answer-step'
 import { EvidenceVaultStep } from '@/components/step/evidence-vault-step'
 import { DefaultPacketPrepStep } from '@/components/step/default-packet-prep-step'
+import { MotionBuilder } from '@/components/step/motion-builder'
+import { TrialPrepChecklistStep } from '@/components/step/trial-prep-checklist-step'
+import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -352,6 +355,44 @@ export default async function StepPage({
             your_info: filingMeta.your_info as { full_name: string; address?: string },
             opposing_parties: (filingMeta.opposing_parties as { full_name: string; address?: string }[]) ?? [],
           } : null}
+        />
+      )
+    }
+    case 'motion_to_compel': {
+      const config = MOTION_CONFIGS['motion_to_compel']
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, role')
+        .eq('id', id)
+        .single()
+
+      return (
+        <MotionBuilder
+          config={config}
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
+        />
+      )
+    }
+    case 'trial_prep_checklist':
+      return <TrialPrepChecklistStep caseId={id} taskId={taskId} />
+    case 'appellate_brief': {
+      const config = MOTION_CONFIGS['appellate_brief']
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('court_type, county, role')
+        .eq('id', id)
+        .single()
+
+      return (
+        <MotionBuilder
+          config={config}
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={caseRow ?? undefined}
         />
       )
     }

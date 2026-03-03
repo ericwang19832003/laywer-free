@@ -8,6 +8,9 @@ import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
 
 interface DashboardData {
@@ -133,6 +136,23 @@ export default async function DashboardPage({
     }
   }
 
+  // Motion tasks + motions count
+  const motionTaskKeys = ['motion_to_compel', 'trial_prep_checklist', 'appellate_brief']
+  const { data: motionTaskRows } = await supabase
+    .from('tasks')
+    .select('id, task_key, title, status')
+    .eq('case_id', id)
+    .in('task_key', motionTaskKeys)
+
+  const motionTasks = motionTaskRows ?? []
+
+  const { count: motionsCount } = await supabase
+    .from('motions')
+    .select('*', { count: 'exact', head: true })
+    .eq('case_id', id)
+
+  const hasMotionActivity = motionTasks.some(t => t.status !== 'locked') || (motionsCount ?? 0) > 0
+
   if (error || data === null) {
     return (
       <div className="min-h-screen bg-warm-bg">
@@ -173,6 +193,40 @@ export default async function DashboardPage({
             servedCount={discoveryServedCount}
             itemCount={discoveryItemCount}
           />
+          {hasMotionActivity && (
+            <Card>
+              <CardContent className="pt-5 pb-4 px-5">
+                <h3 className="text-sm font-semibold text-warm-text mb-3">Motions</h3>
+
+                {motionTasks
+                  .filter(t => t.status === 'todo')
+                  .map(t => (
+                    <div key={t.id} className="flex items-center justify-between py-2 border-b border-warm-border last:border-0">
+                      <div>
+                        <span className="text-sm text-warm-text">{t.title}</span>
+                        <span className="text-xs bg-calm-indigo/10 text-calm-indigo px-2 py-0.5 rounded-full ml-2">
+                          Suggested
+                        </span>
+                      </div>
+                      <Button size="sm" asChild>
+                        <Link href={`/case/${id}/step/${t.id}`}>Start</Link>
+                      </Button>
+                    </div>
+                  ))
+                }
+
+                {(motionsCount ?? 0) > 0 && (
+                  <p className="text-xs text-warm-muted mt-2">
+                    {motionsCount} motion{motionsCount !== 1 ? 's' : ''} created
+                  </p>
+                )}
+
+                <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
+                  <Link href={`/case/${id}/motions`}>View Motions Hub &rarr;</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
           <ProgressCard tasksSummary={dashboard.tasks_summary} />
           <TimelineCard events={dashboard.recent_events} />
         </div>
