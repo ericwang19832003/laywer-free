@@ -114,7 +114,7 @@ describe('createCaseSchema', () => {
   })
 
   it('rejects invalid state', () => {
-    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'FL' })
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'OH' })
     expect(result.success).toBe(false)
   })
 
@@ -155,6 +155,31 @@ describe('createCaseSchema', () => {
       role: 'plaintiff',
       state: 'CA',
       court_type: 'small_claims',
+      dispute_type: 'small_claims',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts FL as state', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'FL' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.state).toBe('FL')
+    }
+  })
+
+  it('accepts FL court types', () => {
+    for (const ct of ['fl_small_claims', 'fl_county', 'fl_circuit']) {
+      const result = createCaseSchema.safeParse({ role: 'plaintiff', court_type: ct })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('accepts FL state with FL court type', () => {
+    const result = createCaseSchema.safeParse({
+      role: 'plaintiff',
+      state: 'FL',
+      court_type: 'fl_small_claims',
       dispute_type: 'small_claims',
     })
     expect(result.success).toBe(true)

@@ -10,8 +10,11 @@ describe('State Config System', () => {
     it('contains NY', () => {
       expect(STATE_CODES).toContain('NY')
     })
-    it('has exactly 3 entries', () => {
-      expect(STATE_CODES).toHaveLength(3)
+    it('contains FL', () => {
+      expect(STATE_CODES).toContain('FL')
+    })
+    it('has exactly 4 entries', () => {
+      expect(STATE_CODES).toHaveLength(4)
     })
   })
 
@@ -88,6 +91,34 @@ describe('State Config System', () => {
     it('NY has 4 amount ranges', () => {
       expect(getStateConfig('NY').amountRanges).toHaveLength(4)
     })
+    it('returns FL config', () => {
+      const config = getStateConfig('FL')
+      expect(config.code).toBe('FL')
+      expect(config.name).toBe('Florida')
+    })
+    it('FL has fl_small_claims, fl_county, fl_circuit court types', () => {
+      const config = getStateConfig('FL')
+      const values = config.courtTypes.map((c) => c.value)
+      expect(values).toEqual(['fl_small_claims', 'fl_county', 'fl_circuit'])
+    })
+    it('FL small claims max is 8000', () => {
+      expect(getStateConfig('FL').thresholds.smallClaimsMax).toBe(8_000)
+    })
+    it('FL SOL personalInjury is 2', () => {
+      expect(getStateConfig('FL').statuteOfLimitations.personalInjury).toBe(2)
+    })
+    it('FL SOL writtenContract is 5', () => {
+      expect(getStateConfig('FL').statuteOfLimitations.writtenContract).toBe(5)
+    })
+    it('FL SOL oralContract is 4', () => {
+      expect(getStateConfig('FL').statuteOfLimitations.oralContract).toBe(4)
+    })
+    it('FL SOL propertyDamage is 4', () => {
+      expect(getStateConfig('FL').statuteOfLimitations.propertyDamage).toBe(4)
+    })
+    it('FL has 4 amount ranges', () => {
+      expect(getStateConfig('FL').amountRanges).toHaveLength(4)
+    })
   })
 
   describe('getCourtLabel', () => {
@@ -113,6 +144,18 @@ describe('State Config System', () => {
     it('returns Federal Court for NY federal', () => {
       expect(getCourtLabel('NY', 'federal')).toBe('Federal Court')
     })
+    it('returns Small Claims Court label for FL fl_small_claims', () => {
+      expect(getCourtLabel('FL', 'fl_small_claims')).toBe('Small Claims Court')
+    })
+    it('returns County Court label for FL fl_county', () => {
+      expect(getCourtLabel('FL', 'fl_county')).toBe('County Court')
+    })
+    it('returns Circuit Court label for FL fl_circuit', () => {
+      expect(getCourtLabel('FL', 'fl_circuit')).toBe('Circuit Court')
+    })
+    it('returns Federal Court for FL federal', () => {
+      expect(getCourtLabel('FL', 'federal')).toBe('Federal Court')
+    })
     it('returns raw value for unknown court type', () => {
       expect(getCourtLabel('TX', 'supreme')).toBe('supreme')
     })
@@ -127,6 +170,9 @@ describe('State Config System', () => {
     })
     it('returns 10000 for NY', () => {
       expect(getSmallClaimsMax('NY')).toBe(10_000)
+    })
+    it('returns 8000 for FL', () => {
+      expect(getSmallClaimsMax('FL')).toBe(8_000)
     })
   })
 })

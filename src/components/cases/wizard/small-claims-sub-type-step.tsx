@@ -90,11 +90,13 @@ interface SmallClaimsSubTypeStepProps {
 export function SmallClaimsSubTypeStep({ value, selectedState = 'TX', onSelect }: SmallClaimsSubTypeStepProps) {
   const limit = getSmallClaimsMax(selectedState)
   const limitFormatted = `$${limit.toLocaleString()}`
-  const stateName = selectedState === 'NY'
-    ? 'New York'
-    : selectedState === 'CA'
-      ? 'California'
-      : 'Texas'
+  const stateName = selectedState === 'FL'
+    ? 'Florida'
+    : selectedState === 'NY'
+      ? 'New York'
+      : selectedState === 'CA'
+        ? 'California'
+        : 'Texas'
 
   return (
     <div className="space-y-3">
@@ -141,7 +143,7 @@ export function SmallClaimsSubTypeStep({ value, selectedState = 'TX', onSelect }
       <div className="rounded-md border border-calm-amber bg-calm-amber/5 px-4 py-3">
         <p className="text-xs font-medium text-calm-amber leading-relaxed">
           {stateName} small claims limit: {limitFormatted}. If your claim is for more than{' '}
-          {limitFormatted}, you may need to file in {selectedState === 'NY' ? 'Civil or Supreme' : selectedState === 'CA' ? 'Limited Civil or Unlimited Civil' : 'County or District'} Court instead.
+          {limitFormatted}, you may need to file in {selectedState === 'FL' ? 'County or Circuit' : selectedState === 'NY' ? 'Civil or Supreme' : selectedState === 'CA' ? 'Limited Civil or Unlimited Civil' : 'County or District'} Court instead.
         </p>
       </div>
     </div>

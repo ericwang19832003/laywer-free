@@ -74,6 +74,13 @@ export const CA_SMALL_CLAIMS_CAP = 12_500
  */
 export const NY_SMALL_CLAIMS_CAP = 10_000
 
+/**
+ * Fla. Stat. § 34.01: Florida Small Claims Court has
+ * jurisdiction over civil matters where the amount does not exceed
+ * $8,000.
+ */
+export const FL_SMALL_CLAIMS_CAP = 8_000
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

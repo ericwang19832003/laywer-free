@@ -5,6 +5,7 @@ const STATE_OPTIONS: { value: State; label: string; description: string }[] = [
   { value: 'TX', label: 'Texas', description: 'JP, County, and District courts' },
   { value: 'CA', label: 'California', description: 'Small Claims, Limited Civil, and Unlimited Civil courts' },
   { value: 'NY', label: 'New York', description: 'Small Claims, Civil, and Supreme courts' },
+  { value: 'FL', label: 'Florida', description: 'Small Claims, County, and Circuit courts' },
 ]
 
 interface StateStepProps {

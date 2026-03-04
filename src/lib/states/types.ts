@@ -1,6 +1,6 @@
-export type StateCode = 'TX' | 'CA' | 'NY'
+export type StateCode = 'TX' | 'CA' | 'NY' | 'FL'
 
-export const STATE_CODES = ['TX', 'CA', 'NY'] as const
+export const STATE_CODES = ['TX', 'CA', 'NY', 'FL'] as const
 
 export interface CourtTypeConfig {
   value: string

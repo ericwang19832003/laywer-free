@@ -2,6 +2,7 @@ import type { StateCode, StateConfig } from './types'
 import { TX_CONFIG } from './tx'
 import { CA_CONFIG } from './ca'
 import { NY_CONFIG } from './ny'
+import { FL_CONFIG } from './fl'
 
 export type { StateCode, StateConfig, CourtTypeConfig } from './types'
 export { STATE_CODES } from './types'
@@ -10,6 +11,7 @@ const STATE_CONFIGS: Record<StateCode, StateConfig> = {
   TX: TX_CONFIG,
   CA: CA_CONFIG,
   NY: NY_CONFIG,
+  FL: FL_CONFIG,
 }
 
 export function getStateConfig(state: StateCode): StateConfig {
