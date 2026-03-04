@@ -67,6 +67,13 @@ export const TX_JP_COURT_CAP = 20_000
  */
 export const CA_SMALL_CLAIMS_CAP = 12_500
 
+/**
+ * UCCA § 1801: New York Small Claims Court has
+ * jurisdiction over civil matters where the amount does not exceed
+ * $10,000 (NYC).
+ */
+export const NY_SMALL_CLAIMS_CAP = 10_000
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

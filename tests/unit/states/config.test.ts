@@ -7,8 +7,11 @@ describe('State Config System', () => {
       expect(STATE_CODES).toContain('TX')
       expect(STATE_CODES).toContain('CA')
     })
-    it('has exactly 2 entries', () => {
-      expect(STATE_CODES).toHaveLength(2)
+    it('contains NY', () => {
+      expect(STATE_CODES).toContain('NY')
+    })
+    it('has exactly 3 entries', () => {
+      expect(STATE_CODES).toHaveLength(3)
     })
   })
 
@@ -57,6 +60,34 @@ describe('State Config System', () => {
     it('CA has 4 amount ranges', () => {
       expect(getStateConfig('CA').amountRanges).toHaveLength(4)
     })
+    it('returns NY config', () => {
+      const config = getStateConfig('NY')
+      expect(config.code).toBe('NY')
+      expect(config.name).toBe('New York')
+    })
+    it('NY has ny_small_claims, ny_civil, ny_supreme court types', () => {
+      const config = getStateConfig('NY')
+      const values = config.courtTypes.map((c) => c.value)
+      expect(values).toEqual(['ny_small_claims', 'ny_civil', 'ny_supreme'])
+    })
+    it('NY small claims max is 10000', () => {
+      expect(getStateConfig('NY').thresholds.smallClaimsMax).toBe(10_000)
+    })
+    it('NY SOL personalInjury is 3', () => {
+      expect(getStateConfig('NY').statuteOfLimitations.personalInjury).toBe(3)
+    })
+    it('NY SOL writtenContract is 6', () => {
+      expect(getStateConfig('NY').statuteOfLimitations.writtenContract).toBe(6)
+    })
+    it('NY SOL oralContract is 6', () => {
+      expect(getStateConfig('NY').statuteOfLimitations.oralContract).toBe(6)
+    })
+    it('NY SOL propertyDamage is 3', () => {
+      expect(getStateConfig('NY').statuteOfLimitations.propertyDamage).toBe(3)
+    })
+    it('NY has 4 amount ranges', () => {
+      expect(getStateConfig('NY').amountRanges).toHaveLength(4)
+    })
   })
 
   describe('getCourtLabel', () => {
@@ -70,6 +101,18 @@ describe('State Config System', () => {
       expect(getCourtLabel('TX', 'federal')).toBe('Federal Court')
       expect(getCourtLabel('CA', 'federal')).toBe('Federal Court')
     })
+    it('returns Small Claims Court label for NY ny_small_claims', () => {
+      expect(getCourtLabel('NY', 'ny_small_claims')).toBe('Small Claims Court')
+    })
+    it('returns Civil Court label for NY ny_civil', () => {
+      expect(getCourtLabel('NY', 'ny_civil')).toBe('Civil Court')
+    })
+    it('returns Supreme Court label for NY ny_supreme', () => {
+      expect(getCourtLabel('NY', 'ny_supreme')).toBe('Supreme Court')
+    })
+    it('returns Federal Court for NY federal', () => {
+      expect(getCourtLabel('NY', 'federal')).toBe('Federal Court')
+    })
     it('returns raw value for unknown court type', () => {
       expect(getCourtLabel('TX', 'supreme')).toBe('supreme')
     })
@@ -81,6 +124,9 @@ describe('State Config System', () => {
     })
     it('returns 12500 for CA', () => {
       expect(getSmallClaimsMax('CA')).toBe(12_500)
+    })
+    it('returns 10000 for NY', () => {
+      expect(getSmallClaimsMax('NY')).toBe(10_000)
     })
   })
 })

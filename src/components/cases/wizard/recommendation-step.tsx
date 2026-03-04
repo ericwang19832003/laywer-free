@@ -27,7 +27,15 @@ const CA_COURT_LABELS: Record<string, string> = {
   federal: 'Federal Court',
 }
 
+const NY_COURT_LABELS: Record<string, string> = {
+  ny_small_claims: 'Small Claims Court',
+  ny_civil: 'Civil Court',
+  ny_supreme: 'Supreme Court',
+  federal: 'Federal Court',
+}
+
 function getCourtLabels(selectedState: State): Record<string, string> {
+  if (selectedState === 'NY') return NY_COURT_LABELS
   return selectedState === 'CA' ? CA_COURT_LABELS : TX_COURT_LABELS
 }
 
@@ -53,7 +61,11 @@ export function RecommendationStep({
 
   const courtLabels = getCourtLabels(selectedState)
   const config = getStateConfig(selectedState)
-  const countyPlaceholder = selectedState === 'CA' ? 'e.g. Los Angeles County' : 'e.g. Travis County'
+  const countyPlaceholder = selectedState === 'NY'
+    ? 'e.g. Kings County'
+    : selectedState === 'CA'
+      ? 'e.g. Los Angeles County'
+      : 'e.g. Travis County'
 
   return (
     <div className="space-y-4">
@@ -70,6 +82,11 @@ export function RecommendationStep({
         {recommendation.alternativeNote && (
           <p className="text-sm text-warm-muted italic">
             {recommendation.alternativeNote}
+          </p>
+        )}
+        {selectedState === 'NY' && recommendation.recommended === 'ny_supreme' && (
+          <p className="text-xs text-warm-muted mt-1">
+            In New York, Supreme Court is the main trial court — not the highest court.
           </p>
         )}
       </div>

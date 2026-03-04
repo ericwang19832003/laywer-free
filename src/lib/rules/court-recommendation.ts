@@ -3,7 +3,7 @@
  *
  * Pure function that recommends the appropriate court
  * based on dispute type, amount in controversy, circumstance flags,
- * and state. Supports Texas and California.
+ * and state. Supports Texas, California, and New York.
  * Zero side effects -- trivially unit-testable.
  */
 
@@ -27,6 +27,9 @@ export type AmountRange =
   | 'under_12500'
   | '12500_35k'
   | 'over_35k'
+  | 'under_10k'
+  | '10k_25k'
+  | 'over_25k'
   | 'not_money'
 
 export type CourtType =
@@ -37,6 +40,9 @@ export type CourtType =
   | 'small_claims'
   | 'limited_civil'
   | 'unlimited_civil'
+  | 'ny_small_claims'
+  | 'ny_civil'
+  | 'ny_supreme'
 
 export interface CircumstanceFlags {
   realProperty: boolean
@@ -50,7 +56,7 @@ export interface CourtRecommendationInput {
   amount: AmountRange
   circumstances: CircumstanceFlags
   subType?: string
-  state?: 'TX' | 'CA'
+  state?: 'TX' | 'CA' | 'NY'
 }
 
 export interface CourtRecommendation {
@@ -68,6 +74,7 @@ export interface CourtRecommendation {
  * Evaluated top-to-bottom; first matching rule wins.
  */
 export function recommendCourt(input: CourtRecommendationInput): CourtRecommendation {
+  if (input.state === 'NY') return recommendNewYorkCourt(input)
   if (input.state === 'CA') return recommendCaliforniaCourt(input)
   return recommendTexasCourt(input)
 }
@@ -285,6 +292,124 @@ function recommendCaliforniaCourt(input: CourtRecommendationInput): CourtRecomme
     recommended: 'unlimited_civil',
     reasoning:
       'Non-monetary disputes are generally heard in California Superior Court (Unlimited Civil division).',
+    confidence: 'high',
+  }
+}
+
+// -- New York Rules -----------------------------------------------------------
+
+function recommendNewYorkCourt(input: CourtRecommendationInput): CourtRecommendation {
+  const { disputeType, amount, circumstances } = input
+
+  // Rule 1: Federal law
+  if (circumstances.federalLaw) {
+    return {
+      recommended: 'federal',
+      reasoning:
+        'This dispute involves a federal law claim, which falls under exclusive federal jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 2: Family → Supreme Court (or Family Court)
+  if (disputeType === 'family') {
+    return {
+      recommended: 'ny_supreme',
+      reasoning:
+        'Family law matters such as divorce are heard in New York Supreme Court. Custody and support matters may also be heard in Family Court.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 3: Eviction → Civil Court (Housing Court)
+  if (disputeType === 'landlord_tenant' && input.subType === 'eviction') {
+    return {
+      recommended: 'ny_civil',
+      reasoning:
+        'Eviction proceedings are heard in Housing Court, which is part of New York Civil Court.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 4: Real property → Supreme Court
+  if (circumstances.realProperty) {
+    return {
+      recommended: 'ny_supreme',
+      reasoning:
+        'Disputes involving title to real property are heard in New York Supreme Court.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 5: Diversity jurisdiction ($75K+ out-of-state)
+  if (
+    circumstances.outOfState &&
+    (amount === 'over_25k' || amount === 'over_200k' || amount === '75k_200k')
+  ) {
+    return {
+      recommended: 'federal',
+      reasoning:
+        'Out-of-state parties with an amount in controversy exceeding $75,000 may qualify for federal diversity jurisdiction.',
+      alternativeNote:
+        'You may also file in New York Supreme Court if you prefer state court.',
+      confidence: 'moderate',
+    }
+  }
+
+  // Rule 6: Under $10K → Small Claims (UCCA § 1801)
+  if (amount === 'under_10k') {
+    return {
+      recommended: 'ny_small_claims',
+      reasoning:
+        'Claims up to $10,000 can be filed in New York Small Claims Court (UCCA § 1801).',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 7: $10K–$25K → Civil Court
+  if (amount === '10k_25k') {
+    return {
+      recommended: 'ny_civil',
+      reasoning:
+        'Claims between $10,000 and $25,000 fall within New York Civil Court jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 8: Over $25K → Supreme Court
+  if (amount === 'over_25k' || amount === 'over_200k' || amount === '75k_200k') {
+    return {
+      recommended: 'ny_supreme',
+      reasoning:
+        'Claims exceeding $25,000 are heard in New York Supreme Court, which has unlimited civil jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  // Handle TX/CA amount ranges used in NY context
+  if (amount === 'under_20k' || amount === 'under_12500') {
+    return {
+      recommended: 'ny_civil',
+      reasoning:
+        'Claims in this range fall within New York Civil Court jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  if (amount === '20k_75k' || amount === '12500_35k' || amount === 'over_35k') {
+    return {
+      recommended: 'ny_supreme',
+      reasoning:
+        'Claims exceeding $25,000 are heard in New York Supreme Court.',
+      confidence: 'high',
+    }
+  }
+
+  // Default → Supreme Court
+  return {
+    recommended: 'ny_supreme',
+    reasoning:
+      'Non-monetary disputes are generally heard in New York Supreme Court, which has broad general jurisdiction.',
     confidence: 'high',
   }
 }

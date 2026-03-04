@@ -114,8 +114,33 @@ describe('createCaseSchema', () => {
   })
 
   it('rejects invalid state', () => {
-    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'NY' })
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'FL' })
     expect(result.success).toBe(false)
+  })
+
+  it('accepts NY as state', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'NY' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.state).toBe('NY')
+    }
+  })
+
+  it('accepts NY court types', () => {
+    for (const ct of ['ny_small_claims', 'ny_civil', 'ny_supreme']) {
+      const result = createCaseSchema.safeParse({ role: 'plaintiff', court_type: ct })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('accepts NY state with NY court type', () => {
+    const result = createCaseSchema.safeParse({
+      role: 'plaintiff',
+      state: 'NY',
+      court_type: 'ny_small_claims',
+      dispute_type: 'small_claims',
+    })
+    expect(result.success).toBe(true)
   })
 
   it('accepts CA court types', () => {
