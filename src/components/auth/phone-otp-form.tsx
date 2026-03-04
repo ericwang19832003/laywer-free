@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,13 @@ export function PhoneOtpForm() {
   const [resendCooldown, setResendCooldown] = useState(0)
   const router = useRouter()
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [])
 
   function getSupabase() {
     if (!supabaseRef.current) {
@@ -27,11 +34,13 @@ export function PhoneOtpForm() {
   }
 
   function startCooldown() {
+    if (intervalRef.current) clearInterval(intervalRef.current)
     setResendCooldown(60)
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setResendCooldown((prev) => {
         if (prev <= 1) {
-          clearInterval(interval)
+          if (intervalRef.current) clearInterval(intervalRef.current)
+          intervalRef.current = null
           return 0
         }
         return prev - 1
