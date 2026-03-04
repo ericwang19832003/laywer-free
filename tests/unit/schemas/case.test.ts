@@ -97,4 +97,41 @@ describe('createCaseSchema', () => {
     const result = createCaseSchema.safeParse({ role: 'plaintiff', pi_sub_type: 'invalid_type' })
     expect(result.success).toBe(false)
   })
+
+  it('defaults state to TX', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff' })
+    if (result.success) {
+      expect(result.data.state).toBe('TX')
+    }
+  })
+
+  it('accepts CA as state', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'CA' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.state).toBe('CA')
+    }
+  })
+
+  it('rejects invalid state', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'NY' })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts CA court types', () => {
+    for (const ct of ['small_claims', 'limited_civil', 'unlimited_civil']) {
+      const result = createCaseSchema.safeParse({ role: 'plaintiff', court_type: ct })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('accepts CA state with CA court type', () => {
+    const result = createCaseSchema.safeParse({
+      role: 'plaintiff',
+      state: 'CA',
+      court_type: 'small_claims',
+      dispute_type: 'small_claims',
+    })
+    expect(result.success).toBe(true)
+  })
 })

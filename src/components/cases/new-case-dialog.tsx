@@ -18,7 +18,9 @@ import {
   type AmountRange,
   type CircumstanceFlags,
 } from '@/lib/rules/court-recommendation'
+import type { State } from '@/lib/schemas/case'
 import { WizardProgress } from './wizard/wizard-progress'
+import { StateStep } from './wizard/state-step'
 import { RoleStep } from './wizard/role-step'
 import { DisputeTypeStep } from './wizard/dispute-type-step'
 import { AmountStep } from './wizard/amount-step'
@@ -42,21 +44,22 @@ import { PISubTypeStep } from './wizard/pi-sub-type-step'
 import type { PiSubType } from '@/lib/schemas/case'
 
 function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: string, debtSide?: string): number {
-  if (disputeType === 'family') return 4
-  if (disputeType === 'small_claims') return 4
-  if (disputeType === 'personal_injury') return 5 // role, dispute, pi-subtype, amount, recommendation
+  if (disputeType === 'family') return 5
+  if (disputeType === 'small_claims') return 5
+  if (disputeType === 'personal_injury') return 6
   if (disputeType === 'landlord_tenant') {
-    return landlordTenantSubType === 'eviction' ? 4 : 5
+    return landlordTenantSubType === 'eviction' ? 5 : 6
   }
   if (disputeType === 'debt_collection') {
-    if (debtSide === 'plaintiff') return 6 // role, dispute, side, amount, circumstances, recommendation
-    return 6 // role, dispute, side, subtype, amount, recommendation
+    if (debtSide === 'plaintiff') return 7
+    return 7
   }
-  return 5
+  return 6
 }
 
 interface WizardState {
   step: number
+  selectedState: State | ''
   role: 'plaintiff' | 'defendant' | ''
   disputeType: DisputeType | ''
   familySubType: FamilySubType | ''
@@ -71,6 +74,7 @@ interface WizardState {
 }
 
 type WizardAction =
+  | { type: 'SET_STATE'; selectedState: State }
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
   | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
@@ -88,6 +92,7 @@ type WizardAction =
 
 const initialState: WizardState = {
   step: 1,
+  selectedState: '',
   role: '',
   disputeType: '',
   familySubType: '',
@@ -108,11 +113,11 @@ const initialState: WizardState = {
 
 function reducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
+    case 'SET_STATE':
+      return { ...state, selectedState: action.selectedState, step: 2 }
     case 'SET_ROLE':
-      return { ...state, role: action.role, step: 2 }
+      return { ...state, role: action.role, step: 3 }
     case 'SET_DISPUTE_TYPE':
-      // When switching away from family/small_claims/landlord_tenant/debt/pi, clear respective sub-type
-      // For personal_injury, auto-set role to plaintiff
       return {
         ...state,
         disputeType: action.disputeType,
@@ -123,14 +128,14 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
         debtSide: action.disputeType === 'debt_collection' ? state.debtSide : '',
         debtSubType: action.disputeType === 'debt_collection' ? state.debtSubType : '',
         piSubType: action.disputeType === 'personal_injury' ? state.piSubType : '',
-        step: 3,
+        step: 4,
       }
     case 'SET_FAMILY_SUB_TYPE':
-      return { ...state, familySubType: action.familySubType, step: 4 }
+      return { ...state, familySubType: action.familySubType, step: 5 }
     case 'SET_SMALL_CLAIMS_SUB_TYPE':
-      return { ...state, smallClaimsSubType: action.smallClaimsSubType, step: 4 }
+      return { ...state, smallClaimsSubType: action.smallClaimsSubType, step: 5 }
     case 'SET_LANDLORD_TENANT_SUB_TYPE':
-      return { ...state, landlordTenantSubType: action.landlordTenantSubType, step: 4 }
+      return { ...state, landlordTenantSubType: action.landlordTenantSubType, step: 5 }
     case 'SET_DEBT_SIDE':
       return { ...state, debtSide: action.debtSide, step: state.step + 1 }
     case 'SET_DEBT_SUB_TYPE':
@@ -180,20 +185,24 @@ export function NewCaseDialog() {
     setLoading(true)
     setError(null)
 
+    const stateCode = state.selectedState || 'TX'
+    const isCA = stateCode === 'CA'
+
     const courtType =
       courtOverride ??
       (isFamily
-        ? 'district'
+        ? (isCA ? 'unlimited_civil' : 'district')
         : isSmallClaims
-          ? 'jp'
+          ? (isCA ? 'small_claims' : 'jp')
           : isEviction
-            ? 'jp'
+            ? (isCA ? 'unlimited_civil' : 'jp')
             : state.disputeType && state.amount
               ? recommendCourt({
                   disputeType: state.disputeType,
                   amount: state.amount,
                   circumstances: state.circumstances,
                   subType: isLandlordTenant ? state.landlordTenantSubType : undefined,
+                  state: stateCode,
                 }).recommended
               : 'unknown')
 
@@ -216,6 +225,7 @@ export function NewCaseDialog() {
             : {}),
         },
         body: JSON.stringify({
+          state: stateCode,
           role: state.role,
           court_type: courtType,
           ...(state.disputeType ? { dispute_type: state.disputeType } : {}),
@@ -262,58 +272,75 @@ export function NewCaseDialog() {
     }
   }
 
-  // Compute recommendation for civil (non-family, non-small-claims, non-pi, non-landlord-tenant, non-debt) flow
+  const selectedState = state.selectedState || 'TX'
+  const isCA = selectedState === 'CA'
+
   const civilRecommendation =
     !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
+          state: selectedState,
         })
       : null
 
-  // Computed recommendation for debt defendant flow (amount-based)
   const debtRecommendation =
     isDebtDefendant && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
+          state: selectedState,
         })
       : null
 
-  // Computed recommendation for debt plaintiff flow (amount-based with circumstances)
   const debtPlaintiffRecommendation =
     isDebtPlaintiff && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
+          state: selectedState,
         })
       : null
 
-  // Hardcoded recommendation for family flow
-  const familyRecommendation = {
-    recommended: 'district' as const,
-    reasoning: 'Family law cases are filed in District Court.',
-    confidence: 'high' as const,
-  }
+  const familyRecommendation = isCA
+    ? {
+        recommended: 'unlimited_civil' as const,
+        reasoning: 'Family law matters are heard in California Superior Court (Unlimited Civil division).',
+        confidence: 'high' as const,
+      }
+    : {
+        recommended: 'district' as const,
+        reasoning: 'Family law cases are filed in District Court.',
+        confidence: 'high' as const,
+      }
 
-  // Hardcoded recommendation for small claims flow
-  const smallClaimsRecommendation = {
-    recommended: 'jp' as const,
-    reasoning: 'Small claims cases are filed in Justice of the Peace (JP) Court.',
-    confidence: 'high' as const,
-  }
+  const smallClaimsRecommendation = isCA
+    ? {
+        recommended: 'small_claims' as const,
+        reasoning: 'Small claims cases are filed in California Small Claims Court.',
+        confidence: 'high' as const,
+      }
+    : {
+        recommended: 'jp' as const,
+        reasoning: 'Small claims cases are filed in Justice of the Peace (JP) Court.',
+        confidence: 'high' as const,
+      }
 
-  // Hardcoded recommendation for eviction flow
-  const evictionRecommendation = {
-    recommended: 'jp' as const,
-    reasoning: 'Eviction cases are filed in Justice of the Peace (JP) Court.',
-    confidence: 'high' as const,
-  }
+  const evictionRecommendation = isCA
+    ? {
+        recommended: 'unlimited_civil' as const,
+        reasoning: 'Unlawful detainer (eviction) cases are heard in California Superior Court regardless of the amount involved.',
+        confidence: 'high' as const,
+      }
+    : {
+        recommended: 'jp' as const,
+        reasoning: 'Eviction cases are filed in Justice of the Peace (JP) Court.',
+        confidence: 'high' as const,
+      }
 
-  // Computed recommendation for non-eviction landlord-tenant flow
   const landlordTenantRecommendation =
     isLandlordTenant && !isEviction && state.disputeType && state.amount
       ? recommendCourt({
@@ -321,16 +348,17 @@ export function NewCaseDialog() {
           amount: state.amount,
           circumstances: state.circumstances,
           subType: state.landlordTenantSubType,
+          state: selectedState,
         })
       : null
 
-  // Computed recommendation for personal injury flow (amount-based)
   const piRecommendation =
     isPersonalInjury && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
+          state: selectedState,
         })
       : null
 
@@ -356,22 +384,30 @@ export function NewCaseDialog() {
         />
 
         {state.step === 1 && (
+          <StateStep
+            value={state.selectedState}
+            onSelect={(s) => dispatch({ type: 'SET_STATE', selectedState: s })}
+          />
+        )}
+
+        {state.step === 2 && (
           <RoleStep
             value={state.role}
             onSelect={(role) => dispatch({ type: 'SET_ROLE', role })}
           />
         )}
 
-        {state.step === 2 && (
+        {state.step === 3 && (
           <DisputeTypeStep
             value={state.disputeType}
+            selectedState={selectedState}
             onSelect={(disputeType) =>
               dispatch({ type: 'SET_DISPUTE_TYPE', disputeType })
             }
           />
         )}
 
-        {state.step === 3 && isFamily && (
+        {state.step === 4 && isFamily && (
           <FamilySubTypeStep
             value={state.familySubType}
             onSelect={(familySubType) =>
@@ -380,16 +416,17 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 3 && isSmallClaims && (
+        {state.step === 4 && isSmallClaims && (
           <SmallClaimsSubTypeStep
             value={state.smallClaimsSubType}
+            selectedState={selectedState}
             onSelect={(smallClaimsSubType) =>
               dispatch({ type: 'SET_SMALL_CLAIMS_SUB_TYPE', smallClaimsSubType })
             }
           />
         )}
 
-        {state.step === 3 && isLandlordTenant && (
+        {state.step === 4 && isLandlordTenant && (
           <LandlordTenantSubTypeStep
             value={state.landlordTenantSubType}
             onSelect={(landlordTenantSubType) =>
@@ -398,14 +435,14 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 3 && isPersonalInjury && (
+        {state.step === 4 && isPersonalInjury && (
           <PISubTypeStep
             value={state.piSubType}
             onSelect={(t) => dispatch({ type: 'SET_PI_SUB_TYPE', payload: t })}
           />
         )}
 
-        {state.step === 3 && isDebtCollection && (
+        {state.step === 4 && isDebtCollection && (
           <DebtSideStep
             value={state.debtSide}
             onSelect={(debtSide) =>
@@ -414,16 +451,18 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 3 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
+        {state.step === 4 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <AmountStep
             value={state.amount}
+            selectedState={selectedState}
             onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
           />
         )}
 
-        {state.step === 4 && isFamily && (
+        {state.step === 5 && isFamily && (
           <RecommendationStep
             recommendation={familyRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
@@ -431,9 +470,10 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 4 && isSmallClaims && (
+        {state.step === 5 && isSmallClaims && (
           <RecommendationStep
             recommendation={smallClaimsRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
@@ -441,9 +481,10 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 4 && isEviction && (
+        {state.step === 5 && isEviction && (
           <RecommendationStep
             recommendation={evictionRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
@@ -451,14 +492,15 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 4 && isLandlordTenant && !isEviction && (
+        {state.step === 5 && isLandlordTenant && !isEviction && (
           <AmountStep
             value={state.amount}
+            selectedState={selectedState}
             onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
           />
         )}
 
-        {state.step === 4 && isDebtDefendant && (
+        {state.step === 5 && isDebtDefendant && (
           <DebtSubTypeStep
             value={state.debtSubType}
             onSelect={(debtSubType) =>
@@ -467,48 +509,23 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 4 && isPersonalInjury && (
+        {state.step === 5 && isPersonalInjury && (
           <AmountStep
             value={state.amount}
-            onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
-          />
-        )}
-
-        {state.step === 4 && isDebtPlaintiff && (
-          <AmountStep
-            value={state.amount}
-            onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
-          />
-        )}
-
-        {state.step === 4 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
-          <CircumstancesStep
-            value={state.circumstances}
-            onChange={(circumstances) =>
-              dispatch({ type: 'SET_CIRCUMSTANCES', circumstances })
-            }
-            onContinue={() => dispatch({ type: 'NEXT_STEP' })}
-          />
-        )}
-
-        {state.step === 5 && isLandlordTenant && !isEviction && landlordTenantRecommendation && (
-          <RecommendationStep
-            recommendation={landlordTenantRecommendation}
-            county={state.county}
-            onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
-            onAccept={handleAccept}
-            loading={loading}
-          />
-        )}
-
-        {state.step === 5 && isDebtDefendant && (
-          <AmountStep
-            value={state.amount}
+            selectedState={selectedState}
             onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
           />
         )}
 
         {state.step === 5 && isDebtPlaintiff && (
+          <AmountStep
+            value={state.amount}
+            selectedState={selectedState}
+            onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
+          />
+        )}
+
+        {state.step === 5 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <CircumstancesStep
             value={state.circumstances}
             onChange={(circumstances) =>
@@ -518,9 +535,39 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 5 && isPersonalInjury && piRecommendation && (
+        {state.step === 6 && isLandlordTenant && !isEviction && landlordTenantRecommendation && (
+          <RecommendationStep
+            recommendation={landlordTenantRecommendation}
+            selectedState={selectedState}
+            county={state.county}
+            onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
+            onAccept={handleAccept}
+            loading={loading}
+          />
+        )}
+
+        {state.step === 6 && isDebtDefendant && (
+          <AmountStep
+            value={state.amount}
+            selectedState={selectedState}
+            onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
+          />
+        )}
+
+        {state.step === 6 && isDebtPlaintiff && (
+          <CircumstancesStep
+            value={state.circumstances}
+            onChange={(circumstances) =>
+              dispatch({ type: 'SET_CIRCUMSTANCES', circumstances })
+            }
+            onContinue={() => dispatch({ type: 'NEXT_STEP' })}
+          />
+        )}
+
+        {state.step === 6 && isPersonalInjury && piRecommendation && (
           <RecommendationStep
             recommendation={piRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
@@ -528,9 +575,10 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 5 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && civilRecommendation && (
+        {state.step === 6 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && civilRecommendation && (
           <RecommendationStep
             recommendation={civilRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
@@ -538,9 +586,10 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 6 && isDebtDefendant && debtRecommendation && (
+        {state.step === 7 && isDebtDefendant && debtRecommendation && (
           <RecommendationStep
             recommendation={debtRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
@@ -548,9 +597,10 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 6 && isDebtPlaintiff && debtPlaintiffRecommendation && (
+        {state.step === 7 && isDebtPlaintiff && debtPlaintiffRecommendation && (
           <RecommendationStep
             recommendation={debtPlaintiffRecommendation}
+            selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}

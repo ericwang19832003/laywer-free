@@ -10,6 +10,8 @@ import {
   HelpCircle,
   type LucideIcon,
 } from 'lucide-react'
+import type { State } from '@/lib/schemas/case'
+import { getSmallClaimsMax } from '@/lib/states'
 
 export type SmallClaimsSubType =
   | 'security_deposit'
@@ -24,7 +26,7 @@ export type SmallClaimsSubType =
 interface SmallClaimsSubTypeOption {
   value: SmallClaimsSubType
   label: string
-  description: string
+  description: string | ((limit: string) => string)
   icon: LucideIcon
 }
 
@@ -74,17 +76,22 @@ const SMALL_CLAIMS_OPTIONS: SmallClaimsSubTypeOption[] = [
   {
     value: 'other',
     label: 'Other Small Claim',
-    description: 'Another type of claim under $20,000',
+    description: (limit: string) => `Another type of claim under ${limit}`,
     icon: HelpCircle,
   },
 ]
 
 interface SmallClaimsSubTypeStepProps {
   value: SmallClaimsSubType | ''
+  selectedState?: State
   onSelect: (subType: SmallClaimsSubType) => void
 }
 
-export function SmallClaimsSubTypeStep({ value, onSelect }: SmallClaimsSubTypeStepProps) {
+export function SmallClaimsSubTypeStep({ value, selectedState = 'TX', onSelect }: SmallClaimsSubTypeStepProps) {
+  const limit = getSmallClaimsMax(selectedState)
+  const limitFormatted = `$${limit.toLocaleString()}`
+  const stateName = selectedState === 'CA' ? 'California' : 'Texas'
+
   return (
     <div className="space-y-3">
       <p className="text-sm font-medium text-warm-text">
@@ -94,6 +101,9 @@ export function SmallClaimsSubTypeStep({ value, onSelect }: SmallClaimsSubTypeSt
         {SMALL_CLAIMS_OPTIONS.map((opt) => {
           const Icon = opt.icon
           const selected = value === opt.value
+          const description = typeof opt.description === 'function'
+            ? opt.description(limitFormatted)
+            : opt.description
 
           return (
             <button
@@ -116,7 +126,7 @@ export function SmallClaimsSubTypeStep({ value, onSelect }: SmallClaimsSubTypeSt
                   {opt.label}
                 </span>
                 <span className="block text-xs mt-0.5 text-warm-muted">
-                  {opt.description}
+                  {description}
                 </span>
               </div>
             </button>
@@ -126,8 +136,8 @@ export function SmallClaimsSubTypeStep({ value, onSelect }: SmallClaimsSubTypeSt
 
       <div className="rounded-md border border-calm-amber bg-calm-amber/5 px-4 py-3">
         <p className="text-xs font-medium text-calm-amber leading-relaxed">
-          Texas small claims limit: $20,000. If your claim is for more than
-          $20,000, you may need to file in County or District Court instead.
+          {stateName} small claims limit: {limitFormatted}. If your claim is for more than{' '}
+          {limitFormatted}, you may need to file in {selectedState === 'CA' ? 'Limited Civil or Unlimited Civil' : 'County or District'} Court instead.
         </p>
       </div>
     </div>

@@ -72,10 +72,20 @@ export const PI_SUB_TYPES = [
 
 export type PiSubType = (typeof PI_SUB_TYPES)[number]
 
+export const STATES = ['TX', 'CA'] as const
+export type State = (typeof STATES)[number]
+
+export const ALL_COURT_TYPES = [
+  'jp', 'county', 'district',
+  'small_claims', 'limited_civil', 'unlimited_civil',
+  'federal', 'unknown',
+] as const
+
 export const createCaseSchema = z.object({
+  state: z.enum(STATES).optional().default('TX'),
   role: z.enum(['plaintiff', 'defendant']),
   county: z.string().optional(),
-  court_type: z.enum(['jp', 'county', 'district', 'federal', 'unknown']).optional().default('unknown'),
+  court_type: z.enum(ALL_COURT_TYPES).optional().default('unknown'),
   dispute_type: z.enum(DISPUTE_TYPES).optional(),
   family_sub_type: z.enum(FAMILY_SUB_TYPES).optional(),
   small_claims_sub_type: z.enum(SMALL_CLAIMS_SUB_TYPES).optional(),

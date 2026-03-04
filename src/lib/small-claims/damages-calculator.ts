@@ -60,6 +60,13 @@ export interface DamagesResult {
  */
 export const TX_JP_COURT_CAP = 20_000
 
+/**
+ * Code Civ. Proc. § 116.221: California Small Claims Court has
+ * jurisdiction over civil matters where the amount does not exceed
+ * $12,500 for individuals.
+ */
+export const CA_SMALL_CLAIMS_CAP = 12_500
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

@@ -10,16 +10,30 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { CourtRecommendation } from '@/lib/rules/court-recommendation'
+import type { State } from '@/lib/schemas/case'
+import { getStateConfig } from '@/lib/states'
 
-const COURT_LABELS: Record<string, string> = {
+const TX_COURT_LABELS: Record<string, string> = {
   jp: 'JP Court (Small Claims)',
   county: 'County Court',
   district: 'District Court',
   federal: 'Federal Court',
 }
 
+const CA_COURT_LABELS: Record<string, string> = {
+  small_claims: 'Small Claims Court',
+  limited_civil: 'Limited Civil Court',
+  unlimited_civil: 'Unlimited Civil Court',
+  federal: 'Federal Court',
+}
+
+function getCourtLabels(selectedState: State): Record<string, string> {
+  return selectedState === 'CA' ? CA_COURT_LABELS : TX_COURT_LABELS
+}
+
 interface RecommendationStepProps {
   recommendation: CourtRecommendation
+  selectedState?: State
   county: string
   onCountyChange: (county: string) => void
   onAccept: (courtOverride: string | null) => void
@@ -28,6 +42,7 @@ interface RecommendationStepProps {
 
 export function RecommendationStep({
   recommendation,
+  selectedState = 'TX',
   county,
   onCountyChange,
   onAccept,
@@ -36,6 +51,10 @@ export function RecommendationStep({
   const [showOverride, setShowOverride] = useState(false)
   const [override, setOverride] = useState('')
 
+  const courtLabels = getCourtLabels(selectedState)
+  const config = getStateConfig(selectedState)
+  const countyPlaceholder = selectedState === 'CA' ? 'e.g. Los Angeles County' : 'e.g. Travis County'
+
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-warm-border bg-white p-4 space-y-2">
@@ -43,7 +62,7 @@ export function RecommendationStep({
           Our recommendation
         </p>
         <p className="text-base font-semibold text-warm-text">
-          {COURT_LABELS[recommendation.recommended]}
+          {courtLabels[recommendation.recommended] ?? recommendation.recommended}
         </p>
         <p className="text-sm text-warm-text leading-relaxed">
           {recommendation.reasoning}
@@ -61,7 +80,7 @@ export function RecommendationStep({
           id="county"
           value={county}
           onChange={(e) => onCountyChange(e.target.value)}
-          placeholder="e.g. Travis County"
+          placeholder={countyPlaceholder}
         />
       </div>
 
@@ -91,9 +110,11 @@ export function RecommendationStep({
               <SelectValue placeholder="Select a court" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="jp">JP Court (Small Claims)</SelectItem>
-              <SelectItem value="county">County Court</SelectItem>
-              <SelectItem value="district">District Court</SelectItem>
+              {config.courtTypes.map((ct) => (
+                <SelectItem key={ct.value} value={ct.value}>
+                  {ct.label}
+                </SelectItem>
+              ))}
               <SelectItem value="federal">Federal Court</SelectItem>
             </SelectContent>
           </Select>

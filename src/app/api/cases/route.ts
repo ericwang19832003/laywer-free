@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type, pi_sub_type } = parsed.data
+    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type, pi_sub_type, state } = parsed.data
 
     // Insert the case
     const { data: newCase, error: caseError } = await supabase!
@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         county,
         court_type,
         dispute_type,
+        state,
       })
       .select()
       .single()
