@@ -67,6 +67,9 @@ import {
 import { buildSmallClaimsFilingPrompt } from '@/lib/rules/small-claims-filing-prompts'
 import { smallClaimsFilingFactsSchema } from '@/lib/schemas/small-claims-filing'
 import { demandLetterFactsSchema, buildDemandLetterPrompt } from '@/lib/rules/demand-letter-prompts'
+import { buildLandlordTenantFilingPrompt } from '@/lib/rules/landlord-tenant-filing-prompts'
+import { landlordTenantFilingFactsSchema } from '@/lib/schemas/landlord-tenant-filing'
+import { ltDemandLetterFactsSchema, buildLtDemandLetterPrompt } from '@/lib/rules/landlord-tenant-demand-letter-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 /* ------------------------------------------------------------------ */
@@ -208,6 +211,44 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   demand_letter: {
     schema: demandLetterFactsSchema,
     buildPrompt: buildDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Landlord-tenant filing types — all 8 sub-types use the same schema/prompt builder
+  landlord_tenant_eviction: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_nonpayment: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_security_deposit: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_property_damage: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_repair_maintenance: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_lease_termination: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_habitability: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  landlord_tenant_other: {
+    schema: landlordTenantFilingFactsSchema,
+    buildPrompt: buildLandlordTenantFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // LT demand letter
+  landlord_tenant_demand_letter: {
+    schema: ltDemandLetterFactsSchema,
+    buildPrompt: buildLtDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 

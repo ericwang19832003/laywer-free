@@ -96,27 +96,29 @@ export function CustodyStep({
       </div>
 
       {/* Reasoning */}
-      <div>
-        <Label htmlFor="custody-reasoning" className="text-sm font-medium text-warm-text">
-          Why do you believe this arrangement is best?
-        </Label>
-        <HelpTooltip label="What should I include?">
-          <p>
-            Focus on the children&apos;s best interest. Mention your involvement in their
-            daily care, their routine, school, healthcare needs, and your living situation.
-            If there are safety concerns, include those too.
-          </p>
-        </HelpTooltip>
-        <textarea
-          id="custody-reasoning"
-          value={reasoning}
-          onChange={(e) => onReasoningChange(e.target.value)}
-          placeholder="Explain why this arrangement is in the best interest of the children..."
-          className="mt-2 w-full rounded-md border border-warm-border bg-white px-3 py-2 text-sm text-warm-text placeholder:text-warm-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
-          style={{ minHeight: '120px' }}
-          rows={5}
-        />
-      </div>
+      {arrangement && arrangement !== 'joint_managing' && (
+        <div>
+          <Label htmlFor="custody-reasoning" className="text-sm font-medium text-warm-text">
+            Why do you believe this arrangement is best?
+          </Label>
+          <HelpTooltip label="What should I include?">
+            <p>
+              Focus on the children&apos;s best interest. Mention your involvement in their
+              daily care, their routine, school, healthcare needs, and your living situation.
+              If there are safety concerns, include those too.
+            </p>
+          </HelpTooltip>
+          <textarea
+            id="custody-reasoning"
+            value={reasoning}
+            onChange={(e) => onReasoningChange(e.target.value)}
+            placeholder="Explain why this arrangement is in the best interest of the children..."
+            className="mt-2 w-full rounded-md border border-warm-border bg-white px-3 py-2 text-sm text-warm-text placeholder:text-warm-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            style={{ minHeight: '120px' }}
+            rows={5}
+          />
+        </div>
+      )}
 
       {/* Standard Possession Order info */}
       <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4">

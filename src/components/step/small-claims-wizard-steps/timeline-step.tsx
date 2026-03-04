@@ -16,6 +16,15 @@ interface TimelineStepProps {
   onEventsChange: (events: TimelineEvent[]) => void
 }
 
+const TIMELINE_SUGGESTIONS = [
+  'Agreement made',
+  'Payment made',
+  'Problem discovered',
+  'Attempted resolution',
+  'Demand letter sent',
+  'Decided to file',
+]
+
 export function TimelineStep({ events, onEventsChange }: TimelineStepProps) {
   function updateEvent(index: number, field: keyof TimelineEvent, value: string) {
     const updated = [...events]
@@ -29,6 +38,32 @@ export function TimelineStep({ events, onEventsChange }: TimelineStepProps) {
 
   function removeEvent(index: number) {
     onEventsChange(events.filter((_, i) => i !== index))
+  }
+
+  function applySuggestion(description: string) {
+    const emptyIndex = events.findIndex(
+      (event) => !event.date && !event.description
+    )
+
+    if (emptyIndex >= 0) {
+      const updated = [...events]
+      updated[emptyIndex] = { ...updated[emptyIndex], description }
+      onEventsChange(updated)
+      return
+    }
+
+    onEventsChange([...events, { date: '', description }])
+  }
+
+  function sortByDate() {
+    const sorted = [...events].sort((a, b) => {
+      if (!a.date && !b.date) return 0
+      if (!a.date) return 1
+      if (!b.date) return -1
+      return a.date.localeCompare(b.date)
+    })
+
+    onEventsChange(sorted)
   }
 
   return (
@@ -49,6 +84,32 @@ export function TimelineStep({ events, onEventsChange }: TimelineStepProps) {
           </p>
         </HelpTooltip>
       </div>
+
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <p className="text-xs font-medium text-warm-muted mb-1.5">Quick add common events:</p>
+        <div className="flex flex-wrap gap-1.5">
+          {TIMELINE_SUGGESTIONS.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => applySuggestion(suggestion)}
+              className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {events.length > 1 && (
+        <button
+          type="button"
+          onClick={sortByDate}
+          className="text-xs text-calm-indigo hover:text-calm-indigo/80"
+        >
+          Sort by date
+        </button>
+      )}
 
       {/* Events list */}
       <div className="space-y-4">

@@ -38,6 +38,7 @@ export interface CourtRecommendationInput {
   disputeType: DisputeType
   amount: AmountRange
   circumstances: CircumstanceFlags
+  subType?: string  // Optional sub-type for dispute-specific routing
 }
 
 export interface CourtRecommendation {
@@ -73,6 +74,16 @@ export function recommendCourt(input: CourtRecommendationInput): CourtRecommenda
       recommended: 'district',
       reasoning:
         'Family law matters have exclusive jurisdiction in Texas District Courts.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 2.5: Eviction -- always JP Court
+  if (disputeType === 'landlord_tenant' && input.subType === 'eviction') {
+    return {
+      recommended: 'jp',
+      reasoning:
+        'Eviction (forcible entry and detainer) cases are filed in Justice of the Peace Court in Texas, regardless of the amount involved.',
       confidence: 'high',
     }
   }

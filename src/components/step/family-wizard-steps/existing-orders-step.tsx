@@ -22,6 +22,13 @@ const modifyOptions = [
   { value: 'spousal_support', label: 'Spousal Support' },
 ]
 
+const commonChanges = [
+  { label: 'Income change', value: 'Income has changed significantly.' },
+  { label: 'Schedule change', value: 'Work or school schedules have changed.' },
+  { label: 'Relocation', value: 'Someone has moved to a new county or city.' },
+  { label: 'Safety concern', value: 'There are new safety or stability concerns.' },
+]
+
 export function ExistingOrdersStep({
   court,
   causeNumber,
@@ -37,6 +44,15 @@ export function ExistingOrdersStep({
       onWhatToModifyChange(whatToModify.filter((v) => v !== value))
     } else {
       onWhatToModifyChange([...whatToModify, value])
+    }
+  }
+
+  function appendChange(value: string) {
+    if (!changeDescription.includes(value)) {
+      const next = changeDescription.trim()
+        ? `${changeDescription.trim()} ${value}`
+        : value
+      onChangeDescriptionChange(next)
     }
   }
 
@@ -131,6 +147,18 @@ export function ExistingOrdersStep({
           style={{ minHeight: '120px' }}
           rows={5}
         />
+        <div className="mt-3 flex flex-wrap gap-2">
+          {commonChanges.map((change) => (
+            <button
+              key={change.label}
+              type="button"
+              onClick={() => appendChange(change.value)}
+              className="rounded-full border border-warm-border px-3 py-1 text-xs text-warm-text hover:bg-warm-bg/60"
+            >
+              {change.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

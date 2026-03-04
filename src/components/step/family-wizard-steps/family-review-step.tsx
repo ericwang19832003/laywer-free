@@ -137,6 +137,14 @@ export function FamilyReviewStep({
   const hasChildSupport = ['divorce', 'custody', 'child_support', 'modification'].includes(familySubType)
   const isModification = familySubType === 'modification'
   const isProtectiveOrder = familySubType === 'protective_order'
+  const includeChecklist = [
+    'Caption with court and parties',
+    'Parties (Petitioner and Respondent)',
+    'Grounds or facts for the request',
+    hasChildren ? 'Children and custody details (if applicable)' : null,
+    'Relief requested',
+    'Signature block',
+  ].filter(Boolean) as string[]
   const isDVFlagged = Boolean(formData.dvFlag) || isProtectiveOrder
 
   return (
@@ -152,6 +160,18 @@ export function FamilyReviewStep({
           <span className="text-warm-muted">Case type:</span>{' '}
           <span className="font-medium">{subTypeLabel(familySubType)}</span>
         </p>
+      </div>
+
+      <div className="rounded-lg border border-warm-border p-4">
+        <p className="text-sm font-medium text-warm-text mb-2">We will include</p>
+        <ul className="space-y-2 text-sm text-warm-muted">
+          {includeChecklist.map((item) => (
+            <li key={item} className="flex items-start gap-2">
+              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-calm-indigo" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* DV / safety reminder */}
@@ -227,6 +247,10 @@ export function FamilyReviewStep({
                 </dl>
               </div>
             ))}
+            <ReviewField
+              label="Where the children have lived"
+              value={formData.childrenResidence as string}
+            />
           </div>
         </SectionCard>
       )}

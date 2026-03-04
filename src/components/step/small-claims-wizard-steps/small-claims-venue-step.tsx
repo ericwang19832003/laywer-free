@@ -3,6 +3,7 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
+import { useState } from 'react'
 
 interface SmallClaimsVenueStepProps {
   defendantCounty: string
@@ -17,6 +18,14 @@ export function SmallClaimsVenueStep({
   precinct,
   onFieldChange,
 }: SmallClaimsVenueStepProps) {
+  const hasDefendantCounty = defendantCounty.trim().length > 0
+  const hasIncidentCounty = incidentCounty.trim().length > 0
+  const showDualVenue =
+    hasDefendantCounty &&
+    hasIncidentCounty &&
+    defendantCounty.trim().toLowerCase() !== incidentCounty.trim().toLowerCase()
+  const [precinctUnknown, setPrecinctUnknown] = useState(false)
+
   return (
     <div className="space-y-6">
       {/* Venue explanation */}
@@ -49,6 +58,17 @@ export function SmallClaimsVenueStep({
         />
       </div>
 
+      {hasDefendantCounty && (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+          <p className="text-sm font-medium text-warm-text">
+            Recommended: {defendantCounty} County
+          </p>
+          <p className="text-xs text-warm-muted mt-1">
+            Does this look right? You can edit the county above.
+          </p>
+        </div>
+      )}
+
       {/* Incident county (optional) */}
       <div>
         <Label htmlFor="incident-county" className="text-sm font-medium text-warm-text">
@@ -62,6 +82,24 @@ export function SmallClaimsVenueStep({
             you may file in either.
           </p>
         </HelpTooltip>
+        {hasDefendantCounty && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onFieldChange('incidentCounty', defendantCounty)}
+              className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+            >
+              Use defendant county
+            </button>
+            <button
+              type="button"
+              onClick={() => onFieldChange('incidentCounty', '')}
+              className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+            >
+              Leave blank
+            </button>
+          </div>
+        )}
         <Input
           id="incident-county"
           value={incidentCounty}
@@ -70,6 +108,20 @@ export function SmallClaimsVenueStep({
           className="mt-2"
         />
       </div>
+
+      {showDualVenue && (
+        <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4">
+          <p className="text-sm font-semibold text-warm-text">Possible venues</p>
+          <p className="text-xs text-warm-muted mt-1">
+            Because the defendant&apos;s county and incident county differ, you can typically file
+            in either.
+          </p>
+          <ul className="mt-2 space-y-1 text-sm text-warm-text">
+            <li>{defendantCounty} County (defendant)</li>
+            <li>{incidentCounty} County (incident)</li>
+          </ul>
+        </div>
+      )}
 
       {/* JP Court precinct (optional) */}
       <div>
@@ -84,13 +136,32 @@ export function SmallClaimsVenueStep({
             blank and look it up before filing.
           </p>
         </HelpTooltip>
-        <Input
-          id="precinct"
-          value={precinct}
-          onChange={(e) => onFieldChange('precinct', e.target.value)}
-          placeholder="e.g. Precinct 3"
-          className="mt-2"
-        />
+        <label className="mt-2 flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
+          <input
+            type="checkbox"
+            checked={precinctUnknown}
+            onChange={(e) => {
+              setPrecinctUnknown(e.target.checked)
+              if (e.target.checked) onFieldChange('precinct', '')
+            }}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo"
+          />
+          <span className="text-sm text-warm-text">I don&apos;t know the precinct yet</span>
+        </label>
+        {!precinctUnknown && (
+          <Input
+            id="precinct"
+            value={precinct}
+            onChange={(e) => onFieldChange('precinct', e.target.value)}
+            placeholder="e.g. Precinct 3"
+            className="mt-2"
+          />
+        )}
+        {precinctUnknown && (
+          <p className="text-xs text-warm-muted mt-2">
+            That&apos;s okay. We&apos;ll remind you to look it up before filing.
+          </p>
+        )}
       </div>
 
       {/* Venue tip */}

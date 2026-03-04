@@ -199,6 +199,13 @@ export function SmallClaimsReviewStep({
 }: SmallClaimsReviewStepProps) {
   const detailFields = getClaimDetailsSummary(claimSubType, claimDetails)
   const hasTimeline = timelineEvents.length > 0 && timelineEvents.some((e) => e.date || e.description)
+  const missingItems: string[] = []
+
+  if (!plaintiff.full_name) missingItems.push('Your name')
+  if (!defendant.full_name) missingItems.push('Defendant name')
+  if (detailFields.length === 0) missingItems.push('Claim details')
+  if (totalDamages <= 0) missingItems.push('Damages total')
+  if (!defendantCounty) missingItems.push('Venue selection')
 
   return (
     <div className="space-y-4">
@@ -206,6 +213,60 @@ export function SmallClaimsReviewStep({
         Review the information below. Click &quot;Edit&quot; on any section to make changes.
         When everything looks right, click the button below to continue.
       </p>
+
+      {missingItems.length > 0 && (
+        <div className="rounded-lg border border-calm-amber/40 bg-calm-amber/5 p-4">
+          <p className="text-sm font-semibold text-warm-text">Some sections look incomplete</p>
+          <p className="text-xs text-warm-muted mt-1">
+            You can still continue, but filling these in helps your filing go smoothly.
+          </p>
+          <ul className="mt-2 space-y-1 text-sm text-warm-text">
+            {missingItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4">
+        <p className="text-sm font-semibold text-warm-text">Key totals</p>
+        <div className="mt-2 grid gap-2 text-sm text-warm-text sm:grid-cols-2">
+          <div>
+            <span className="text-xs text-warm-muted">Damages total</span>
+            <p className="font-semibold">
+              ${totalDamages.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div>
+            <span className="text-xs text-warm-muted">Line items</span>
+            <p className="font-semibold">
+              {damageItems.filter((item) => item.amount > 0).length}
+            </p>
+          </div>
+          <div>
+            <span className="text-xs text-warm-muted">Timeline events</span>
+            <p className="font-semibold">
+              {timelineEvents.filter((event) => event.date || event.description).length} events
+            </p>
+          </div>
+          <div>
+            <span className="text-xs text-warm-muted">Demand letter</span>
+            <p className="font-semibold">{demandLetterSent ? 'Sent' : 'Not sent'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-warm-border bg-warm-bg/30 p-4">
+        <p className="text-sm font-semibold text-warm-text">We will include</p>
+        <ul className="mt-2 space-y-1 text-sm text-warm-muted">
+          <li>Parties and contact info</li>
+          <li>Claim details summary</li>
+          <li>Damages total and line items</li>
+          <li>Timeline of events (if provided)</li>
+          <li>Demand letter status</li>
+          <li>Venue selection</li>
+        </ul>
+      </div>
 
       {/* Case type */}
       <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">

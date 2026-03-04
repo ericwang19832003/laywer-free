@@ -3,6 +3,42 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
+import { Button } from '@/components/ui/button'
+
+function getExampleText(claimSubType: string) {
+  switch (claimSubType) {
+    case 'security_deposit':
+      return 'Example: I paid a $1,200 deposit, moved out on June 1, and the landlord kept $700 for cleaning without an itemized list.'
+    case 'breach_of_contract':
+      return 'Example: The contractor agreed to remodel the kitchen by March 1 for $8,000, but stopped after demolition and never finished the work.'
+    case 'consumer_refund':
+      return 'Example: I paid $450 for a repair on January 10, the issue returned within a week, and the company refused a refund.'
+    case 'property_damage':
+      return 'Example: A delivery truck hit my fence on May 3, causing $2,500 in damage based on repair estimates.'
+    case 'car_accident':
+      return 'Example: I was rear-ended at a red light on April 2, and repairs cost $3,200.'
+    case 'neighbor_dispute':
+      return "Example: My neighbor's tree fell onto my fence during a storm and they refuse to pay for repairs."
+    case 'unpaid_loan':
+      return 'Example: I lent $2,000 in July with a promise to repay monthly, but payments stopped after two months.'
+    case 'other':
+    default:
+      return 'Example: On May 5, the business charged me twice and has not refunded the duplicate payment.'
+  }
+}
+
+function applyTemplate(
+  formValues: Record<string, string | boolean>,
+  onFieldChange: (field: string, value: string | boolean) => void,
+  updates: Record<string, string>
+) {
+  Object.entries(updates).forEach(([field, value]) => {
+    const current = (formValues[field] as string) ?? ''
+    if (!current.trim()) {
+      onFieldChange(field, value)
+    }
+  })
+}
 
 interface ClaimDetailsStepProps {
   claimSubType: string
@@ -42,6 +78,26 @@ function SecurityDepositForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                deductions:
+                  'The landlord deducted $____ for cleaning and $____ for repairs, but the unit was left in good condition.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert a starter sentence you can edit.</p>
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="lease-start-date" className="text-sm font-medium text-warm-text">
@@ -128,6 +184,28 @@ function BreachOfContractForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                whatWasPromised:
+                  'The other party agreed to provide ____ by ____ for $____.',
+                whatHappened:
+                  'They failed to deliver the work and stopped responding after ____.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="contract-date" className="text-sm font-medium text-warm-text">
           Date of the contract or agreement
@@ -196,6 +274,28 @@ function ConsumerRefundForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                whatWentWrong:
+                  'The product/service did not work as promised and failed within ____ days.',
+                refundAttempts:
+                  'I contacted the business on ____ and ____ to request a refund, but they refused or did not respond.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="purchase-date" className="text-sm font-medium text-warm-text">
           Date of purchase
@@ -276,6 +376,29 @@ function PropertyDamageForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                whatWasDamaged: 'The damage includes ____ and ____.',
+                howDamaged:
+                  'The damage occurred when ____ on ____.',
+                repairEstimates:
+                  'Estimate from ____: $____. Estimate from ____: $____.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="what-was-damaged" className="text-sm font-medium text-warm-text">
           What was damaged?
@@ -343,6 +466,28 @@ function CarAccidentForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                accidentDescription:
+                  'I was driving ____ when the other driver ____ and hit my vehicle.',
+                faultReason:
+                  'The other driver was at fault because ____.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="accident-date" className="text-sm font-medium text-warm-text">
           Date of the accident
@@ -415,6 +560,28 @@ function NeighborDisputeForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                disputeNature:
+                  'The dispute involves ____ and has caused ____.',
+                resolutionAttempts:
+                  'I attempted to resolve this on ____ by ____.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="dispute-nature" className="text-sm font-medium text-warm-text">
           Nature of the dispute
@@ -489,6 +656,28 @@ function UnpaidLoanForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                loanTerms:
+                  'We agreed the loan would be repaid by ____ in ____ installments.',
+                paymentsMade:
+                  'They paid $____ on ____ but stopped after ____.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="loan-date" className="text-sm font-medium text-warm-text">
           Date of the loan
@@ -575,6 +764,26 @@ function OtherClaimForm({
 }: Pick<ClaimDetailsStepProps, 'formValues' | 'onFieldChange'>) {
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-warm-muted">Need a starting point?</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              applyTemplate(formValues, onFieldChange, {
+                claimDescription:
+                  'On ____, ____ happened at ____. As a result, I lost $____.',
+              })
+            }
+            className="h-7 px-2 text-xs"
+          >
+            Use template
+          </Button>
+        </div>
+        <p className="text-xs text-warm-muted mt-1">We will insert starter sentences you can edit.</p>
+      </div>
       <div>
         <Label htmlFor="incident-date" className="text-sm font-medium text-warm-text">
           Date of the incident
@@ -614,8 +823,15 @@ export function ClaimDetailsStep({
   formValues,
   onFieldChange,
 }: ClaimDetailsStepProps) {
+  const exampleText = getExampleText(claimSubType)
+
   return (
     <div className="space-y-6">
+      {exampleText ? (
+        <div className="rounded-lg border border-warm-border bg-warm-bg/40 p-4 text-sm text-warm-text">
+          <p>{exampleText}</p>
+        </div>
+      ) : null}
       {(() => {
         switch (claimSubType) {
           case 'security_deposit':

@@ -14,6 +14,8 @@ import Link from 'next/link'
 
 // Import all small claims wizard steps
 import { SmallClaimsPreflight } from './small-claims-wizard-steps/small-claims-preflight'
+import { SmallClaimsWelcomeStep } from './small-claims-wizard-steps/small-claims-welcome-step'
+import { SmallClaimsStepPreview } from './small-claims-wizard-steps/small-claims-step-preview'
 import { SmallClaimsPartiesStep } from './small-claims-wizard-steps/small-claims-parties-step'
 import { ClaimDetailsStep } from './small-claims-wizard-steps/claim-details-step'
 import { DamagesCalculatorStep } from './small-claims-wizard-steps/damages-calculator-step'
@@ -56,6 +58,16 @@ interface SmallClaimsWizardProps {
 /* ------------------------------------------------------------------ */
 
 function getStepsForSubType(subType: string): WizardStep[] {
+  const welcome: WizardStep = {
+    id: 'welcome',
+    title: 'Welcome',
+    subtitle: 'Here is what to expect in this process.',
+  }
+  const preview: WizardStep = {
+    id: 'preview',
+    title: 'Step Preview',
+    subtitle: 'A quick overview before we begin.',
+  }
   const preflight: WizardStep = {
     id: 'preflight',
     title: 'Before You Start',
@@ -99,22 +111,22 @@ function getStepsForSubType(subType: string): WizardStep[] {
 
   switch (subType) {
     case 'security_deposit':
-      return [preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
     case 'breach_of_contract':
-      return [preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
     case 'consumer_refund':
-      return [preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
     case 'property_damage':
-      return [preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
     case 'car_accident':
-      return [preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
     case 'neighbor_dispute':
-      return [preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
     case 'unpaid_loan':
-      return [preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
     case 'other':
     default:
-      return [preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
   }
 }
 
@@ -596,6 +608,20 @@ export function SmallClaimsWizard({
   function renderStep() {
     const stepId = steps[currentStep]?.id
     switch (stepId) {
+      case 'welcome':
+        return (
+          <SmallClaimsWelcomeStep
+            onContinue={() => setCurrentStep(currentStep + 1)}
+          />
+        )
+      case 'preview':
+        return (
+          <SmallClaimsStepPreview
+            steps={steps.filter((step) => !['welcome', 'preview'].includes(step.id))}
+            totalMinutes={totalEstimateMinutes}
+            onContinue={() => setCurrentStep(currentStep + 1)}
+          />
+        )
       case 'preflight':
         return (
           <SmallClaimsPreflight

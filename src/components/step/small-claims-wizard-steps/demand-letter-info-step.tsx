@@ -12,6 +12,25 @@ interface DemandLetterInfoStepProps {
   onFieldChange: (field: string, value: string | boolean) => void
 }
 
+const DEADLINE_PRESETS = [
+  { label: '7 days', value: '7' },
+  { label: '14 days', value: '14' },
+  { label: '21 days', value: '21' },
+  { label: '30 days', value: '30' },
+]
+
+const RESOLUTION_TEMPLATES = [
+  'Full refund of $____ within __ days.',
+  'Payment of $____ for repairs by __.',
+  'Replacement of the item or a refund of $____.',
+]
+
+const RESPONSE_TEMPLATES = [
+  'No response received.',
+  'They denied responsibility.',
+  'They offered partial payment of $____.',
+]
+
 export function DemandLetterInfoStep({
   demandLetterSent,
   demandLetterDate,
@@ -19,6 +38,12 @@ export function DemandLetterInfoStep({
   preferredResolution,
   onFieldChange,
 }: DemandLetterInfoStepProps) {
+  function appendTemplate(template: string) {
+    const current = preferredResolution?.trim()
+    const nextValue = current ? `${current}\n${template}` : template
+    onFieldChange('preferredResolution', nextValue)
+  }
+
   return (
     <div className="space-y-6">
       {/* Demand letter explanation */}
@@ -73,6 +98,21 @@ export function DemandLetterInfoStep({
             <Label htmlFor="demand-response" className="text-sm font-medium text-warm-text">
               Did you receive a response?
             </Label>
+            <div className="mt-2 rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+              <p className="text-xs font-medium text-warm-muted mb-2">Quick notes:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {RESPONSE_TEMPLATES.map((template) => (
+                  <button
+                    key={template}
+                    type="button"
+                    onClick={() => appendTemplate(template)}
+                    className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+                  >
+                    {template.replace(/\s*\$____\s*/g, ' $') }
+                  </button>
+                ))}
+              </div>
+            </div>
             <textarea
               id="demand-response"
               value={preferredResolution}
@@ -98,6 +138,21 @@ export function DemandLetterInfoStep({
                 reasonable.
               </p>
             </HelpTooltip>
+            <div className="mt-2 rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+              <p className="text-xs font-medium text-warm-muted mb-2">Quick picks:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {DEADLINE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => onFieldChange('deadlineDays', preset.value)}
+                    className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <select
               id="deadline-days"
               value={deadlineDays}
@@ -110,6 +165,11 @@ export function DemandLetterInfoStep({
               <option value="21">21 days</option>
               <option value="30">30 days</option>
             </select>
+            {deadlineDays && (
+              <p className="mt-2 text-xs text-warm-muted">
+                Suggested sentence: Please respond within {deadlineDays} days.
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="preferred-resolution" className="text-sm font-medium text-warm-text">
@@ -122,6 +182,21 @@ export function DemandLetterInfoStep({
                 dollar amount, a repair, or another action.
               </p>
             </HelpTooltip>
+            <div className="mt-2 rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+              <p className="text-xs font-medium text-warm-muted mb-2">Quick templates:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {RESOLUTION_TEMPLATES.map((template) => (
+                  <button
+                    key={template}
+                    type="button"
+                    onClick={() => appendTemplate(template)}
+                    className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+                  >
+                    {template.replace(/\$____/g, '$')}
+                  </button>
+                ))}
+              </div>
+            </div>
             <textarea
               id="preferred-resolution"
               value={preferredResolution}

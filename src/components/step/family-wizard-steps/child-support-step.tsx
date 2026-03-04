@@ -19,6 +19,7 @@ interface ChildSupportStepProps {
   useGuidelineAmount: boolean
   customAmount: string
   customReasoning: string
+  incomeUnknown: boolean
   onFieldChange: (field: string, value: string | number | boolean) => void
 }
 
@@ -48,6 +49,7 @@ export function ChildSupportStep({
   useGuidelineAmount,
   customAmount,
   customReasoning,
+  incomeUnknown,
   onFieldChange,
 }: ChildSupportStepProps) {
   const result = useMemo(
@@ -81,8 +83,31 @@ export function ChildSupportStep({
         </div>
       </HelpTooltip>
 
+      <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
+        <input
+          type="checkbox"
+          checked={incomeUnknown}
+          onChange={(e) => onFieldChange('incomeUnknown', e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo"
+        />
+        <div>
+          <p className="text-sm text-warm-text">I don&apos;t have income details yet</p>
+          <p className="text-xs text-warm-muted">
+            That&apos;s okay. You can continue and update this later.
+          </p>
+        </div>
+      </label>
+
+      {incomeUnknown && (
+        <div className="rounded-lg border border-calm-amber/40 bg-calm-amber/5 p-3 text-sm text-warm-text">
+          <strong>Income details pending.</strong> We&apos;ll save your progress and you can
+          come back to finish the calculation later.
+        </div>
+      )}
+
       {/* Income */}
-      <div className="rounded-lg border border-warm-border p-4 space-y-4">
+      {!incomeUnknown && (
+        <div className="rounded-lg border border-warm-border p-4 space-y-4">
         <p className="text-sm font-medium text-warm-text">Monthly Income</p>
 
         <div>
@@ -109,10 +134,12 @@ export function ChildSupportStep({
             />
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Deductions */}
-      <div className="rounded-lg border border-warm-border p-4 space-y-4">
+      {!incomeUnknown && (
+        <div className="rounded-lg border border-warm-border p-4 space-y-4">
         <p className="text-sm font-medium text-warm-text">Monthly Deductions</p>
         <p className="text-xs text-warm-muted">
           Enter monthly amounts for each deduction. These are subtracted from gross income
@@ -215,7 +242,8 @@ export function ChildSupportStep({
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Children counts */}
       <div className="rounded-lg border border-warm-border p-4 space-y-4">
@@ -262,7 +290,7 @@ export function ChildSupportStep({
       </div>
 
       {/* Live calculation display */}
-      {parseNum(grossIncome) > 0 && numberOfChildren > 0 && (
+      {!incomeUnknown && parseNum(grossIncome) > 0 && numberOfChildren > 0 && (
         <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4 space-y-3">
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-calm-indigo" />

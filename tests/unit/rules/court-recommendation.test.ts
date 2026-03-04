@@ -96,6 +96,44 @@ describe('recommendCourt -- family', () => {
   })
 })
 
+// -- Landlord-Tenant Eviction -------------------------------------------------
+
+describe('recommendCourt -- landlord-tenant eviction', () => {
+  it('recommends JP court for eviction regardless of amount', () => {
+    const result = recommendCourt(
+      makeInput({
+        disputeType: 'landlord_tenant',
+        amount: 'over_200k',
+        subType: 'eviction',
+      })
+    )
+    expect(result.recommended).toBe('jp')
+    expect(result.confidence).toBe('high')
+  })
+
+  it('non-eviction LT with under_20k still returns JP via amount rule', () => {
+    const result = recommendCourt(
+      makeInput({
+        disputeType: 'landlord_tenant',
+        amount: 'under_20k',
+        subType: 'security_deposit',
+      })
+    )
+    expect(result.recommended).toBe('jp')
+  })
+
+  it('non-eviction LT with 20k_75k returns county', () => {
+    const result = recommendCourt(
+      makeInput({
+        disputeType: 'landlord_tenant',
+        amount: '20k_75k',
+        subType: 'security_deposit',
+      })
+    )
+    expect(result.recommended).toBe('county')
+  })
+})
+
 // -- Real Property ------------------------------------------------------------
 
 describe('recommendCourt -- real property', () => {

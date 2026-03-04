@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type } = parsed.data
+    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type } = parsed.data
 
     // Insert the case
     const { data: newCase, error: caseError } = await supabase!
@@ -69,6 +69,24 @@ export async function POST(request: NextRequest) {
       if (smallClaimsError) {
         return NextResponse.json(
           { error: 'Case created but failed to save small claims details', details: smallClaimsError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Insert landlord-tenant details if this is a landlord-tenant case
+    if (landlord_tenant_sub_type) {
+      const { error: ltError } = await supabase!
+        .from('landlord_tenant_details')
+        .insert({
+          case_id: newCase.id,
+          landlord_tenant_sub_type,
+          party_role: role === 'plaintiff' ? 'landlord' : 'tenant',
+        })
+
+      if (ltError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save landlord-tenant details', details: ltError.message },
           { status: 500 }
         )
       }

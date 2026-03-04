@@ -295,6 +295,26 @@ export function SmallClaimsPreflight({ claimSubType, onReady }: SmallClaimsPrefl
             <p className="text-xs font-semibold text-warm-muted uppercase tracking-wide">
               Gather if you have them
             </p>
+            {optionalItems.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeferred(optionalItems.map((item) => item.title))}
+                  className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+                >
+                  Get all later
+                </button>
+                {deferred.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setDeferred([])}
+                    className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+                  >
+                    Clear later list
+                  </button>
+                )}
+              </div>
+            )}
             {optionalItems.map((item) => {
               const isDeferred = deferred.includes(item.title)
               return (

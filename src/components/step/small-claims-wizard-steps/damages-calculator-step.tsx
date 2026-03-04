@@ -39,12 +39,35 @@ function getCategorySuggestions(claimSubType: string): string[] {
   }
 }
 
+function getAmountPresets(claimSubType: string): number[] {
+  switch (claimSubType) {
+    case 'security_deposit':
+      return [250, 500, 1000, 1500]
+    case 'car_accident':
+      return [250, 500, 1000, 2500]
+    case 'property_damage':
+      return [300, 750, 1500, 3000]
+    case 'breach_of_contract':
+      return [500, 1000, 2500, 5000]
+    case 'consumer_refund':
+      return [100, 250, 500, 1000]
+    case 'neighbor_dispute':
+      return [200, 500, 1000, 2000]
+    case 'unpaid_loan':
+      return [200, 500, 1000, 2000]
+    case 'other':
+    default:
+      return [100, 250, 500, 1000]
+  }
+}
+
 export function DamagesCalculatorStep({
   items,
   onItemsChange,
   claimSubType,
 }: DamagesCalculatorStepProps) {
   const suggestions = getCategorySuggestions(claimSubType)
+  const amountPresets = getAmountPresets(claimSubType)
 
   const result = useMemo(
     () => calculateDamages({ items }),
@@ -68,6 +91,50 @@ export function DamagesCalculatorStep({
     onItemsChange(items.filter((_, i) => i !== index))
   }
 
+  function applySuggestion(category: string) {
+    const emptyIndex = items.findIndex(
+      (item) => !item.category && !item.amount && !item.description
+    )
+
+    if (emptyIndex >= 0) {
+      const updated = [...items]
+      updated[emptyIndex] = { ...updated[emptyIndex], category }
+      onItemsChange(updated)
+      return
+    }
+
+    onItemsChange([
+      ...items,
+      { category, amount: 0, description: '' },
+    ])
+  }
+
+  function applyAmountPreset(amount: number) {
+    const emptyIndex = items.findIndex(
+      (item) => !item.amount && !item.category && !item.description
+    )
+
+    if (emptyIndex >= 0) {
+      const updated = [...items]
+      updated[emptyIndex] = { ...updated[emptyIndex], amount }
+      onItemsChange(updated)
+      return
+    }
+
+    const firstIndex = items.findIndex((item) => !item.amount)
+    if (firstIndex >= 0) {
+      const updated = [...items]
+      updated[firstIndex] = { ...updated[firstIndex], amount }
+      onItemsChange(updated)
+      return
+    }
+
+    onItemsChange([
+      ...items,
+      { category: '', amount, description: '' },
+    ])
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -88,9 +155,30 @@ export function DamagesCalculatorStep({
         <p className="text-xs font-medium text-warm-muted mb-1.5">Common categories for this type of claim:</p>
         <div className="flex flex-wrap gap-1.5">
           {suggestions.map((s) => (
-            <span key={s} className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border">
+            <button
+              key={s}
+              type="button"
+              onClick={() => applySuggestion(s)}
+              className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+            >
               {s}
-            </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+        <p className="text-xs font-medium text-warm-muted mb-1.5">Quick amounts (edit later):</p>
+        <div className="flex flex-wrap gap-1.5">
+          {amountPresets.map((amount) => (
+            <button
+              key={amount}
+              type="button"
+              onClick={() => applyAmountPreset(amount)}
+              className="rounded-full bg-white px-2.5 py-0.5 text-xs text-warm-text border border-warm-border transition hover:border-calm-indigo/40 hover:bg-calm-indigo/10"
+            >
+              ${amount.toLocaleString('en-US')}
+            </button>
           ))}
         </div>
       </div>
@@ -184,6 +272,10 @@ export function DamagesCalculatorStep({
         <p className="text-xs text-warm-muted mt-1">
           {result.itemCount} item{result.itemCount === 1 ? '' : 's'} &middot; Small claims limit: ${result.capAmount.toLocaleString('en-US')}
         </p>
+      </div>
+
+      <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3 text-xs text-warm-text">
+        <strong>Receipts tip:</strong> List each receipt or estimate as its own item. This makes it easier to prove each amount.
       </div>
 
       {/* Nearing cap warning */}

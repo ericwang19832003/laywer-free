@@ -108,6 +108,27 @@ function getSubTypePrompt(familySubType: string): { label: string; placeholder: 
   }
 }
 
+function getExampleText(familySubType: string): string | null {
+  switch (familySubType) {
+    case 'custody':
+      return 'Example: The children live with me most school nights. I am asking for a schedule that keeps their school routine stable and allows the other parent regular weekends.'
+    case 'child_support':
+      return 'Example: I pay for most daily expenses and need support to cover school, medical, and childcare costs.'
+    case 'visitation':
+      return 'Example: We do not have a consistent schedule. A standard weekend and holiday plan would help the children.'
+    case 'protective_order':
+      return 'Example: On January 10, 2026, the respondent threatened me at work. A police report was filed. I am asking for no contact and to stay away from my home.'
+    case 'modification':
+      return 'Example: Since the last order, my work schedule changed and the children now live primarily with me during the week.'
+    case 'spousal_support':
+      return 'Example: I have been out of the workforce for years and need temporary support while I find stable employment.'
+    case 'divorce':
+      return 'Example: We separated in June 2024 and have been living apart. We are seeking a no-fault divorce.'
+    default:
+      return null
+  }
+}
+
 export function FamilyGroundsStep({
   familySubType,
   grounds,
@@ -241,6 +262,7 @@ export function FamilyGroundsStep({
 
   // Non-divorce sub-types
   const prompt = getSubTypePrompt(familySubType)
+  const exampleText = getExampleText(familySubType)
   const isProtectiveOrder = familySubType === 'protective_order'
 
   return (
@@ -274,6 +296,12 @@ export function FamilyGroundsStep({
           rows={6}
         />
       </div>
+
+      {exampleText && (
+        <div className="rounded-lg border border-warm-border bg-warm-bg/50 p-3 text-xs text-warm-muted">
+          <span className="font-semibold text-warm-text">Example:</span> {exampleText}
+        </div>
+      )}
 
       {/* Additional facts */}
       <div>

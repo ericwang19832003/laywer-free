@@ -36,6 +36,13 @@ import { SmallClaimsWizard } from '@/components/step/small-claims-wizard'
 import { ServeDefendantStep } from '@/components/step/small-claims/serve-defendant-step'
 import { PrepareForHearingStep } from '@/components/step/small-claims/prepare-for-hearing-step'
 import { HearingDayStep } from '@/components/step/small-claims/hearing-day-step'
+import { LtIntakeStep } from '@/components/step/landlord-tenant/lt-intake-step'
+import { LtDemandLetterStep } from '@/components/step/landlord-tenant/lt-demand-letter-step'
+import { LandlordTenantWizard } from '@/components/step/landlord-tenant-wizard'
+import { ServeOtherPartyStep } from '@/components/step/landlord-tenant/serve-other-party-step'
+import { LtHearingPrepStep } from '@/components/step/landlord-tenant/lt-hearing-prep-step'
+import { LtHearingDayStep } from '@/components/step/landlord-tenant/lt-hearing-day-step'
+import { PostJudgmentStep } from '@/components/step/landlord-tenant/post-judgment-step'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -581,10 +588,68 @@ export default async function StepPage({
     }
     case 'serve_defendant':
       return <ServeDefendantStep caseId={id} taskId={taskId} />
-    case 'prepare_for_hearing':
+    case 'prepare_for_hearing': {
+      // Check if this is a landlord-tenant case
+      const { data: caseCheck } = await supabase
+        .from('cases').select('dispute_type').eq('id', id).single()
+      if (caseCheck?.dispute_type === 'landlord_tenant') {
+        return <LtHearingPrepStep caseId={id} taskId={taskId} />
+      }
       return <PrepareForHearingStep caseId={id} taskId={taskId} />
-    case 'hearing_day':
+    }
+    case 'hearing_day': {
+      // Check if this is a landlord-tenant case
+      const { data: caseCheck } = await supabase
+        .from('cases').select('dispute_type').eq('id', id).single()
+      if (caseCheck?.dispute_type === 'landlord_tenant') {
+        return <LtHearingDayStep caseId={id} taskId={taskId} />
+      }
       return <HearingDayStep caseId={id} taskId={taskId} />
+    }
+
+    // Landlord-tenant task chain steps
+    case 'landlord_tenant_intake':
+      return (
+        <LtIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'prepare_lt_demand_letter': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county').eq('id', id).single()
+      const { data: ltDetails } = await supabase
+        .from('landlord_tenant_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <LtDemandLetterStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          landlordTenantDetails={ltDetails}
+          caseData={{ county: caseRow?.county ?? null }}
+        />
+      )
+    }
+    case 'prepare_landlord_tenant_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county, court_type').eq('id', id).single()
+      const { data: ltDetails } = await supabase
+        .from('landlord_tenant_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <LandlordTenantWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          landlordTenantDetails={ltDetails}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'jp' }}
+        />
+      )
+    }
+    case 'serve_other_party':
+      return <ServeOtherPartyStep caseId={id} taskId={taskId} />
+    case 'post_judgment':
+      return <PostJudgmentStep caseId={id} taskId={taskId} />
 
     default:
       return (

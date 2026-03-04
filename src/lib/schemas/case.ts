@@ -34,6 +34,19 @@ export const SMALL_CLAIMS_SUB_TYPES = [
 
 export type SmallClaimsSubType = (typeof SMALL_CLAIMS_SUB_TYPES)[number]
 
+export const LANDLORD_TENANT_SUB_TYPES = [
+  'eviction',
+  'nonpayment',
+  'security_deposit',
+  'property_damage',
+  'repair_maintenance',
+  'lease_termination',
+  'habitability',
+  'other',
+] as const
+
+export type LandlordTenantSubType = (typeof LANDLORD_TENANT_SUB_TYPES)[number]
+
 export const createCaseSchema = z.object({
   role: z.enum(['plaintiff', 'defendant']),
   county: z.string().optional(),
@@ -41,6 +54,7 @@ export const createCaseSchema = z.object({
   dispute_type: z.enum(DISPUTE_TYPES).optional(),
   family_sub_type: z.enum(FAMILY_SUB_TYPES).optional(),
   small_claims_sub_type: z.enum(SMALL_CLAIMS_SUB_TYPES).optional(),
+  landlord_tenant_sub_type: z.enum(LANDLORD_TENANT_SUB_TYPES).optional(),
 })
 
 export type CreateCaseInput = z.infer<typeof createCaseSchema>

@@ -16,6 +16,8 @@ interface ChildrenStepProps {
   children: ChildInfo[]
   onChildrenChange: (children: ChildInfo[]) => void
   familySubType: string
+  residenceSummary: string
+  onResidenceSummaryChange: (value: string) => void
 }
 
 const requiresChildren = ['custody', 'child_support', 'visitation']
@@ -24,6 +26,8 @@ export function ChildrenStep({
   children: childrenList,
   onChildrenChange,
   familySubType,
+  residenceSummary,
+  onResidenceSummaryChange,
 }: ChildrenStepProps) {
   function updateChild(index: number, field: keyof ChildInfo, value: string) {
     const updated = [...childrenList]
@@ -60,6 +64,23 @@ export function ChildrenStep({
             date of birth, and their relationship to you.
           </p>
         </HelpTooltip>
+      </div>
+
+      <div>
+        <Label htmlFor="children-residence" className="text-sm font-medium text-warm-text">
+          Where have the children lived most of the last 6 months?
+        </Label>
+        <p className="text-xs text-warm-muted mt-1">
+          This helps confirm the right county to file in.
+        </p>
+        <textarea
+          id="children-residence"
+          value={residenceSummary}
+          onChange={(e) => onResidenceSummaryChange(e.target.value)}
+          placeholder="Example: Travis County with me during the school year."
+          className="mt-2 w-full rounded-md border border-warm-border bg-white px-3 py-2 text-sm text-warm-text placeholder:text-warm-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          rows={3}
+        />
       </div>
 
       {/* No children warning */}

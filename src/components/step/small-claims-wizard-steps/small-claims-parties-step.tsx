@@ -3,6 +3,7 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
+import { useState } from 'react'
 
 interface PartyInfo {
   full_name: string
@@ -33,6 +34,9 @@ export function SmallClaimsPartiesStep({
   onDefendantIsBusinessChange,
   onDefendantBusinessNameChange,
 }: SmallClaimsPartiesStepProps) {
+  const [defendantAddressUnknown, setDefendantAddressUnknown] = useState(false)
+  const [businessNameUnknown, setBusinessNameUnknown] = useState(false)
+
   return (
     <div className="space-y-8">
       {/* Terminology explanation */}
@@ -170,7 +174,25 @@ export function SmallClaimsPartiesStep({
               onChange={(e) => onDefendantBusinessNameChange(e.target.value)}
               placeholder="e.g. ABC Property Management LLC"
               className="mt-2"
+              disabled={businessNameUnknown}
             />
+            <label className="mt-2 flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
+              <input
+                type="checkbox"
+                checked={businessNameUnknown}
+                onChange={(e) => {
+                  setBusinessNameUnknown(e.target.checked)
+                  if (e.target.checked) onDefendantBusinessNameChange('')
+                }}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo"
+              />
+              <span className="text-sm text-warm-text">I don&apos;t know the legal business name yet</span>
+            </label>
+            {businessNameUnknown && (
+              <p className="text-xs text-warm-muted mt-2">
+                We will remind you to add it before filing.
+              </p>
+            )}
             <p className="text-xs text-warm-muted mt-1">
               Tip: Search the{' '}
               <span className="text-calm-indigo">Texas Secretary of State</span>{' '}
@@ -189,40 +211,58 @@ export function SmallClaimsPartiesStep({
               suing a business, use the registered agent&apos;s address or the business address.
             </p>
           </HelpTooltip>
-          <div className="space-y-2 mt-2">
-            <Input
-              id="defendant-address"
-              data-testid="defendant-address"
-              value={defendant.address ?? ''}
-              onChange={(e) => onDefendantChange({ ...defendant, address: e.target.value })}
-              placeholder="Street address"
-            />
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label htmlFor="defendant-city" className="text-xs text-warm-muted">City</Label>
+          <div className="space-y-3 mt-2">
+            <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
+              <input
+                type="checkbox"
+                checked={defendantAddressUnknown}
+                onChange={(e) => setDefendantAddressUnknown(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo"
+              />
+              <span className="text-sm text-warm-text">I don&apos;t know their address yet</span>
+            </label>
+
+            {defendantAddressUnknown ? (
+              <p className="text-xs text-warm-muted">
+                You can add a work or last known address later.
+              </p>
+            ) : (
+              <div className="space-y-2">
                 <Input
-                  id="defendant-city"
-                  value={defendant.city ?? ''}
-                  onChange={(e) => onDefendantChange({ ...defendant, city: e.target.value })}
+                  id="defendant-address"
+                  data-testid="defendant-address"
+                  value={defendant.address ?? ''}
+                  onChange={(e) => onDefendantChange({ ...defendant, address: e.target.value })}
+                  placeholder="Street address"
                 />
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label htmlFor="defendant-city" className="text-xs text-warm-muted">City</Label>
+                    <Input
+                      id="defendant-city"
+                      value={defendant.city ?? ''}
+                      onChange={(e) => onDefendantChange({ ...defendant, city: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="defendant-state" className="text-xs text-warm-muted">State</Label>
+                    <Input
+                      id="defendant-state"
+                      value={defendant.state ?? ''}
+                      onChange={(e) => onDefendantChange({ ...defendant, state: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="defendant-zip" className="text-xs text-warm-muted">Zip</Label>
+                    <Input
+                      id="defendant-zip"
+                      value={defendant.zip ?? ''}
+                      onChange={(e) => onDefendantChange({ ...defendant, zip: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="defendant-state" className="text-xs text-warm-muted">State</Label>
-                <Input
-                  id="defendant-state"
-                  value={defendant.state ?? ''}
-                  onChange={(e) => onDefendantChange({ ...defendant, state: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="defendant-zip" className="text-xs text-warm-muted">Zip</Label>
-                <Input
-                  id="defendant-zip"
-                  value={defendant.zip ?? ''}
-                  onChange={(e) => onDefendantChange({ ...defendant, zip: e.target.value })}
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

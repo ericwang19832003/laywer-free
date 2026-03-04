@@ -261,6 +261,9 @@ export function FamilyLawWizard({
   const [children, setChildren] = useState<ChildInfo[]>(
     (meta.children as ChildInfo[]) ?? (familyDetails?.children as ChildInfo[]) ?? []
   )
+  const [childrenResidence, setChildrenResidence] = useState<string>(
+    (meta.children_residence as string) ?? ''
+  )
 
   /* ---- Custody ---- */
   const [custodyArrangement, setCustodyArrangement] = useState<string>(
@@ -305,6 +308,9 @@ export function FamilyLawWizard({
   )
   const [useGuidelineAmount, setUseGuidelineAmount] = useState<boolean>(
     (meta.use_guideline as boolean) ?? true
+  )
+  const [incomeUnknown, setIncomeUnknown] = useState<boolean>(
+    (meta.income_unknown as boolean) ?? false
   )
   const [customSupportAmount, setCustomSupportAmount] = useState<string>(
     (meta.custom_support_amount as string) ?? ''
@@ -409,6 +415,9 @@ export function FamilyLawWizard({
         case 'customReasoning':
           setCustomSupportReasoning(value as string)
           break
+        case 'incomeUnknown':
+          setIncomeUnknown(value as boolean)
+          break
       }
     },
     []
@@ -499,6 +508,7 @@ export function FamilyLawWizard({
       state_months: stateMonths === '' ? null : stateMonths,
       // Children
       children,
+      children_residence: childrenResidence || null,
       // Custody
       custody_arrangement: custodyArrangement || null,
       custody_reasoning: custodyReasoning || null,
@@ -517,6 +527,7 @@ export function FamilyLawWizard({
       use_guideline: useGuidelineAmount,
       custom_support_amount: customSupportAmount || null,
       custom_support_reasoning: customSupportReasoning || null,
+      income_unknown: incomeUnknown,
       // Spousal support
       requesting_spousal: requestingSpousal,
       spousal_amount: spousalAmount || null,
@@ -550,6 +561,7 @@ export function FamilyLawWizard({
     countyMonths,
     stateMonths,
     children,
+    childrenResidence,
     custodyArrangement,
     custodyReasoning,
     communityProperty,
@@ -565,6 +577,7 @@ export function FamilyLawWizard({
     useGuidelineAmount,
     customSupportAmount,
     customSupportReasoning,
+    incomeUnknown,
     requestingSpousal,
     spousalAmount,
     spousalDuration,
@@ -720,6 +733,7 @@ export function FamilyLawWizard({
       countyMonths,
       stateMonths,
       children,
+      childrenResidence,
       petitionerCounty,
       childrenCounty,
       grounds,
@@ -732,6 +746,7 @@ export function FamilyLawWizard({
       useGuidelineAmount,
       customAmount: customSupportAmount,
       customReasoning: customSupportReasoning,
+      incomeUnknown,
       requestingSpousalSupport: requestingSpousal,
       spousalAmount,
       spousalDurationMonths: spousalDuration,
@@ -753,6 +768,7 @@ export function FamilyLawWizard({
       countyMonths,
       stateMonths,
       children,
+      childrenResidence,
       petitionerCounty,
       childrenCounty,
       grounds,
@@ -836,6 +852,8 @@ export function FamilyLawWizard({
             children={children}
             onChildrenChange={setChildren}
             familySubType={familySubType}
+            residenceSummary={childrenResidence}
+            onResidenceSummaryChange={setChildrenResidence}
           />
         )
       case 'venue':
@@ -884,6 +902,7 @@ export function FamilyLawWizard({
             useGuidelineAmount={useGuidelineAmount}
             customAmount={customSupportAmount}
             customReasoning={customSupportReasoning}
+            incomeUnknown={incomeUnknown}
             onFieldChange={handleSupportFieldChange}
           />
         )
