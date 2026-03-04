@@ -38,10 +38,13 @@ import {
 } from './wizard/landlord-tenant-sub-type-step'
 import { DebtSideStep, type DebtSide } from './wizard/debt-side-step'
 import { DebtSubTypeStep, type DebtSubType } from './wizard/debt-sub-type-step'
+import { PISubTypeStep } from './wizard/pi-sub-type-step'
+import type { PiSubType } from '@/lib/schemas/case'
 
 function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: string, debtSide?: string): number {
   if (disputeType === 'family') return 4
   if (disputeType === 'small_claims') return 4
+  if (disputeType === 'personal_injury') return 5 // role, dispute, pi-subtype, amount, recommendation
   if (disputeType === 'landlord_tenant') {
     return landlordTenantSubType === 'eviction' ? 4 : 5
   }
@@ -61,6 +64,7 @@ interface WizardState {
   landlordTenantSubType: LandlordTenantSubType | ''
   debtSide: DebtSide | ''
   debtSubType: DebtSubType | ''
+  piSubType: PiSubType | ''
   amount: AmountRange | ''
   circumstances: CircumstanceFlags
   county: string
@@ -74,6 +78,7 @@ type WizardAction =
   | { type: 'SET_LANDLORD_TENANT_SUB_TYPE'; landlordTenantSubType: LandlordTenantSubType }
   | { type: 'SET_DEBT_SIDE'; debtSide: DebtSide }
   | { type: 'SET_DEBT_SUB_TYPE'; debtSubType: DebtSubType }
+  | { type: 'SET_PI_SUB_TYPE'; payload: PiSubType }
   | { type: 'SET_AMOUNT'; amount: AmountRange }
   | { type: 'SET_CIRCUMSTANCES'; circumstances: CircumstanceFlags }
   | { type: 'SET_COUNTY'; county: string }
@@ -90,6 +95,7 @@ const initialState: WizardState = {
   landlordTenantSubType: '',
   debtSide: '',
   debtSubType: '',
+  piSubType: '',
   amount: '',
   circumstances: {
     realProperty: false,
@@ -105,15 +111,18 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
     case 'SET_ROLE':
       return { ...state, role: action.role, step: 2 }
     case 'SET_DISPUTE_TYPE':
-      // When switching away from family/small_claims/landlord_tenant/debt, clear respective sub-type
+      // When switching away from family/small_claims/landlord_tenant/debt/pi, clear respective sub-type
+      // For personal_injury, auto-set role to plaintiff
       return {
         ...state,
         disputeType: action.disputeType,
+        role: action.disputeType === 'personal_injury' ? 'plaintiff' : state.role,
         familySubType: action.disputeType === 'family' ? state.familySubType : '',
         smallClaimsSubType: action.disputeType === 'small_claims' ? state.smallClaimsSubType : '',
         landlordTenantSubType: action.disputeType === 'landlord_tenant' ? state.landlordTenantSubType : '',
         debtSide: action.disputeType === 'debt_collection' ? state.debtSide : '',
         debtSubType: action.disputeType === 'debt_collection' ? state.debtSubType : '',
+        piSubType: action.disputeType === 'personal_injury' ? state.piSubType : '',
         step: 3,
       }
     case 'SET_FAMILY_SUB_TYPE':
@@ -126,6 +135,8 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, debtSide: action.debtSide, step: state.step + 1 }
     case 'SET_DEBT_SUB_TYPE':
       return { ...state, debtSubType: action.debtSubType, step: state.step + 1 }
+    case 'SET_PI_SUB_TYPE':
+      return { ...state, piSubType: action.payload, step: state.step + 1 }
     case 'SET_AMOUNT':
       return { ...state, amount: action.amount, step: state.step + 1 }
     case 'SET_CIRCUMSTANCES':
@@ -155,6 +166,7 @@ export function NewCaseDialog() {
 
   const isFamily = state.disputeType === 'family'
   const isSmallClaims = state.disputeType === 'small_claims'
+  const isPersonalInjury = state.disputeType === 'personal_injury'
   const isLandlordTenant = state.disputeType === 'landlord_tenant'
   const isEviction = isLandlordTenant && state.landlordTenantSubType === 'eviction'
   const isDebtCollection = state.disputeType === 'debt_collection'
@@ -218,6 +230,9 @@ export function NewCaseDialog() {
             ? { landlord_tenant_sub_type: state.landlordTenantSubType }
             : {}),
           ...debtSubTypePayload,
+          ...(isPersonalInjury && state.piSubType
+            ? { pi_sub_type: state.piSubType }
+            : {}),
         }),
       })
 
@@ -247,9 +262,9 @@ export function NewCaseDialog() {
     }
   }
 
-  // Compute recommendation for civil (non-family, non-small-claims, non-landlord-tenant, non-debt) flow
+  // Compute recommendation for civil (non-family, non-small-claims, non-pi, non-landlord-tenant, non-debt) flow
   const civilRecommendation =
-    !isFamily && !isSmallClaims && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
+    !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
@@ -306,6 +321,16 @@ export function NewCaseDialog() {
           amount: state.amount,
           circumstances: state.circumstances,
           subType: state.landlordTenantSubType,
+        })
+      : null
+
+  // Computed recommendation for personal injury flow (amount-based)
+  const piRecommendation =
+    isPersonalInjury && state.disputeType && state.amount
+      ? recommendCourt({
+          disputeType: state.disputeType,
+          amount: state.amount,
+          circumstances: state.circumstances,
         })
       : null
 
@@ -373,6 +398,13 @@ export function NewCaseDialog() {
           />
         )}
 
+        {state.step === 3 && isPersonalInjury && (
+          <PISubTypeStep
+            value={state.piSubType}
+            onSelect={(t) => dispatch({ type: 'SET_PI_SUB_TYPE', payload: t })}
+          />
+        )}
+
         {state.step === 3 && isDebtCollection && (
           <DebtSideStep
             value={state.debtSide}
@@ -382,7 +414,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 3 && !isFamily && !isSmallClaims && !isLandlordTenant && !isDebtCollection && (
+        {state.step === 3 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <AmountStep
             value={state.amount}
             onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
@@ -435,6 +467,13 @@ export function NewCaseDialog() {
           />
         )}
 
+        {state.step === 4 && isPersonalInjury && (
+          <AmountStep
+            value={state.amount}
+            onSelect={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
+          />
+        )}
+
         {state.step === 4 && isDebtPlaintiff && (
           <AmountStep
             value={state.amount}
@@ -442,7 +481,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 4 && !isFamily && !isSmallClaims && !isLandlordTenant && !isDebtCollection && (
+        {state.step === 4 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <CircumstancesStep
             value={state.circumstances}
             onChange={(circumstances) =>
@@ -479,7 +518,17 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 5 && !isFamily && !isSmallClaims && !isLandlordTenant && !isDebtCollection && civilRecommendation && (
+        {state.step === 5 && isPersonalInjury && piRecommendation && (
+          <RecommendationStep
+            recommendation={piRecommendation}
+            county={state.county}
+            onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
+            onAccept={handleAccept}
+            loading={loading}
+          />
+        )}
+
+        {state.step === 5 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && civilRecommendation && (
           <RecommendationStep
             recommendation={civilRecommendation}
             county={state.county}

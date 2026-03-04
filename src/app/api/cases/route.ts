@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type } = parsed.data
+    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type, pi_sub_type } = parsed.data
 
     // Insert the case
     const { data: newCase, error: caseError } = await supabase!
@@ -104,6 +104,23 @@ export async function POST(request: NextRequest) {
       if (debtError) {
         return NextResponse.json(
           { error: 'Case created but failed to save debt defense details', details: debtError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Insert personal injury details if this is a PI case
+    if (pi_sub_type) {
+      const { error: piError } = await supabase!
+        .from('personal_injury_details')
+        .insert({
+          case_id: newCase.id,
+          pi_sub_type,
+        })
+
+      if (piError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save personal injury details', details: piError.message },
           { status: 500 }
         )
       }

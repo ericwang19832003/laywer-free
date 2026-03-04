@@ -51,6 +51,16 @@ import { ServePlaintiffStep } from '@/components/step/debt-defense/serve-plainti
 import { DebtHearingPrepStep } from '@/components/step/debt-defense/debt-hearing-prep-step'
 import { DebtHearingDayStep } from '@/components/step/debt-defense/debt-hearing-day-step'
 import { DebtPostJudgmentStep } from '@/components/step/debt-defense/debt-post-judgment-step'
+import { PIIntakeStep } from '@/components/step/personal-injury/pi-intake-step'
+import { PIDemandLetterStep } from '@/components/step/personal-injury/pi-demand-letter-step'
+import { PersonalInjuryWizard } from '@/components/step/personal-injury-wizard'
+import { PIMedicalRecordsStep } from '@/components/step/personal-injury/pi-medical-records-step'
+import { PIInsuranceCommunicationStep } from '@/components/step/personal-injury/pi-insurance-communication-step'
+import { PISettlementNegotiationStep } from '@/components/step/personal-injury/pi-settlement-negotiation-step'
+import { PIFileWithCourtStep } from '@/components/step/personal-injury/pi-file-with-court-step'
+import { PIServeDefendantStep } from '@/components/step/personal-injury/pi-serve-defendant-step'
+import { PITrialPrepStep } from '@/components/step/personal-injury/pi-trial-prep-step'
+import { PIPostResolutionStep } from '@/components/step/personal-injury/pi-post-resolution-step'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -708,6 +718,60 @@ export default async function StepPage({
       return <DebtHearingDayStep caseId={id} taskId={taskId} />
     case 'debt_post_judgment':
       return <DebtPostJudgmentStep caseId={id} taskId={taskId} />
+
+    // Personal injury task chain steps
+    case 'pi_intake':
+      return (
+        <PIIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'pi_medical_records':
+      return <PIMedicalRecordsStep caseId={id} taskId={taskId} />
+    case 'pi_insurance_communication':
+      return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} />
+    case 'prepare_pi_demand_letter': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county').eq('id', id).single()
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <PIDemandLetterStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          personalInjuryDetails={piDetails}
+          caseData={{ county: caseRow?.county ?? null }}
+        />
+      )
+    }
+    case 'pi_settlement_negotiation':
+      return <PISettlementNegotiationStep caseId={id} taskId={taskId} />
+    case 'prepare_pi_petition': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county, court_type').eq('id', id).single()
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <PersonalInjuryWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          personalInjuryDetails={piDetails}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+        />
+      )
+    }
+    case 'pi_file_with_court':
+      return <PIFileWithCourtStep caseId={id} taskId={taskId} />
+    case 'pi_serve_defendant':
+      return <PIServeDefendantStep caseId={id} taskId={taskId} />
+    case 'pi_trial_prep':
+      return <PITrialPrepStep caseId={id} taskId={taskId} />
+    case 'pi_post_resolution':
+      return <PIPostResolutionStep caseId={id} taskId={taskId} />
 
     default:
       return (

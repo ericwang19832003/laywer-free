@@ -72,6 +72,9 @@ import { landlordTenantFilingFactsSchema } from '@/lib/schemas/landlord-tenant-f
 import { ltDemandLetterFactsSchema, buildLtDemandLetterPrompt } from '@/lib/rules/landlord-tenant-demand-letter-prompts'
 import { debtValidationLetterFactsSchema, buildDebtValidationLetterPrompt } from '@/lib/rules/debt-validation-letter-prompts'
 import { debtDefenseFactsSchema, buildDebtDefensePrompt } from '@/lib/rules/debt-defense-prompts'
+import { piDemandLetterFactsSchema, buildPiDemandLetterPrompt } from '@/lib/rules/pi-demand-letter-prompts'
+import { piPetitionFactsSchema, buildPiPetitionPrompt } from '@/lib/rules/pi-petition-prompts'
+import { piSettlementFactsSchema, buildPiSettlementPrompt } from '@/lib/rules/pi-settlement-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 /* ------------------------------------------------------------------ */
@@ -264,6 +267,19 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   debt_defense_specific_answer: {
     schema: debtDefenseFactsSchema,
     buildPrompt: buildDebtDefensePrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Personal injury
+  pi_demand_letter: {
+    schema: piDemandLetterFactsSchema,
+    buildPrompt: buildPiDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  pi_petition: {
+    schema: piPetitionFactsSchema,
+    buildPrompt: buildPiPetitionPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  pi_settlement_agreement: {
+    schema: piSettlementFactsSchema,
+    buildPrompt: buildPiSettlementPrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 

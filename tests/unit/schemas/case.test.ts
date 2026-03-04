@@ -76,4 +76,25 @@ describe('createCaseSchema', () => {
     const result = createCaseSchema.safeParse({ role: 'defendant', debt_sub_type: 'invalid_type' })
     expect(result.success).toBe(false)
   })
+
+  it('accepts pi_sub_type for personal_injury cases', () => {
+    const result = createCaseSchema.safeParse({
+      role: 'plaintiff',
+      dispute_type: 'personal_injury',
+      pi_sub_type: 'auto_accident',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts all valid pi_sub_type values', () => {
+    for (const st of ['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist', 'slip_and_fall', 'dog_bite', 'product_liability', 'other']) {
+      const result = createCaseSchema.safeParse({ role: 'plaintiff', pi_sub_type: st })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid pi_sub_type', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', pi_sub_type: 'invalid_type' })
+    expect(result.success).toBe(false)
+  })
 })
