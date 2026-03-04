@@ -43,6 +43,14 @@ import { ServeOtherPartyStep } from '@/components/step/landlord-tenant/serve-oth
 import { LtHearingPrepStep } from '@/components/step/landlord-tenant/lt-hearing-prep-step'
 import { LtHearingDayStep } from '@/components/step/landlord-tenant/lt-hearing-day-step'
 import { PostJudgmentStep } from '@/components/step/landlord-tenant/post-judgment-step'
+import { DebtDefenseIntakeStep } from '@/components/step/debt-defense/debt-defense-intake-step'
+import { DebtValidationLetterStep } from '@/components/step/debt-defense/debt-validation-letter-step'
+import { DebtDefenseWizard } from '@/components/step/debt-defense-wizard'
+import { DebtFileWithCourtStep } from '@/components/step/debt-defense/debt-file-with-court-step'
+import { ServePlaintiffStep } from '@/components/step/debt-defense/serve-plaintiff-step'
+import { DebtHearingPrepStep } from '@/components/step/debt-defense/debt-hearing-prep-step'
+import { DebtHearingDayStep } from '@/components/step/debt-defense/debt-hearing-day-step'
+import { DebtPostJudgmentStep } from '@/components/step/debt-defense/debt-post-judgment-step'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -650,6 +658,56 @@ export default async function StepPage({
       return <ServeOtherPartyStep caseId={id} taskId={taskId} />
     case 'post_judgment':
       return <PostJudgmentStep caseId={id} taskId={taskId} />
+
+    // Debt defense task chain steps
+    case 'debt_defense_intake':
+      return (
+        <DebtDefenseIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'prepare_debt_validation_letter': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county').eq('id', id).single()
+      const { data: debtDetails } = await supabase
+        .from('debt_defense_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <DebtValidationLetterStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          debtDefenseDetails={debtDetails}
+          caseData={{ county: caseRow?.county ?? null }}
+        />
+      )
+    }
+    case 'prepare_debt_defense_answer': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county, court_type').eq('id', id).single()
+      const { data: debtDetails } = await supabase
+        .from('debt_defense_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <DebtDefenseWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          debtDefenseDetails={debtDetails}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'jp' }}
+        />
+      )
+    }
+    case 'debt_file_with_court':
+      return <DebtFileWithCourtStep caseId={id} taskId={taskId} />
+    case 'serve_plaintiff':
+      return <ServePlaintiffStep caseId={id} taskId={taskId} />
+    case 'debt_hearing_prep':
+      return <DebtHearingPrepStep caseId={id} taskId={taskId} />
+    case 'debt_hearing_day':
+      return <DebtHearingDayStep caseId={id} taskId={taskId} />
+    case 'debt_post_judgment':
+      return <DebtPostJudgmentStep caseId={id} taskId={taskId} />
 
     default:
       return (

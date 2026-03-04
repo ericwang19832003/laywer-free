@@ -55,4 +55,25 @@ describe('createCaseSchema', () => {
     const result = createCaseSchema.safeParse({ role: 'plaintiff', dispute_type: 'invalid_type' })
     expect(result.success).toBe(false)
   })
+
+  it('accepts debt_sub_type for debt_collection cases', () => {
+    const result = createCaseSchema.safeParse({
+      role: 'defendant',
+      dispute_type: 'debt_collection',
+      debt_sub_type: 'credit_card',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts all valid debt_sub_type values', () => {
+    for (const dt of ['credit_card', 'medical_bills', 'personal_loan', 'auto_loan', 'payday_loan', 'debt_buyer', 'other']) {
+      const result = createCaseSchema.safeParse({ role: 'defendant', debt_sub_type: dt })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid debt_sub_type', () => {
+    const result = createCaseSchema.safeParse({ role: 'defendant', debt_sub_type: 'invalid_type' })
+    expect(result.success).toBe(false)
+  })
 })

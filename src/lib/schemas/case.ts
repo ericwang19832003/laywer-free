@@ -47,6 +47,18 @@ export const LANDLORD_TENANT_SUB_TYPES = [
 
 export type LandlordTenantSubType = (typeof LANDLORD_TENANT_SUB_TYPES)[number]
 
+export const DEBT_SUB_TYPES = [
+  'credit_card',
+  'medical_bills',
+  'personal_loan',
+  'auto_loan',
+  'payday_loan',
+  'debt_buyer',
+  'other',
+] as const
+
+export type DebtSubType = (typeof DEBT_SUB_TYPES)[number]
+
 export const createCaseSchema = z.object({
   role: z.enum(['plaintiff', 'defendant']),
   county: z.string().optional(),
@@ -55,6 +67,7 @@ export const createCaseSchema = z.object({
   family_sub_type: z.enum(FAMILY_SUB_TYPES).optional(),
   small_claims_sub_type: z.enum(SMALL_CLAIMS_SUB_TYPES).optional(),
   landlord_tenant_sub_type: z.enum(LANDLORD_TENANT_SUB_TYPES).optional(),
+  debt_sub_type: z.enum(DEBT_SUB_TYPES).optional(),
 })
 
 export type CreateCaseInput = z.infer<typeof createCaseSchema>

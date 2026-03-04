@@ -70,6 +70,8 @@ import { demandLetterFactsSchema, buildDemandLetterPrompt } from '@/lib/rules/de
 import { buildLandlordTenantFilingPrompt } from '@/lib/rules/landlord-tenant-filing-prompts'
 import { landlordTenantFilingFactsSchema } from '@/lib/schemas/landlord-tenant-filing'
 import { ltDemandLetterFactsSchema, buildLtDemandLetterPrompt } from '@/lib/rules/landlord-tenant-demand-letter-prompts'
+import { debtValidationLetterFactsSchema, buildDebtValidationLetterPrompt } from '@/lib/rules/debt-validation-letter-prompts'
+import { debtDefenseFactsSchema, buildDebtDefensePrompt } from '@/lib/rules/debt-defense-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 
 /* ------------------------------------------------------------------ */
@@ -249,6 +251,19 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   landlord_tenant_demand_letter: {
     schema: ltDemandLetterFactsSchema,
     buildPrompt: buildLtDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Debt defense
+  debt_validation_letter: {
+    schema: debtValidationLetterFactsSchema,
+    buildPrompt: buildDebtValidationLetterPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  debt_defense_general_denial: {
+    schema: debtDefenseFactsSchema,
+    buildPrompt: buildDebtDefensePrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  debt_defense_specific_answer: {
+    schema: debtDefenseFactsSchema,
+    buildPrompt: buildDebtDefensePrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 

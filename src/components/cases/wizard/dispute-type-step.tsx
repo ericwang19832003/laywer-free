@@ -2,7 +2,7 @@ import type { DisputeType } from '@/lib/rules/court-recommendation'
 import { OptionCard } from './option-card'
 
 const DISPUTE_OPTIONS: { value: DisputeType; label: string; description: string }[] = [
-  { value: 'debt_collection', label: 'Money owed to me', description: 'Debt or unpaid contract' },
+  { value: 'debt_collection', label: 'Debt dispute', description: 'Debt collection, credit card lawsuit, or money owed' },
   { value: 'landlord_tenant', label: 'Landlord-tenant issue', description: 'Lease, eviction, or deposit dispute' },
   { value: 'personal_injury', label: 'Property damage or personal injury', description: 'Accident, negligence, or damage claims' },
   { value: 'contract', label: 'Business or contract dispute', description: 'Breach of agreement, partnership issues' },
