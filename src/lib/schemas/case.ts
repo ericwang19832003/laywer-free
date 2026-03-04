@@ -72,7 +72,7 @@ export const PI_SUB_TYPES = [
 
 export type PiSubType = (typeof PI_SUB_TYPES)[number]
 
-export const STATES = ['TX', 'CA', 'NY', 'FL'] as const
+export const STATES = ['TX', 'CA', 'NY', 'FL', 'PA'] as const
 export type State = (typeof STATES)[number]
 
 export const ALL_COURT_TYPES = [
@@ -80,6 +80,7 @@ export const ALL_COURT_TYPES = [
   'small_claims', 'limited_civil', 'unlimited_civil',
   'ny_small_claims', 'ny_civil', 'ny_supreme',
   'fl_small_claims', 'fl_county', 'fl_circuit',
+  'pa_magisterial', 'pa_common_pleas',
   'federal', 'unknown',
 ] as const
 

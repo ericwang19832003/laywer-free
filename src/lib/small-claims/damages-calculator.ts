@@ -81,6 +81,13 @@ export const NY_SMALL_CLAIMS_CAP = 10_000
  */
 export const FL_SMALL_CLAIMS_CAP = 8_000
 
+/**
+ * 42 Pa.C.S. § 1515: Pennsylvania Magisterial District Courts have
+ * jurisdiction over civil matters where the amount does not exceed
+ * $12,000, exclusive of interest and costs.
+ */
+export const PA_SMALL_CLAIMS_CAP = 12_000
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

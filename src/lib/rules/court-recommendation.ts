@@ -3,7 +3,7 @@
  *
  * Pure function that recommends the appropriate court
  * based on dispute type, amount in controversy, circumstance flags,
- * and state. Supports Texas, California, and New York.
+ * and state. Supports Texas, California, New York, Florida, and Pennsylvania.
  * Zero side effects -- trivially unit-testable.
  */
 
@@ -33,6 +33,8 @@ export type AmountRange =
   | 'under_8k'
   | '8k_50k'
   | 'over_50k'
+  | 'under_12k'
+  | 'over_12k'
   | 'not_money'
 
 export type CourtType =
@@ -49,6 +51,8 @@ export type CourtType =
   | 'fl_small_claims'
   | 'fl_county'
   | 'fl_circuit'
+  | 'pa_magisterial'
+  | 'pa_common_pleas'
 
 export interface CircumstanceFlags {
   realProperty: boolean
@@ -62,7 +66,7 @@ export interface CourtRecommendationInput {
   amount: AmountRange
   circumstances: CircumstanceFlags
   subType?: string
-  state?: 'TX' | 'CA' | 'NY' | 'FL'
+  state?: 'TX' | 'CA' | 'NY' | 'FL' | 'PA'
 }
 
 export interface CourtRecommendation {
@@ -80,6 +84,7 @@ export interface CourtRecommendation {
  * Evaluated top-to-bottom; first matching rule wins.
  */
 export function recommendCourt(input: CourtRecommendationInput): CourtRecommendation {
+  if (input.state === 'PA') return recommendPennsylvaniaCourt(input)
   if (input.state === 'FL') return recommendFloridaCourt(input)
   if (input.state === 'NY') return recommendNewYorkCourt(input)
   if (input.state === 'CA') return recommendCaliforniaCourt(input)
@@ -535,6 +540,114 @@ function recommendFloridaCourt(input: CourtRecommendationInput): CourtRecommenda
     recommended: 'fl_circuit',
     reasoning:
       'Non-monetary disputes are generally heard in Florida Circuit Court, which has broad general jurisdiction.',
+    confidence: 'high',
+  }
+}
+
+// -- Pennsylvania Rules -------------------------------------------------------
+
+function recommendPennsylvaniaCourt(input: CourtRecommendationInput): CourtRecommendation {
+  const { disputeType, amount, circumstances } = input
+
+  // Rule 1: Federal law
+  if (circumstances.federalLaw) {
+    return {
+      recommended: 'federal',
+      reasoning:
+        'This dispute involves a federal law claim, which falls under exclusive federal jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 2: Family → Court of Common Pleas (Family Division)
+  if (disputeType === 'family') {
+    return {
+      recommended: 'pa_common_pleas',
+      reasoning:
+        'Family law matters are heard in the Family Division of Pennsylvania Court of Common Pleas.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 3: Eviction → Magisterial District Court
+  if (disputeType === 'landlord_tenant' && input.subType === 'eviction') {
+    return {
+      recommended: 'pa_magisterial',
+      reasoning:
+        'Eviction proceedings are filed in Pennsylvania Magisterial District Court (68 P.S. § 250.501).',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 4: Real property → Court of Common Pleas
+  if (circumstances.realProperty) {
+    return {
+      recommended: 'pa_common_pleas',
+      reasoning:
+        'Disputes involving title to real property are heard in Pennsylvania Court of Common Pleas.',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 5: Diversity jurisdiction ($75K+ out-of-state)
+  if (
+    circumstances.outOfState &&
+    (amount === 'over_12k' || amount === 'over_200k' || amount === '75k_200k')
+  ) {
+    return {
+      recommended: 'federal',
+      reasoning:
+        'Out-of-state parties with an amount in controversy exceeding $75,000 may qualify for federal diversity jurisdiction.',
+      alternativeNote:
+        'You may also file in Pennsylvania Court of Common Pleas if you prefer state court.',
+      confidence: 'moderate',
+    }
+  }
+
+  // Rule 6: Under $12K → Magisterial District Court (42 Pa.C.S. § 1515)
+  if (amount === 'under_12k') {
+    return {
+      recommended: 'pa_magisterial',
+      reasoning:
+        'Claims up to $12,000 can be filed in Pennsylvania Magisterial District Court (42 Pa.C.S. § 1515).',
+      confidence: 'high',
+    }
+  }
+
+  // Rule 7: Over $12K → Court of Common Pleas
+  if (amount === 'over_12k' || amount === 'over_200k' || amount === '75k_200k') {
+    return {
+      recommended: 'pa_common_pleas',
+      reasoning:
+        'Claims exceeding $12,000 are heard in Pennsylvania Court of Common Pleas, which has unlimited civil jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  // Handle TX/CA/NY/FL amount ranges used in PA context
+  if (amount === 'under_20k' || amount === 'under_12500' || amount === 'under_10k' || amount === 'under_8k') {
+    return {
+      recommended: 'pa_common_pleas',
+      reasoning:
+        'Claims in this range fall within Pennsylvania Court of Common Pleas jurisdiction.',
+      confidence: 'high',
+    }
+  }
+
+  if (amount === '20k_75k' || amount === '12500_35k' || amount === 'over_35k' || amount === '10k_25k' || amount === 'over_25k' || amount === '8k_50k' || amount === 'over_50k') {
+    return {
+      recommended: 'pa_common_pleas',
+      reasoning:
+        'Claims in this range are heard in Pennsylvania Court of Common Pleas.',
+      confidence: 'high',
+    }
+  }
+
+  // Default → Court of Common Pleas
+  return {
+    recommended: 'pa_common_pleas',
+    reasoning:
+      'Non-monetary disputes are generally heard in Pennsylvania Court of Common Pleas, which has broad general jurisdiction.',
     confidence: 'high',
   }
 }

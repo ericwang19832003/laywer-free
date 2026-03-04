@@ -41,7 +41,14 @@ const FL_COURT_LABELS: Record<string, string> = {
   federal: 'Federal Court',
 }
 
+const PA_COURT_LABELS: Record<string, string> = {
+  pa_magisterial: 'Magisterial District Court',
+  pa_common_pleas: 'Court of Common Pleas',
+  federal: 'Federal Court',
+}
+
 function getCourtLabels(selectedState: State): Record<string, string> {
+  if (selectedState === 'PA') return PA_COURT_LABELS
   if (selectedState === 'FL') return FL_COURT_LABELS
   if (selectedState === 'NY') return NY_COURT_LABELS
   return selectedState === 'CA' ? CA_COURT_LABELS : TX_COURT_LABELS
@@ -69,13 +76,15 @@ export function RecommendationStep({
 
   const courtLabels = getCourtLabels(selectedState)
   const config = getStateConfig(selectedState)
-  const countyPlaceholder = selectedState === 'FL'
-    ? 'e.g. Miami-Dade County'
-    : selectedState === 'NY'
-      ? 'e.g. Kings County'
-      : selectedState === 'CA'
-        ? 'e.g. Los Angeles County'
-        : 'e.g. Travis County'
+  const countyPlaceholder = selectedState === 'PA'
+    ? 'e.g. Allegheny County'
+    : selectedState === 'FL'
+      ? 'e.g. Miami-Dade County'
+      : selectedState === 'NY'
+        ? 'e.g. Kings County'
+        : selectedState === 'CA'
+          ? 'e.g. Los Angeles County'
+          : 'e.g. Travis County'
 
   return (
     <div className="space-y-4">

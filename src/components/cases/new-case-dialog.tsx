@@ -189,15 +189,16 @@ export function NewCaseDialog() {
     const isCA = stateCode === 'CA'
     const isNY = stateCode === 'NY'
     const isFL = stateCode === 'FL'
+    const isPA = stateCode === 'PA'
 
     const courtType =
       courtOverride ??
       (isFamily
-        ? (isFL ? 'fl_circuit' : isNY ? 'ny_supreme' : isCA ? 'unlimited_civil' : 'district')
+        ? (isPA ? 'pa_common_pleas' : isFL ? 'fl_circuit' : isNY ? 'ny_supreme' : isCA ? 'unlimited_civil' : 'district')
         : isSmallClaims
-          ? (isFL ? 'fl_small_claims' : isNY ? 'ny_small_claims' : isCA ? 'small_claims' : 'jp')
+          ? (isPA ? 'pa_magisterial' : isFL ? 'fl_small_claims' : isNY ? 'ny_small_claims' : isCA ? 'small_claims' : 'jp')
           : isEviction
-            ? (isFL ? 'fl_county' : isNY ? 'ny_civil' : isCA ? 'unlimited_civil' : 'jp')
+            ? (isPA ? 'pa_magisterial' : isFL ? 'fl_county' : isNY ? 'ny_civil' : isCA ? 'unlimited_civil' : 'jp')
             : state.disputeType && state.amount
               ? recommendCourt({
                   disputeType: state.disputeType,
@@ -278,6 +279,7 @@ export function NewCaseDialog() {
   const isCA = selectedState === 'CA'
   const isNY = selectedState === 'NY'
   const isFL = selectedState === 'FL'
+  const isPA = selectedState === 'PA'
 
   const civilRecommendation =
     !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
@@ -309,77 +311,95 @@ export function NewCaseDialog() {
         })
       : null
 
-  const familyRecommendation = isFL
+  const familyRecommendation = isPA
     ? {
-        recommended: 'fl_circuit' as const,
-        reasoning: 'Family law matters are heard in Florida Circuit Court.',
+        recommended: 'pa_common_pleas' as const,
+        reasoning: 'Family law matters are heard in the Family Division of Pennsylvania Court of Common Pleas.',
         confidence: 'high' as const,
       }
-    : isNY
+    : isFL
       ? {
-          recommended: 'ny_supreme' as const,
-          reasoning: 'Family law matters such as divorce are heard in New York Supreme Court.',
+          recommended: 'fl_circuit' as const,
+          reasoning: 'Family law matters are heard in Florida Circuit Court.',
           confidence: 'high' as const,
         }
-      : isCA
+      : isNY
         ? {
-            recommended: 'unlimited_civil' as const,
-            reasoning: 'Family law matters are heard in California Superior Court (Unlimited Civil division).',
+            recommended: 'ny_supreme' as const,
+            reasoning: 'Family law matters such as divorce are heard in New York Supreme Court.',
             confidence: 'high' as const,
           }
-        : {
-            recommended: 'district' as const,
-            reasoning: 'Family law cases are filed in District Court.',
-            confidence: 'high' as const,
-          }
+        : isCA
+          ? {
+              recommended: 'unlimited_civil' as const,
+              reasoning: 'Family law matters are heard in California Superior Court (Unlimited Civil division).',
+              confidence: 'high' as const,
+            }
+          : {
+              recommended: 'district' as const,
+              reasoning: 'Family law cases are filed in District Court.',
+              confidence: 'high' as const,
+            }
 
-  const smallClaimsRecommendation = isFL
+  const smallClaimsRecommendation = isPA
     ? {
-        recommended: 'fl_small_claims' as const,
-        reasoning: 'Small claims cases up to $8,000 are filed in Florida Small Claims Court.',
+        recommended: 'pa_magisterial' as const,
+        reasoning: 'Small claims cases up to $12,000 are filed in Pennsylvania Magisterial District Court.',
         confidence: 'high' as const,
       }
-    : isNY
+    : isFL
       ? {
-          recommended: 'ny_small_claims' as const,
-          reasoning: 'Small claims cases up to $10,000 are filed in New York Small Claims Court.',
+          recommended: 'fl_small_claims' as const,
+          reasoning: 'Small claims cases up to $8,000 are filed in Florida Small Claims Court.',
           confidence: 'high' as const,
         }
-      : isCA
+      : isNY
         ? {
-            recommended: 'small_claims' as const,
-            reasoning: 'Small claims cases are filed in California Small Claims Court.',
+            recommended: 'ny_small_claims' as const,
+            reasoning: 'Small claims cases up to $10,000 are filed in New York Small Claims Court.',
             confidence: 'high' as const,
           }
-        : {
-            recommended: 'jp' as const,
-            reasoning: 'Small claims cases are filed in Justice of the Peace (JP) Court.',
-            confidence: 'high' as const,
-          }
+        : isCA
+          ? {
+              recommended: 'small_claims' as const,
+              reasoning: 'Small claims cases are filed in California Small Claims Court.',
+              confidence: 'high' as const,
+            }
+          : {
+              recommended: 'jp' as const,
+              reasoning: 'Small claims cases are filed in Justice of the Peace (JP) Court.',
+              confidence: 'high' as const,
+            }
 
-  const evictionRecommendation = isFL
+  const evictionRecommendation = isPA
     ? {
-        recommended: 'fl_county' as const,
-        reasoning: 'Eviction proceedings are filed in Florida County Court.',
+        recommended: 'pa_magisterial' as const,
+        reasoning: 'Eviction proceedings are filed in Pennsylvania Magisterial District Court.',
         confidence: 'high' as const,
       }
-    : isNY
+    : isFL
       ? {
-          recommended: 'ny_civil' as const,
-          reasoning: 'Eviction proceedings are heard in Housing Court, which is part of New York Civil Court.',
+          recommended: 'fl_county' as const,
+          reasoning: 'Eviction proceedings are filed in Florida County Court.',
           confidence: 'high' as const,
         }
-      : isCA
+      : isNY
         ? {
-            recommended: 'unlimited_civil' as const,
-            reasoning: 'Unlawful detainer (eviction) cases are heard in California Superior Court regardless of the amount involved.',
+            recommended: 'ny_civil' as const,
+            reasoning: 'Eviction proceedings are heard in Housing Court, which is part of New York Civil Court.',
             confidence: 'high' as const,
           }
-        : {
-            recommended: 'jp' as const,
-            reasoning: 'Eviction cases are filed in Justice of the Peace (JP) Court.',
-            confidence: 'high' as const,
-          }
+        : isCA
+          ? {
+              recommended: 'unlimited_civil' as const,
+              reasoning: 'Unlawful detainer (eviction) cases are heard in California Superior Court regardless of the amount involved.',
+              confidence: 'high' as const,
+            }
+          : {
+              recommended: 'jp' as const,
+              reasoning: 'Eviction cases are filed in Justice of the Peace (JP) Court.',
+              confidence: 'high' as const,
+            }
 
   const landlordTenantRecommendation =
     isLandlordTenant && !isEviction && state.disputeType && state.amount

@@ -184,4 +184,29 @@ describe('createCaseSchema', () => {
     })
     expect(result.success).toBe(true)
   })
+
+  it('accepts PA as state', () => {
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'PA' })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.state).toBe('PA')
+    }
+  })
+
+  it('accepts PA court types', () => {
+    for (const ct of ['pa_magisterial', 'pa_common_pleas']) {
+      const result = createCaseSchema.safeParse({ role: 'plaintiff', court_type: ct })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('accepts PA state with PA court type', () => {
+    const result = createCaseSchema.safeParse({
+      role: 'plaintiff',
+      state: 'PA',
+      court_type: 'pa_magisterial',
+      dispute_type: 'small_claims',
+    })
+    expect(result.success).toBe(true)
+  })
 })
