@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { AuthTabs, type AuthTabValue } from '@/components/auth/auth-tabs'
+import { PhoneOtpForm } from '@/components/auth/phone-otp-form'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -15,6 +17,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<AuthTabValue>('email')
   const router = useRouter()
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
@@ -38,8 +41,6 @@ export default function SignupPage() {
       return
     }
 
-    // If the user's email is already confirmed (auto-confirm enabled),
-    // redirect to /cases. Otherwise, show confirmation message.
     if (data.session) {
       router.push('/cases')
       router.refresh()
@@ -76,45 +77,59 @@ export default function SignupPage() {
               </Link>
             </div>
           ) : (
-            <>
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                    required
-                    minLength={6}
-                  />
-                </div>
-                {error && (
-                  <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
-                )}
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
-              <p className="mt-4 text-center text-sm" style={{ color: '#78716C' }}>
-                Already have an account?{' '}
-                <Link href="/login" className="text-primary underline">
-                  Sign in
-                </Link>
-              </p>
-            </>
+            <AuthTabs activeTab={activeTab} onTabChange={setActiveTab}>
+              {activeTab === 'email' ? (
+                <>
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="At least 6 characters"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    {error && (
+                      <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+                    )}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? 'Creating account...' : 'Create Account'}
+                    </Button>
+                  </form>
+                  <p className="mt-4 text-center text-sm" style={{ color: '#78716C' }}>
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-primary underline">
+                      Sign in
+                    </Link>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <PhoneOtpForm />
+                  <p className="mt-4 text-center text-sm" style={{ color: '#78716C' }}>
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-primary underline">
+                      Sign in
+                    </Link>
+                  </p>
+                </>
+              )}
+            </AuthTabs>
           )}
         </CardContent>
       </Card>

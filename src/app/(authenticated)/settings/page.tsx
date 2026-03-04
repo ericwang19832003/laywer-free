@@ -34,6 +34,8 @@ export default function SettingsPage() {
   const router = useRouter()
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [isPhoneUser, setIsPhoneUser] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -62,6 +64,8 @@ export default function SettingsPage() {
     getSupabase().auth.getUser().then(({ data }) => {
       if (data.user) {
         setEmail(data.user.email ?? '')
+        setPhone(data.user.phone ?? '')
+        setIsPhoneUser(!data.user.email && !!data.user.phone)
         setDisplayName(data.user.user_metadata?.display_name ?? '')
         const prefs = data.user.user_metadata?.notification_prefs
         if (prefs) {
@@ -195,11 +199,19 @@ export default function SettingsPage() {
               <CardTitle className="text-base">Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" value={email} disabled className="bg-warm-bg" />
-                <p className="text-xs text-warm-muted">Email cannot be changed.</p>
-              </div>
+              {isPhoneUser ? (
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input id="phone" value={phone} disabled className="bg-warm-bg" />
+                  <p className="text-xs text-warm-muted">Phone number cannot be changed.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" value={email} disabled className="bg-warm-bg" />
+                  <p className="text-xs text-warm-muted">Email cannot be changed.</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="displayName">Display Name</Label>
                 <Input
@@ -215,34 +227,36 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Change Password</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleChangePassword} disabled={changingPassword} size="sm">
-                {changingPassword ? 'Changing...' : 'Change Password'}
-              </Button>
-            </CardContent>
-          </Card>
+          {!isPhoneUser && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Change Password</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleChangePassword} disabled={changingPassword} size="sm">
+                  {changingPassword ? 'Changing...' : 'Change Password'}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

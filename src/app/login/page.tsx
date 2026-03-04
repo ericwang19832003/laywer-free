@@ -8,12 +8,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { AuthTabs, type AuthTabValue } from '@/components/auth/auth-tabs'
+import { PhoneOtpForm } from '@/components/auth/phone-otp-form'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<AuthTabValue>('email')
   const router = useRouter()
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
@@ -50,41 +53,57 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+          <AuthTabs activeTab={activeTab} onTabChange={setActiveTab}>
+            {activeTab === 'email' ? (
+              <>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  {error && (
+                    <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+                  )}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </Button>
+                </form>
+                <p className="mt-4 text-center text-sm" style={{ color: '#78716C' }}>
+                  New here?{' '}
+                  <Link href="/signup" className="text-primary underline">
+                    Create an account
+                  </Link>
+                </p>
+              </>
+            ) : (
+              <>
+                <PhoneOtpForm />
+                <p className="mt-4 text-center text-sm" style={{ color: '#78716C' }}>
+                  New here?{' '}
+                  <Link href="/signup" className="text-primary underline">
+                    Create an account
+                  </Link>
+                </p>
+              </>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm" style={{ color: '#78716C' }}>
-            New here?{' '}
-            <Link href="/signup" className="text-primary underline">
-              Create an account
-            </Link>
-          </p>
+          </AuthTabs>
         </CardContent>
       </Card>
     </div>

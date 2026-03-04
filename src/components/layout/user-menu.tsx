@@ -15,7 +15,7 @@ import { useRef, useState, useEffect } from 'react'
 export function UserMenu() {
   const router = useRouter()
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
-  const [email, setEmail] = useState<string | null>(null)
+  const [userIdentifier, setUserIdentifier] = useState<string | null>(null)
 
   function getSupabase() {
     if (!supabaseRef.current) {
@@ -26,7 +26,7 @@ export function UserMenu() {
 
   useEffect(() => {
     getSupabase().auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null)
+      setUserIdentifier(data.user?.email ?? data.user?.phone ?? null)
     })
   }, [])
 
@@ -47,10 +47,10 @@ export function UserMenu() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        {email && (
+        {userIdentifier && (
           <>
             <div className="px-2 py-1.5">
-              <p className="text-sm font-medium text-warm-text truncate">{email}</p>
+              <p className="text-sm font-medium text-warm-text truncate">{userIdentifier}</p>
             </div>
             <DropdownMenuSeparator />
           </>
