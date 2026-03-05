@@ -1,6 +1,7 @@
 'use client'
 
-import { useReducer, useState } from 'react'
+import { useReducer, useState, useRef, useCallback, useEffect } from 'react'
+import { ChevronUp, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -423,6 +424,37 @@ export function NewCaseDialog() {
         })
       : null
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollUp, setCanScrollUp] = useState(false)
+  const [canScrollDown, setCanScrollDown] = useState(false)
+
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollUp(el.scrollTop > 0)
+    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 1)
+  }, [])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollTop = 0
+    // Use rAF to check after content renders
+    requestAnimationFrame(updateScrollState)
+  }, [state.step, updateScrollState])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const ro = new ResizeObserver(updateScrollState)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [updateScrollState])
+
+  function scrollBy(delta: number) {
+    scrollRef.current?.scrollBy({ top: delta, behavior: 'smooth' })
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -430,7 +462,7 @@ export function NewCaseDialog() {
           + New Case
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Start a new case</DialogTitle>
           <DialogDescription>
@@ -443,6 +475,18 @@ export function NewCaseDialog() {
           totalSteps={totalSteps}
           onBack={() => dispatch({ type: 'PREV_STEP' })}
         />
+
+        <div className="relative min-h-0 flex-1">
+          {canScrollUp && (
+            <div className="pointer-events-none absolute top-0 left-0 right-0 z-10 h-6 bg-gradient-to-b from-background to-transparent" />
+          )}
+
+          <div
+            ref={scrollRef}
+            onScroll={updateScrollState}
+            className="overflow-y-auto max-h-full pr-1"
+            style={{ maxHeight: 'calc(85vh - 180px)' }}
+          >
 
         {state.step === 1 && (
           <StateStep
@@ -680,6 +724,35 @@ export function NewCaseDialog() {
             loading={loading}
           />
         )}
+
+          </div>
+
+          {canScrollDown && (
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-6 bg-gradient-to-t from-background to-transparent" />
+          )}
+
+          {canScrollUp && (
+            <button
+              type="button"
+              onClick={() => scrollBy(-200)}
+              className="absolute top-1 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 border border-warm-border shadow-sm hover:bg-background transition-colors"
+              aria-label="Scroll up"
+            >
+              <ChevronUp className="h-4 w-4 text-warm-muted" />
+            </button>
+          )}
+
+          {canScrollDown && (
+            <button
+              type="button"
+              onClick={() => scrollBy(200)}
+              className="absolute bottom-1 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 border border-warm-border shadow-sm hover:bg-background transition-colors"
+              aria-label="Scroll down"
+            >
+              <ChevronDown className="h-4 w-4 text-warm-muted" />
+            </button>
+          )}
+        </div>
 
         {error && <p className="text-sm text-calm-amber">{error}</p>}
       </DialogContent>

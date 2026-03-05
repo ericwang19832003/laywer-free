@@ -98,7 +98,9 @@ describe('tasksToSkip are cumulative', () => {
         const prevSkips = milestones[i - 1].tasksToSkip
         const currentSkips = milestones[i].tasksToSkip
         // Every task in the previous milestone's skip list should be in the current one
+        // Exception: a milestone's firstUnlockedTask should NOT be in its own tasksToSkip
         for (const task of prevSkips) {
+          if (task === milestones[i].firstUnlockedTask) continue
           expect(currentSkips).toContain(task)
         }
         // Current should have at least as many as previous

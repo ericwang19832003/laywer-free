@@ -115,7 +115,6 @@ const CIVIL_MILESTONES: Milestone[] = [
       'wait_for_answer',
       'check_docket_for_answer',
       'upload_answer',
-      'discovery_starter_pack',
       'rule_26f_prep',
       'mandatory_disclosures',
     ],
