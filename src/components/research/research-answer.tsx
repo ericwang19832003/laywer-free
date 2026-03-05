@@ -14,11 +14,17 @@ interface Citation {
 interface ResearchAnswerProps {
   answer: string
   citations: Citation[]
+  notice?: string | null
 }
 
-export function ResearchAnswer({ answer, citations }: ResearchAnswerProps) {
+export function ResearchAnswer({ answer, citations, notice }: ResearchAnswerProps) {
   return (
     <div className="space-y-4">
+      {notice && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {notice}
+        </div>
+      )}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold" style={{ color: '#1C1917' }}>

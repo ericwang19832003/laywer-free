@@ -62,6 +62,7 @@ export async function POST(
       return NextResponse.json({
         answer: 'You haven\'t saved any case law authorities yet. Search for relevant cases and click "Use as Authority" to build your research library, then ask your question again.',
         citations: [],
+        notice: 'Why this was limited: no saved authorities were available for this case.',
         _meta: { source: 'no_authorities' },
       })
     }
@@ -146,6 +147,7 @@ export async function POST(
       return NextResponse.json({
         answer: 'No relevant case law excerpts found in your saved authorities. Try adding more cases that relate to your question.',
         citations: [],
+        notice: 'Why this was limited: no matching excerpts were found in your saved authorities.',
         _meta: { source: 'no_matches' },
       })
     }
@@ -190,6 +192,7 @@ export async function POST(
       return NextResponse.json({
         answer: 'The AI response did not include sufficient citations for every statement. Please try asking a narrower question or add more authorities.',
         citations: [],
+        notice: 'Why this was limited: the response could not be fully supported by citations.',
         _meta: { source: 'citation_missing' },
       })
     }
@@ -199,6 +202,7 @@ export async function POST(
       return NextResponse.json({
         answer: 'The AI response could not be displayed because it contained language that may constitute legal advice. Please rephrase your question to focus on what the case law says rather than what actions to take.',
         citations: [],
+        notice: 'Why this was limited: the response included language that could be interpreted as legal advice.',
         _meta: { source: 'safety_filtered' },
       })
     }

@@ -23,6 +23,7 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
   const [loading, setLoading] = useState(false)
   const [answer, setAnswer] = useState<string | null>(null)
   const [citations, setCitations] = useState<Citation[]>([])
+  const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function handleAsk(e: React.FormEvent) {
@@ -33,6 +34,7 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
     setError(null)
     setAnswer(null)
     setCitations([])
+    setNotice(null)
 
     try {
       const res = await fetch(`/api/cases/${caseId}/research/ask`, {
@@ -49,6 +51,7 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
 
       setAnswer(data.answer)
       setCitations(data.citations ?? [])
+      setNotice(data.notice ?? null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -81,7 +84,7 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
 
       {error && <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>}
 
-      {answer && <ResearchAnswer answer={answer} citations={citations} />}
+      {answer && <ResearchAnswer answer={answer} citations={citations} notice={notice} />}
     </div>
   )
 }
