@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { AuthorityList } from '@/components/research/authority-list'
+import { AuthorityWorkspace } from '@/components/research/authority-workspace'
 
 export default async function ResearchAuthoritiesPage({
   params,
@@ -27,6 +27,9 @@ export default async function ResearchAuthoritiesPage({
       id,
       cluster_id,
       status,
+      pinned,
+      folder_id,
+      tags,
       added_at,
       cl_case_clusters (
         case_name,
@@ -35,6 +38,10 @@ export default async function ResearchAuthoritiesPage({
         date_filed,
         citations,
         snippet
+      ),
+      authority_folders (
+        id,
+        name
       )
     `)
     .eq('case_id', id)
@@ -45,7 +52,16 @@ export default async function ResearchAuthoritiesPage({
     cl_case_clusters: Array.isArray(a.cl_case_clusters)
       ? a.cl_case_clusters[0] ?? null
       : a.cl_case_clusters,
+    authority_folders: Array.isArray(a.authority_folders)
+      ? a.authority_folders[0] ?? null
+      : a.authority_folders,
   }))
+
+  const { data: folders } = await supabase
+    .from('authority_folders')
+    .select('id, name, created_at')
+    .eq('case_id', id)
+    .order('created_at', { ascending: true })
 
   return (
     <div className="space-y-4">
@@ -56,7 +72,11 @@ export default async function ResearchAuthoritiesPage({
         </p>
       </div>
 
-      <AuthorityList caseId={id} initialAuthorities={authorities ?? []} />
+      <AuthorityWorkspace
+        caseId={id}
+        initialAuthorities={authorities ?? []}
+        initialFolders={(folders ?? []).map((f) => ({ id: f.id as string, name: f.name as string }))}
+      />
     </div>
   )
 }

@@ -28,6 +28,9 @@ export async function GET(
         id,
         cluster_id,
         status,
+        pinned,
+        folder_id,
+        tags,
         added_at,
         cl_case_clusters (
           case_name,
@@ -36,6 +39,10 @@ export async function GET(
           date_filed,
           citations,
           snippet
+        ),
+        authority_folders (
+          id,
+          name
         )
       `)
       .eq('case_id', caseId)
@@ -120,6 +127,76 @@ export async function POST(
     }
 
     return NextResponse.json({ authority }, { status: 201 })
+  } catch {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// PATCH: Update authority metadata (pinned, folder, tags)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: caseId } = await params
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
+
+    const body = await request.json()
+    const { cluster_id, pinned, folder_id, tags } = body as {
+      cluster_id?: number
+      pinned?: boolean
+      folder_id?: string | null
+      tags?: string[]
+    }
+
+    if (!cluster_id || typeof cluster_id !== 'number') {
+      return NextResponse.json({ error: 'cluster_id is required' }, { status: 400 })
+    }
+
+    const update: Record<string, unknown> = {}
+    if (typeof pinned === 'boolean') update.pinned = pinned
+    if (typeof folder_id === 'string' || folder_id === null) update.folder_id = folder_id
+    if (Array.isArray(tags)) update.tags = tags
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: 'No updates provided' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('case_authorities')
+      .update(update)
+      .eq('case_id', caseId)
+      .eq('cluster_id', cluster_id)
+      .select(`
+        id,
+        cluster_id,
+        status,
+        pinned,
+        folder_id,
+        tags,
+        added_at,
+        cl_case_clusters (
+          case_name,
+          court_id,
+          court_name,
+          date_filed,
+          citations,
+          snippet
+        ),
+        authority_folders (
+          id,
+          name
+        )
+      `)
+      .maybeSingle()
+
+    if (error || !data) {
+      return NextResponse.json({ error: 'Failed to update authority' }, { status: 500 })
+    }
+
+    return NextResponse.json({ authority: data })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
