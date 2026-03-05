@@ -20,6 +20,10 @@ const SECTION_LABELS: Record<string, string> = {
   health: 'Health',
   step: 'Step',
   research: 'Research',
+  search: 'Search',
+  authorities: 'Authorities',
+  ask: 'Ask',
+  history: 'History',
 }
 
 export function buildBreadcrumbs(pathname: string): Crumb[] {
@@ -46,13 +50,16 @@ export function buildBreadcrumbs(pathname: string): Crumb[] {
 
       if (segments.length === 3) {
         crumbs.push({ label: sectionLabel, href: null })
+      } else if (section === 'step') {
+        crumbs.push({ label: 'Step', href: null })
+      } else if (section === 'research') {
+        const subSection = segments[3]
+        const subLabel = SECTION_LABELS[subSection] || subSection.charAt(0).toUpperCase() + subSection.slice(1)
+        crumbs.push({ label: sectionLabel, href: `/case/${caseId}/${section}` })
+        crumbs.push({ label: subLabel, href: null })
       } else {
-        if (section === 'step') {
-          crumbs.push({ label: 'Step', href: null })
-        } else {
-          crumbs.push({ label: sectionLabel, href: `/case/${caseId}/${section}` })
-          crumbs.push({ label: 'Detail', href: null })
-        }
+        crumbs.push({ label: sectionLabel, href: `/case/${caseId}/${section}` })
+        crumbs.push({ label: 'Detail', href: null })
       }
     }
 

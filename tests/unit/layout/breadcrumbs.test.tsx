@@ -65,4 +65,14 @@ describe('buildBreadcrumbs', () => {
       { label: 'Detail', href: null },
     ])
   })
+
+  it('returns Cases > Dashboard > Research > Search for /case/abc/research/search', () => {
+    const crumbs = buildBreadcrumbs('/case/abc/research/search')
+    expect(crumbs).toEqual([
+      { label: 'Cases', href: '/cases' },
+      { label: 'Dashboard', href: '/case/abc' },
+      { label: 'Research', href: '/case/abc/research' },
+      { label: 'Search', href: null },
+    ])
+  })
 })
