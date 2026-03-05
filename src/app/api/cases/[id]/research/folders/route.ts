@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { isUuid } from '@/lib/security/uuid'
 
 export const runtime = 'nodejs'
 
@@ -92,11 +93,21 @@ export async function DELETE(
     if (!auth.ok) return auth.error
     const { supabase } = auth
 
+    const { data: caseData, error: caseError } = await supabase
+      .from('cases')
+      .select('id')
+      .eq('id', caseId)
+      .single()
+
+    if (caseError || !caseData) {
+      return NextResponse.json({ error: 'Case not found' }, { status: 404 })
+    }
+
     const body = await request.json()
     const { folder_id } = body as { folder_id?: string }
 
-    if (!folder_id) {
-      return NextResponse.json({ error: 'folder_id is required' }, { status: 400 })
+    if (!folder_id || !isUuid(folder_id)) {
+      return NextResponse.json({ error: 'Valid folder_id is required' }, { status: 400 })
     }
 
     await supabase

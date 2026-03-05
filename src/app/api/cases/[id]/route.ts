@@ -11,6 +11,16 @@ export async function DELETE(
     if (!auth.ok) return auth.error
     const { supabase } = auth
 
+    const { data: caseData, error: caseError } = await supabase
+      .from('cases')
+      .select('id')
+      .eq('id', id)
+      .single()
+
+    if (caseError || !caseData) {
+      return NextResponse.json({ error: 'Case not found' }, { status: 404 })
+    }
+
     const { error } = await supabase
       .from('cases')
       .update({ status: 'archived' })

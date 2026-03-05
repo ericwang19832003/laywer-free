@@ -66,6 +66,7 @@ export function validateAnswerCitations(answer: string): CitationValidationResul
 }
 
 export function sanitizeDirectiveLanguage(text: string): string {
+  // Order matters: handle more specific phrases before general ones.
   return text
     .replace(/\byou must file\b/gi, 'you may need to consider filing')
     .replace(/\byou must\b/gi, 'you may need to consider')

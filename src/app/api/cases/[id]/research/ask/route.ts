@@ -5,6 +5,7 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSingleEmbedding } from '@/lib/courtlistener/embeddings'
 import { buildRAGPrompt, isRAGAnswerSafe, ragQuestionSchema, type RAGChunkContext } from '@/lib/courtlistener/rag-prompts'
 import { expandQueryWithContext, mergeHybridResults } from '@/lib/courtlistener/search'
+import { buildQueryHash } from '@/lib/courtlistener/cache'
 import { sanitizeDirectiveLanguage, validateAnswerCitations } from '@/lib/courtlistener/validators'
 import { safeError } from '@/lib/security/safe-log'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
@@ -71,9 +72,7 @@ export async function POST(
       .update(JSON.stringify(authorityIds))
       .digest('hex')
 
-    const queryHash = createHash('sha256')
-      .update(JSON.stringify({ question }))
-      .digest('hex')
+    const queryHash = buildQueryHash(question, caseId)
 
     const { data: cached } = await supabase
       .from('cl_query_cache')

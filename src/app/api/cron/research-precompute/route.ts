@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { processClusterOpinions } from '@/lib/courtlistener/pipeline'
 import { computeJobBackoffMs } from '@/lib/courtlistener/job-utils'
 import { safeError } from '@/lib/security/safe-log'
+import { safeEquals } from '@/lib/security/timing-safe'
 
 const BATCH_SIZE = 5
 
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
   }
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (!authHeader || !safeEquals(authHeader, `Bearer ${cronSecret}`)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
