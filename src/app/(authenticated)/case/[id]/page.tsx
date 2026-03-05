@@ -9,6 +9,7 @@ import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-se
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
+import { ResearchCard } from '@/components/dashboard/research-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
 import { Card, CardContent } from '@/components/ui/card'
@@ -173,6 +174,12 @@ export default async function DashboardPage({
     .eq('id', id)
     .single()
 
+  // Research / legal authorities count
+  const { count: authorityCount } = await supabase
+    .from('case_authorities')
+    .select('id', { count: 'exact', head: true })
+    .eq('case_id', id)
+
   // AI cache fetches
   const dashboard = data as DashboardData | null
   const [taskDescResult, timelineSummaryResult, healthTipsResult, strategyResult] = await Promise.all([
@@ -243,6 +250,7 @@ export default async function DashboardPage({
             servedCount={discoveryServedCount}
             itemCount={discoveryItemCount}
           />
+          <ResearchCard caseId={id} authorityCount={authorityCount ?? 0} />
           {hasMotionActivity && (
             <Card>
               <CardContent className="pt-5 pb-4 px-5">

@@ -19,6 +19,7 @@ const SECTION_LABELS: Record<string, string> = {
   binders: 'Binders',
   health: 'Health',
   step: 'Step',
+  research: 'Research',
 }
 
 export function buildBreadcrumbs(pathname: string): Crumb[] {
