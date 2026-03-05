@@ -23,7 +23,8 @@ export type DebtSubType =
 interface DebtSubTypeOption {
   value: DebtSubType
   label: string
-  description: string
+  defendantDesc: string
+  plaintiffDesc: string
   icon: LucideIcon
 }
 
@@ -31,53 +32,63 @@ const DEBT_OPTIONS: DebtSubTypeOption[] = [
   {
     value: 'credit_card',
     label: 'Credit Card Debt',
-    description: 'Sued by a credit card company or debt buyer',
+    defendantDesc: 'Sued by a credit card company or debt buyer',
+    plaintiffDesc: 'Collecting on an unpaid credit card balance',
     icon: CreditCard,
   },
   {
     value: 'medical_bills',
     label: 'Medical Bills',
-    description: 'Sued for unpaid medical or hospital bills',
+    defendantDesc: 'Sued for unpaid medical or hospital bills',
+    plaintiffDesc: 'Collecting on unpaid medical or hospital bills',
     icon: Stethoscope,
   },
   {
     value: 'personal_loan',
     label: 'Personal Loan',
-    description: 'Sued for an unpaid personal or installment loan',
+    defendantDesc: 'Sued for an unpaid personal or installment loan',
+    plaintiffDesc: 'Collecting on an unpaid personal loan',
     icon: Wallet,
   },
   {
     value: 'auto_loan',
     label: 'Auto Loan / Deficiency',
-    description: 'Sued after vehicle repossession for remaining balance',
+    defendantDesc: 'Sued after vehicle repossession for remaining balance',
+    plaintiffDesc: 'Collecting remaining balance after repossession',
     icon: Car,
   },
   {
     value: 'payday_loan',
     label: 'Payday / Title Loan',
-    description: 'Sued by a payday or title loan company',
+    defendantDesc: 'Sued by a payday or title loan company',
+    plaintiffDesc: 'Collecting on a payday or title loan',
     icon: Banknote,
   },
   {
     value: 'debt_buyer',
-    label: 'Debt Buyer / Junk Debt',
-    description: 'Sued by a company that bought old debt (e.g., Portfolio Recovery, Midland Credit)',
+    label: 'Debt Buyer / Purchased Debt',
+    defendantDesc: 'Sued by a company that bought old debt (e.g., Portfolio Recovery, Midland Credit)',
+    plaintiffDesc: 'Purchased debt and seeking to collect',
     icon: FileStack,
   },
   {
     value: 'other',
     label: 'Other Debt',
-    description: 'Another type of debt collection lawsuit',
+    defendantDesc: 'Another type of debt collection lawsuit',
+    plaintiffDesc: 'Another type of debt you are owed',
     icon: HelpCircle,
   },
 ]
 
 interface DebtSubTypeStepProps {
   value: DebtSubType | ''
+  side?: 'defendant' | 'plaintiff'
   onSelect: (subType: DebtSubType) => void
 }
 
-export function DebtSubTypeStep({ value, onSelect }: DebtSubTypeStepProps) {
+export function DebtSubTypeStep({ value, side = 'defendant', onSelect }: DebtSubTypeStepProps) {
+  const isPlaintiff = side === 'plaintiff'
+
   return (
     <div className="space-y-3">
       <p className="text-sm font-medium text-warm-text">
@@ -87,6 +98,7 @@ export function DebtSubTypeStep({ value, onSelect }: DebtSubTypeStepProps) {
         {DEBT_OPTIONS.map((opt) => {
           const Icon = opt.icon
           const isSelected = value === opt.value
+          const description = isPlaintiff ? opt.plaintiffDesc : opt.defendantDesc
 
           return (
             <button
@@ -109,7 +121,7 @@ export function DebtSubTypeStep({ value, onSelect }: DebtSubTypeStepProps) {
                   {opt.label}
                 </span>
                 <span className="block text-xs mt-0.5 text-warm-muted">
-                  {opt.description}
+                  {description}
                 </span>
               </div>
             </button>
@@ -117,13 +129,15 @@ export function DebtSubTypeStep({ value, onSelect }: DebtSubTypeStepProps) {
         })}
       </div>
 
-      <div className="rounded-md border border-calm-amber bg-calm-amber/5 px-4 py-3">
-        <p className="text-xs font-medium text-calm-amber leading-relaxed">
-          Debt buyers purchase old debts for pennies on the dollar, then sue to
-          collect the full amount. They often lack proper documentation — which
-          can be a strong defense.
-        </p>
-      </div>
+      {!isPlaintiff && (
+        <div className="rounded-md border border-calm-amber bg-calm-amber/5 px-4 py-3">
+          <p className="text-xs font-medium text-calm-amber leading-relaxed">
+            Debt buyers purchase old debts for pennies on the dollar, then sue to
+            collect the full amount. They often lack proper documentation — which
+            can be a strong defense.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

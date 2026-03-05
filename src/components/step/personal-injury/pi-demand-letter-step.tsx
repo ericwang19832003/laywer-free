@@ -205,7 +205,7 @@ export function PIDemandLetterStep({
             insurance_carrier: insuranceCarrier,
             policy_number: policyNumber || undefined,
             claim_number: claimNumber || undefined,
-            pi_sub_type: pid?.pi_sub_type ?? 'other',
+            pi_sub_type: pid?.pi_sub_type ?? 'other_injury',
             incident_date: incidentDate,
             incident_location: incidentLocation,
             incident_description: incidentDescription,

@@ -214,7 +214,7 @@ export function PersonalInjuryWizard({
 }: PersonalInjuryWizardProps) {
   const router = useRouter()
   const meta = (existingMetadata ?? {}) as Record<string, unknown>
-  const piSubType = personalInjuryDetails?.pi_sub_type ?? 'other'
+  const piSubType = personalInjuryDetails?.pi_sub_type ?? 'other_injury'
   const totalEstimateMinutes = 35
 
   const steps = useMemo(() => getStepsForSubType(piSubType), [piSubType])

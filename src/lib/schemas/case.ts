@@ -67,7 +67,11 @@ export const PI_SUB_TYPES = [
   'slip_and_fall',
   'dog_bite',
   'product_liability',
-  'other',
+  'other_injury',
+  'vehicle_damage',
+  'property_damage_negligence',
+  'vandalism',
+  'other_property_damage',
 ] as const
 
 export type PiSubType = (typeof PI_SUB_TYPES)[number]

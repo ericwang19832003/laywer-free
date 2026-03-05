@@ -51,7 +51,8 @@ function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: st
     return landlordTenantSubType === 'eviction' ? 5 : 6
   }
   if (disputeType === 'debt_collection') {
-    if (debtSide === 'plaintiff') return 7
+    // Both plaintiff and defendant now get sub-type step
+    if (debtSide === 'plaintiff') return 8
     return 7
   }
   return 6
@@ -209,7 +210,7 @@ export function NewCaseDialog() {
                 }).recommended
               : 'unknown')
 
-    const debtSubTypePayload = isDebtDefendant && state.debtSubType
+    const debtSubTypePayload = isDebtCollection && state.debtSubType
       ? { debt_sub_type: state.debtSubType }
       : {}
 
@@ -453,6 +454,7 @@ export function NewCaseDialog() {
         {state.step === 2 && (
           <RoleStep
             value={state.role}
+            disputeType={state.disputeType || undefined}
             onSelect={(role) => dispatch({ type: 'SET_ROLE', role })}
           />
         )}
@@ -563,6 +565,17 @@ export function NewCaseDialog() {
         {state.step === 5 && isDebtDefendant && (
           <DebtSubTypeStep
             value={state.debtSubType}
+            side="defendant"
+            onSelect={(debtSubType) =>
+              dispatch({ type: 'SET_DEBT_SUB_TYPE', debtSubType })
+            }
+          />
+        )}
+
+        {state.step === 5 && isDebtPlaintiff && (
+          <DebtSubTypeStep
+            value={state.debtSubType}
+            side="plaintiff"
             onSelect={(debtSubType) =>
               dispatch({ type: 'SET_DEBT_SUB_TYPE', debtSubType })
             }
@@ -577,7 +590,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 5 && isDebtPlaintiff && (
+        {state.step === 6 && isDebtPlaintiff && (
           <AmountStep
             value={state.amount}
             selectedState={selectedState}
@@ -614,7 +627,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 6 && isDebtPlaintiff && (
+        {state.step === 7 && isDebtPlaintiff && (
           <CircumstancesStep
             value={state.circumstances}
             onChange={(circumstances) =>
@@ -657,7 +670,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 7 && isDebtPlaintiff && debtPlaintiffRecommendation && (
+        {state.step === 8 && isDebtPlaintiff && debtPlaintiffRecommendation && (
           <RecommendationStep
             recommendation={debtPlaintiffRecommendation}
             selectedState={selectedState}
