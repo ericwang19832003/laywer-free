@@ -9,7 +9,8 @@ export const piDemandLetterFactsSchema = z.object({
   claim_number: z.string().optional(),
   pi_sub_type: z.enum([
     'auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist',
-    'slip_and_fall', 'dog_bite', 'product_liability', 'other',
+    'slip_and_fall', 'dog_bite', 'product_liability', 'other_injury',
+    'vehicle_damage', 'property_damage_negligence', 'vandalism', 'other_property_damage',
   ]),
   incident_date: z.string().min(1),
   incident_location: z.string().min(1),
@@ -45,7 +46,11 @@ const SUB_TYPE_LABELS: Record<PiDemandLetterFacts['pi_sub_type'], string> = {
   slip_and_fall: 'Slip and Fall / Premises Liability',
   dog_bite: 'Dog Bite / Animal Attack',
   product_liability: 'Product Liability',
-  other: 'Personal Injury — Other',
+  other_injury: 'Personal Injury — Other',
+  vehicle_damage: 'Vehicle Damage (No Injury)',
+  property_damage_negligence: 'Property Damage — Negligence',
+  vandalism: 'Vandalism / Intentional Damage',
+  other_property_damage: 'Property Damage — Other',
 }
 
 function buildUserPrompt(facts: PiDemandLetterFacts): string {

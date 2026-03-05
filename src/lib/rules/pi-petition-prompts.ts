@@ -13,7 +13,8 @@ export const piPetitionFactsSchema = z.object({
   cause_number: z.string().optional(),
   pi_sub_type: z.enum([
     'auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist',
-    'slip_and_fall', 'dog_bite', 'product_liability', 'other',
+    'slip_and_fall', 'dog_bite', 'product_liability', 'other_injury',
+    'vehicle_damage', 'property_damage_negligence', 'vandalism', 'other_property_damage',
   ]),
   incident_date: z.string().min(1),
   incident_location: z.string().min(1),
@@ -82,7 +83,13 @@ function getNegligenceGuidance(subType: string): string {
       return `Strict product liability under Tex. Civ. Prac. & Rem. Code \u00a7 82.001. The product was unreasonably dangerous due to a defective design, manufacturing defect, or failure to warn of known risks.`
     case 'dog_bite':
       return `Animal liability: the owner knew or should have known of the animal's dangerous propensities and failed to restrain or control the animal, resulting in injury to Plaintiff.`
-    case 'other':
+    case 'vehicle_damage':
+    case 'property_damage_negligence':
+    case 'other_property_damage':
+      return `Property damage negligence: Defendant owed a duty of care to Plaintiff's property, breached that duty through negligent acts or omissions, and the breach proximately caused damage to Plaintiff's property.`
+    case 'vandalism':
+      return `Intentional property damage: Defendant intentionally and unlawfully damaged or destroyed Plaintiff's property, causing actual damages.`
+    case 'other_injury':
     default:
       return `General negligence: Defendant owed a duty of care to Plaintiff, breached that duty, and the breach proximately caused Plaintiff's injuries and damages.`
   }

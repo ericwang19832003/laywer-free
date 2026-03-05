@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert debt defense details if this is a debt collection defendant case
-    if (debt_sub_type) {
+    if (debt_sub_type && role === 'defendant') {
       const { error: debtError } = await supabase
         .from('debt_defense_details')
         .insert({
