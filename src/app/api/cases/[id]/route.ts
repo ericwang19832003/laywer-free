@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
+
+    const { error } = await supabase
+      .from('cases')
+      .update({ status: 'archived' })
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Failed to delete case', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

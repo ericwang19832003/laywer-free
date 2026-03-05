@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { Search, Scale } from 'lucide-react'
 import { Breadcrumbs } from './breadcrumbs'
 import { NotificationBell } from './notification-bell'
 import { UserMenu } from './user-menu'
@@ -14,12 +14,15 @@ export function TopNav() {
   return (
     <>
       <nav className="sticky top-0 z-40 w-full border-b border-warm-border bg-warm-bg/95 backdrop-blur supports-[backdrop-filter]:bg-warm-bg/80">
-        <div className="mx-auto flex h-14 max-w-4xl items-center px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <Link
             href="/cases"
-            className="mr-4 text-sm font-semibold text-warm-text whitespace-nowrap"
+            className="mr-4 flex items-center gap-2 text-sm font-semibold text-warm-text whitespace-nowrap"
           >
-            Lawyer Free
+            <div className="w-7 h-7 rounded-lg bg-calm-indigo flex items-center justify-center">
+              <Scale className="h-4 w-4 text-white" />
+            </div>
+            <span className="hidden sm:inline">Lawyer Free</span>
           </Link>
 
           <div className="flex-1 min-w-0">

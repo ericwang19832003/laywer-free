@@ -12,6 +12,7 @@ import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { ResearchCard } from '@/components/dashboard/research-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
+import { DeleteCaseCard } from '@/components/dashboard/delete-case-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
@@ -293,6 +294,7 @@ export default async function DashboardPage({
             initialEnabled={shareData?.share_enabled ?? false}
             initialToken={shareData?.share_token ?? null}
           />
+          <DeleteCaseCard caseId={id} />
         </div>
 
         <LegalDisclaimer />

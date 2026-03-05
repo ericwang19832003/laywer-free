@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
-import { SupportiveHeader } from '@/components/layout/supportive-header'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
-import { CaseCard } from '@/components/cases/case-card'
 import { NewCaseDialog } from '@/components/cases/new-case-dialog'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import { StatsCards } from '@/components/cases/stats-cards'
+import { CaseTable } from '@/components/cases/case-table'
+import { Briefcase, Clock, Shield, FileText } from 'lucide-react'
+import Image from 'next/image'
 
 export default async function CasesPage() {
   const supabase = await createClient()
@@ -91,66 +92,110 @@ export default async function CasesPage() {
   const hasProfile = Boolean(user?.user_metadata?.display_name)
 
   const checklistItems = [
-    { key: 'create_case', label: 'Create your first case', href: '#new-case', completed: hasCase },
-    { key: 'upload_document', label: 'Upload a document', href: hasCases ? `/case/${cases![0].id}` : '/cases', completed: hasDocument },
-    { key: 'explore_evidence', label: 'Explore the evidence vault', href: hasCases ? `/case/${cases![0].id}/evidence` : '/cases', completed: false },
-    { key: 'review_deadlines', label: 'Review your deadlines', href: hasCases ? `/case/${cases![0].id}/deadlines` : '/cases', completed: false },
-    { key: 'setup_profile', label: 'Set up your profile', href: '/settings', completed: hasProfile },
+    { key: 'create_case', label: 'Create your first case', description: 'Set up your court and dispute type', href: '#new-case', completed: hasCase },
+    { key: 'upload_document', label: 'Upload a document', description: 'Add complaints, filings, or evidence', href: hasCases ? `/case/${cases![0].id}` : '/cases', completed: hasDocument },
+    { key: 'explore_evidence', label: 'Explore the evidence vault', description: 'Organize and tag your evidence', href: hasCases ? `/case/${cases![0].id}/evidence` : '/cases', completed: false },
+    { key: 'review_deadlines', label: 'Review your deadlines', description: 'Never miss a court date', href: hasCases ? `/case/${cases![0].id}/deadlines` : '/cases', completed: false },
+    { key: 'setup_profile', label: 'Set up your profile', description: 'Add your name and contact info', href: '/settings', completed: hasProfile },
   ]
+
+  // Build case table rows
+  const caseRows = (cases ?? []).map((c) => {
+    const taskData = tasksByCase.get(c.id) ?? { completed: 0, total: 0 }
+    return {
+      id: c.id,
+      county: c.county,
+      role: c.role,
+      courtType: c.court_type,
+      disputeType: c.dispute_type,
+      createdAt: c.created_at,
+      healthScore: healthByCase.get(c.id) ?? null,
+      tasksCompleted: taskData.completed,
+      tasksTotal: taskData.total,
+      nextDeadline: deadlineByCase.get(c.id) ?? null,
+      lastActivity: activityByCase.get(c.id) ?? null,
+    }
+  })
 
   return (
     <div className="min-h-screen bg-warm-bg">
-      <main className="mx-auto max-w-2xl px-4 py-10">
-        <SupportiveHeader
-          title="Your Cases"
-          subtitle="Welcome back. Let's keep moving."
-        />
-
-        <OnboardingChecklist items={checklistItems} dismissed={isDismissed} />
-
-        {hasCases && (
-          <StatsCards
-            activeCases={cases.length}
-            tasksCompleted={totalCompleted}
-            tasksTotal={totalTasks}
-            upcomingDeadlines={allDeadlines.length}
-            averageHealth={avgHealth}
-          />
-        )}
-
-        {hasCases ? (
-          <div className="space-y-3">
-            {cases.map((c) => {
-              const taskData = tasksByCase.get(c.id) ?? { completed: 0, total: 0 }
-              return (
-                <CaseCard
-                  key={c.id}
-                  id={c.id}
-                  county={c.county}
-                  role={c.role}
-                  courtType={c.court_type}
-                  disputeType={c.dispute_type}
-                  createdAt={c.created_at}
-                  healthScore={healthByCase.get(c.id) ?? null}
-                  tasksCompleted={taskData.completed}
-                  tasksTotal={taskData.total}
-                  nextDeadline={deadlineByCase.get(c.id) ?? null}
-                  lastActivity={activityByCase.get(c.id) ?? null}
-                />
-              )
-            })}
-          </div>
-        ) : (
-          <div className="rounded-lg border border-warm-border bg-white py-16 text-center">
-            <p className="text-warm-muted">
-              No cases yet. Let&apos;s get started — one step at a time.
+      <main className="py-6">
+        {/* Page header — compact, professional */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold text-warm-text">Cases</h1>
+            <p className="mt-0.5 text-sm text-warm-muted">
+              Organize your matters, track deadlines, and keep evidence in one place.
             </p>
           </div>
-        )}
-
-        <div className="mt-8">
           <NewCaseDialog />
         </div>
+
+        {hasCases ? (
+          /* ── Has cases: stats + table ── */
+          <>
+            <StatsCards
+              activeCases={cases.length}
+              tasksCompleted={totalCompleted}
+              tasksTotal={totalTasks}
+              upcomingDeadlines={allDeadlines.length}
+              averageHealth={avgHealth}
+            />
+
+            <CaseTable cases={caseRows} />
+          </>
+        ) : (
+          /* ── Empty state: two-column layout ── */
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Left: empty state panel */}
+            <div className="lg:col-span-3 rounded-lg border border-warm-border bg-white p-8">
+              <div className="flex items-start gap-5 mb-6">
+                <Image
+                  src="/images/hero-illustration.png"
+                  alt=""
+                  width={140}
+                  height={112}
+                  className="object-contain shrink-0 hidden sm:block"
+                />
+                <div>
+                  <h2 className="text-base font-semibold text-warm-text">Create your first case</h2>
+                  <p className="text-sm text-warm-muted mt-1">Get organized in under 2 minutes. We&apos;ll guide you through every step of your legal matter.</p>
+                </div>
+              </div>
+
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <Clock className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-warm-text font-medium">Track deadlines automatically</p>
+                    <p className="text-xs text-warm-muted">We calculate key dates based on your court rules.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Shield className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-warm-text font-medium">Organize evidence securely</p>
+                    <p className="text-xs text-warm-muted">Upload, tag, and manage documents in one place.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <FileText className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-warm-text font-medium">Generate filings with AI</p>
+                    <p className="text-xs text-warm-muted">Draft motions, answers, and discovery in minutes.</p>
+                  </div>
+                </li>
+              </ul>
+
+              <NewCaseDialog />
+            </div>
+
+            {/* Right: onboarding checklist sidebar */}
+            <div className="lg:col-span-2">
+              <OnboardingChecklist items={checklistItems} dismissed={isDismissed} />
+            </div>
+          </div>
+        )}
 
         <LegalDisclaimer />
       </main>

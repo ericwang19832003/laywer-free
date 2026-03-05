@@ -425,8 +425,8 @@ export function NewCaseDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="w-full" size="lg">
-          Start a New Case
+        <Button size="sm">
+          + New Case
         </Button>
       </DialogTrigger>
       <DialogContent>

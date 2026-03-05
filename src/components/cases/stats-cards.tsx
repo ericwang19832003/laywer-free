@@ -1,3 +1,5 @@
+'use client'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { Briefcase, CheckCircle2, Clock, Heart } from 'lucide-react'
 
@@ -10,23 +12,47 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ activeCases, tasksCompleted, tasksTotal, upcomingDeadlines, averageHealth }: StatsCardsProps) {
+  const healthColor = averageHealth !== null && averageHealth >= 70
+    ? 'green' : averageHealth !== null && averageHealth >= 40
+    ? 'amber' : 'red'
+
   const stats = [
-    { label: 'Active Cases', value: activeCases, icon: Briefcase, color: 'text-calm-indigo' },
-    { label: 'Tasks Done', value: `${tasksCompleted}/${tasksTotal}`, icon: CheckCircle2, color: 'text-calm-green' },
-    { label: 'Deadlines (7d)', value: upcomingDeadlines, icon: Clock, color: 'text-calm-amber' },
-    { label: 'Avg Health', value: averageHealth !== null ? `${averageHealth}%` : '\u2014', icon: Heart, color: averageHealth !== null && averageHealth >= 70 ? 'text-calm-green' : averageHealth !== null && averageHealth >= 40 ? 'text-calm-amber' : 'text-red-500' },
+    {
+      label: 'Active Cases',
+      value: activeCases,
+      icon: Briefcase,
+      iconColor: 'text-warm-muted',
+    },
+    {
+      label: 'Tasks Done',
+      value: `${tasksCompleted}/${tasksTotal}`,
+      icon: CheckCircle2,
+      iconColor: 'text-warm-muted',
+    },
+    {
+      label: 'Deadlines (7d)',
+      value: upcomingDeadlines,
+      icon: Clock,
+      iconColor: 'text-warm-muted',
+    },
+    {
+      label: 'Avg Health',
+      value: averageHealth !== null ? `${averageHealth}%` : '\u2014',
+      icon: Heart,
+      iconColor: healthColor === 'green' ? 'text-green-600' : healthColor === 'amber' ? 'text-amber-600' : averageHealth !== null ? 'text-red-600' : 'text-warm-muted',
+    },
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 mb-8 sm:grid-cols-4">
       {stats.map((stat) => (
-        <Card key={stat.label}>
-          <CardContent className="py-4 px-4 flex items-center gap-3">
-            <stat.icon className={`h-5 w-5 ${stat.color} shrink-0`} />
-            <div>
-              <p className="text-lg font-semibold text-warm-text">{stat.value}</p>
+        <Card key={stat.label} className="bg-white">
+          <CardContent className="py-4 px-4">
+            <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-warm-muted">{stat.label}</p>
+              <stat.icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
             </div>
+            <p className="text-xl font-semibold text-warm-text">{stat.value}</p>
           </CardContent>
         </Card>
       ))}

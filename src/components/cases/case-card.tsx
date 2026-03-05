@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { ArrowRight } from 'lucide-react'
 
 interface CaseCardProps {
   id: string
@@ -21,10 +20,10 @@ interface CaseCardProps {
 }
 
 function healthColor(score: number | null): string {
-  if (score === null) return 'bg-gray-100 text-gray-600'
-  if (score >= 70) return 'bg-green-100 text-green-700'
-  if (score >= 40) return 'bg-amber-100 text-amber-700'
-  return 'bg-red-100 text-red-700'
+  if (score === null) return 'text-warm-muted'
+  if (score >= 70) return 'text-green-600'
+  if (score >= 40) return 'text-amber-600'
+  return 'text-red-600'
 }
 
 function relativeDate(dateStr: string): string {
@@ -50,6 +49,13 @@ function timeAgo(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+const COURT_LABELS: Record<string, string> = {
+  jp: 'Justice Court',
+  county: 'County Court',
+  district: 'District Court',
+  federal: 'Federal Court',
+}
+
 const DISPUTE_LABELS: Record<string, string> = {
   debt_collection: 'Debt',
   landlord_tenant: 'Landlord/Tenant',
@@ -64,52 +70,51 @@ export function CaseCard({
   id, county, role, courtType, disputeType, createdAt,
   healthScore, tasksCompleted, tasksTotal, nextDeadline, lastActivity,
 }: CaseCardProps) {
-  const displayCounty = county || 'County not set'
+  const displayCounty = county ? `${county} County` : 'County not set'
+  const courtLabel = courtType ? COURT_LABELS[courtType] ?? courtType : null
   const roleLabel = role === 'plaintiff' ? 'Plaintiff' : 'Defendant'
-  const courtLabel = courtType === 'jp' ? 'JP' : courtType === 'county' ? 'County' : courtType === 'district' ? 'District' : courtType === 'federal' ? 'Federal' : null
   const disputeLabel = disputeType ? DISPUTE_LABELS[disputeType] ?? disputeType : null
   const percentage = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="py-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="font-medium text-warm-text">{displayCounty}</span>
-              <Badge variant="secondary" className="text-xs">{roleLabel}</Badge>
-              {courtLabel && <Badge variant="outline" className="text-xs">{courtLabel}</Badge>}
-              {disputeLabel && <Badge variant="outline" className="text-xs">{disputeLabel}</Badge>}
+    <Link href={`/case/${id}`} className="block">
+      <Card className="bg-white hover:shadow-sm transition-shadow">
+        <CardContent className="py-4 px-5">
+          <div className="flex items-center gap-4">
+            {/* Health score */}
+            <div className="shrink-0 text-center w-10">
+              <p className={`text-lg font-semibold ${healthColor(healthScore)}`}>
+                {healthScore !== null ? healthScore : '\u2014'}
+              </p>
+              <p className="text-[10px] text-warm-muted">health</p>
             </div>
-            <p className="text-xs text-warm-muted">
-              Started {new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              {lastActivity && <> &middot; Active {timeAgo(lastActivity)}</>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge className={`text-xs ${healthColor(healthScore)}`}>
-              {healthScore !== null ? `${healthScore}%` : '\u2014'}
-            </Badge>
-            <Button asChild size="sm">
-              <Link href={`/case/${id}`}>Continue</Link>
-            </Button>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-warm-muted">{tasksCompleted}/{tasksTotal} tasks</span>
-              {nextDeadline && (
-                <span className="text-xs text-calm-amber font-medium">
-                  Due {relativeDate(nextDeadline)}
-                </span>
-              )}
+            {/* Case identity */}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-warm-text truncate">
+                {displayCounty}{courtLabel ? ` · ${courtLabel}` : ''}
+              </p>
+              <p className="text-xs text-warm-muted">
+                {roleLabel}{disputeLabel ? ` · ${disputeLabel}` : ''} · Started {new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {lastActivity && <> · {timeAgo(lastActivity)}</>}
+              </p>
             </div>
-            <Progress value={percentage} className="h-1.5" />
+
+            {/* Progress */}
+            <div className="shrink-0 w-32 hidden sm:block">
+              <div className="flex items-center justify-between text-xs text-warm-muted mb-1">
+                <span>{tasksCompleted}/{tasksTotal}</span>
+                {nextDeadline && (
+                  <span className="text-amber-600 font-medium">{relativeDate(nextDeadline)}</span>
+                )}
+              </div>
+              <Progress value={percentage} className="h-1.5" />
+            </div>
+
+            <ArrowRight className="h-4 w-4 text-warm-muted shrink-0" />
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
