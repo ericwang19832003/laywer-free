@@ -29,10 +29,10 @@ export async function POST(
     if (!auth.ok) return auth.error
     const { supabase } = auth
 
-    // 1. Verify case ownership via RLS
+    // 1. Verify case ownership via RLS and get dispute_type from DB
     const { data: caseData, error: caseError } = await supabase
       .from('cases')
-      .select('id')
+      .select('id, dispute_type')
       .eq('id', id)
       .single()
 
@@ -54,7 +54,9 @@ export async function POST(
       )
     }
 
-    const { milestone: milestoneId, disputeType, catchUp } = parsed.data
+    const { milestone: milestoneId, catchUp } = parsed.data
+    // Use the case's actual dispute_type from DB, not the request body
+    const disputeType = (caseData.dispute_type ?? parsed.data.disputeType) as string
 
     // 3. Look up milestone definition
     const milestone = getMilestoneByID(
@@ -116,7 +118,24 @@ export async function POST(
       )
     }
 
-    // 7. Write task_events entry
+    // 7. Persist catch-up data on the welcome task's metadata for later access
+    if (catchUp) {
+      const catchUpMeta: Record<string, unknown> = {}
+      if (catchUp.caseNumber) catchUpMeta.case_number = catchUp.caseNumber
+      if (catchUp.opposingParty) catchUpMeta.opposing_party = catchUp.opposingParty
+      if (catchUp.filingDate) catchUpMeta.filing_date = catchUp.filingDate
+      if (catchUp.serviceDate) catchUpMeta.service_date = catchUp.serviceDate
+
+      if (Object.keys(catchUpMeta).length > 0) {
+        await supabase
+          .from('tasks')
+          .update({ metadata: catchUpMeta })
+          .eq('case_id', id)
+          .eq('task_key', 'welcome')
+      }
+    }
+
+    // 8. Write audit event
     await supabase.from('task_events').insert({
       case_id: id,
       kind: 'bulk_import_skip',
@@ -129,7 +148,7 @@ export async function POST(
       },
     })
 
-    // 8. If catch-up has a deadline (label + date), create a deadline row
+    // 9. If catch-up has a deadline (label + date), create a deadline row
     if (catchUp?.upcomingDeadlineLabel && catchUp?.upcomingDeadlineDate) {
       const { error: deadlineError } = await supabase
         .from('deadlines')
@@ -147,7 +166,7 @@ export async function POST(
       }
     }
 
-    // 9. Return success response
+    // 10. Return success response
     return NextResponse.json({
       success: true,
       tasksSkipped,
