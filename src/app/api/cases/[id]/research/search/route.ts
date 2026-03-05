@@ -64,7 +64,7 @@ export async function POST(
       .upsert({
         query_hash: queryHash,
         query_text: enrichedQuery,
-        results: JSON.stringify(results),
+        results,
         expires_at: expiresAt,
       }, { onConflict: 'query_hash' })
 

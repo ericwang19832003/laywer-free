@@ -49,7 +49,7 @@ export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
   }
 
   // Strip HTML tags from snippet
-  const cleanSnippet = result.snippet.replace(/<[^>]*>/g, '')
+  const cleanSnippet = (result.snippet ?? '').replace(/<[^>]*>/g, '')
 
   return (
     <Card>
