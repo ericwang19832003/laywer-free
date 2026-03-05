@@ -76,6 +76,11 @@ export async function processClusterOpinions(
       content: chunk.content,
       char_start: chunk.char_start,
       char_end: chunk.char_end,
+      section_title: chunk.section_title,
+      paragraph_start: chunk.paragraph_start,
+      paragraph_end: chunk.paragraph_end,
+      citation_count: chunk.citation_count,
+      contains_holding: chunk.contains_holding,
       embedding: JSON.stringify(embeddings[i]),
     }))
 

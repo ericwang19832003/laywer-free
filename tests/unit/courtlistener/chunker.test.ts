@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { chunkText, TextChunk } from '@/lib/courtlistener/chunker'
+import { chunkText } from '@/lib/courtlistener/chunker'
 
 describe('chunkText', () => {
   // Test 1: returns empty array for empty text
@@ -18,6 +18,8 @@ describe('chunkText', () => {
     expect(chunks[0].chunk_index).toBe(0)
     expect(chunks[0].char_start).toBe(0)
     expect(chunks[0].char_end).toBe(text.length)
+    expect(chunks[0].paragraph_start).toBe(0)
+    expect(chunks[0].paragraph_end).toBe(0)
   })
 
   // Test 3: splits long text into multiple chunks
@@ -67,5 +69,28 @@ describe('chunkText', () => {
     for (let i = 1; i < chunks.length; i++) {
       expect(chunks[i].char_start).toBeLessThan(chunks[i - 1].char_end)
     }
+  })
+
+  it('adds section titles, paragraph ranges, and metadata', () => {
+    const text = [
+      'FACTS',
+      '',
+      'Plaintiff was served on January 1, 2024.',
+      'The court holds that service was defective. See 123 F.3d 456.',
+      '',
+      'ANALYSIS',
+      '',
+      'The court concludes the notice was insufficient.',
+    ].join('\n')
+
+    const chunks = chunkText(text)
+    expect(chunks.length).toBeGreaterThan(0)
+
+    const first = chunks[0]
+    expect(first.section_title).toBe('FACTS')
+    expect(first.paragraph_start).toBe(0)
+    expect(first.paragraph_end).toBeGreaterThanOrEqual(first.paragraph_start)
+    expect(first.citation_count).toBeGreaterThanOrEqual(1)
+    expect(first.contains_holding).toBe(true)
   })
 })

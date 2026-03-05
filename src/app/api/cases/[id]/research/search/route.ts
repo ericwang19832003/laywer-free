@@ -3,6 +3,7 @@ import { createHash } from 'crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { getCourtListenerClient } from '@/lib/courtlistener/client'
 import type { CLSearchFilters } from '@/lib/courtlistener/types'
+import { expandQueryWithContext } from '@/lib/courtlistener/search'
 import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
@@ -21,7 +22,7 @@ export async function POST(
     // Verify case exists and user owns it
     const { data: caseData, error: caseError } = await supabase
       .from('cases')
-      .select('id, jurisdiction, dispute_type, court_type')
+      .select('id, jurisdiction, dispute_type, role, county')
       .eq('id', caseId)
       .single()
 
@@ -37,7 +38,12 @@ export async function POST(
     }
 
     // Build enriched query with case context
-    const enrichedQuery = query.trim()
+    const enrichedQuery = expandQueryWithContext(query.trim(), {
+      dispute_type: caseData.dispute_type,
+      jurisdiction: caseData.jurisdiction,
+      role: caseData.role,
+      county: caseData.county,
+    })
 
     // Check search cache
     const queryHash = createHash('sha256')
