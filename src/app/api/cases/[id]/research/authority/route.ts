@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { processClusterOpinions } from '@/lib/courtlistener/pipeline'
 import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
@@ -107,26 +106,23 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to save authority' }, { status: 500 })
     }
 
-    // Process opinions (fetch, chunk, embed) — inline for now
-    try {
-      await processClusterOpinions(supabase, cluster_id)
+    // Enqueue background processing job
+    const { error: jobError } = await supabase
+      .from('cl_authority_jobs')
+      .upsert({
+        case_id: caseId,
+        cluster_id,
+        status: 'pending',
+        attempts: 0,
+        last_error: null,
+        next_run_at: new Date().toISOString(),
+      }, { onConflict: 'case_id,cluster_id' })
 
-      // Mark as ready
-      await supabase
-        .from('case_authorities')
-        .update({ status: 'ready' })
-        .eq('case_id', caseId)
-        .eq('cluster_id', cluster_id)
-    } catch (err) {
-      safeError('research/authority', err)
-      await supabase
-        .from('case_authorities')
-        .update({ status: 'failed' })
-        .eq('case_id', caseId)
-        .eq('cluster_id', cluster_id)
+    if (jobError) {
+      safeError('research/authority', jobError)
     }
 
-    return NextResponse.json({ authority }, { status: 201 })
+    return NextResponse.json({ authority }, { status: 202 })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
