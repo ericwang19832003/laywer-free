@@ -10,11 +10,18 @@ const store = new Map<string, RateLimitEntry>()
 let lastCleanup = Date.now()
 const CLEANUP_INTERVAL = 5 * 60 * 1000
 
-function cleanup(windowMs: number) {
+// Use the maximum configured window for cleanup so we never prune entries
+// that longer-window tiers still need
+const MAX_WINDOW_MS = Math.max(
+  60 * 60 * 1000,  // 1 hour (AI + email tiers)
+  60 * 1000,       // 1 min (standard tier)
+)
+
+function cleanup() {
   const now = Date.now()
   if (now - lastCleanup < CLEANUP_INTERVAL) return
   lastCleanup = now
-  const cutoff = now - windowMs
+  const cutoff = now - MAX_WINDOW_MS
   for (const [key, entry] of store) {
     entry.timestamps = entry.timestamps.filter((t) => t > cutoff)
     if (entry.timestamps.length === 0) store.delete(key)
@@ -27,7 +34,7 @@ export function checkRateLimit(
   maxRequests: number,
   windowMs: number
 ): { allowed: boolean; retryAfterMs: number } {
-  cleanup(windowMs)
+  cleanup()
   const key = `${userId}:${endpoint}`
   const now = Date.now()
   const cutoff = now - windowMs
