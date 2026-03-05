@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { NewCaseDialog } from '@/components/cases/new-case-dialog'
+import { ImportCaseDialog } from '@/components/cases/import-case-dialog'
 import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import { StatsCards } from '@/components/cases/stats-cards'
 import { CaseTable } from '@/components/cases/case-table'
@@ -128,7 +129,10 @@ export default async function CasesPage() {
               Organize your matters, track deadlines, and keep evidence in one place.
             </p>
           </div>
-          <NewCaseDialog />
+          <div className="flex items-center gap-2">
+            <ImportCaseDialog />
+            <NewCaseDialog />
+          </div>
         </div>
 
         {hasCases ? (
