@@ -7,8 +7,9 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const { court_type } = body
@@ -20,7 +21,7 @@ export async function PATCH(
       )
     }
 
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('cases')
       .update({ court_type })
       .eq('id', id)

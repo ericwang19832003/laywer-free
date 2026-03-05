@@ -8,6 +8,8 @@ import {
   buildTimelineSummaryPrompt,
   TIMELINE_SUMMARY_SYSTEM_PROMPT,
 } from '@/lib/ai/timeline-summary'
+import { safeError } from '@/lib/security/safe-log'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -23,8 +25,12 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Verify case
     const { error: caseError } = await supabase
@@ -105,7 +111,7 @@ export async function GET(
           }
         }
       } catch (err) {
-        console.error('[timeline-summary] AI call failed:', err)
+        safeError('timeline-summary', err)
       }
     }
 

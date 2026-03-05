@@ -7,8 +7,9 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const evidenceId = request.nextUrl.searchParams.get('id')
     if (!evidenceId) {
@@ -19,7 +20,7 @@ export async function GET(
     }
 
     // Fetch evidence item (RLS ensures ownership)
-    const { data: item, error: fetchError } = await supabase!
+    const { data: item, error: fetchError } = await supabase
       .from('evidence_items')
       .select('storage_path, file_name')
       .eq('id', evidenceId)
@@ -34,7 +35,7 @@ export async function GET(
     }
 
     // Create a signed URL (valid for 60 seconds)
-    const { data: signedUrl, error: urlError } = await supabase!.storage
+    const { data: signedUrl, error: urlError } = await supabase.storage
       .from('case-documents')
       .createSignedUrl(item.storage_path, 60, {
         download: item.file_name,

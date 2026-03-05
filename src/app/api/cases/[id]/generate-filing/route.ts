@@ -76,6 +76,8 @@ import { piDemandLetterFactsSchema, buildPiDemandLetterPrompt } from '@/lib/rule
 import { piPetitionFactsSchema, buildPiPetitionPrompt } from '@/lib/rules/pi-petition-prompts'
 import { piSettlementFactsSchema, buildPiSettlementPrompt } from '@/lib/rules/pi-settlement-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
+import { safeError } from '@/lib/security/safe-log'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 /* ------------------------------------------------------------------ */
 /*  Motion registry — add new motion types here instead of if/else    */
@@ -292,11 +294,15 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id, role, court_type, county, dispute_type')
       .eq('id', caseId)
@@ -385,7 +391,7 @@ export async function POST(
     }
 
     // Audit event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'filing_draft_generated',
       payload: {
@@ -396,7 +402,7 @@ export async function POST(
 
     return NextResponse.json({ draft, annotations })
   } catch (err) {
-    console.error('[generate-filing] Error:', err)
+    safeError('generate-filing', err)
     return NextResponse.json(
       { error: 'Failed to generate document. Please try again.' },
       { status: 500 }

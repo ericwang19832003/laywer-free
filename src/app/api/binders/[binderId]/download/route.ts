@@ -7,11 +7,12 @@ export async function GET(
 ) {
   try {
     const { binderId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch binder (RLS ensures ownership via case)
-    const { data: binder, error: fetchError } = await supabase!
+    const { data: binder, error: fetchError } = await supabase
       .from('trial_binders')
       .select('id, case_id, storage_path, title')
       .eq('id', binderId)
@@ -25,7 +26,7 @@ export async function GET(
       )
     }
 
-    const { data: signedUrl, error: urlError } = await supabase!.storage
+    const { data: signedUrl, error: urlError } = await supabase.storage
       .from('case-documents')
       .createSignedUrl(binder.storage_path, 60, {
         download: `${binder.title || 'Trial_Binder'}.zip`,
@@ -39,7 +40,7 @@ export async function GET(
     }
 
     // Fire-and-forget: record download event in timeline
-    supabase!.from('task_events').insert({
+    supabase.from('task_events').insert({
       case_id: binder.case_id,
       kind: 'trial_binder_downloaded',
       payload: { binder_id: binder.id, title: binder.title },

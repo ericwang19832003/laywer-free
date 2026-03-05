@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { processClusterOpinions } from '@/lib/courtlistener/pipeline'
+import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60  // opinion processing can take time
@@ -12,15 +13,16 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Verify case
-    const { error: caseError } = await supabase!
+    const { error: caseError } = await supabase
       .from('cases').select('id').eq('id', caseId).single()
     if (caseError) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
 
-    const { data: authorities, error } = await supabase!
+    const { data: authorities, error } = await supabase
       .from('case_authorities')
       .select(`
         id,
@@ -56,11 +58,12 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Verify case
-    const { error: caseError } = await supabase!
+    const { error: caseError } = await supabase
       .from('cases').select('id').eq('id', caseId).single()
     if (caseError) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
 
@@ -72,7 +75,7 @@ export async function POST(
     }
 
     // Check cluster exists in our cache
-    const { data: cluster } = await supabase!
+    const { data: cluster } = await supabase
       .from('cl_case_clusters')
       .select('cluster_id')
       .eq('cluster_id', cluster_id)
@@ -83,7 +86,7 @@ export async function POST(
     }
 
     // Upsert authority link
-    const { data: authority, error: upsertError } = await supabase!
+    const { data: authority, error: upsertError } = await supabase
       .from('case_authorities')
       .upsert({
         case_id: caseId,
@@ -99,17 +102,17 @@ export async function POST(
 
     // Process opinions (fetch, chunk, embed) — inline for now
     try {
-      await processClusterOpinions(supabase!, cluster_id)
+      await processClusterOpinions(supabase, cluster_id)
 
       // Mark as ready
-      await supabase!
+      await supabase
         .from('case_authorities')
         .update({ status: 'ready' })
         .eq('case_id', caseId)
         .eq('cluster_id', cluster_id)
     } catch (err) {
-      console.error('[research/authority] Pipeline error:', err)
-      await supabase!
+      safeError('research/authority', err)
+      await supabase
         .from('case_authorities')
         .update({ status: 'failed' })
         .eq('case_id', caseId)
@@ -129,8 +132,9 @@ export async function DELETE(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const { cluster_id } = body as { cluster_id?: number }
@@ -139,7 +143,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'cluster_id is required' }, { status: 400 })
     }
 
-    await supabase!
+    await supabase
       .from('case_authorities')
       .delete()
       .eq('case_id', caseId)

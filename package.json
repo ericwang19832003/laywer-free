@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "test:rls": "vitest run --config vitest.rls.config.ts --reporter verbose"
+    "test:rls": "vitest run --config vitest.rls.config.ts --reporter verbose",
+    "audit": "npm audit --production"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

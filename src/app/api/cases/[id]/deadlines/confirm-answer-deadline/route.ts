@@ -10,8 +10,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = confirmAnswerDeadlineSchema.safeParse(body)
@@ -25,7 +26,7 @@ export async function POST(
     const { confirmed_due_at } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -40,14 +41,14 @@ export async function POST(
 
     // Delete existing answer deadline rows (estimated + any previous confirmed).
     // FK cascade on reminders table deletes associated reminders automatically.
-    await supabase!
+    await supabase
       .from('deadlines')
       .delete()
       .eq('case_id', caseId)
       .in('key', ['answer_deadline_estimated', 'answer_deadline_confirmed'])
 
     // Insert confirmed answer deadline
-    const { data: deadline, error: dlError } = await supabase!
+    const { data: deadline, error: dlError } = await supabase
       .from('deadlines')
       .insert({
         case_id: caseId,
@@ -80,7 +81,7 @@ export async function POST(
         status: 'scheduled' as const,
       }))
 
-      const { data: createdReminders, error: remErr } = await supabase!
+      const { data: createdReminders, error: remErr } = await supabase
         .from('reminders')
         .insert(remindersToInsert)
         .select()
@@ -93,7 +94,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'answer_deadline_confirmed',
       payload: {
@@ -104,7 +105,7 @@ export async function POST(
     })
 
     // Run gatekeeper to unlock wait_for_answer immediately
-    await runAndApplyGatekeeper(supabase!, caseId)
+    await runAndApplyGatekeeper(supabase, caseId)
 
     return NextResponse.json(
       { deadline, reminders },

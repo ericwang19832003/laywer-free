@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeAndStoreCaseHealth } from '@/lib/rules/compute-case-health'
 import { evaluateHealthAlert, insertHealthAlertIfNeeded } from '@/lib/rules/health-alert'
+import { safeError } from '@/lib/security/safe-log'
 
 const BATCH_SIZE = 5
 const PAGE_SIZE = 1000
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
             }
           }
         } catch (alertErr) {
-          console.error(`[cron/health] Health alert failed for case ${batch[j].id}:`, alertErr)
+          safeError('cron/health', alertErr)
         }
       } else {
         failed++
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
           case_id: batch[j].id,
           message: err instanceof Error ? err.message : String(err),
         })
-        console.error(`[cron/health] Failed for case ${batch[j].id}:`, err)
+        safeError('cron/health', err)
       }
     }
   }
@@ -100,6 +101,6 @@ export async function GET(request: NextRequest) {
     succeeded,
     failed,
     healthAlertsTriggered,
-    errors,
+    errorCount: errors.length,
   })
 }

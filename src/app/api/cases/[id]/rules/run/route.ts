@@ -9,8 +9,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Parse optional body (may be empty)
     let now: Date | undefined
@@ -31,7 +32,7 @@ export async function POST(
     }
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -44,7 +45,7 @@ export async function POST(
       )
     }
 
-    const result = await runAndApplyGatekeeper(supabase!, caseId, now)
+    const result = await runAndApplyGatekeeper(supabase, caseId, now)
 
     return NextResponse.json(result)
   } catch {

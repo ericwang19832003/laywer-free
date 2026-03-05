@@ -6,6 +6,7 @@ const mockEq = vi.fn()
 
 vi.mock('@/lib/supabase/route-handler', () => ({
   getAuthenticatedClient: vi.fn().mockResolvedValue({
+    ok: true,
     supabase: {
       from: vi.fn().mockReturnValue({
         update: vi.fn().mockImplementation((data) => {
@@ -27,7 +28,6 @@ vi.mock('@/lib/supabase/route-handler', () => ({
       }),
     },
     user: { id: 'user-001' },
-    error: null,
   }),
 }))
 

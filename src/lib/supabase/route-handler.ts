@@ -1,8 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import type { SupabaseClient, User } from '@supabase/supabase-js'
 
-export async function getAuthenticatedClient() {
+type AuthSuccess = { ok: true; supabase: SupabaseClient; user: User }
+type AuthFailure = { ok: false; error: NextResponse }
+export type AuthResult = AuthSuccess | AuthFailure
+
+export async function getAuthenticatedClient(): Promise<AuthResult> {
   const cookieStore = await cookies()
 
   const supabase = createServerClient(
@@ -19,7 +24,7 @@ export async function getAuthenticatedClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Ignore
+            // Ignore - this happens when trying to set cookies in a Server Component
           }
         },
       },
@@ -29,8 +34,8 @@ export async function getAuthenticatedClient() {
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
-    return { supabase: null, user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+    return { ok: false, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  return { supabase, user, error: null }
+  return { ok: true, supabase, user }
 }

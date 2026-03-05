@@ -4,8 +4,9 @@ import { createCaseSchema } from '@/lib/schemas/case'
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase, user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
 
     const body = await request.json()
     const parsed = createCaseSchema.safeParse(body)
@@ -20,10 +21,10 @@ export async function POST(request: NextRequest) {
     const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type, pi_sub_type, state } = parsed.data
 
     // Insert the case
-    const { data: newCase, error: caseError } = await supabase!
+    const { data: newCase, error: caseError } = await supabase
       .from('cases')
       .insert({
-        user_id: user!.id,
+        user_id: user.id,
         role,
         county,
         court_type,
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Insert family case details if this is a family case
     if (family_sub_type) {
-      const { error: familyError } = await supabase!
+      const { error: familyError } = await supabase
         .from('family_case_details')
         .insert({
           case_id: newCase.id,
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Insert small claims details if this is a small claims case
     if (small_claims_sub_type) {
-      const { error: smallClaimsError } = await supabase!
+      const { error: smallClaimsError } = await supabase
         .from('small_claims_details')
         .insert({
           case_id: newCase.id,
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Insert landlord-tenant details if this is a landlord-tenant case
     if (landlord_tenant_sub_type) {
-      const { error: ltError } = await supabase!
+      const { error: ltError } = await supabase
         .from('landlord_tenant_details')
         .insert({
           case_id: newCase.id,
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // Insert debt defense details if this is a debt collection defendant case
     if (debt_sub_type) {
-      const { error: debtError } = await supabase!
+      const { error: debtError } = await supabase
         .from('debt_defense_details')
         .insert({
           case_id: newCase.id,
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     // Insert personal injury details if this is a PI case
     if (pi_sub_type) {
-      const { error: piError } = await supabase!
+      const { error: piError } = await supabase
         .from('personal_injury_details')
         .insert({
           case_id: newCase.id,
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch auto-created tasks (created by the seed_case_tasks trigger)
-    const { data: tasks, error: tasksError } = await supabase!
+    const { data: tasks, error: tasksError } = await supabase
       .from('tasks')
       .select()
       .eq('case_id', newCase.id)
@@ -152,10 +153,11 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
-    const { data: cases, error: casesError } = await supabase!
+    const { data: cases, error: casesError } = await supabase
       .from('cases')
       .select()
       .eq('status', 'active')

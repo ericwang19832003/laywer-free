@@ -9,6 +9,7 @@ import {
   classificationOutputSchema,
 } from '@/lib/schemas/objection-classification'
 import type { ClassificationItem } from '@/lib/schemas/objection-classification'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -49,8 +50,12 @@ export async function POST(
 ) {
   try {
     const { reviewId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Check if OpenAI is configured
     if (!process.env.OPENAI_API_KEY) {
@@ -61,7 +66,7 @@ export async function POST(
     }
 
     // Fetch objection_review by reviewId (RLS ensures ownership)
-    const { data: review, error: reviewError } = await supabase!
+    const { data: review, error: reviewError } = await supabase
       .from('objection_reviews')
       .select('id, case_id, response_id, status')
       .eq('id', reviewId)
@@ -83,7 +88,7 @@ export async function POST(
     }
 
     // Set status → 'running'
-    const { error: runningError } = await supabase!
+    const { error: runningError } = await supabase
       .from('objection_reviews')
       .update({ status: 'running' })
       .eq('id', reviewId)
@@ -96,14 +101,14 @@ export async function POST(
     }
 
     // Load the discovery_response row
-    const { data: response, error: responseError } = await supabase!
+    const { data: response, error: responseError } = await supabase
       .from('discovery_responses')
       .select('id, storage_path, mime_type')
       .eq('id', review.response_id)
       .single()
 
     if (responseError || !response) {
-      await setErrorStatus(supabase!, reviewId, review.case_id, 'Discovery response not found')
+      await setErrorStatus(supabase, reviewId, review.case_id, 'Discovery response not found')
       return NextResponse.json(
         { error: 'Discovery response not found' },
         { status: 404 }
@@ -113,12 +118,12 @@ export async function POST(
     // Download file from Supabase Storage
     let buffer: Buffer
     try {
-      const { data: fileData, error: downloadError } = await supabase!.storage
+      const { data: fileData, error: downloadError } = await supabase.storage
         .from('case-documents')
         .download(response.storage_path)
 
       if (downloadError || !fileData) {
-        await setErrorStatus(supabase!, reviewId, review.case_id, `Failed to download file: ${downloadError?.message}`)
+        await setErrorStatus(supabase, reviewId, review.case_id, `Failed to download file: ${downloadError?.message}`)
         return NextResponse.json(
           { error: 'Failed to download file', details: downloadError?.message },
           { status: 500 }
@@ -128,7 +133,7 @@ export async function POST(
       buffer = Buffer.from(await fileData.arrayBuffer())
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown download error'
-      await setErrorStatus(supabase!, reviewId, review.case_id, message)
+      await setErrorStatus(supabase, reviewId, review.case_id, message)
       return NextResponse.json(
         { error: 'Failed to download file', details: message },
         { status: 500 }
@@ -147,7 +152,7 @@ export async function POST(
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Text extraction failed'
-      await setErrorStatus(supabase!, reviewId, review.case_id, message)
+      await setErrorStatus(supabase, reviewId, review.case_id, message)
       return NextResponse.json(
         { error: 'Text extraction failed', details: message },
         { status: 500 }
@@ -155,7 +160,7 @@ export async function POST(
     }
 
     if (text.length < MIN_TEXT_LENGTH) {
-      await setErrorStatus(supabase!, reviewId, review.case_id, 'Could not extract readable text for classification')
+      await setErrorStatus(supabase, reviewId, review.case_id, 'Could not extract readable text for classification')
       return NextResponse.json(
         { error: 'Insufficient text for classification' },
         { status: 422 }
@@ -179,7 +184,7 @@ export async function POST(
 
       const raw = completion.choices[0]?.message?.content
       if (!raw) {
-        await setErrorStatus(supabase!, reviewId, review.case_id, 'AI returned empty response')
+        await setErrorStatus(supabase, reviewId, review.case_id, 'AI returned empty response')
         return NextResponse.json(
           { error: 'AI returned empty response', fallback: true },
           { status: 502 }
@@ -189,7 +194,7 @@ export async function POST(
       try {
         aiOutput = JSON.parse(raw)
       } catch {
-        await setErrorStatus(supabase!, reviewId, review.case_id, 'AI returned invalid JSON')
+        await setErrorStatus(supabase, reviewId, review.case_id, 'AI returned invalid JSON')
         return NextResponse.json(
           { error: 'AI returned invalid JSON', fallback: true },
           { status: 502 }
@@ -197,7 +202,7 @@ export async function POST(
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'OpenAI call failed'
-      await setErrorStatus(supabase!, reviewId, review.case_id, message)
+      await setErrorStatus(supabase, reviewId, review.case_id, message)
       return NextResponse.json(
         { error: 'AI classification failed', details: message, fallback: true },
         { status: 500 }
@@ -209,7 +214,7 @@ export async function POST(
 
     if (!validated.success) {
       // Invalid output — mark as needs_review but don't insert items
-      await supabase!
+      await supabase
         .from('objection_reviews')
         .update({
           status: 'needs_review',
@@ -219,7 +224,7 @@ export async function POST(
         })
         .eq('id', reviewId)
 
-      await supabase!.from('task_events').insert({
+      await supabase.from('task_events').insert({
         case_id: review.case_id,
         kind: 'objection_classified',
         payload: {
@@ -247,12 +252,12 @@ export async function POST(
       confidence: item.confidence,
     }))
 
-    const { error: insertError } = await supabase!
+    const { error: insertError } = await supabase
       .from('objection_items')
       .insert(itemRows)
 
     if (insertError) {
-      await setErrorStatus(supabase!, reviewId, review.case_id, `Failed to insert items: ${insertError.message}`)
+      await setErrorStatus(supabase, reviewId, review.case_id, `Failed to insert items: ${insertError.message}`)
       return NextResponse.json(
         { error: 'Failed to save classification results', details: insertError.message },
         { status: 500 }
@@ -260,7 +265,7 @@ export async function POST(
     }
 
     // Update review to needs_review with model info
-    const { data: updatedReview, error: updateError } = await supabase!
+    const { data: updatedReview, error: updateError } = await supabase
       .from('objection_reviews')
       .update({
         status: 'needs_review',
@@ -280,7 +285,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: review.case_id,
       kind: 'objection_classified',
       payload: {
@@ -293,7 +298,7 @@ export async function POST(
     })
 
     // Fetch inserted items to return
-    const { data: items } = await supabase!
+    const { data: items } = await supabase
       .from('objection_items')
       .select('*')
       .eq('review_id', reviewId)

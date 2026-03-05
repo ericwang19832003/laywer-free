@@ -16,12 +16,8 @@ export function getPasswordStrength(password: string): PasswordStrength {
   const hasNumber = /\d/.test(password)
   const hasSymbol = /[^a-zA-Z0-9]/.test(password)
 
-  if (password.length < 6) {
-    return { level: 'weak', label: 'Weak', score: 1 }
-  }
-
   if (password.length < 8) {
-    return { level: 'fair', label: 'Fair', score: 1 }
+    return { level: 'weak', label: 'Weak', score: 1 }
   }
 
   // 8+ characters

@@ -3,6 +3,8 @@ import Anthropic from '@anthropic-ai/sdk'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSingleEmbedding } from '@/lib/courtlistener/embeddings'
 import { buildRAGPrompt, isRAGAnswerSafe, ragQuestionSchema, type RAGChunkContext } from '@/lib/courtlistener/rag-prompts'
+import { safeError } from '@/lib/security/safe-log'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -15,8 +17,12 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Verify case + get context
     const { data: caseData, error: caseError } = await supabase
@@ -146,7 +152,7 @@ export async function POST(
       _meta: { source: 'rag', model: AI_MODEL, chunks_used: chunks.length },
     })
   } catch (err) {
-    console.error('[research/ask] Error:', err)
+    safeError('research/ask', err)
     return NextResponse.json({ error: 'Failed to generate answer. Please try again.' }, { status: 500 })
   }
 }

@@ -11,8 +11,9 @@ export async function POST(
 ) {
   try {
     const { packId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = servePackSchema.safeParse(body)
@@ -25,7 +26,7 @@ export async function POST(
     }
 
     // Fetch pack to verify access and get case_id (RLS handles ownership)
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('id, case_id')
       .eq('id', packId)
@@ -35,7 +36,7 @@ export async function POST(
       return NextResponse.json({ error: 'Discovery pack not found' }, { status: 404 })
     }
 
-    const { data: log, error: insertError } = await supabase!
+    const { data: log, error: insertError } = await supabase
       .from('discovery_service_logs')
       .insert({
         pack_id: packId,
@@ -57,7 +58,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: pack.case_id,
       kind: 'discovery_pack_served',
       payload: {

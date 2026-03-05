@@ -8,6 +8,8 @@ import {
   buildTaskDescriptionPrompt,
   TASK_DESCRIPTION_SYSTEM_PROMPT,
 } from '@/lib/ai/task-descriptions'
+import { safeError } from '@/lib/security/safe-log'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -20,8 +22,12 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const taskKey = request.nextUrl.searchParams.get('task_key')
     if (!taskKey) {
@@ -100,7 +106,7 @@ export async function GET(
           }
         }
       } catch (err) {
-        console.error('[task-description] AI call failed, using static fallback:', err)
+        safeError('task-description', err)
       }
     }
 

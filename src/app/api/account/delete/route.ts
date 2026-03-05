@@ -4,8 +4,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { user } = auth
 
     const body = await request.json()
     if (body.confirmation !== 'DELETE') {
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Use admin client to delete user (cascades to all data via FK constraints)
     const adminSupabase = createAdminClient()
-    const { error } = await adminSupabase.auth.admin.deleteUser(user!.id)
+    const { error } = await adminSupabase.auth.admin.deleteUser(user.id)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

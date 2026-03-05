@@ -12,8 +12,9 @@ export async function POST(
 ) {
   try {
     const { packId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = confirmDiscoveryDeadlineSchema.safeParse(body)
@@ -28,7 +29,7 @@ export async function POST(
     const { due_at } = parsed.data
 
     // Fetch pack to verify access, get case_id, and check status (RLS handles ownership)
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('id, case_id, title, status')
       .eq('id', packId)
@@ -51,14 +52,14 @@ export async function POST(
     // Delete any existing deadline for THIS pack only.
     // FK cascade on reminders table deletes associated reminders automatically.
     const packKey = `discovery_response_due_confirmed:${packId}`
-    await supabase!
+    await supabase
       .from('deadlines')
       .delete()
       .eq('case_id', pack.case_id)
       .eq('key', packKey)
 
     // Insert confirmed discovery response deadline scoped to this pack
-    const { data: deadline, error: dlError } = await supabase!
+    const { data: deadline, error: dlError } = await supabase
       .from('deadlines')
       .insert({
         case_id: pack.case_id,
@@ -90,7 +91,7 @@ export async function POST(
         status: 'scheduled' as const,
       }))
 
-      const { data: createdReminders, error: remErr } = await supabase!
+      const { data: createdReminders, error: remErr } = await supabase
         .from('reminders')
         .insert(remindersToInsert)
         .select()
@@ -103,7 +104,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: pack.case_id,
       kind: 'discovery_response_deadline_set',
       payload: {

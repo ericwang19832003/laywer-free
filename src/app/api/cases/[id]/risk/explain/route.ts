@@ -8,6 +8,7 @@ import {
   buildExplanationPrompt,
   RISK_EXPLANATION_SYSTEM_PROMPT,
 } from '@/lib/risk/explain'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -21,11 +22,15 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -39,7 +44,7 @@ export async function POST(
     }
 
     // Load latest risk score for this case
-    const { data: riskScore, error: riskError } = await supabase!
+    const { data: riskScore, error: riskError } = await supabase
       .from('case_risk_scores')
       .select('id, overall_score, deadline_risk, response_risk, evidence_risk, activity_risk, risk_level, breakdown')
       .eq('case_id', caseId)
@@ -120,7 +125,7 @@ export async function POST(
       },
     }
 
-    const { error: updateError } = await supabase!
+    const { error: updateError } = await supabase
       .from('case_risk_scores')
       .update({ breakdown: updatedBreakdown })
       .eq('id', riskScore.id)

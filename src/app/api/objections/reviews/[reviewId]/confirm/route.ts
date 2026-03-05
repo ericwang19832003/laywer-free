@@ -9,11 +9,12 @@ export async function POST(
 ) {
   try {
     const { reviewId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch review (RLS ensures ownership)
-    const { data: review, error: reviewError } = await supabase!
+    const { data: review, error: reviewError } = await supabase
       .from('objection_reviews')
       .select('id, case_id, status')
       .eq('id', reviewId)
@@ -45,7 +46,7 @@ export async function POST(
     }
 
     // Fetch all items for this review to verify completeness
-    const { data: allItems, error: fetchItemsError } = await supabase!
+    const { data: allItems, error: fetchItemsError } = await supabase
       .from('objection_items')
       .select('id')
       .eq('review_id', reviewId)
@@ -71,7 +72,7 @@ export async function POST(
 
     // Update each item
     for (const item of parsed.data.items) {
-      const { error: itemError } = await supabase!
+      const { error: itemError } = await supabase
         .from('objection_items')
         .update({
           labels: item.labels,
@@ -91,7 +92,7 @@ export async function POST(
     }
 
     // Update review status to completed
-    const { data: updatedReview, error: updateError } = await supabase!
+    const { data: updatedReview, error: updateError } = await supabase
       .from('objection_reviews')
       .update({ status: 'completed', error: null })
       .eq('id', reviewId)
@@ -106,7 +107,7 @@ export async function POST(
     }
 
     // Write timeline event
-    const { error: eventError } = await supabase!.from('task_events').insert({
+    const { error: eventError } = await supabase.from('task_events').insert({
       case_id: review.case_id,
       kind: 'objection_review_confirmed',
       payload: {
@@ -118,7 +119,7 @@ export async function POST(
     if (eventError) console.error('Failed to write timeline event:', eventError.message)
 
     // Fetch updated items
-    const { data: items } = await supabase!
+    const { data: items } = await supabase
       .from('objection_items')
       .select('*')
       .eq('review_id', reviewId)

@@ -8,10 +8,11 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('cases')
       .select('share_token, share_enabled')
       .eq('id', caseId)
@@ -36,8 +37,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const enabled = Boolean(body.enabled)
@@ -46,7 +48,7 @@ export async function POST(
     let updates: Record<string, unknown> = { share_enabled: enabled }
 
     if (enabled) {
-      const { data: existing } = await supabase!
+      const { data: existing } = await supabase
         .from('cases')
         .select('share_token')
         .eq('id', caseId)
@@ -57,7 +59,7 @@ export async function POST(
       }
     }
 
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('cases')
       .update(updates)
       .eq('id', caseId)

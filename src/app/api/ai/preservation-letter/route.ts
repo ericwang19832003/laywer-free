@@ -5,6 +5,7 @@ import {
   aiPreservationLetterRequestSchema,
   aiPreservationLetterResponseSchema,
 } from '@/lib/schemas/ai-preservation-letter'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 const PROMPT_VERSION = '1.0.0'
 
@@ -29,8 +30,12 @@ OUTPUT FORMAT — respond with valid JSON only:
 
 export async function POST(request: NextRequest) {
   // Auth check
-  const { error: authError } = await getAuthenticatedClient()
-  if (authError) return authError
+  const auth = await getAuthenticatedClient()
+  if (!auth.ok) return auth.error
+  const { user } = auth
+
+  const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
   // Check if OpenAI is configured
   if (!process.env.OPENAI_API_KEY) {

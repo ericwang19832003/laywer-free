@@ -36,11 +36,12 @@ export async function POST(
   { params }: { params: Promise<{ binderId: string }> }
 ) {
   const { binderId } = await params
-  const { supabase, error: authError } = await getAuthenticatedClient()
-  if (authError) return authError
+  const auth = await getAuthenticatedClient()
+  if (!auth.ok) return auth.error
+  const { supabase } = auth
 
   // ① Fetch binder + case info (RLS ensures ownership)
-  const { data: binder, error: binderError } = await supabase!
+  const { data: binder, error: binderError } = await supabase
     .from('trial_binders')
     .select('*, cases(id, county, role, jurisdiction, dispute_type)')
     .eq('id', binderId)
@@ -62,14 +63,14 @@ export async function POST(
   const options = (binder.options ?? {}) as BinderOptions
 
   // ② Set status = building
-  await supabase!
+  await supabase
     .from('trial_binders')
     .update({ status: 'building' })
     .eq('id', binderId)
 
   try {
     // ③ Load exhibits with evidence metadata
-    const { data: exhibits, error: exError } = await supabase!
+    const { data: exhibits, error: exError } = await supabase
       .from('exhibits')
       .select('exhibit_no, sort_order, title, description, evidence_item_id, evidence_items(file_name, storage_path, mime_type, label, notes, created_at)')
       .eq('exhibit_set_id', binder.exhibit_set_id)
@@ -103,13 +104,13 @@ export async function POST(
     // ④ Load optional data in parallel
     const [timelineRes, deadlinesRes, discoveryRes] = await Promise.all([
       options.include_timeline
-        ? supabase!.from('task_events').select('*').eq('case_id', caseId).order('created_at', { ascending: true })
+        ? supabase.from('task_events').select('*').eq('case_id', caseId).order('created_at', { ascending: true })
         : Promise.resolve({ data: null, error: null }),
       options.include_deadlines
-        ? supabase!.from('deadlines').select('*').eq('case_id', caseId).order('due_at', { ascending: true })
+        ? supabase.from('deadlines').select('*').eq('case_id', caseId).order('due_at', { ascending: true })
         : Promise.resolve({ data: null, error: null }),
       options.include_discovery
-        ? supabase!.from('discovery_packs').select('*, discovery_items(*)').eq('case_id', caseId).order('created_at', { ascending: false })
+        ? supabase.from('discovery_packs').select('*, discovery_items(*)').eq('case_id', caseId).order('created_at', { ascending: false })
         : Promise.resolve({ data: null, error: null }),
     ])
 
@@ -189,7 +190,7 @@ export async function POST(
       }
 
       try {
-        const { data: fileData, error: dlError } = await supabase!.storage
+        const { data: fileData, error: dlError } = await supabase.storage
           .from('case-documents')
           .download(ex.evidence.storage_path)
 
@@ -223,7 +224,7 @@ export async function POST(
     if (options.include_all_evidence) {
       const exhibitedIds = new Set(exhibitRows.map((ex) => ex.evidence_item_id))
 
-      const { data: allEvidence } = await supabase!
+      const { data: allEvidence } = await supabase
         .from('evidence_items')
         .select('id, file_name, storage_path')
         .eq('case_id', caseId)
@@ -234,7 +235,7 @@ export async function POST(
         if (!item.storage_path) continue
 
         try {
-          const { data: fileData, error: dlError } = await supabase!.storage
+          const { data: fileData, error: dlError } = await supabase.storage
             .from('case-documents')
             .download(item.storage_path)
 
@@ -309,7 +310,7 @@ export async function POST(
     // ⑨ Upload ZIP to Supabase Storage
     const storagePath = `cases/${caseId}/binders/${binderId}/trial_binder.zip`
 
-    const { error: uploadError } = await supabase!.storage
+    const { error: uploadError } = await supabase.storage
       .from('case-documents')
       .upload(storagePath, zipBuffer, {
         contentType: 'application/zip',
@@ -319,7 +320,7 @@ export async function POST(
     if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`)
 
     // ⑩ Update binder row → ready
-    const { data: updated, error: updateError } = await supabase!
+    const { data: updated, error: updateError } = await supabase
       .from('trial_binders')
       .update({
         status: 'ready',
@@ -333,7 +334,7 @@ export async function POST(
     if (updateError) throw new Error(`Failed to update binder: ${updateError.message}`)
 
     // ⑪ Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'trial_binder_generated',
       payload: {
@@ -352,12 +353,12 @@ export async function POST(
     const message = err instanceof Error ? err.message : 'Unknown build error'
     console.error('Trial binder build failed:', message)
 
-    await supabase!
+    await supabase
       .from('trial_binders')
       .update({ status: 'failed', error: message })
       .eq('id', binderId)
 
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'trial_binder_failed',
       payload: { binder_id: binderId, error: message },

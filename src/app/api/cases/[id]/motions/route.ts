@@ -16,11 +16,12 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -43,7 +44,7 @@ export async function POST(
       )
     }
 
-    const { data: motion, error: insertError } = await supabase!
+    const { data: motion, error: insertError } = await supabase
       .from('motions')
       .insert({ case_id: caseId, ...parsed.data })
       .select()
@@ -57,7 +58,7 @@ export async function POST(
     }
 
     // Audit event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'motion_created',
       payload: {
@@ -81,10 +82,11 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
-    const { data: motions, error } = await supabase!
+    const { data: motions, error } = await supabase
       .from('motions')
       .select('*')
       .eq('case_id', caseId)

@@ -3,13 +3,14 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
 export async function POST() {
   try {
-    const { supabase, user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
 
-    const { error } = await supabase!
+    const { error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('user_id', user!.id)
+      .eq('user_id', user.id)
       .eq('read', false)
 
     if (error) {

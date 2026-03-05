@@ -42,8 +42,8 @@ export default function ResetPasswordPage() {
       setError('Passwords do not match.')
       return
     }
-    if (password.length < 6) {
-      setError('Password needs at least 6 characters.')
+    if (password.length < 8) {
+      setError('Password needs at least 8 characters.')
       return
     }
 
@@ -102,9 +102,9 @@ export default function ResetPasswordPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
                 <PasswordStrengthIndicator password={password} />
               </div>

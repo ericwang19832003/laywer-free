@@ -11,8 +11,9 @@ export async function PATCH(
 ) {
   try {
     const { exhibitId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = updateExhibitSchema.safeParse(body)
@@ -24,7 +25,7 @@ export async function PATCH(
       )
     }
 
-    const { data: exhibit, error: updateError } = await supabase!
+    const { data: exhibit, error: updateError } = await supabase
       .from('exhibits')
       .update(parsed.data)
       .eq('id', exhibitId)
@@ -54,11 +55,12 @@ export async function DELETE(
 ) {
   try {
     const { exhibitId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch exhibit + case_id for timeline event (RLS ensures ownership)
-    const { data: exhibit, error: fetchError } = await supabase!
+    const { data: exhibit, error: fetchError } = await supabase
       .from('exhibits')
       .select('id, exhibit_set_id, exhibit_no, evidence_item_id')
       .eq('id', exhibitId)
@@ -69,14 +71,14 @@ export async function DELETE(
     }
 
     // Look up case_id via exhibit_set
-    const { data: setData } = await supabase!
+    const { data: setData } = await supabase
       .from('exhibit_sets')
       .select('case_id')
       .eq('id', exhibit.exhibit_set_id)
       .single()
 
     // Delete the exhibit row
-    const { error: deleteError } = await supabase!
+    const { error: deleteError } = await supabase
       .from('exhibits')
       .delete()
       .eq('id', exhibitId)
@@ -90,7 +92,7 @@ export async function DELETE(
 
     // Write timeline event
     if (setData) {
-      await supabase!.from('task_events').insert({
+      await supabase.from('task_events').insert({
         case_id: setData.case_id,
         kind: 'exhibit_removed',
         payload: {

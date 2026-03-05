@@ -7,29 +7,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: { cases: [], tasks: [], documents: [], deadlines: [] } })
   }
 
-  const { supabase, error: authError } = await getAuthenticatedClient()
-  if (authError) return authError
+  const auth = await getAuthenticatedClient()
+  if (!auth.ok) return auth.error
+  const { supabase } = auth
 
-  const pattern = `%${q}%`
+  const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
+  const pattern = `%${escaped}%`
 
   const [casesResult, tasksResult, documentsResult, deadlinesResult] = await Promise.all([
-    supabase!
+    supabase
       .from('cases')
       .select('id, county, role, dispute_type, status')
       .eq('status', 'active')
       .or(`county.ilike.${pattern},dispute_type.ilike.${pattern},role.ilike.${pattern}`)
       .limit(5),
-    supabase!
+    supabase
       .from('tasks')
       .select('id, case_id, task_key, title, status')
       .ilike('title', pattern)
       .limit(5),
-    supabase!
+    supabase
       .from('court_documents')
       .select('id, case_id, doc_type, original_filename')
       .or(`doc_type.ilike.${pattern},original_filename.ilike.${pattern}`)
       .limit(5),
-    supabase!
+    supabase
       .from('deadlines')
       .select('id, case_id, key, due_at, source')
       .ilike('key', pattern)

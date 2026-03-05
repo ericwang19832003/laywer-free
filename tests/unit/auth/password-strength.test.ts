@@ -6,14 +6,11 @@ describe('getPasswordStrength', () => {
     expect(getPasswordStrength('')).toEqual({ level: 'weak', label: 'Weak', score: 0 })
   })
 
-  it('returns weak for under 6 characters', () => {
+  it('returns weak for under 8 characters', () => {
     expect(getPasswordStrength('ab1')).toEqual({ level: 'weak', label: 'Weak', score: 1 })
-  })
-
-  it('returns fair for 6-7 characters', () => {
+    // 6-7 chars are also weak now (minimum raised to 8)
     const result = getPasswordStrength('abcdef')
-    expect(result.level).toBe('fair')
-    expect(result.label).toBe('Fair')
+    expect(result.level).toBe('weak')
   })
 
   it('returns good for 8+ with mixed case', () => {

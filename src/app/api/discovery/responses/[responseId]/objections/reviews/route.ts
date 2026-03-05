@@ -11,8 +11,9 @@ export async function POST(
 ) {
   try {
     const { responseId } = await params
-    const { supabase, user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
 
     const body = await request.json()
     const parsed = createObjectionReviewSchema.safeParse(body)
@@ -27,7 +28,7 @@ export async function POST(
     const { pack_id } = parsed.data
 
     // Fetch discovery_response by responseId (RLS ensures ownership)
-    const { data: response, error: responseError } = await supabase!
+    const { data: response, error: responseError } = await supabase
       .from('discovery_responses')
       .select('id, pack_id')
       .eq('id', responseId)
@@ -49,7 +50,7 @@ export async function POST(
     }
 
     // Get case_id from discovery_packs via the pack_id
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('id, case_id')
       .eq('id', pack_id)
@@ -63,14 +64,14 @@ export async function POST(
     }
 
     // Insert objection_reviews row
-    const { data: review, error: insertError } = await supabase!
+    const { data: review, error: insertError } = await supabase
       .from('objection_reviews')
       .insert({
         case_id: pack.case_id,
         pack_id,
         response_id: responseId,
         status: 'queued',
-        created_by: user!.id,
+        created_by: user.id,
       })
       .select()
       .single()
@@ -83,7 +84,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: pack.case_id,
       kind: 'objection_review_created',
       payload: {

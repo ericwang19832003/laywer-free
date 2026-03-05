@@ -6,14 +6,15 @@ export const runtime = 'nodejs'
 // GET /api/discovery/examples?dispute_type=...&item_type=...
 export async function GET(request: NextRequest) {
   try {
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const { searchParams } = request.nextUrl
     const disputeType = searchParams.get('dispute_type') || 'general'
     const itemType = searchParams.get('item_type')
 
-    let query = supabase!
+    let query = supabase
       .from('discovery_examples')
       .select('id, item_type, title, example_text')
       .eq('jurisdiction', 'TX')

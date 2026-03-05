@@ -8,8 +8,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
 
     // Parse FormData
     const formData = await request.formData()
@@ -41,7 +42,7 @@ export async function POST(
     }
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -58,7 +59,7 @@ export async function POST(
     const fileId = crypto.randomUUID()
     const storagePath = `cases/${caseId}/court-docs/${fileId}`
 
-    const { error: uploadError } = await supabase!.storage
+    const { error: uploadError } = await supabase.storage
       .from('case-documents')
       .upload(storagePath, file, {
         contentType: parsed.data.mime_type,
@@ -73,7 +74,7 @@ export async function POST(
     }
 
     // Insert court_documents row
-    const { data: document, error: insertError } = await supabase!
+    const { data: document, error: insertError } = await supabase
       .from('court_documents')
       .insert({
         case_id: caseId,
@@ -82,14 +83,14 @@ export async function POST(
         file_name: parsed.data.file_name,
         mime_type: parsed.data.mime_type,
         sha256: parsed.data.sha256,
-        uploaded_by: user!.id,
+        uploaded_by: user.id,
       })
       .select()
       .single()
 
     if (insertError) {
       // Cleanup: remove uploaded file on DB insert failure
-      await supabase!.storage
+      await supabase.storage
         .from('case-documents')
         .remove([storagePath])
 
@@ -100,7 +101,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'court_document_uploaded',
       payload: {

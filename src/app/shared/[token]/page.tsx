@@ -1,6 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 
+interface SharedCase {
+  id: string
+  county: string | null
+  court_type: string
+  role: string
+  dispute_type: string | null
+  status: string
+  created_at: string
+}
+
+interface SharedDeadline {
+  key: string
+  due_at: string
+  source: string | null
+}
+
+interface SharedEvent {
+  kind: string
+  payload: unknown
+  created_at: string
+}
+
 export default async function SharedCasePage({
   params,
 }: {
@@ -9,15 +31,10 @@ export default async function SharedCasePage({
   const { token } = await params
   const supabase = await createClient()
 
-  // Fetch shared case by token (public RLS policy allows this)
-  const { data: caseRow, error } = await supabase
-    .from('cases')
-    .select('id, county, court_type, role, dispute_type, status, created_at, share_enabled')
-    .eq('share_token', token)
-    .eq('share_enabled', true)
-    .single()
+  // Use SECURITY DEFINER functions — validates token server-side
+  const { data: caseData } = await supabase.rpc('get_shared_case', { p_token: token })
 
-  if (error || !caseRow) {
+  if (!caseData) {
     return (
       <div className="min-h-screen bg-warm-bg flex items-center justify-center">
         <Card className="max-w-md">
@@ -32,24 +49,16 @@ export default async function SharedCasePage({
     )
   }
 
-  // Fetch limited public data
-  const [deadlinesResult, timelineResult] = await Promise.all([
-    supabase
-      .from('deadlines')
-      .select('key, due_at, source')
-      .eq('case_id', caseRow.id)
-      .order('due_at', { ascending: true })
-      .limit(10),
-    supabase
-      .from('task_events')
-      .select('kind, payload, created_at')
-      .eq('case_id', caseRow.id)
-      .order('created_at', { ascending: false })
-      .limit(10),
+  const caseRow = caseData as SharedCase
+
+  // Fetch child data via token-validated RPC functions
+  const [deadlinesResult, eventsResult] = await Promise.all([
+    supabase.rpc('get_shared_case_deadlines', { p_token: token }),
+    supabase.rpc('get_shared_case_events', { p_token: token }),
   ])
 
-  const deadlines = deadlinesResult.data ?? []
-  const events = timelineResult.data ?? []
+  const deadlines = (deadlinesResult.data ?? []) as SharedDeadline[]
+  const events = (eventsResult.data ?? []) as SharedEvent[]
 
   const courtLabels: Record<string, string> = {
     jp: 'Justice Court',

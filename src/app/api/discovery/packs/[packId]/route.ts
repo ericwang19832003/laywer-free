@@ -10,11 +10,12 @@ export async function GET(
 ) {
   try {
     const { packId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch pack (RLS ensures ownership via cases join)
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('*')
       .eq('id', packId)
@@ -26,18 +27,18 @@ export async function GET(
 
     // Fetch related data in parallel
     const [itemsResult, logsResult, responsesResult] = await Promise.all([
-      supabase!
+      supabase
         .from('discovery_items')
         .select('*')
         .eq('pack_id', packId)
         .order('item_type')
         .order('item_no'),
-      supabase!
+      supabase
         .from('discovery_service_logs')
         .select('*')
         .eq('pack_id', packId)
         .order('served_at', { ascending: false }),
-      supabase!
+      supabase
         .from('discovery_responses')
         .select('*')
         .eq('pack_id', packId)

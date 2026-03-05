@@ -11,8 +11,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
 
     const body = await request.json()
     const parsed = createPackSchema.safeParse(body)
@@ -25,7 +26,7 @@ export async function POST(
     }
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -37,12 +38,12 @@ export async function POST(
 
     const title = parsed.data.title || 'Untitled Discovery Pack'
 
-    const { data: pack, error: insertError } = await supabase!
+    const { data: pack, error: insertError } = await supabase
       .from('discovery_packs')
       .insert({
         case_id: caseId,
         title,
-        created_by: user!.id,
+        created_by: user.id,
       })
       .select()
       .single()
@@ -55,7 +56,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'discovery_pack_created',
       payload: { pack_id: pack.id, title },
@@ -74,10 +75,11 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('discovery_packs')
       .select('*')
       .eq('case_id', caseId)

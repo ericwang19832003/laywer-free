@@ -15,8 +15,9 @@ export async function PATCH(
 ) {
   try {
     const { id: motionId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = updateMotionSchema.safeParse(body)
@@ -28,7 +29,7 @@ export async function PATCH(
       )
     }
 
-    const { data: motion, error: updateError } = await supabase!
+    const { data: motion, error: updateError } = await supabase
       .from('motions')
       .update(parsed.data)
       .eq('id', motionId)

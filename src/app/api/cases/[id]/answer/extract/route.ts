@@ -4,6 +4,7 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractRequestSchema } from '@/lib/schemas/document-extraction'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
 import { extractTextFromImage } from '@/lib/extraction/ocr'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -63,8 +64,12 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Validate body
     const body = await request.json()
@@ -79,7 +84,7 @@ export async function POST(
     const { court_document_id } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -93,7 +98,7 @@ export async function POST(
     }
 
     // Load court document — verify it's an answer and belongs to this case
-    const { data: doc, error: docError } = await supabase!
+    const { data: doc, error: docError } = await supabase
       .from('court_documents')
       .select('id, case_id, doc_type, storage_path, mime_type')
       .eq('id', court_document_id)
@@ -121,7 +126,7 @@ export async function POST(
     }
 
     // Idempotency: if non-failed extraction exists, return it
-    const { data: existing } = await supabase!
+    const { data: existing } = await supabase
       .from('document_extractions')
       .select('id, case_id, court_document_id, extractor, status, confidence, fields, confirmed_by_user, confirmed_fields, created_at')
       .eq('court_document_id', court_document_id)
@@ -136,7 +141,7 @@ export async function POST(
     }
 
     // Download file from storage
-    const { data: fileData, error: downloadError } = await supabase!.storage
+    const { data: fileData, error: downloadError } = await supabase.storage
       .from('case-documents')
       .download(doc.storage_path)
 
@@ -190,7 +195,7 @@ export async function POST(
     }
 
     // Insert extraction row
-    const { data: extraction, error: insertError } = await supabase!
+    const { data: extraction, error: insertError } = await supabase
       .from('document_extractions')
       .insert({
         case_id: caseId,
@@ -212,7 +217,7 @@ export async function POST(
     }
 
     // Audit event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'extraction_completed',
       payload: {

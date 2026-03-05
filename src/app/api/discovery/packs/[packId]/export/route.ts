@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import archiver from 'archiver'
 import { PassThrough } from 'stream'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
 
@@ -11,11 +12,12 @@ export async function GET(
 ) {
   try {
     const { packId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch pack (RLS ensures ownership via cases join)
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('id, title, status, case_id')
       .eq('id', packId)
@@ -31,28 +33,28 @@ export async function GET(
     // Fetch all related data in parallel
     const [itemsResult, logsResult, responsesResult, evidenceResult, eventsResult] =
       await Promise.all([
-        supabase!
+        supabase
           .from('discovery_items')
           .select('id, item_type, item_no, prompt_text, generated_text')
           .eq('pack_id', packId)
           .order('item_type')
           .order('item_no'),
-        supabase!
+        supabase
           .from('discovery_service_logs')
           .select('id, served_at, service_method, served_to_name, served_to_email, served_to_address, notes')
           .eq('pack_id', packId)
           .order('served_at', { ascending: false }),
-        supabase!
+        supabase
           .from('discovery_responses')
           .select('id, file_name, storage_path, received_at, notes')
           .eq('pack_id', packId)
           .order('received_at', { ascending: false }),
-        supabase!
+        supabase
           .from('evidence_items')
           .select('id, file_name, storage_path')
           .eq('case_id', pack.case_id)
           .order('created_at', { ascending: true }),
-        supabase!
+        supabase
           .from('task_events')
           .select('id, kind, payload, created_at')
           .eq('case_id', pack.case_id)
@@ -159,7 +161,7 @@ export async function GET(
     const responseFiles: { name: string; buffer: Buffer }[] = []
     for (const resp of responses) {
       if (!resp.storage_path || !resp.file_name) continue
-      const { data: fileData, error: dlError } = await supabase!.storage
+      const { data: fileData, error: dlError } = await supabase.storage
         .from('case-documents')
         .download(resp.storage_path)
       if (dlError || !fileData) {
@@ -173,7 +175,7 @@ export async function GET(
     const evidenceFiles: { name: string; buffer: Buffer }[] = []
     for (const ev of evidenceItems) {
       if (!ev.storage_path || !ev.file_name) continue
-      const { data: fileData, error: dlError } = await supabase!.storage
+      const { data: fileData, error: dlError } = await supabase.storage
         .from('case-documents')
         .download(ev.storage_path)
       if (dlError || !fileData) {
@@ -220,7 +222,7 @@ export async function GET(
     const zipName = `Discovery_Pack_${titleSlug}_${dateStr}.zip`
 
     // Log export event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: pack.case_id,
       kind: 'discovery_packet_exported',
       payload: {
@@ -242,7 +244,7 @@ export async function GET(
       },
     })
   } catch (err) {
-    console.error('Discovery pack export error:', err)
+    safeError('discovery-export', err)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

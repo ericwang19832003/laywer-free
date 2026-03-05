@@ -8,8 +8,9 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = updateTaskSchema.safeParse(body)
@@ -24,7 +25,7 @@ export async function PATCH(
     const { status: newStatus, metadata } = parsed.data
 
     // Fetch current task (RLS handles ownership check)
-    const { data: currentTask, error: fetchError } = await supabase!
+    const { data: currentTask, error: fetchError } = await supabase
       .from('tasks')
       .select()
       .eq('id', id)
@@ -61,7 +62,7 @@ export async function PATCH(
     }
 
     // Update the task
-    const { data: updatedTask, error: updateError } = await supabase!
+    const { data: updatedTask, error: updateError } = await supabase
       .from('tasks')
       .update(updatePayload)
       .eq('id', id)
@@ -76,7 +77,7 @@ export async function PATCH(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: currentTask.case_id,
       task_id: id,
       kind: 'task_status_changed',

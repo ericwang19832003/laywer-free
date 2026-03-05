@@ -16,11 +16,12 @@ export async function POST(
 ) {
   try {
     const { reviewId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch objection_review by reviewId (RLS ensures ownership)
-    const { data: review, error: reviewError } = await supabase!
+    const { data: review, error: reviewError } = await supabase
       .from('objection_reviews')
       .select('id, case_id, response_id, status')
       .eq('id', reviewId)
@@ -42,7 +43,7 @@ export async function POST(
     }
 
     // Set status → 'running'
-    const { error: runningError } = await supabase!
+    const { error: runningError } = await supabase
       .from('objection_reviews')
       .update({ status: 'running' })
       .eq('id', reviewId)
@@ -55,7 +56,7 @@ export async function POST(
     }
 
     // Load the discovery_response row
-    const { data: response, error: responseError } = await supabase!
+    const { data: response, error: responseError } = await supabase
       .from('discovery_responses')
       .select('id, storage_path, mime_type')
       .eq('id', review.response_id)
@@ -63,7 +64,7 @@ export async function POST(
 
     if (responseError || !response) {
       // Mark as needs_review on failure
-      await setErrorStatus(supabase!, reviewId, review.case_id, 'Discovery response not found')
+      await setErrorStatus(supabase, reviewId, review.case_id, 'Discovery response not found')
       return NextResponse.json(
         { error: 'Discovery response not found' },
         { status: 404 }
@@ -73,12 +74,12 @@ export async function POST(
     // Download file from Supabase Storage
     let buffer: Buffer
     try {
-      const { data: fileData, error: downloadError } = await supabase!.storage
+      const { data: fileData, error: downloadError } = await supabase.storage
         .from('case-documents')
         .download(response.storage_path)
 
       if (downloadError || !fileData) {
-        await setErrorStatus(supabase!, reviewId, review.case_id, `Failed to download file: ${downloadError?.message}`)
+        await setErrorStatus(supabase, reviewId, review.case_id, `Failed to download file: ${downloadError?.message}`)
         return NextResponse.json(
           { error: 'Failed to download file', details: downloadError?.message },
           { status: 500 }
@@ -88,7 +89,7 @@ export async function POST(
       buffer = Buffer.from(await fileData.arrayBuffer())
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown download error'
-      await setErrorStatus(supabase!, reviewId, review.case_id, message)
+      await setErrorStatus(supabase, reviewId, review.case_id, message)
       return NextResponse.json(
         { error: 'Failed to download file', details: message },
         { status: 500 }
@@ -111,7 +112,7 @@ export async function POST(
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Text extraction failed'
-      await setErrorStatus(supabase!, reviewId, review.case_id, message)
+      await setErrorStatus(supabase, reviewId, review.case_id, message)
       return NextResponse.json(
         { error: 'Text extraction failed', details: message },
         { status: 500 }
@@ -130,7 +131,7 @@ export async function POST(
     }
 
     // Update objection_reviews
-    const { data: updatedReview, error: updateError } = await supabase!
+    const { data: updatedReview, error: updateError } = await supabase
       .from('objection_reviews')
       .update({ status, extractor, error })
       .eq('id', reviewId)
@@ -145,7 +146,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: review.case_id,
       kind: 'objection_text_extracted',
       payload: {

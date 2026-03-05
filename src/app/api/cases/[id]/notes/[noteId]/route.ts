@@ -13,8 +13,9 @@ export async function PATCH(
 ) {
   try {
     const { id: caseId, noteId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = updateNoteSchema.safeParse(body)
@@ -29,7 +30,7 @@ export async function PATCH(
     if (parsed.data.content !== undefined) updates.content = parsed.data.content
     if (parsed.data.pinned !== undefined) updates.pinned = parsed.data.pinned
 
-    const { data: note, error } = await supabase!
+    const { data: note, error } = await supabase
       .from('case_notes')
       .update(updates)
       .eq('id', noteId)
@@ -53,10 +54,11 @@ export async function DELETE(
 ) {
   try {
     const { id: caseId, noteId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
-    const { error } = await supabase!
+    const { error } = await supabase
       .from('case_notes')
       .delete()
       .eq('id', noteId)

@@ -12,8 +12,9 @@ export async function POST(
 ) {
   try {
     const { packId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = addItemSchema.safeParse(body)
@@ -26,7 +27,7 @@ export async function POST(
     }
 
     // Fetch pack to verify access and get case_id (RLS handles ownership)
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('id, case_id, status')
       .eq('id', packId)
@@ -44,7 +45,7 @@ export async function POST(
     }
 
     // Generate next item_no per type within this pack
-    const { data: maxRow } = await supabase!
+    const { data: maxRow } = await supabase
       .from('discovery_items')
       .select('item_no')
       .eq('pack_id', packId)
@@ -76,7 +77,7 @@ export async function POST(
       throw err
     }
 
-    const { data: item, error: insertError } = await supabase!
+    const { data: item, error: insertError } = await supabase
       .from('discovery_items')
       .insert({
         pack_id: packId,
@@ -103,7 +104,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: pack.case_id,
       kind: 'discovery_item_added',
       payload: {

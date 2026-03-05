@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
 
@@ -10,8 +11,9 @@ export async function GET(
 ) {
   try {
     const { setId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const format = request.nextUrl.searchParams.get('format') || 'csv'
     if (format !== 'csv' && format !== 'json') {
@@ -22,7 +24,7 @@ export async function GET(
     }
 
     // Verify exhibit set exists and get case_id (RLS handles ownership)
-    const { data: setData, error: setError } = await supabase!
+    const { data: setData, error: setError } = await supabase
       .from('exhibit_sets')
       .select('id, case_id, title')
       .eq('id', setId)
@@ -33,7 +35,7 @@ export async function GET(
     }
 
     // Fetch exhibits joined with evidence_items, sorted by sort_order
-    const { data: exhibits, error: fetchError } = await supabase!
+    const { data: exhibits, error: fetchError } = await supabase
       .from('exhibits')
       .select('exhibit_no, sort_order, title, description, evidence_items(file_name, label, notes, created_at)')
       .eq('exhibit_set_id', setId)
@@ -74,7 +76,7 @@ export async function GET(
     })
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: setData.case_id,
       kind: 'exhibit_list_exported',
       payload: {
@@ -129,7 +131,7 @@ export async function GET(
       },
     })
   } catch (err) {
-    console.error('Exhibit export error:', err)
+    safeError('exhibit-export', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

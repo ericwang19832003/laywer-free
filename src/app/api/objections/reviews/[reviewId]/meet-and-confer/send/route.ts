@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { sendEmail } from '@/lib/email/provider'
 import { createHash } from 'crypto'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 
@@ -17,8 +18,13 @@ export async function POST(
 ) {
   try {
     const { reviewId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    // Rate limit: 5 emails per hour per user
+    const rl = checkRateLimit(user.id, 'email', RATE_LIMITS.email.maxRequests, RATE_LIMITS.email.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const body = await request.json()
     const parsed = sendSchema.safeParse(body)
@@ -32,7 +38,7 @@ export async function POST(
     const { draft_id, recipient_email } = parsed.data
 
     // Fetch draft (RLS ensures ownership via case_id)
-    const { data: draft, error: draftError } = await supabase!
+    const { data: draft, error: draftError } = await supabase
       .from('meet_and_confer_drafts')
       .select('id, case_id, review_id, status, content_text, sha256')
       .eq('id', draft_id)
@@ -66,7 +72,7 @@ export async function POST(
     const bodySha = draft.sha256 ?? createHash('sha256').update(bodyText, 'utf8').digest('hex')
 
     // Insert communications record (queued)
-    const { data: comm, error: commError } = await supabase!
+    const { data: comm, error: commError } = await supabase
       .from('communications')
       .insert({
         case_id: draft.case_id,
@@ -96,7 +102,7 @@ export async function POST(
 
     // Update communications status
     if (result.success) {
-      await supabase!
+      await supabase
         .from('communications')
         .update({
           status: 'sent',
@@ -106,19 +112,19 @@ export async function POST(
         .eq('id', comm.id)
 
       // Update draft status to 'sent'
-      await supabase!
+      await supabase
         .from('meet_and_confer_drafts')
         .update({ status: 'sent' })
         .eq('id', draft_id)
     } else {
-      await supabase!
+      await supabase
         .from('communications')
         .update({ status: 'failed' })
         .eq('id', comm.id)
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: draft.case_id,
       kind: 'meet_and_confer_sent',
       payload: {
@@ -137,6 +143,8 @@ export async function POST(
         { status: 502 }
       )
     }
+
+    console.log(`[email-audit] user=${user.id} to=${recipient_email} type=meet_and_confer`)
 
     return NextResponse.json(
       {

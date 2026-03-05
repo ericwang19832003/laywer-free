@@ -3,6 +3,7 @@ import { createHash } from 'crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { getCourtListenerClient } from '@/lib/courtlistener/client'
 import type { CLSearchFilters } from '@/lib/courtlistener/types'
+import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -13,11 +14,12 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Verify case exists and user owns it
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id, jurisdiction, dispute_type, court_type')
       .eq('id', caseId)
@@ -42,7 +44,7 @@ export async function POST(
       .update(JSON.stringify({ query: enrichedQuery, filters: filters ?? {} }))
       .digest('hex')
 
-    const { data: cached } = await supabase!
+    const { data: cached } = await supabase
       .from('cl_search_cache')
       .select('results, expires_at')
       .eq('query_hash', queryHash)
@@ -59,7 +61,7 @@ export async function POST(
 
     // Cache results (24h TTL)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    await supabase!
+    await supabase
       .from('cl_search_cache')
       .upsert({
         query_hash: queryHash,
@@ -70,7 +72,7 @@ export async function POST(
 
     // Upsert cluster metadata for each result
     for (const r of results) {
-      await supabase!
+      await supabase
         .from('cl_case_clusters')
         .upsert({
           cluster_id: r.cluster_id,
@@ -86,7 +88,7 @@ export async function POST(
 
     return NextResponse.json({ results, _meta: { source: 'courtlistener' } })
   } catch (err) {
-    console.error('[research/search] Error:', err)
+    safeError('research/search', err)
     return NextResponse.json({ error: 'Search failed. Please try again.' }, { status: 500 })
   }
 }

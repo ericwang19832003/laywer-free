@@ -11,10 +11,11 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
-    const { data, error } = await supabase!
+    const { data, error } = await supabase
       .from('evidence_items')
       .select('*')
       .eq('case_id', caseId)
@@ -42,8 +43,9 @@ export async function DELETE(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const { evidence_id } = await request.json()
     if (!evidence_id) {
@@ -54,7 +56,7 @@ export async function DELETE(
     }
 
     // Fetch the evidence item to get storage_path (RLS ensures ownership)
-    const { data: item, error: fetchError } = await supabase!
+    const { data: item, error: fetchError } = await supabase
       .from('evidence_items')
       .select('id, storage_path')
       .eq('id', evidence_id)
@@ -69,7 +71,7 @@ export async function DELETE(
     }
 
     // Delete from storage first — abort if it fails to avoid orphaned files
-    const { error: storageError } = await supabase!.storage
+    const { error: storageError } = await supabase.storage
       .from('case-documents')
       .remove([item.storage_path])
 
@@ -81,7 +83,7 @@ export async function DELETE(
     }
 
     // Delete from database
-    const { error: deleteError } = await supabase!
+    const { error: deleteError } = await supabase
       .from('evidence_items')
       .delete()
       .eq('id', evidence_id)
@@ -108,8 +110,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, user, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
 
     // Parse FormData
     const formData = await request.formData()
@@ -143,7 +146,7 @@ export async function POST(
     }
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -164,7 +167,7 @@ export async function POST(
     const fileId = crypto.randomUUID()
     const storagePath = `cases/${caseId}/evidence/${fileId}`
 
-    const { error: uploadError } = await supabase!.storage
+    const { error: uploadError } = await supabase.storage
       .from('case-documents')
       .upload(storagePath, buffer, {
         contentType: parsed.data.mime_type,
@@ -179,7 +182,7 @@ export async function POST(
     }
 
     // Insert evidence_items row
-    const { data: evidence, error: insertError } = await supabase!
+    const { data: evidence, error: insertError } = await supabase
       .from('evidence_items')
       .insert({
         case_id: caseId,
@@ -191,14 +194,14 @@ export async function POST(
         label: parsed.data.label ?? null,
         notes: parsed.data.notes ?? null,
         captured_at: parsed.data.captured_at ?? null,
-        uploaded_by: user!.id,
+        uploaded_by: user.id,
       })
       .select()
       .single()
 
     if (insertError) {
       // Cleanup: remove uploaded file on DB insert failure
-      await supabase!.storage
+      await supabase.storage
         .from('case-documents')
         .remove([storagePath])
 
@@ -209,7 +212,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'evidence_uploaded',
       payload: {

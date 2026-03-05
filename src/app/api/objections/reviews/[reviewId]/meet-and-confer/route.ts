@@ -13,11 +13,12 @@ export async function POST(
 ) {
   try {
     const { reviewId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch review (RLS ensures ownership)
-    const { data: review, error: reviewError } = await supabase!
+    const { data: review, error: reviewError } = await supabase
       .from('objection_reviews')
       .select('id, case_id, pack_id, response_id, status')
       .eq('id', reviewId)
@@ -39,7 +40,7 @@ export async function POST(
     }
 
     // Load follow-up items
-    const { data: followUpItems, error: itemsError } = await supabase!
+    const { data: followUpItems, error: itemsError } = await supabase
       .from('objection_items')
       .select('item_type, item_no, labels, neutral_summary')
       .eq('review_id', reviewId)
@@ -62,14 +63,14 @@ export async function POST(
     }
 
     // Load discovery pack title
-    const { data: pack } = await supabase!
+    const { data: pack } = await supabase
       .from('discovery_packs')
       .select('title')
       .eq('id', review.pack_id)
       .single()
 
     // Load discovery response date
-    const { data: response } = await supabase!
+    const { data: response } = await supabase
       .from('discovery_responses')
       .select('received_at')
       .eq('id', review.response_id)
@@ -93,7 +94,7 @@ export async function POST(
     const sha256 = createHash('sha256').update(body, 'utf8').digest('hex')
 
     // Insert meet_and_confer_drafts row
-    const { data: draft, error: insertError } = await supabase!
+    const { data: draft, error: insertError } = await supabase
       .from('meet_and_confer_drafts')
       .insert({
         case_id: review.case_id,
@@ -114,7 +115,7 @@ export async function POST(
     }
 
     // Write timeline event
-    const { error: eventError } = await supabase!.from('task_events').insert({
+    const { error: eventError } = await supabase.from('task_events').insert({
       case_id: review.case_id,
       kind: 'meet_and_confer_generated',
       payload: {
