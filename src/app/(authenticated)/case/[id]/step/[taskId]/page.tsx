@@ -189,22 +189,14 @@ export default async function StepPage({
       )
     }
 
-    case 'file_with_court': {
-      const { data: caseRow } = await supabase
-        .from('cases')
-        .select('role, court_type, county')
-        .eq('id', id)
-        .single()
-
+    case 'file_with_court':
       return (
         <FileWithCourtStep
           caseId={id}
           taskId={taskId}
-          existingMetadata={task.metadata}
-          caseData={caseRow ?? { role: 'plaintiff', court_type: 'district', county: null }}
+          existingAnswers={task.metadata?.guided_answers}
         />
       )
-    }
 
     case 'preservation_letter':
       return (
@@ -269,6 +261,7 @@ export default async function StepPage({
         <UnderstandRemovalStep
           caseId={id}
           taskId={taskId}
+          existingAnswers={task.metadata?.guided_answers}
         />
       )
     case 'choose_removal_strategy': {
@@ -367,6 +360,7 @@ export default async function StepPage({
         <Rule26fPrepStep
           caseId={id}
           taskId={taskId}
+          existingAnswers={task.metadata?.guided_answers}
         />
       )
     case 'mandatory_disclosures':
@@ -377,7 +371,7 @@ export default async function StepPage({
         />
       )
     case 'evidence_vault':
-      return <EvidenceVaultStep caseId={id} taskId={taskId} />
+      return <EvidenceVaultStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'default_packet_prep': {
       const { data: caseRow } = await supabase
         .from('cases').select('court_type, county').eq('id', id).single()
@@ -484,13 +478,13 @@ export default async function StepPage({
       )
     }
     case 'waiting_period':
-      return <WaitingPeriodStep caseId={id} taskId={taskId} />
+      return <WaitingPeriodStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'temporary_orders':
-      return <TemporaryOrdersStep caseId={id} taskId={taskId} />
+      return <TemporaryOrdersStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'mediation':
-      return <MediationStep caseId={id} taskId={taskId} />
+      return <MediationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'final_orders':
-      return <FinalOrdersStep caseId={id} taskId={taskId} />
+      return <FinalOrdersStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
     // Family motions (filed from Motions page)
     case 'protective_order': {
@@ -605,24 +599,24 @@ export default async function StepPage({
       )
     }
     case 'serve_defendant':
-      return <ServeDefendantStep caseId={id} taskId={taskId} />
+      return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'prepare_for_hearing': {
       // Check if this is a landlord-tenant case
       const { data: caseCheck } = await supabase
         .from('cases').select('dispute_type').eq('id', id).single()
       if (caseCheck?.dispute_type === 'landlord_tenant') {
-        return <LtHearingPrepStep caseId={id} taskId={taskId} />
+        return <LtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
       }
-      return <PrepareForHearingStep caseId={id} taskId={taskId} />
+      return <PrepareForHearingStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     }
     case 'hearing_day': {
       // Check if this is a landlord-tenant case
       const { data: caseCheck } = await supabase
         .from('cases').select('dispute_type').eq('id', id).single()
       if (caseCheck?.dispute_type === 'landlord_tenant') {
-        return <LtHearingDayStep caseId={id} taskId={taskId} />
+        return <LtHearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
       }
-      return <HearingDayStep caseId={id} taskId={taskId} />
+      return <HearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     }
 
     // Landlord-tenant task chain steps
@@ -665,9 +659,9 @@ export default async function StepPage({
       )
     }
     case 'serve_other_party':
-      return <ServeOtherPartyStep caseId={id} taskId={taskId} />
+      return <ServeOtherPartyStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'post_judgment':
-      return <PostJudgmentStep caseId={id} taskId={taskId} />
+      return <PostJudgmentStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
     // Debt defense task chain steps
     case 'debt_defense_intake':
@@ -709,11 +703,11 @@ export default async function StepPage({
       )
     }
     case 'debt_file_with_court':
-      return <DebtFileWithCourtStep caseId={id} taskId={taskId} />
+      return <DebtFileWithCourtStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'serve_plaintiff':
-      return <ServePlaintiffStep caseId={id} taskId={taskId} />
+      return <ServePlaintiffStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_prep':
-      return <DebtHearingPrepStep caseId={id} taskId={taskId} />
+      return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':
       return <DebtHearingDayStep caseId={id} taskId={taskId} />
     case 'debt_post_judgment':
@@ -729,9 +723,9 @@ export default async function StepPage({
         />
       )
     case 'pi_medical_records':
-      return <PIMedicalRecordsStep caseId={id} taskId={taskId} />
+      return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_insurance_communication':
-      return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} />
+      return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'prepare_pi_demand_letter': {
       const { data: caseRow } = await supabase
         .from('cases').select('county').eq('id', id).single()
@@ -748,7 +742,7 @@ export default async function StepPage({
       )
     }
     case 'pi_settlement_negotiation':
-      return <PISettlementNegotiationStep caseId={id} taskId={taskId} />
+      return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type').eq('id', id).single()
@@ -767,11 +761,11 @@ export default async function StepPage({
     case 'pi_file_with_court':
       return <PIFileWithCourtStep caseId={id} taskId={taskId} />
     case 'pi_serve_defendant':
-      return <PIServeDefendantStep caseId={id} taskId={taskId} />
+      return <PIServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_trial_prep':
-      return <PITrialPrepStep caseId={id} taskId={taskId} />
+      return <PITrialPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_post_resolution':
-      return <PIPostResolutionStep caseId={id} taskId={taskId} />
+      return <PIPostResolutionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
     default:
       return (
