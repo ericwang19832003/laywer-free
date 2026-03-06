@@ -1,39 +1,7 @@
--- Gmail Integration: connected_accounts and case_email_filters tables
+-- Gmail Integration: case_email_filters table
+-- (connected_accounts removed — authentication handled by MCP server externally)
 
--- Table 1: connected_accounts
--- Stores encrypted OAuth tokens for Gmail connections.
-CREATE TABLE public.connected_accounts (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  provider text NOT NULL CHECK (provider IN ('gmail')),
-  email text NOT NULL,
-  access_token_encrypted text NOT NULL,
-  refresh_token_encrypted text NOT NULL,
-  token_expires_at timestamptz NOT NULL,
-  scopes text[] NOT NULL DEFAULT '{}',
-  connected_at timestamptz DEFAULT now(),
-  revoked_at timestamptz
-);
-
-CREATE UNIQUE INDEX idx_connected_accounts_active
-  ON public.connected_accounts (user_id, provider)
-  WHERE revoked_at IS NULL;
-
-ALTER TABLE public.connected_accounts ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view own connected accounts"
-  ON public.connected_accounts FOR SELECT
-  USING (user_id = auth.uid());
-
-CREATE POLICY "Users can insert own connected accounts"
-  ON public.connected_accounts FOR INSERT
-  WITH CHECK (user_id = auth.uid());
-
-CREATE POLICY "Users can update own connected accounts"
-  ON public.connected_accounts FOR UPDATE
-  USING (user_id = auth.uid());
-
--- Table 2: case_email_filters
+-- Table: case_email_filters
 -- Stores which email addresses to monitor per case.
 CREATE TABLE public.case_email_filters (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

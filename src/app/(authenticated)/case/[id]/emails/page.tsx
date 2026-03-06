@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { SupportiveHeader } from '@/components/layout/supportive-header'
 import { CaseEmailsClient } from '@/components/emails/case-emails-client'
+import { isGmailMcpConfigured, getGmailProfile } from '@/lib/mcp/gmail-client'
 
 export default async function CaseEmailsPage({
   params,
@@ -20,13 +21,9 @@ export default async function CaseEmailsPage({
     return null
   }
 
-  const { data: gmailAccount } = await supabase
-    .from('connected_accounts')
-    .select('email')
-    .eq('user_id', user.id)
-    .eq('provider', 'gmail')
-    .is('revoked_at', null)
-    .maybeSingle()
+  // Check MCP Gmail connection
+  const mcpConfigured = isGmailMcpConfigured()
+  const profile = mcpConfigured ? await getGmailProfile() : null
 
   const { data: filters } = await supabase
     .from('case_email_filters')
@@ -55,7 +52,7 @@ export default async function CaseEmailsPage({
           subtitle="Track and respond to emails from opposing counsel."
         />
 
-        {!gmailAccount ? (
+        {!profile ? (
           <Card className="mt-6">
             <CardContent className="pt-6 text-center py-12">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warm-bg">
@@ -65,24 +62,25 @@ export default async function CaseEmailsPage({
                 </svg>
               </div>
               <h2 className="text-lg font-semibold text-warm-text mb-2">
-                Connect your Gmail
+                {mcpConfigured ? 'Gmail connection error' : 'Gmail not configured'}
               </h2>
               <p className="text-sm text-warm-muted mb-4 max-w-md mx-auto">
-                Connect your Gmail account to monitor emails from opposing counsel
-                and get AI-powered reply suggestions.
+                {mcpConfigured
+                  ? 'The Gmail MCP server is configured but not responding. Check your MCP server setup.'
+                  : 'Email monitoring requires a Gmail MCP server. Check the settings page for setup instructions.'}
               </p>
               <Link
                 href="/settings"
                 className="inline-flex items-center justify-center rounded-md bg-calm-indigo px-4 py-2 text-sm font-medium text-white hover:bg-calm-indigo/90 transition-colors"
               >
-                Go to Settings to Connect
+                Go to Settings
               </Link>
             </CardContent>
           </Card>
         ) : (
           <CaseEmailsClient
             caseId={caseId}
-            gmailEmail={gmailAccount.email}
+            gmailEmail={profile.email}
             initialFilters={filters ?? []}
             disputeType={caseRow?.dispute_type ?? null}
           />

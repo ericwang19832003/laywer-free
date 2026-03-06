@@ -7,7 +7,7 @@ Self-represented litigants receive emails from opposing counsel that require car
 ## Solution
 
 Add Gmail integration that lets users:
-1. Connect their Gmail account (read-only OAuth)
+1. Configure a Gmail MCP server (handles authentication externally)
 2. Add opposing counsel's email address(es) per case
 3. View filtered emails from opposing counsel within each case
 4. Get AI-drafted reply suggestions informed by case context
@@ -15,39 +15,29 @@ Add Gmail integration that lets users:
 
 ## Architecture
 
-### OAuth & Token Storage
+### MCP-Based Gmail Access
 
-**Google OAuth 2.0 flow:**
-1. User clicks "Connect Gmail" on Settings page
-2. Redirect to Google OAuth consent screen with `gmail.readonly` scope
-3. Google redirects to `/api/auth/google/callback` with authorization code
-4. Server exchanges code for access + refresh tokens
-5. Tokens encrypted and stored in `connected_accounts` table
-6. Access tokens auto-refreshed when expired
+**Model Context Protocol (MCP)** replaces custom OAuth. The app connects to an external Gmail MCP server that handles authentication and token management independently.
 
-**New table: `connected_accounts`**
-```sql
-connected_accounts (
-  id uuid PK DEFAULT gen_random_uuid(),
-  user_id uuid FK → auth.users NOT NULL,
-  provider text NOT NULL CHECK (provider IN ('gmail')),
-  email text NOT NULL,
-  access_token_encrypted text NOT NULL,
-  refresh_token_encrypted text NOT NULL,
-  token_expires_at timestamptz NOT NULL,
-  scopes text[] NOT NULL,
-  connected_at timestamptz DEFAULT now(),
-  revoked_at timestamptz NULL
-)
-```
+**Setup:**
+1. Install a Gmail MCP server (e.g., `@anthropic-ai/mcp-server-gmail`)
+2. Run its setup to authenticate with Google (one-time)
+3. Set `GMAIL_MCP_COMMAND` and `GMAIL_MCP_ARGS` in `.env.local`
 
-RLS: `user_id = auth.uid()`. Tokens encrypted with AES-256 using server-side `ENCRYPTION_KEY` env var. Tokens never exposed to the client.
+**Benefits over custom OAuth:**
+- No Google Cloud project creation required
+- No token encryption/storage in our database
+- No OAuth callback routes
+- MCP server handles token refresh automatically
+- Standardized protocol — swap MCP servers without app changes
+
+**Connection:** The app spawns the MCP server as a subprocess and communicates via stdio. A singleton client persists across requests.
 
 ### Per-Case Email Filters
 
 Users manually add opposing counsel's email address(es) per case.
 
-**New table: `case_email_filters`**
+**Table: `case_email_filters`**
 ```sql
 case_email_filters (
   id uuid PK DEFAULT gen_random_uuid(),
@@ -62,16 +52,15 @@ RLS: Joins through `cases.user_id = auth.uid()`.
 
 ### Email Fetching
 
-- **Live from Gmail API** — no local storage of email content
-- When user opens Emails tab, server queries Gmail API: `from:addr1 OR from:addr2`
+- **Live via MCP** — no local storage of email content
+- When user opens Emails tab, server calls MCP `gmail_search_messages` with `from:addr1 OR from:addr2`
 - Paginated, newest first, returns subject/snippet/date/from
-- Click to fetch full email body + thread
-- 5-minute client-side cache for list performance
+- Click to fetch full email body + thread via MCP `gmail_read_thread`
 
 ### AI Reply Suggestions
 
 When user clicks "Draft Reply":
-1. Fetch full email thread from Gmail API
+1. Fetch full email thread via MCP `gmail_read_thread`
 2. Load case context (dispute type, role, status, key facts)
 3. Send to Claude with legal-assistant system prompt
 4. Return editable draft with copy-to-clipboard
@@ -91,14 +80,10 @@ When user clicks "Draft Reply":
 ### API Endpoints
 
 ```
-GET  /api/auth/google          → Initiate OAuth flow (redirect to Google)
-GET  /api/auth/google/callback → Handle OAuth callback, store tokens
-DELETE /api/auth/google        → Disconnect Gmail (revoke + set revoked_at)
+GET  /api/gmail/status         → Check MCP connection status
 
-GET  /api/gmail/status         → Check connection status
-
-GET  /api/cases/[id]/emails              → Fetch filtered emails from Gmail
-GET  /api/cases/[id]/emails/[messageId]  → Fetch full email + thread
+GET  /api/cases/[id]/emails              → Fetch filtered emails via MCP
+GET  /api/cases/[id]/emails/[messageId]  → Fetch full email + thread via MCP
 POST /api/cases/[id]/emails/[messageId]/draft-reply → Generate AI reply
 
 POST   /api/cases/[id]/email-filters     → Add email filter
@@ -109,15 +94,15 @@ GET    /api/cases/[id]/email-filters     → List filters
 ### UI Components
 
 **Settings Page — "Connected Services" section:**
-- Gmail connection card showing status
-- "Connect Gmail" / "Disconnect" buttons
+- Gmail MCP status card (connected/error/not configured)
 - Connected email address display
+- Setup instructions when not configured
 
 **Case Emails Tab (`/case/[id]/emails`):**
-- Not-connected state: prompt to connect in settings
+- Not-configured state: prompt with setup instructions
 - No-filters state: form to add opposing counsel email
 - Email list: sender, subject, date, snippet (Card-based rows)
-- Email detail: full body (sanitized HTML), thread view
+- Email detail: full body, thread view
 - Reply draft: editable textarea + "Copy" + "Regenerate" buttons
 - Warning banner on all AI-generated content
 
@@ -126,27 +111,25 @@ GET    /api/cases/[id]/email-filters     → List filters
 ## Environment Variables
 
 ```env
-GOOGLE_CLIENT_ID=...              # Google OAuth client ID
-GOOGLE_CLIENT_SECRET=...          # Google OAuth client secret
-GOOGLE_REDIRECT_URI=...           # OAuth callback URL
-ENCRYPTION_KEY=...                # AES-256 key for token encryption
+GMAIL_MCP_COMMAND=npx                        # Command to run Gmail MCP server
+GMAIL_MCP_ARGS=-y,@anthropic-ai/mcp-server-gmail  # Comma-separated args
+ANTHROPIC_API_KEY=...                         # For AI reply generation
 ```
 
 ## Security Considerations
 
-- **Minimal scope**: `gmail.readonly` only — cannot send, delete, or modify emails
-- **Encrypted tokens**: AES-256 encryption at rest, never exposed to client
-- **RLS enforcement**: Users can only access their own connected accounts and case filters
-- **No email storage**: Email content fetched live, never persisted in our database
+- **Read-only access**: MCP server configured with `gmail.readonly` scope
+- **External auth**: No tokens stored in our database — MCP server manages credentials
+- **RLS enforcement**: Users can only access their own case filters
+- **No email storage**: Email content fetched live via MCP, never persisted
 - **Audit logging**: All AI reply generations logged for accountability
-- **Rate limiting**: Prevents abuse of Gmail API and AI endpoints
-- **Token refresh**: Automatic refresh before expiry, graceful handling of revoked tokens
-- **Sanitized HTML**: Email body HTML sanitized before rendering to prevent XSS
+- **Rate limiting**: Prevents abuse of AI endpoints (10/hour)
+- **Singleton connection**: MCP server process managed as a singleton per Node.js process
 
 ## Out of Scope (Future)
 
-- Sending emails through the app (requires `gmail.send` scope)
-- Creating Gmail drafts (requires `gmail.compose` scope)
+- Sending emails through the app
+- Creating Gmail drafts via MCP
 - Outlook/Microsoft email integration
 - Auto-detection of case-related emails
 - Email notifications/push alerts for new emails

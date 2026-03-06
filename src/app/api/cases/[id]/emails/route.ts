@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { getGmailConnection, searchGmailMessages, getGmailMessage, parseHeaders } from '@/lib/gmail/client'
+import { isGmailMcpConfigured, searchMessages, readMessage } from '@/lib/mcp/gmail-client'
 
 export async function GET(
   request: NextRequest,
@@ -8,12 +8,11 @@ export async function GET(
 ) {
   const auth = await getAuthenticatedClient()
   if (!auth.ok) return auth.error
-  const { supabase, user } = auth
+  const { supabase } = auth
   const { id: caseId } = await params
 
-  const gmail = await getGmailConnection(user.id)
-  if (!gmail) {
-    return NextResponse.json({ error: 'Gmail not connected' }, { status: 403 })
+  if (!isGmailMcpConfigured()) {
+    return NextResponse.json({ error: 'Gmail MCP not configured' }, { status: 503 })
   }
 
   const { data: filters } = await supabase
@@ -29,23 +28,26 @@ export async function GET(
   const pageToken = request.nextUrl.searchParams.get('pageToken') ?? undefined
 
   try {
-    const result = await searchGmailMessages(gmail.accessToken, fromQuery, pageToken)
+    const result = await searchMessages(fromQuery, 20, pageToken)
 
-    if (!result.messages || result.messages.length === 0) {
-      return NextResponse.json({ emails: [], nextPageToken: null })
-    }
-
+    // If the MCP server returned summaries with IDs but missing details,
+    // fetch individual messages to fill in the data
     const emails = await Promise.all(
       result.messages.map(async (msg) => {
-        const full = await getGmailMessage(gmail.accessToken, msg.id)
-        const headers = parseHeaders(full.payload?.headers ?? [])
-        return {
-          id: msg.id,
-          threadId: msg.threadId,
-          from: headers.from ?? '',
-          subject: headers.subject ?? '(no subject)',
-          date: headers.date ?? '',
-          snippet: full.snippet ?? '',
+        if (msg.from && msg.subject && msg.date) return msg
+        // MCP server returned only IDs — fetch details
+        try {
+          const full = await readMessage(msg.id)
+          return {
+            id: msg.id,
+            threadId: msg.threadId || full.threadId,
+            from: full.from,
+            subject: full.subject || '(no subject)',
+            date: full.date,
+            snippet: msg.snippet || full.body.slice(0, 120),
+          }
+        } catch {
+          return msg
         }
       })
     )
@@ -55,7 +57,7 @@ export async function GET(
       nextPageToken: result.nextPageToken ?? null,
     })
   } catch (err) {
-    console.error('[gmail-fetch] Error:', err)
+    console.error('[gmail-mcp] Search error:', err)
     return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 502 })
   }
 }

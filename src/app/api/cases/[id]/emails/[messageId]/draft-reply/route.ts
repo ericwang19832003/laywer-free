@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { getGmailConnection, getGmailMessage, getGmailThread, parseHeaders, parseEmailBody } from '@/lib/gmail/client'
+import { isGmailMcpConfigured, getThreadTextForAI, readMessage } from '@/lib/mcp/gmail-client'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 const AI_MODEL = 'claude-sonnet-4-20250514'
@@ -19,10 +19,8 @@ export async function POST(
   const rl = checkRateLimit(user.id, 'ai_email_reply', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
-  // Get Gmail connection
-  const gmail = await getGmailConnection(user.id)
-  if (!gmail) {
-    return NextResponse.json({ error: 'Gmail not connected' }, { status: 403 })
+  if (!isGmailMcpConfigured()) {
+    return NextResponse.json({ error: 'Gmail MCP not configured' }, { status: 503 })
   }
 
   // Get case context
@@ -37,18 +35,11 @@ export async function POST(
   }
 
   try {
-    // Get the full message to find thread
-    const message = await getGmailMessage(gmail.accessToken, messageId)
+    // Get the message to find its thread
+    const message = await readMessage(messageId)
 
-    // Get full thread for context
-    const thread = await getGmailThread(gmail.accessToken, message.threadId)
-
-    // Format thread for the prompt
-    const threadMessages = (thread.messages ?? []).map((msg: Record<string, unknown>) => {
-      const payload = msg.payload as Record<string, unknown>
-      const headers = parseHeaders((payload?.headers ?? []) as Array<{ name: string; value: string }>)
-      return `From: ${headers.from}\nDate: ${headers.date}\nSubject: ${headers.subject}\n\n${parseEmailBody(payload)}`
-    })
+    // Get full thread text for AI context
+    const threadText = await getThreadTextForAI(message.threadId)
 
     const roleLabel = caseRow.role === 'plaintiff' ? 'plaintiff' : 'defendant'
     const disputeLabel = (caseRow.dispute_type ?? 'civil').replace(/_/g, ' ')
@@ -68,7 +59,7 @@ Guidelines:
 - Do not include legal citations or case law references
 - Keep the reply concise — match the length and formality of the incoming email`
 
-    const userPrompt = `Here is the email thread (oldest first):\n\n${threadMessages.join('\n\n---\n\n')}\n\nPlease draft a reply to the most recent message.`
+    const userPrompt = `Here is the email thread:\n\n${threadText}\n\nPlease draft a reply to the most recent message.`
 
     const anthropic = new Anthropic()
     const response = await anthropic.messages.create({
@@ -84,10 +75,7 @@ Guidelines:
       .join('\n')
 
     // Audit log (no email content stored)
-    const lastHeaders = parseHeaders(
-      ((thread.messages?.at(-1) as Record<string, unknown>)?.payload as Record<string, unknown>)?.headers as Array<{ name: string; value: string }> ?? []
-    )
-    console.log(`[email-reply-audit] user=${user.id} case=${caseId} subject="${lastHeaders.subject ?? 'unknown'}"`)
+    console.log(`[email-reply-audit] user=${user.id} case=${caseId} subject="${message.subject ?? 'unknown'}"`)
 
     return NextResponse.json({ draft })
   } catch (err) {

@@ -45,12 +45,12 @@ export default function SettingsPage() {
   // Notification preferences
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS)
 
-  // Gmail connection
+  // Gmail MCP connection
   const [gmailStatus, setGmailStatus] = useState<{
     connected: boolean
     email: string | null
+    configured: boolean
   } | null>(null)
-  const [disconnecting, setDisconnecting] = useState(false)
 
   // Data export
   const [exporting, setExporting] = useState(false)
@@ -90,20 +90,7 @@ export default function SettingsPage() {
     fetch('/api/gmail/status')
       .then((r) => r.json())
       .then(setGmailStatus)
-      .catch(() => setGmailStatus({ connected: false, email: null }))
-  }, [])
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('gmail_connected') === 'true') {
-      fetch('/api/gmail/status')
-        .then((r) => r.json())
-        .then(setGmailStatus)
-      window.history.replaceState({}, '', '/settings')
-    }
-    if (params.get('gmail_error')) {
-      window.history.replaceState({}, '', '/settings')
-    }
+      .catch(() => setGmailStatus({ connected: false, email: null, configured: false }))
   }, [])
 
   async function handleSaveProfile() {
@@ -324,9 +311,9 @@ export default function SettingsPage() {
           {/* Connected Services */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Connected Services</CardTitle>
+              <CardTitle className="text-base">Connected Services</CardTitle>
               <p className="text-sm text-warm-muted">
-                Connect your email to monitor communications from opposing counsel.
+                Email integration for monitoring communications from opposing counsel.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -339,45 +326,34 @@ export default function SettingsPage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-warm-text">Gmail</p>
+                    <p className="text-sm font-medium text-warm-text">Gmail (MCP)</p>
                     {gmailStatus?.connected ? (
-                      <p className="text-xs text-warm-muted">{gmailStatus.email}</p>
+                      <p className="text-xs text-green-600">{gmailStatus.email}</p>
+                    ) : gmailStatus?.configured ? (
+                      <p className="text-xs text-amber-500">Configured but not responding</p>
                     ) : (
-                      <p className="text-xs text-warm-muted">Not connected</p>
+                      <p className="text-xs text-warm-muted">Not configured</p>
                     )}
                   </div>
                 </div>
-                {gmailStatus?.connected ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={disconnecting}
-                    onClick={async () => {
-                      setDisconnecting(true)
-                      try {
-                        await fetch('/api/auth/google/disconnect', { method: 'POST' })
-                        setGmailStatus({ connected: false, email: null })
-                      } finally {
-                        setDisconnecting(false)
-                      }
-                    }}
-                  >
-                    {disconnecting ? 'Disconnecting...' : 'Disconnect'}
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      window.location.href = '/api/auth/google'
-                    }}
-                  >
-                    Connect
-                  </Button>
-                )}
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                  gmailStatus?.connected
+                    ? 'bg-green-50 text-green-700'
+                    : gmailStatus?.configured
+                    ? 'bg-amber-50 text-amber-700'
+                    : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {gmailStatus?.connected ? 'Connected' : gmailStatus?.configured ? 'Error' : 'Off'}
+                </span>
               </div>
               {gmailStatus?.connected && (
                 <p className="text-xs text-warm-muted">
-                  Read-only access. We can view your emails but cannot send, delete, or modify them.
+                  Read-only access via MCP. Emails are fetched live and never stored.
+                </p>
+              )}
+              {gmailStatus && !gmailStatus.configured && (
+                <p className="text-xs text-warm-muted">
+                  Set <code className="text-xs bg-warm-bg px-1 rounded">GMAIL_MCP_COMMAND</code> in your environment to enable Gmail integration.
                 </p>
               )}
             </CardContent>
