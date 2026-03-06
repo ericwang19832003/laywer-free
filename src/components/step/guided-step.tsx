@@ -87,15 +87,22 @@ export function GuidedStep({
 
   async function handleAnswer(value: string) {
     const updated = { ...answers, [currentQuestion.id]: value }
-    setAnswers(updated)
-
-    // Auto-save in background
-    autoSave(updated)
 
     // Recompute visible questions with updated answers
     const nextVisible = config.questions.filter(
       (q) => !q.showIf || q.showIf(updated)
     )
+
+    // Prune answers for questions that are no longer visible
+    const visibleIds = new Set(nextVisible.map((q) => q.id))
+    const pruned = Object.fromEntries(
+      Object.entries(updated).filter(([key]) => visibleIds.has(key))
+    )
+
+    setAnswers(pruned)
+
+    // Auto-save in background
+    autoSave(pruned)
 
     // Find the next unanswered question after the current one
     const currentQuestionId = currentQuestion.id
@@ -103,8 +110,8 @@ export function GuidedStep({
     const nextUnanswered = nextVisible.findIndex((q, i) => {
       if (i <= currentPosInNext) return false
       return q.type === 'info'
-        ? updated[q.id] !== 'acknowledged'
-        : !(q.id in updated)
+        ? pruned[q.id] !== 'acknowledged'
+        : !(q.id in pruned)
     })
 
     if (nextUnanswered !== -1) {
@@ -124,6 +131,16 @@ export function GuidedStep({
   async function handleComplete() {
     setLoading(true)
     try {
+      // Ensure task is in_progress before completing (guards against skipped auto-save)
+      await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'in_progress',
+          metadata: { guided_answers: answers },
+        }),
+      })
+
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
