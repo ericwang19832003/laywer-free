@@ -575,7 +575,7 @@ export function DebtDefenseWizard({
     switch (stepId) {
       case 'preflight':
         return (
-          <DebtPreflight debtSubType={debtDefenseDetails?.debt_sub_type ?? 'other'} />
+          <DebtPreflight caseId={caseId} taskId={taskId} />
         )
       case 'debt_info':
         return (
