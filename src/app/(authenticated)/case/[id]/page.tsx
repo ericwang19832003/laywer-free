@@ -10,6 +10,7 @@ import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { ResearchCard } from '@/components/dashboard/research-card'
+import { EmailsCard } from '@/components/dashboard/emails-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
 import { DeleteCaseCard } from '@/components/dashboard/delete-case-card'
@@ -261,6 +262,7 @@ export default async function DashboardPage({
             itemCount={discoveryItemCount}
           />
           <ResearchCard caseId={id} authorityCount={authorityCount ?? 0} />
+          <EmailsCard caseId={id} />
           {hasMotionActivity && (
             <Card>
               <CardContent className="pt-5 pb-4 px-5">
