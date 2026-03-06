@@ -45,6 +45,13 @@ export default function SettingsPage() {
   // Notification preferences
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS)
 
+  // Gmail connection
+  const [gmailStatus, setGmailStatus] = useState<{
+    connected: boolean
+    email: string | null
+  } | null>(null)
+  const [disconnecting, setDisconnecting] = useState(false)
+
   // Data export
   const [exporting, setExporting] = useState(false)
 
@@ -77,6 +84,26 @@ export default function SettingsPage() {
         }
       }
     })
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/gmail/status')
+      .then((r) => r.json())
+      .then(setGmailStatus)
+      .catch(() => setGmailStatus({ connected: false, email: null }))
+  }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('gmail_connected') === 'true') {
+      fetch('/api/gmail/status')
+        .then((r) => r.json())
+        .then(setGmailStatus)
+      window.history.replaceState({}, '', '/settings')
+    }
+    if (params.get('gmail_error')) {
+      window.history.replaceState({}, '', '/settings')
+    }
   }, [])
 
   async function handleSaveProfile() {
@@ -291,6 +318,68 @@ export default function SettingsPage() {
                 </label>
               ))}
               <p className="text-xs text-warm-muted">Controls which in-app notifications you receive.</p>
+            </CardContent>
+          </Card>
+
+          {/* Connected Services */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Connected Services</CardTitle>
+              <p className="text-sm text-warm-muted">
+                Connect your email to monitor communications from opposing counsel.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warm-bg">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                      <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-warm-text">Gmail</p>
+                    {gmailStatus?.connected ? (
+                      <p className="text-xs text-warm-muted">{gmailStatus.email}</p>
+                    ) : (
+                      <p className="text-xs text-warm-muted">Not connected</p>
+                    )}
+                  </div>
+                </div>
+                {gmailStatus?.connected ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={disconnecting}
+                    onClick={async () => {
+                      setDisconnecting(true)
+                      try {
+                        await fetch('/api/auth/google/disconnect', { method: 'POST' })
+                        setGmailStatus({ connected: false, email: null })
+                      } finally {
+                        setDisconnecting(false)
+                      }
+                    }}
+                  >
+                    {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      window.location.href = '/api/auth/google'
+                    }}
+                  >
+                    Connect
+                  </Button>
+                )}
+              </div>
+              {gmailStatus?.connected && (
+                <p className="text-xs text-warm-muted">
+                  Read-only access. We can view your emails but cannot send, delete, or modify them.
+                </p>
+              )}
             </CardContent>
           </Card>
 
