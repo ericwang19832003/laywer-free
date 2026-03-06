@@ -6,7 +6,6 @@ import { discoveryStarterPackConfig } from '@/lib/guided-steps/discovery-starter
 interface DiscoveryStarterPackStepProps {
   caseId: string
   taskId: string
-  courtType?: string
   existingAnswers?: Record<string, string>
 }
 

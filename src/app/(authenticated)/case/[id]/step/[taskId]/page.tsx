@@ -241,21 +241,14 @@ export default async function StepPage({
           taskId={taskId}
         />
       )
-    case 'discovery_starter_pack': {
-      const { data: caseRow } = await supabase
-        .from('cases')
-        .select('court_type')
-        .eq('id', id)
-        .single()
-
+    case 'discovery_starter_pack':
       return (
         <DiscoveryStarterPackStep
           caseId={id}
           taskId={taskId}
-          courtType={caseRow?.court_type ?? 'district'}
+          existingAnswers={task.metadata?.guided_answers}
         />
       )
-    }
     case 'understand_removal':
       return (
         <UnderstandRemovalStep
@@ -424,7 +417,7 @@ export default async function StepPage({
       )
     }
     case 'trial_prep_checklist':
-      return <TrialPrepChecklistStep caseId={id} taskId={taskId} />
+      return <TrialPrepChecklistStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'appellate_brief': {
       const config = MOTION_CONFIGS['appellate_brief']
       const { data: caseRow } = await supabase
@@ -759,7 +752,7 @@ export default async function StepPage({
       )
     }
     case 'pi_file_with_court':
-      return <PIFileWithCourtStep caseId={id} taskId={taskId} />
+      return <PIFileWithCourtStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_serve_defendant':
       return <PIServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_trial_prep':
