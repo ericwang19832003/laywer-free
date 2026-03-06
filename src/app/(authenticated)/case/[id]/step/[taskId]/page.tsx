@@ -709,9 +709,9 @@ export default async function StepPage({
     case 'debt_hearing_prep':
       return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':
-      return <DebtHearingDayStep caseId={id} taskId={taskId} />
+      return <DebtHearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_post_judgment':
-      return <DebtPostJudgmentStep caseId={id} taskId={taskId} />
+      return <DebtPostJudgmentStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
     // Personal injury task chain steps
     case 'pi_intake':
