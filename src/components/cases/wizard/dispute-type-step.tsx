@@ -1,21 +1,32 @@
+import { useState } from 'react'
 import type { DisputeType } from '@/lib/rules/court-recommendation'
 import type { State } from '@/lib/schemas/case'
 import { getSmallClaimsMax } from '@/lib/states'
 import { OptionCard } from './option-card'
 
-function getDisputeOptions(selectedState: State): { value: DisputeType; label: string; description: string }[] {
+interface DisputeOption {
+  id: string
+  value: DisputeType
+  label: string
+  description: string
+}
+
+function getDisputeOptions(selectedState: State): DisputeOption[] {
   const limit = getSmallClaimsMax(selectedState)
   const limitFormatted = `$${limit.toLocaleString()}`
 
   return [
-    { value: 'debt_collection', label: 'Debt dispute', description: 'Debt collection, credit card lawsuit, or money owed to you' },
-    { value: 'landlord_tenant', label: 'Landlord-tenant issue', description: 'Lease, eviction, repairs, or deposit dispute with a landlord or tenant' },
-    { value: 'personal_injury', label: 'Property damage or personal injury', description: 'Accident, negligence, vehicle damage, or injury claims' },
-    { value: 'contract', label: 'Business or contract dispute', description: 'Breach of agreement, partnership issues' },
-    { value: 'property', label: 'Property or real estate', description: 'Land ownership, boundary, or title dispute (not damage claims)' },
-    { value: 'family', label: 'Family matter', description: 'Custody, divorce, child support, or protective order' },
-    { value: 'small_claims', label: 'Small claim', description: `General dispute under ${limitFormatted} that doesn\u2019t fit above` },
-    { value: 'other', label: 'Something else', description: "Doesn't fit the categories above" },
+    { id: 'debt_collection', value: 'debt_collection', label: 'Debt dispute', description: 'Debt collection, credit card lawsuit, or money owed to you' },
+    { id: 'landlord_tenant', value: 'landlord_tenant', label: 'Landlord-tenant issue', description: 'Lease, eviction, repairs, or deposit dispute' },
+    { id: 'personal_injury', value: 'personal_injury', label: 'Personal injury', description: 'Accident, negligence, or injury claims' },
+    { id: 'property_damage', value: 'personal_injury', label: 'Property damage', description: 'Vehicle damage, property damage from negligence, or vandalism' },
+    { id: 'contract', value: 'contract', label: 'Contract dispute', description: 'Breach of agreement, broken contract' },
+    { id: 'business', value: 'contract', label: 'Business dispute', description: 'Partnership issues, business disagreements' },
+    { id: 'property', value: 'property', label: 'Property dispute', description: 'Land ownership, boundary, or title dispute' },
+    { id: 'real_estate', value: 'property', label: 'Real estate', description: 'Real estate transactions, liens, or deed issues' },
+    { id: 'family', value: 'family', label: 'Family matter', description: 'Custody, divorce, child support, or protective order' },
+    { id: 'small_claims', value: 'small_claims', label: 'Small claim', description: `General dispute under ${limitFormatted} that doesn\u2019t fit above` },
+    { id: 'other', value: 'other', label: 'Something else', description: "Doesn't fit the categories above" },
   ]
 }
 
@@ -27,6 +38,16 @@ interface DisputeTypeStepProps {
 
 export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: DisputeTypeStepProps) {
   const options = getDisputeOptions(selectedState)
+  const [selectedId, setSelectedId] = useState<string>(() => {
+    if (!value) return ''
+    const match = options.find((opt) => opt.value === value)
+    return match?.id ?? ''
+  })
+
+  function handleSelect(opt: DisputeOption) {
+    setSelectedId(opt.id)
+    onSelect(opt.value)
+  }
 
   return (
     <div className="space-y-3">
@@ -35,11 +56,11 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
       <div className="space-y-2">
         {options.map((opt) => (
           <OptionCard
-            key={opt.value}
+            key={opt.id}
             label={opt.label}
             description={opt.description}
-            selected={value === opt.value}
-            onClick={() => onSelect(opt.value)}
+            selected={selectedId === opt.id}
+            onClick={() => handleSelect(opt)}
           />
         ))}
       </div>

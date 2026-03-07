@@ -35,9 +35,9 @@ const COURT_TYPE_LABELS: Record<string, string> = {
 const DISPUTE_TYPE_LABELS: Record<string, string> = {
   debt_collection: 'Money owed (debt/contract)',
   landlord_tenant: 'Landlord-tenant issue',
-  personal_injury: 'Property damage or personal injury',
-  contract: 'Business or contract dispute',
-  property: 'Property or real estate',
+  personal_injury: 'Personal injury / Property damage',
+  contract: 'Contract / Business dispute',
+  property: 'Property / Real estate',
   family: 'Family matter',
   other: 'Other',
 }
