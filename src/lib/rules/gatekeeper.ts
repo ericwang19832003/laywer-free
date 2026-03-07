@@ -36,6 +36,7 @@ export interface GatekeeperInput {
 export type GatekeeperAction =
   | { type: 'unlock_task'; task_key: string; due_at?: string }
   | { type: 'complete_task'; task_key: string }
+  | { type: 'inject_tasks'; task_definitions: { task_key: string; title: string }[]; then_unlock: string }
 
 function findTask(tasks: GatekeeperTask[], key: string): GatekeeperTask | undefined {
   return tasks.find((t) => t.task_key === key)
@@ -202,6 +203,54 @@ export function evaluateGatekeeperRules(input: GatekeeperInput): GatekeeperActio
     input.completedMotionTypes?.includes('notice_of_appeal')
   ) {
     actions.push({ type: 'unlock_task', task_key: 'appellate_brief' })
+  }
+
+  // ── PI Federal Removal Branch ─────────────────────────
+
+  const piWaitTask = findTask(tasks, 'pi_wait_for_answer')
+  const piWaitAnswers = piWaitTask?.metadata?.guided_answers as Record<string, string> | undefined
+  const piReviewAnswerTask = findTask(tasks, 'pi_review_answer')
+  const piDiscoveryPrepTask = findTask(tasks, 'pi_discovery_prep')
+
+  // Rule 19: PI removal detected → inject removal tasks
+  if (
+    piWaitTask?.status === 'completed' &&
+    piWaitAnswers?.case_removed === 'yes' &&
+    !findTask(tasks, 'understand_removal') // Tasks don't exist yet
+  ) {
+    actions.push({
+      type: 'inject_tasks',
+      task_definitions: [
+        { task_key: 'understand_removal', title: 'Understand the Removal' },
+        { task_key: 'choose_removal_strategy', title: 'Choose Your Response Strategy' },
+        { task_key: 'prepare_amended_complaint', title: 'Prepare First Amended Complaint' },
+        { task_key: 'file_amended_complaint', title: 'File Your Amended Complaint' },
+        { task_key: 'prepare_remand_motion', title: 'Prepare Motion to Remand' },
+        { task_key: 'file_remand_motion', title: 'File Your Motion to Remand' },
+        { task_key: 'rule_26f_prep', title: 'Prepare for Rule 26(f) Conference' },
+        { task_key: 'mandatory_disclosures', title: 'Complete Mandatory Disclosures' },
+      ],
+      then_unlock: 'understand_removal',
+    })
+    actions.push({ type: 'unlock_task', task_key: 'understand_removal' })
+  }
+
+  // Rule 20: PI remand filed → resume PI chain at pi_review_answer
+  if (
+    piWaitAnswers?.case_removed === 'yes' &&
+    fileRemandTask?.status === 'completed' &&
+    piReviewAnswerTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'pi_review_answer' })
+  }
+
+  // Rule 21: PI accepted federal → resume PI chain at pi_discovery_prep
+  if (
+    piWaitAnswers?.case_removed === 'yes' &&
+    mandatoryDisclosuresTask?.status === 'completed' &&
+    piDiscoveryPrepTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'pi_discovery_prep' })
   }
 
   return actions

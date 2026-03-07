@@ -516,4 +516,106 @@ describe('evaluateGatekeeperRules', () => {
       expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'appellate_brief' }))
     })
   })
+
+  // ── PI Removal Rules ───────────────────────────────────
+
+  describe('PI Removal — inject_tasks', () => {
+    it('returns inject_tasks when pi_wait_for_answer completed with case_removed=yes and no removal tasks exist', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+          ],
+        })
+      )
+
+      const injectAction = actions.find((a) => a.type === 'inject_tasks')
+      expect(injectAction).toBeDefined()
+      if (injectAction && injectAction.type === 'inject_tasks') {
+        expect(injectAction.task_definitions).toHaveLength(8)
+        expect(injectAction.task_definitions.map(d => d.task_key)).toContain('understand_removal')
+        expect(injectAction.task_definitions.map(d => d.task_key)).toContain('prepare_remand_motion')
+      }
+
+      const unlockAction = actions.find(
+        (a) => a.type === 'unlock_task' && a.task_key === 'understand_removal'
+      )
+      expect(unlockAction).toBeDefined()
+    })
+
+    it('does NOT inject when removal tasks already exist', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+            makeTask('understand_removal', 'locked'),
+          ],
+        })
+      )
+
+      const injectAction = actions.find((a) => a.type === 'inject_tasks')
+      expect(injectAction).toBeUndefined()
+    })
+
+    it('does NOT inject when case_removed is not yes', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'no' },
+            }),
+          ],
+        })
+      )
+
+      const injectAction = actions.find((a) => a.type === 'inject_tasks')
+      expect(injectAction).toBeUndefined()
+    })
+  })
+
+  describe('PI Removal — resume PI chain', () => {
+    it('unlocks pi_review_answer when file_remand_motion completed', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+            makeTask('file_remand_motion', 'completed'),
+            makeTask('pi_review_answer', 'locked'),
+            makeTask('understand_removal', 'completed'),
+          ],
+        })
+      )
+
+      expect(actions).toContainEqual({
+        type: 'unlock_task',
+        task_key: 'pi_review_answer',
+      })
+    })
+
+    it('unlocks pi_discovery_prep when mandatory_disclosures completed', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+            makeTask('mandatory_disclosures', 'completed'),
+            makeTask('pi_discovery_prep', 'locked'),
+            makeTask('understand_removal', 'completed'),
+          ],
+        })
+      )
+
+      expect(actions).toContainEqual({
+        type: 'unlock_task',
+        task_key: 'pi_discovery_prep',
+      })
+    })
+  })
 })
