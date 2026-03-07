@@ -61,6 +61,13 @@ import { PIFileWithCourtStep } from '@/components/step/personal-injury/pi-file-w
 import { PIServeDefendantStep } from '@/components/step/personal-injury/pi-serve-defendant-step'
 import { PITrialPrepStep } from '@/components/step/personal-injury/pi-trial-prep-step'
 import { PIPostResolutionStep } from '@/components/step/personal-injury/pi-post-resolution-step'
+import { PIWaitForAnswerStep } from '@/components/step/personal-injury/pi-wait-for-answer-step'
+import { PIReviewAnswerStep } from '@/components/step/personal-injury/pi-review-answer-step'
+import { PIDiscoveryPrepStep } from '@/components/step/personal-injury/pi-discovery-prep-step'
+import { PIDiscoveryResponsesStep } from '@/components/step/personal-injury/pi-discovery-responses-step'
+import { PISchedulingConferenceStep } from '@/components/step/personal-injury/pi-scheduling-conference-step'
+import { PIPretrialMotionsStep } from '@/components/step/personal-injury/pi-pretrial-motions-step'
+import { PIMediationStep } from '@/components/step/personal-injury/pi-mediation-step'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -755,6 +762,20 @@ export default async function StepPage({
       return <PIFileWithCourtStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_serve_defendant':
       return <PIServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_wait_for_answer':
+      return <PIWaitForAnswerStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_review_answer':
+      return <PIReviewAnswerStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_discovery_prep':
+      return <PIDiscoveryPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_discovery_responses':
+      return <PIDiscoveryResponsesStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_scheduling_conference':
+      return <PISchedulingConferenceStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_pretrial_motions':
+      return <PIPretrialMotionsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_mediation':
+      return <PIMediationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_trial_prep':
       return <PITrialPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_post_resolution':
