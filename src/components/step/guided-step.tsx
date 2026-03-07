@@ -12,6 +12,7 @@ interface GuidedStepProps {
   taskId: string
   config: GuidedStepConfig
   existingAnswers?: Record<string, string>
+  onAfterComplete?: () => Promise<void>
 }
 
 export function GuidedStep({
@@ -19,6 +20,7 @@ export function GuidedStep({
   taskId,
   config,
   existingAnswers,
+  onAfterComplete,
 }: GuidedStepProps) {
   const router = useRouter()
   const [answers, setAnswers] = useState<Record<string, string>>(
@@ -150,6 +152,9 @@ export function GuidedStep({
         }),
       })
       if (!res.ok) throw new Error('Failed to complete task')
+      if (onAfterComplete) {
+        await onAfterComplete()
+      }
       router.push(`/case/${caseId}`)
       router.refresh()
     } catch {

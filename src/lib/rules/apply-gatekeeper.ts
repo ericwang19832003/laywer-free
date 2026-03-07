@@ -88,10 +88,48 @@ export async function runAndApplyGatekeeper(
     return { actionsApplied: [], rulesEvaluated: actions.length }
   }
 
-  // Apply each action
+  // Apply actions in two passes:
+  // 1. inject_tasks first (creates tasks that subsequent unlocks may reference)
+  // 2. unlock_task / complete_task second
   const actionsApplied: string[] = []
 
   for (const action of actions) {
+    if (action.type === 'inject_tasks') {
+      for (const def of action.task_definitions) {
+        const exists = tasks.find((t) => t.task_key === def.task_key)
+        if (exists) continue
+
+        await supabase.from('tasks').insert({
+          case_id: caseId,
+          task_key: def.task_key,
+          title: def.title,
+          status: 'locked',
+        })
+      }
+
+      // Update court_type to federal
+      await supabase
+        .from('cases')
+        .update({ court_type: 'federal' })
+        .eq('id', caseId)
+
+      // Re-fetch tasks so subsequent unlock actions find the new tasks
+      const { data: refreshedTasks } = await supabase
+        .from('tasks')
+        .select('id, task_key, status, due_at, metadata')
+        .eq('case_id', caseId)
+
+      if (refreshedTasks) {
+        tasks.splice(0, tasks.length, ...refreshedTasks)
+      }
+
+      actionsApplied.push(`inject_tasks:${action.task_definitions.map((d) => d.task_key).join(',')}`)
+    }
+  }
+
+  for (const action of actions) {
+    if (action.type === 'inject_tasks') continue
+
     const task = tasks.find((t) => t.task_key === action.task_key)
     if (!task) continue
 

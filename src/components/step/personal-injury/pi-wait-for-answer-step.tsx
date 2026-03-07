@@ -10,12 +10,21 @@ interface Props {
 }
 
 export function PIWaitForAnswerStep({ caseId, taskId, existingAnswers }: Props) {
+  const handleAfterComplete = async () => {
+    await fetch(`/api/cases/${caseId}/rules/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
+  }
+
   return (
     <GuidedStep
       caseId={caseId}
       taskId={taskId}
       config={piWaitForAnswerConfig}
       existingAnswers={existingAnswers}
+      onAfterComplete={handleAfterComplete}
     />
   )
 }
