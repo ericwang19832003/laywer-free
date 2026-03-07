@@ -73,6 +73,31 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
         'If the defendant does not file an answer by the deadline, you may be eligible to request a default judgment. This means the court could rule in your favor without a trial.',
       showIf: (answers) => answers.answer_received === 'no' && answers.service_date === 'over_three_weeks',
     },
+    {
+      id: 'case_removed',
+      type: 'single_choice',
+      prompt: 'Was your case removed to federal court by the defendant?',
+      showIf: (answers) => answers.defendant_served === 'yes',
+      options: [
+        { value: 'yes', label: 'Yes, my case was removed to federal court' },
+        { value: 'no', label: 'No' },
+        { value: 'not_sure', label: 'I\'m not sure' },
+      ],
+    },
+    {
+      id: 'removal_check_info',
+      type: 'info',
+      prompt:
+        'Check your court docket or look for a "Notice of Removal" from the defendant\'s attorney. If the case was removed, it will be transferred to the federal district court. You can also call the county clerk\'s office to confirm.',
+      showIf: (answers) => answers.case_removed === 'not_sure',
+    },
+    {
+      id: 'removal_detected_info',
+      type: 'info',
+      prompt:
+        'When a case is removed to federal court, you have 30 days from the date of removal to file a motion to remand (send it back to state court). After completing this step, we\'ll guide you through your options: filing a motion to remand, preparing an amended complaint for federal court, or both.',
+      showIf: (answers) => answers.case_removed === 'yes',
+    },
   ],
 
   generateSummary(answers) {
@@ -94,6 +119,13 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       }
     } else if (answers.answer_received === 'not_sure') {
       items.push({ status: 'needed', text: 'Check the court docket or call the clerk to see if an answer was filed.' })
+    }
+
+    if (answers.case_removed === 'yes') {
+      items.push({
+        status: 'needed',
+        text: 'Case removed to federal court. You have 30 days to file a motion to remand.',
+      })
     }
 
     items.push({
