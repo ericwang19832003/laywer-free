@@ -714,14 +714,18 @@ export default async function StepPage({
       return <DebtPostJudgmentStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
     // Personal injury task chain steps
-    case 'pi_intake':
+    case 'pi_intake': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
       return (
         <PIIntakeStep
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
+          piSubType={piDetails?.pi_sub_type ?? undefined}
         />
       )
+    }
     case 'pi_medical_records':
       return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_insurance_communication':
