@@ -6,6 +6,7 @@ import { AnnotatedDraftViewer } from '../filing/annotated-draft-viewer'
 import type { DraftAnnotation } from '../filing/annotated-draft-viewer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
 
 interface MedicalProvider {
   name: string
@@ -45,6 +46,7 @@ export function PIDemandLetterStep({
 }: PIDemandLetterStepProps) {
   const meta = existingMetadata ?? {}
   const pid = personalInjuryDetails
+  const isPropertyDamage = isPropertyDamageSubType(pid?.pi_sub_type)
 
   // Section 1: Your Information
   const [yourName, setYourName] = useState(
@@ -147,11 +149,9 @@ export function PIDemandLetterStep({
     1.5
 
   const painSufferingAmount = multiplier * totalMedicalExpenses
-  const totalDemandAmount =
-    totalMedicalExpenses +
-    (parseFloat(lostWages) || 0) +
-    (parseFloat(propertyDamage) || 0) +
-    painSufferingAmount
+  const totalDemandAmount = isPropertyDamage
+    ? totalMedicalExpenses + (parseFloat(lostWages) || 0) + (parseFloat(propertyDamage) || 0)
+    : totalMedicalExpenses + (parseFloat(lostWages) || 0) + (parseFloat(propertyDamage) || 0) + painSufferingAmount
 
   // -- Provider helpers --
 
@@ -324,7 +324,10 @@ export function PIDemandLetterStep({
       caseId={caseId}
       taskId={taskId}
       title="Draft Your Demand Letter"
-      reassurance="A demand letter is your first step in seeking fair compensation. It puts the insurance company on notice of your claim."
+      reassurance={isPropertyDamage
+        ? "A demand letter formally notifies the at-fault party's insurance of your property damage claim and the compensation you are seeking."
+        : "A demand letter is your first step in seeking fair compensation. It puts the insurance company on notice of your claim."
+      }
       onConfirm={handleConfirm}
       onSave={handleSave}
       onBeforeReview={generateDraft}
@@ -506,55 +509,78 @@ export function PIDemandLetterStep({
           </div>
         </div>
 
-        {/* Section 5: Injuries */}
-        <div>
-          <h2 className="text-sm font-semibold text-warm-text mb-4">
-            5. Injuries
-          </h2>
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="pidl-injuries-description">
-                Description of injuries *
-              </Label>
-              <textarea
-                id="pidl-injuries-description"
-                value={injuriesDescription}
-                onChange={(e) => setInjuriesDescription(e.target.value)}
-                placeholder="Describe all injuries sustained..."
-                rows={4}
-                className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              />
-            </div>
-            <div>
-              <Label>Injury severity *</Label>
-              <div className="space-y-2 mt-1">
-                {(['minor', 'moderate', 'severe'] as const).map((level) => (
-                  <label
-                    key={level}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="pidl-injury-severity"
-                      value={level}
-                      checked={injurySeverity === level}
-                      onChange={() => setInjurySeverity(level)}
-                      className="h-4 w-4 border-warm-border text-calm-indigo focus:ring-calm-indigo"
-                    />
-                    <span className="text-sm text-warm-text capitalize">
-                      {level}
-                    </span>
-                  </label>
-                ))}
+        {/* Section 5: Injuries / Damage Details */}
+        {isPropertyDamage ? (
+          <div>
+            <h2 className="text-sm font-semibold text-warm-text mb-4">
+              5. Damage Details
+            </h2>
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="pidl-damage-description">
+                  Description of property damage *
+                </Label>
+                <textarea
+                  id="pidl-damage-description"
+                  value={injuriesDescription}
+                  onChange={(e) => setInjuriesDescription(e.target.value)}
+                  placeholder="Describe all property damage in detail..."
+                  rows={4}
+                  className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
+                />
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            <h2 className="text-sm font-semibold text-warm-text mb-4">
+              5. Injuries
+            </h2>
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="pidl-injuries-description">
+                  Description of injuries *
+                </Label>
+                <textarea
+                  id="pidl-injuries-description"
+                  value={injuriesDescription}
+                  onChange={(e) => setInjuriesDescription(e.target.value)}
+                  placeholder="Describe all injuries sustained..."
+                  rows={4}
+                  className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
+                />
+              </div>
+              <div>
+                <Label>Injury severity *</Label>
+                <div className="space-y-2 mt-1">
+                  {(['minor', 'moderate', 'severe'] as const).map((level) => (
+                    <label
+                      key={level}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="pidl-injury-severity"
+                        value={level}
+                        checked={injurySeverity === level}
+                        onChange={() => setInjurySeverity(level)}
+                        className="h-4 w-4 border-warm-border text-calm-indigo focus:ring-calm-indigo"
+                      />
+                      <span className="text-sm text-warm-text capitalize">
+                        {level}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Section 6: Medical Providers */}
+        {/* Section 6: Medical Providers / Repair Vendors */}
         <div>
           <h2 className="text-sm font-semibold text-warm-text mb-4">
-            6. Medical Providers
+            {isPropertyDamage ? '6. Repair Vendors & Contractors' : '6. Medical Providers'}
           </h2>
           <div className="space-y-4">
             {providers.map((provider, index) => (
@@ -579,7 +605,7 @@ export function PIDemandLetterStep({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor={`pidl-provider-name-${index}`}>
-                      Provider name
+                      {isPropertyDamage ? 'Vendor / contractor name' : 'Provider name'}
                     </Label>
                     <Input
                       id={`pidl-provider-name-${index}`}
@@ -592,7 +618,7 @@ export function PIDemandLetterStep({
                   </div>
                   <div>
                     <Label htmlFor={`pidl-provider-type-${index}`}>
-                      Type of treatment
+                      {isPropertyDamage ? 'Type of work' : 'Type of treatment'}
                     </Label>
                     <Input
                       id={`pidl-provider-type-${index}`}
@@ -600,12 +626,12 @@ export function PIDemandLetterStep({
                       onChange={(e) =>
                         updateProvider(index, 'type', e.target.value)
                       }
-                      placeholder="e.g. ER, Orthopedic, PT"
+                      placeholder={isPropertyDamage ? 'e.g. Body shop, Roofer, Electrician' : 'e.g. ER, Orthopedic, PT'}
                     />
                   </div>
                   <div>
                     <Label htmlFor={`pidl-provider-dates-${index}`}>
-                      Dates of treatment
+                      {isPropertyDamage ? 'Date of estimate / service' : 'Dates of treatment'}
                     </Label>
                     <Input
                       id={`pidl-provider-dates-${index}`}
@@ -646,7 +672,7 @@ export function PIDemandLetterStep({
               onClick={addProvider}
               className="text-sm text-calm-indigo hover:text-calm-indigo/80 font-medium transition-colors"
             >
-              + Add another provider
+              {isPropertyDamage ? '+ Add another vendor' : '+ Add another provider'}
             </button>
           </div>
         </div>
@@ -661,20 +687,22 @@ export function PIDemandLetterStep({
             <div className="rounded-lg border border-warm-border bg-warm-bg/50 p-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-warm-text">
-                  Total medical expenses
+                  {isPropertyDamage ? 'Total repair / replacement costs' : 'Total medical expenses'}
                 </p>
                 <p className="text-sm font-medium text-warm-text">
                   {formatCurrency(totalMedicalExpenses)}
                 </p>
               </div>
               <p className="text-xs text-warm-muted mt-0.5">
-                Auto-calculated from medical providers above
+                {isPropertyDamage ? 'Auto-calculated from vendors above' : 'Auto-calculated from medical providers above'}
               </p>
             </div>
 
             {/* Lost wages */}
             <div>
-              <Label htmlFor="pidl-lost-wages">Lost wages</Label>
+              <Label htmlFor="pidl-lost-wages">
+                {isPropertyDamage ? 'Loss of use costs (rental car, temporary housing, etc.)' : 'Lost wages'}
+              </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-warm-muted">
                   $
@@ -712,22 +740,24 @@ export function PIDemandLetterStep({
               </div>
             </div>
 
-            {/* Pain & suffering */}
-            <div className="rounded-lg border border-warm-border bg-warm-bg/50 p-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-warm-text">
-                  Pain &amp; suffering
-                </p>
-                <p className="text-sm font-medium text-warm-text">
+            {/* Pain & suffering (hidden for property damage) */}
+            {!isPropertyDamage && (
+              <div className="rounded-lg border border-warm-border bg-warm-bg/50 p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-warm-text">
+                    Pain &amp; suffering
+                  </p>
+                  <p className="text-sm font-medium text-warm-text">
+                    {formatCurrency(painSufferingAmount)}
+                  </p>
+                </div>
+                <p className="text-xs text-warm-muted mt-0.5">
+                  Pain &amp; suffering = {multiplier}x &times;{' '}
+                  {formatCurrency(totalMedicalExpenses)} ={' '}
                   {formatCurrency(painSufferingAmount)}
                 </p>
               </div>
-              <p className="text-xs text-warm-muted mt-0.5">
-                Pain &amp; suffering = {multiplier}x &times;{' '}
-                {formatCurrency(totalMedicalExpenses)} ={' '}
-                {formatCurrency(painSufferingAmount)}
-              </p>
-            </div>
+            )}
 
             {/* Total demand */}
             <div className="rounded-lg border border-calm-indigo/30 bg-calm-indigo/5 p-3">
@@ -749,10 +779,9 @@ export function PIDemandLetterStep({
             What is a demand letter?
           </p>
           <p className="text-xs text-warm-muted mt-0.5">
-            A demand letter formally notifies the at-fault party&apos;s
-            insurance company of your claim. It details the incident, your
-            injuries, and the compensation you are seeking. This is typically
-            the first step before filing a lawsuit.
+            {isPropertyDamage
+              ? "A demand letter formally notifies the at-fault party's insurance company of your property damage claim. It details the incident, the damage to your property, and the compensation you are seeking. This is typically the first step before filing a lawsuit."
+              : "A demand letter formally notifies the at-fault party\u2019s insurance company of your claim. It details the incident, your injuries, and the compensation you are seeking. This is typically the first step before filing a lawsuit."}
           </p>
         </div>
       </div>
