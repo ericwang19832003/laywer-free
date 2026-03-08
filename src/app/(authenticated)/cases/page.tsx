@@ -17,6 +17,19 @@ export default async function CasesPage() {
     .eq('status', 'active')
     .order('created_at', { ascending: false })
 
+  // Fetch pi_sub_type for PI cases to show "Property Damage" when applicable
+  const piCaseIds = (cases ?? []).filter(c => c.dispute_type === 'personal_injury').map(c => c.id)
+  const piSubTypeMap = new Map<string, string>()
+  if (piCaseIds.length > 0) {
+    const { data: piDetails } = await supabase
+      .from('personal_injury_details')
+      .select('case_id, pi_sub_type')
+      .in('case_id', piCaseIds)
+    for (const pd of piDetails ?? []) {
+      if (pd.pi_sub_type) piSubTypeMap.set(pd.case_id, pd.pi_sub_type)
+    }
+  }
+
   const hasCases = cases && cases.length > 0
   const caseIds = (cases ?? []).map((c) => c.id)
 
@@ -109,6 +122,7 @@ export default async function CasesPage() {
       role: c.role,
       courtType: c.court_type,
       disputeType: c.dispute_type,
+      piSubType: piSubTypeMap.get(c.id) ?? null,
       createdAt: c.created_at,
       healthScore: healthByCase.get(c.id) ?? null,
       tasksCompleted: taskData.completed,

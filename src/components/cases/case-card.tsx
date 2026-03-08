@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ArrowRight } from 'lucide-react'
+import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
 
 interface CaseCardProps {
   id: string
@@ -11,6 +12,7 @@ interface CaseCardProps {
   role: string
   courtType: string | null
   disputeType: string | null
+  piSubType: string | null
   createdAt: string
   healthScore: number | null
   tasksCompleted: number
@@ -49,31 +51,14 @@ function timeAgo(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-const COURT_LABELS: Record<string, string> = {
-  jp: 'Justice Court',
-  county: 'County Court',
-  district: 'District Court',
-  federal: 'Federal Court',
-}
-
-const DISPUTE_LABELS: Record<string, string> = {
-  debt_collection: 'Debt',
-  landlord_tenant: 'Landlord/Tenant',
-  personal_injury: 'Personal Injury',
-  contract: 'Contract',
-  property: 'Property',
-  family: 'Family',
-  other: 'Other',
-}
-
 export function CaseCard({
-  id, county, role, courtType, disputeType, createdAt,
+  id, county, role, courtType, disputeType, piSubType, createdAt,
   healthScore, tasksCompleted, tasksTotal, nextDeadline, lastActivity,
 }: CaseCardProps) {
   const displayCounty = county ? `${county} County` : 'County not set'
-  const courtLabel = courtType ? COURT_LABELS[courtType] ?? courtType : null
+  const courtLabel = getCourtLabel(courtType) || null
   const roleLabel = role === 'plaintiff' ? 'Plaintiff' : 'Defendant'
-  const disputeLabel = disputeType ? DISPUTE_LABELS[disputeType] ?? disputeType : null
+  const disputeLabel = disputeType ? getDisputeLabel(disputeType, piSubType) : null
   const percentage = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0
 
   return (

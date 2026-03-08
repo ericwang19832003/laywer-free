@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
 
 interface CaseRow {
   id: string
@@ -9,6 +10,7 @@ interface CaseRow {
   role: string
   courtType: string | null
   disputeType: string | null
+  piSubType: string | null
   createdAt: string
   healthScore: number | null
   tasksCompleted: number
@@ -19,23 +21,6 @@ interface CaseRow {
 
 interface CaseTableProps {
   cases: CaseRow[]
-}
-
-const COURT_LABELS: Record<string, string> = {
-  jp: 'Justice Court',
-  county: 'County Court',
-  district: 'District Court',
-  federal: 'Federal Court',
-}
-
-const DISPUTE_LABELS: Record<string, string> = {
-  debt_collection: 'Debt Collection',
-  landlord_tenant: 'Landlord/Tenant',
-  personal_injury: 'Personal Injury',
-  contract: 'Contract',
-  property: 'Property',
-  family: 'Family',
-  other: 'Other',
 }
 
 function healthColor(score: number | null): string {
@@ -86,9 +71,9 @@ export function CaseTable({ cases }: CaseTableProps) {
         <tbody className="divide-y divide-warm-border">
           {cases.map((c) => {
             const displayName = c.county ? `${c.county} County` : 'County not set'
-            const courtLabel = c.courtType ? COURT_LABELS[c.courtType] ?? c.courtType : null
+            const courtLabel = getCourtLabel(c.courtType) || null
             const roleLabel = c.role === 'plaintiff' ? 'Plaintiff' : 'Defendant'
-            const disputeLabel = c.disputeType ? DISPUTE_LABELS[c.disputeType] ?? c.disputeType : null
+            const disputeLabel = c.disputeType ? getDisputeLabel(c.disputeType, c.piSubType) : null
             const pct = c.tasksTotal > 0 ? Math.round((c.tasksCompleted / c.tasksTotal) * 100) : 0
 
             return (
