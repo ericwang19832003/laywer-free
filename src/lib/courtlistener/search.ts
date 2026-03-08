@@ -13,15 +13,11 @@ export interface HybridResult {
   source: HybridSource
 }
 
-export function expandQueryWithContext(query: string, context: RAGQueryContext): string {
-  const parts = [query.trim()]
-
-  if (context.dispute_type) parts.push(context.dispute_type)
-  if (context.jurisdiction) parts.push(context.jurisdiction)
-  if (context.role) parts.push(context.role)
-  if (context.county) parts.push(context.county)
-
-  return parts.join(' ').replace(/\s+/g, ' ').trim()
+export function expandQueryWithContext(query: string, _context: RAGQueryContext): string {
+  // Return the user's query as-is. Context fields (jurisdiction, dispute_type,
+  // role, county) are applied via CourtListener's filter parameters rather than
+  // appended as search terms, which would dilute keyword relevance.
+  return query.trim()
 }
 
 export function mergeHybridResults(
