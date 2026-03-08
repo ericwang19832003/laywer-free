@@ -54,6 +54,37 @@ export const piSettlementNegotiationConfig: GuidedStepConfig = {
       prompt:
         'Important: If negotiations fail, you must file suit before your statute of limitations expires. In Texas, this is generally 2 years from the date of injury.',
     },
+    {
+      id: 'settlement_reached',
+      type: 'yes_no',
+      prompt:
+        'Have you reached a settlement agreement that you are satisfied with?',
+      helpText:
+        'If you accepted a settlement offer, select Yes. If negotiations are still ongoing or failed, select No.',
+    },
+    {
+      id: 'want_to_file_suit',
+      type: 'yes_no',
+      prompt: 'Do you want to file a lawsuit (petition) against the other party?',
+      helpText:
+        'If settlement negotiations have failed and you want to pursue your claim in court, select Yes.',
+      showIf: (answers) => answers.settlement_reached === 'no',
+    },
+    {
+      id: 'filing_suit_info',
+      type: 'info',
+      prompt:
+        'We will guide you through preparing and filing your petition. Make sure you file before your statute of limitations expires.',
+      showIf: (answers) =>
+        answers.settlement_reached === 'no' && answers.want_to_file_suit === 'yes',
+    },
+    {
+      id: 'settled_info',
+      type: 'info',
+      prompt:
+        'Great — we will skip the litigation steps and guide you through the post-resolution process, including reviewing your settlement agreement and understanding any liens or tax implications.',
+      showIf: (answers) => answers.settlement_reached === 'yes',
+    },
   ],
 
   generateSummary(answers) {
@@ -116,6 +147,25 @@ export const piSettlementNegotiationConfig: GuidedStepConfig = {
       status: 'info',
       text: 'If negotiations fail, you must file suit before your statute of limitations expires.',
     })
+
+    if (answers.settlement_reached === 'yes') {
+      items.push({
+        status: 'done',
+        text: 'Settlement reached. Litigation steps will be skipped.',
+      })
+    } else if (answers.settlement_reached === 'no') {
+      if (answers.want_to_file_suit === 'yes') {
+        items.push({
+          status: 'needed',
+          text: 'Filing a lawsuit. Next step: prepare your petition.',
+        })
+      } else {
+        items.push({
+          status: 'info',
+          text: 'Not filing suit at this time. You can revisit this decision later.',
+        })
+      }
+    }
 
     return items
   },
