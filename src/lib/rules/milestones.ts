@@ -156,8 +156,8 @@ const PERSONAL_INJURY_MILESTONES: Milestone[] = [
   },
   {
     id: 'medical',
-    label: 'Gathering medical records',
-    description: 'I\'m collecting my medical records and bills.',
+    label: 'Documenting damages',
+    description: 'I\'m collecting records, estimates, and documentation.',
     firstUnlockedTask: 'pi_medical_records',
     tasksToSkip: [
       'welcome',
