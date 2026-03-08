@@ -229,6 +229,38 @@ export function GuidedStep({
                     Got it &rarr;
                   </Button>
                 </div>
+              ) : currentQuestion.type === 'text' ? (
+                /* Text input */
+                <div>
+                  <h2 className="text-lg font-medium text-warm-text mb-2">
+                    {currentQuestion.prompt}
+                  </h2>
+                  {currentQuestion.helpText && (
+                    <p className="text-sm text-warm-muted mb-4">
+                      {currentQuestion.helpText}
+                    </p>
+                  )}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      const input = e.currentTarget.elements.namedItem('text-input') as HTMLInputElement
+                      if (input.value.trim()) handleAnswer(input.value.trim())
+                    }}
+                    className="mt-4 space-y-3"
+                  >
+                    <input
+                      name="text-input"
+                      type="text"
+                      defaultValue={answers[currentQuestion.id] ?? ''}
+                      placeholder={currentQuestion.placeholder ?? ''}
+                      className="flex w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
+                      autoFocus
+                    />
+                    <Button type="submit" className="w-full">
+                      Continue &rarr;
+                    </Button>
+                  </form>
+                </div>
               ) : (
                 /* yes_no or single_choice */
                 <div>

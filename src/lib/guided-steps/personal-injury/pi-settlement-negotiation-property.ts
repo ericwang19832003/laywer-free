@@ -79,6 +79,48 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
         answers.settlement_reached === 'no' && answers.want_to_file_suit === 'yes',
     },
     {
+      id: 'already_filed_petition',
+      type: 'yes_no',
+      prompt: 'Have you already filed a petition (lawsuit) with the court?',
+      helpText:
+        'If you have already filed your petition independently or with help from another service, select Yes.',
+      showIf: (answers) =>
+        answers.settlement_reached === 'no' && answers.want_to_file_suit === 'yes',
+    },
+    {
+      id: 'cause_number',
+      type: 'text',
+      prompt: 'What is your cause number (case number)?',
+      helpText:
+        'You can find this on your filed petition or the court receipt. Example: 2024-CI-12345.',
+      placeholder: 'e.g. 2024-CI-12345',
+      showIf: (answers) =>
+        answers.settlement_reached === 'no' &&
+        answers.want_to_file_suit === 'yes' &&
+        answers.already_filed_petition === 'yes',
+    },
+    {
+      id: 'petition_filing_date',
+      type: 'text',
+      prompt: 'When did you file your petition?',
+      helpText: 'An approximate date is fine.',
+      placeholder: 'e.g. January 2024',
+      showIf: (answers) =>
+        answers.settlement_reached === 'no' &&
+        answers.want_to_file_suit === 'yes' &&
+        answers.already_filed_petition === 'yes',
+    },
+    {
+      id: 'already_filed_info',
+      type: 'info',
+      prompt:
+        "Got it. Since you've already filed your petition, we'll skip the petition preparation and court filing steps and move straight to serving the defendant.",
+      showIf: (answers) =>
+        answers.settlement_reached === 'no' &&
+        answers.want_to_file_suit === 'yes' &&
+        answers.already_filed_petition === 'yes',
+    },
+    {
       id: 'settled_info',
       type: 'info',
       prompt:
@@ -150,10 +192,18 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       })
     } else if (answers.settlement_reached === 'no') {
       if (answers.want_to_file_suit === 'yes') {
-        items.push({
-          status: 'needed',
-          text: 'Filing a lawsuit. Next step: prepare your petition.',
-        })
+        if (answers.already_filed_petition === 'yes') {
+          const causeInfo = answers.cause_number ? ` (Cause No. ${answers.cause_number})` : ''
+          items.push({
+            status: 'done',
+            text: `Petition already filed${causeInfo}. Next step: serve the defendant.`,
+          })
+        } else {
+          items.push({
+            status: 'needed',
+            text: 'Filing a lawsuit. Next step: prepare your petition.',
+          })
+        }
       } else {
         items.push({
           status: 'info',

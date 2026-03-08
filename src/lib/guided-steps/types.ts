@@ -7,8 +7,9 @@ export interface QuestionDef {
   id: string
   prompt: string
   helpText?: string
-  type: 'yes_no' | 'single_choice' | 'info'
+  type: 'yes_no' | 'single_choice' | 'info' | 'text'
   options?: QuestionOption[]
+  placeholder?: string
   /** Return false to skip this question based on prior answers */
   showIf?: (answers: Record<string, string>) => boolean
 }
