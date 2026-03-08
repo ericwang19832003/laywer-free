@@ -18,6 +18,7 @@ interface StepRunnerProps {
   skipReview?: boolean
   onBeforeReview?: () => Promise<void>
   reviewButtonLabel?: string
+  wrapperClassName?: string
 }
 
 export function StepRunner({
@@ -32,6 +33,7 @@ export function StepRunner({
   skipReview = false,
   onBeforeReview,
   reviewButtonLabel,
+  wrapperClassName,
 }: StepRunnerProps) {
   const [phase, setPhase] = useState<'input' | 'review'>('input')
   const [loading, setLoading] = useState(false)
@@ -62,7 +64,7 @@ export function StepRunner({
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className={wrapperClassName ?? "max-w-2xl mx-auto px-4 py-8"}>
       <Link
         href={`/case/${caseId}`}
         className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block"

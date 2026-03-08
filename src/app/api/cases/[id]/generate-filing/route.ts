@@ -318,6 +318,42 @@ export async function POST(
     const body = await request.json()
     const documentType = body.document_type as string | undefined
 
+    // Fetch authority citations if provided
+    const authorityClusterIds = body.authority_cluster_ids as number[] | undefined
+    let authorityCitationBlock = ''
+
+    if (authorityClusterIds && authorityClusterIds.length > 0) {
+      const { data: authorities } = await supabase
+        .from('case_authorities')
+        .select(`
+          cluster_id,
+          cl_case_clusters!inner (
+            case_name,
+            court_name,
+            date_filed,
+            citations,
+            snippet
+          )
+        `)
+        .eq('case_id', caseId)
+        .in('cluster_id', authorityClusterIds)
+
+      if (authorities && authorities.length > 0) {
+        const citationLines = authorities.map((a: any) => {
+          const c = a.cl_case_clusters
+          const cite = (c.citations as string[])?.length > 0
+            ? (c.citations as string[])[0]
+            : c.case_name
+          const snippetText = c.snippet
+            ? `\n  Key passage: "${(c.snippet as string).replace(/<[^>]*>/g, '').trim().slice(0, 300)}"`
+            : ''
+          return `- ${c.case_name}, ${cite} (${c.court_name ?? 'Court unknown'}, ${c.date_filed ?? 'date unknown'})${snippetText}`
+        })
+
+        authorityCitationBlock = `\n\nCASE AUTHORITIES TO CITE:\nThe user has selected these cases to support their position. Weave relevant citations naturally into the document where they strengthen the legal arguments. Use standard legal citation format (e.g., "See *Case Name*, Citation."). Do NOT fabricate additional citations.\n\n${citationLines.join('\n')}\n`
+      }
+    }
+
     let prompt: { system: string; user: string }
     let auditDocType = 'original'
 
@@ -344,6 +380,13 @@ export async function POST(
       }
       const { facts } = parsed.data
       prompt = buildFilingPrompt(facts)
+    }
+
+    if (authorityCitationBlock) {
+      prompt = {
+        system: prompt.system,
+        user: prompt.user + authorityCitationBlock,
+      }
     }
 
     const anthropic = new Anthropic()

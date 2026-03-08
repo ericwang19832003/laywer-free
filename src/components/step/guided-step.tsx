@@ -13,6 +13,7 @@ interface GuidedStepProps {
   config: GuidedStepConfig
   existingAnswers?: Record<string, string>
   onAfterComplete?: () => Promise<void>
+  wrapperClassName?: string
 }
 
 export function GuidedStep({
@@ -21,6 +22,7 @@ export function GuidedStep({
   config,
   existingAnswers,
   onAfterComplete,
+  wrapperClassName,
 }: GuidedStepProps) {
   const router = useRouter()
   const [answers, setAnswers] = useState<Record<string, string>>(
@@ -174,7 +176,7 @@ export function GuidedStep({
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className={wrapperClassName ?? "max-w-2xl mx-auto px-4 py-8"}>
       <Link
         href={`/case/${caseId}`}
         className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block"
