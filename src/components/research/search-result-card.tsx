@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookmarkPlus, Loader2, Check } from 'lucide-react'
+import { BookmarkPlus, Loader2, Check, ExternalLink } from 'lucide-react'
 
 interface SearchResult {
   cluster_id: number
@@ -17,6 +17,10 @@ interface SearchResult {
 interface SearchResultCardProps {
   result: SearchResult
   caseId: string
+}
+
+function courtListenerUrl(clusterId: number): string {
+  return `https://www.courtlistener.com/opinion/${clusterId}/`
 }
 
 export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
@@ -48,18 +52,26 @@ export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
     }
   }
 
-  // Strip HTML tags from snippet
-  const cleanSnippet = (result.snippet ?? '').replace(/<[^>]*>/g, '')
+  // Strip HTML tags from snippet but preserve text
+  const cleanSnippet = (result.snippet ?? '').replace(/<[^>]*>/g, '').trim()
 
   return (
     <Card>
       <CardContent className="pt-4 pb-3 space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-semibold truncate" style={{ color: '#1C1917' }}>
-              {result.case_name}
-            </h4>
-            <p className="text-xs" style={{ color: '#78716C' }}>
+            <a
+              href={courtListenerUrl(result.cluster_id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-start gap-1"
+            >
+              <h4 className="text-sm font-semibold text-warm-text group-hover:text-blue-700 group-hover:underline transition-colors">
+                {result.case_name}
+              </h4>
+              <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 text-warm-muted group-hover:text-blue-700 transition-colors" />
+            </a>
+            <p className="text-xs text-warm-muted">
               {result.court_name} {result.date_filed ? `\u00b7 ${result.date_filed}` : ''}
             </p>
             {result.citations.length > 0 && (
@@ -82,13 +94,23 @@ export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
             ) : (
               <BookmarkPlus className="h-3.5 w-3.5" />
             )}
-            <span className="ml-1">{saved ? 'Saved' : 'Use as Authority'}</span>
+            <span className="ml-1">{saved ? 'Saved' : 'Save Case'}</span>
           </Button>
         </div>
-        {cleanSnippet && (
-          <p className="text-xs leading-relaxed" style={{ color: '#57534E' }}>
+        {cleanSnippet ? (
+          <p className="text-xs leading-relaxed text-warm-text/70">
             &ldquo;{cleanSnippet}&rdquo;
           </p>
+        ) : (
+          <a
+            href={courtListenerUrl(result.cluster_id)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 hover:underline"
+          >
+            Read full opinion on CourtListener
+            <ExternalLink className="h-3 w-3" />
+          </a>
         )}
         {error && <p className="text-xs" style={{ color: '#D97706' }}>{error}</p>}
       </CardContent>
