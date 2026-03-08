@@ -726,10 +726,16 @@ export default async function StepPage({
         />
       )
     }
-    case 'pi_medical_records':
-      return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_insurance_communication':
-      return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_medical_records': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
+    }
+    case 'pi_insurance_communication': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
+    }
     case 'prepare_pi_demand_letter': {
       const { data: caseRow } = await supabase
         .from('cases').select('county').eq('id', id).single()
