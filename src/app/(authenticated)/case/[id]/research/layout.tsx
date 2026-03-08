@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ResearchShell } from '@/components/research/research-shell'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
+import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
 
 export default async function ResearchLayout({
   children,
@@ -29,9 +30,18 @@ export default async function ResearchLayout({
     .select('id', { count: 'exact', head: true })
     .eq('case_id', id)
 
-  const caseLabelParts = [caseData.dispute_type, caseData.county, caseData.court_type]
+  // Fetch pi_sub_type for PI cases to show "Property Damage" when applicable
+  let piSubType: string | undefined
+  if (caseData.dispute_type === 'personal_injury') {
+    const { data: piDetails } = await supabase
+      .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+    piSubType = piDetails?.pi_sub_type ?? undefined
+  }
+
+  const disputeLabel = getDisputeLabel(caseData.dispute_type, piSubType)
+  const courtLabel = getCourtLabel(caseData.court_type)
+  const caseLabelParts = [disputeLabel, caseData.county, courtLabel]
     .filter(Boolean)
-    .map((part) => String(part))
 
   const caseLabel = caseLabelParts.length > 0
     ? caseLabelParts.join(' · ')
