@@ -751,8 +751,11 @@ export default async function StepPage({
         />
       )
     }
-    case 'pi_settlement_negotiation':
-      return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_settlement_negotiation': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
+    }
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type').eq('id', id).single()
@@ -788,8 +791,11 @@ export default async function StepPage({
       return <PIMediationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_trial_prep':
       return <PITrialPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_post_resolution':
-      return <PIPostResolutionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_post_resolution': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      return <PIPostResolutionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
+    }
 
     default:
       return (
