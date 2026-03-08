@@ -19,8 +19,13 @@ interface SearchResultCardProps {
   caseId: string
 }
 
-function courtListenerUrl(clusterId: number): string {
-  return `https://www.courtlistener.com/opinion/${clusterId}/`
+function courtListenerUrl(clusterId: number, caseName: string): string {
+  const slug = caseName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 75)
+  return `https://www.courtlistener.com/opinion/${clusterId}/${slug}/`
 }
 
 export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
@@ -61,7 +66,7 @@ export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <a
-              href={courtListenerUrl(result.cluster_id)}
+              href={courtListenerUrl(result.cluster_id, result.case_name)}
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-start gap-1"
@@ -103,7 +108,7 @@ export function SearchResultCard({ result, caseId }: SearchResultCardProps) {
           </p>
         ) : (
           <a
-            href={courtListenerUrl(result.cluster_id)}
+            href={courtListenerUrl(result.cluster_id, result.case_name)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 hover:underline"
