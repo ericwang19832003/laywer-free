@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select'
 import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Shield, Receipt } from 'lucide-react'
 import Link from 'next/link'
+import { StepAuthoritySidebar } from './step-authority-sidebar'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -352,6 +353,7 @@ export function PersonalInjuryWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [selectedAuthorityIds, setSelectedAuthorityIds] = useState<number[]>([])
 
   /* ---- Computed: total medical from providers ---- */
 
@@ -614,6 +616,7 @@ export function PersonalInjuryWizard({
         body: JSON.stringify({
           document_type: 'pi_petition',
           facts: buildFacts(),
+          authority_cluster_ids: selectedAuthorityIds.length > 0 ? selectedAuthorityIds : undefined,
         }),
       })
       if (!res.ok) {
@@ -1561,83 +1564,103 @@ export function PersonalInjuryWizard({
 
   if (draftPhase) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <Link
-          href={`/case/${caseId}`}
-          className="inline-flex items-center gap-1 text-sm text-warm-muted hover:text-warm-text mb-4"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex gap-6 items-start">
+          <div className="flex-1 min-w-0">
+            <Link
+              href={`/case/${caseId}`}
+              className="inline-flex items-center gap-1 text-sm text-warm-muted hover:text-warm-text mb-4"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back to dashboard
+            </Link>
 
-        <h1 className="text-2xl font-semibold text-warm-text">
-          {getDraftTitle(piSubType)}
-        </h1>
-        <p className="text-sm text-warm-muted mt-1 mb-6">
-          Review your draft below. You can edit it directly, regenerate it, or download a PDF.
-        </p>
+            <h1 className="text-2xl font-semibold text-warm-text">
+              {getDraftTitle(piSubType)}
+            </h1>
+            <p className="text-sm text-warm-muted mt-1 mb-6">
+              Review your draft below. You can edit it directly, regenerate it, or download a PDF.
+            </p>
 
-        {genError && (
-          <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3 mb-4">
-            <p className="text-sm text-warm-text">{genError}</p>
-          </div>
-        )}
-
-        {draft ? (
-          <>
-            <AnnotatedDraftViewer
-              draft={draft}
-              annotations={annotations}
-              onDraftChange={setDraft}
-              onRegenerate={async () => {
-                setDraftPhase(false)
-                await generateDraft()
-              }}
-              regenerating={generating}
-              acknowledged={acknowledged}
-              onAcknowledgeChange={setAcknowledged}
-              documentTitle={getDocumentTitle(piSubType)}
-            />
-
-            {acknowledged && (
-              <div className="mt-6">
-                <Button
-                  onClick={handleFinalConfirm}
-                  disabled={confirming}
-                  className="w-full"
-                  size="lg"
-                >
-                  {confirming ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Confirm & Submit'
-                  )}
-                </Button>
-                <p className="text-xs text-warm-muted text-center mt-2">
-                  This saves your document and marks this step as complete.
-                </p>
+            {genError && (
+              <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3 mb-4">
+                <p className="text-sm text-warm-text">{genError}</p>
               </div>
             )}
 
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => setDraftPhase(false)}
-                className="text-sm text-warm-muted hover:text-warm-text transition-colors"
-              >
-                Go back and edit my information
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-3 py-12 justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
-            <p className="text-sm text-warm-muted">Generating your draft...</p>
+            {draft ? (
+              <>
+                <AnnotatedDraftViewer
+                  draft={draft}
+                  annotations={annotations}
+                  onDraftChange={setDraft}
+                  onRegenerate={async () => {
+                    setDraftPhase(false)
+                    await generateDraft()
+                  }}
+                  regenerating={generating}
+                  acknowledged={acknowledged}
+                  onAcknowledgeChange={setAcknowledged}
+                  documentTitle={getDocumentTitle(piSubType)}
+                />
+
+                {acknowledged && (
+                  <div className="mt-6">
+                    <Button
+                      onClick={handleFinalConfirm}
+                      disabled={confirming}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {confirming ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        'Confirm & Submit'
+                      )}
+                    </Button>
+                    <p className="text-xs text-warm-muted text-center mt-2">
+                      This saves your document and marks this step as complete.
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setDraftPhase(false)}
+                    className="text-sm text-warm-muted hover:text-warm-text transition-colors"
+                  >
+                    Go back and edit my information
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-3 py-12 justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
+                <p className="text-sm text-warm-muted">Generating your draft...</p>
+              </div>
+            )}
           </div>
-        )}
+          <div className="hidden lg:block w-72 shrink-0 sticky top-8">
+            <StepAuthoritySidebar
+              caseId={caseId}
+              mode="select"
+              selectedClusterIds={selectedAuthorityIds}
+              onSelectionChange={setSelectedAuthorityIds}
+            />
+          </div>
+        </div>
+        <div className="lg:hidden mt-6">
+          <StepAuthoritySidebar
+            caseId={caseId}
+            mode="select"
+            selectedClusterIds={selectedAuthorityIds}
+            onSelectionChange={setSelectedAuthorityIds}
+          />
+        </div>
       </div>
     )
   }
@@ -1645,29 +1668,51 @@ export function PersonalInjuryWizard({
   /* ---- Wizard phase layout ---- */
 
   return (
-    <WizardShell
-      caseId={caseId}
-      title={`Prepare Your ${getDocumentTitle(piSubType)}`}
-      steps={steps}
-      currentStep={currentStep}
-      onStepChange={setCurrentStep}
-      onSave={handleSave}
-      onComplete={handleComplete}
-      canAdvance={canAdvance}
-      totalEstimateMinutes={totalEstimateMinutes}
-      completeButtonLabel={generating ? 'Generating...' : 'Generate My Petition'}
-    >
-      {generating ? (
-        <div className="flex items-center gap-3 py-12 justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
-          <p className="text-sm text-warm-muted">
-            Generating your {getSubTypeLabel(piSubType).toLowerCase()} petition... This may take a moment.
-          </p>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="flex gap-6 items-start">
+        <div className="flex-1 min-w-0">
+          <WizardShell
+            caseId={caseId}
+            title={`Prepare Your ${getDocumentTitle(piSubType)}`}
+            steps={steps}
+            currentStep={currentStep}
+            onStepChange={setCurrentStep}
+            onSave={handleSave}
+            onComplete={handleComplete}
+            canAdvance={canAdvance}
+            totalEstimateMinutes={totalEstimateMinutes}
+            completeButtonLabel={generating ? 'Generating...' : 'Generate My Petition'}
+          >
+            {generating ? (
+              <div className="flex items-center gap-3 py-12 justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
+                <p className="text-sm text-warm-muted">
+                  Generating your {getSubTypeLabel(piSubType).toLowerCase()} petition... This may take a moment.
+                </p>
+              </div>
+            ) : (
+              renderStep()
+            )}
+          </WizardShell>
         </div>
-      ) : (
-        renderStep()
-      )}
-    </WizardShell>
+        <div className="hidden lg:block w-72 shrink-0 sticky top-8">
+          <StepAuthoritySidebar
+            caseId={caseId}
+            mode="select"
+            selectedClusterIds={selectedAuthorityIds}
+            onSelectionChange={setSelectedAuthorityIds}
+          />
+        </div>
+      </div>
+      <div className="lg:hidden mt-6">
+        <StepAuthoritySidebar
+          caseId={caseId}
+          mode="select"
+          selectedClusterIds={selectedAuthorityIds}
+          onSelectionChange={setSelectedAuthorityIds}
+        />
+      </div>
+    </div>
   )
 }
 

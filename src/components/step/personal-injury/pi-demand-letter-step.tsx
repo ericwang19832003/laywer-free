@@ -7,6 +7,7 @@ import type { DraftAnnotation } from '../filing/annotated-draft-viewer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { StepAuthoritySidebar } from '../step-authority-sidebar'
 
 interface MedicalProvider {
   name: string
@@ -130,6 +131,7 @@ export function PIDemandLetterStep({
   const [acknowledged, setAcknowledged] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
+  const [selectedAuthorityIds, setSelectedAuthorityIds] = useState<number[]>([])
 
   // -- Computed damages --
 
@@ -219,6 +221,7 @@ export function PIDemandLetterStep({
             total_demand_amount: totalDemandAmount,
             county: caseData.county || undefined,
           },
+          authority_cluster_ids: selectedAuthorityIds.length > 0 ? selectedAuthorityIds : undefined,
         }),
       })
       if (!res.ok) {
@@ -320,20 +323,24 @@ export function PIDemandLetterStep({
   )
 
   return (
-    <StepRunner
-      caseId={caseId}
-      taskId={taskId}
-      title="Draft Your Demand Letter"
-      reassurance={isPropertyDamage
-        ? "A demand letter formally notifies the at-fault party's insurance of your property damage claim and the compensation you are seeking."
-        : "A demand letter is your first step in seeking fair compensation. It puts the insurance company on notice of your claim."
-      }
-      onConfirm={handleConfirm}
-      onSave={handleSave}
-      onBeforeReview={generateDraft}
-      reviewContent={reviewContent}
-      reviewButtonLabel="Generate Letter &rarr;"
-    >
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="flex gap-6 items-start">
+        <div className="flex-1 min-w-0">
+          <StepRunner
+            caseId={caseId}
+            taskId={taskId}
+            title="Draft Your Demand Letter"
+            reassurance={isPropertyDamage
+              ? "A demand letter formally notifies the at-fault party's insurance of your property damage claim and the compensation you are seeking."
+              : "A demand letter is your first step in seeking fair compensation. It puts the insurance company on notice of your claim."
+            }
+            onConfirm={handleConfirm}
+            onSave={handleSave}
+            onBeforeReview={generateDraft}
+            reviewContent={reviewContent}
+            reviewButtonLabel="Generate Letter &rarr;"
+            wrapperClassName=""
+          >
       <div className="space-y-8">
         {genError && (
           <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
@@ -785,6 +792,25 @@ export function PIDemandLetterStep({
           </p>
         </div>
       </div>
-    </StepRunner>
+          </StepRunner>
+        </div>
+        <div className="hidden lg:block w-72 shrink-0 sticky top-8">
+          <StepAuthoritySidebar
+            caseId={caseId}
+            mode="select"
+            selectedClusterIds={selectedAuthorityIds}
+            onSelectionChange={setSelectedAuthorityIds}
+          />
+        </div>
+      </div>
+      <div className="lg:hidden mt-6">
+        <StepAuthoritySidebar
+          caseId={caseId}
+          mode="select"
+          selectedClusterIds={selectedAuthorityIds}
+          onSelectionChange={setSelectedAuthorityIds}
+        />
+      </div>
+    </div>
   )
 }

@@ -47,7 +47,18 @@ export function StepAuthoritySidebar({
         const res = await fetch(`/api/cases/${caseId}/research/authority`)
         if (!res.ok) return
         const data = await res.json()
-        setAuthorities(data.authorities ?? [])
+        // Map nested cl_case_clusters to flat Authority shape
+        const mapped = (data.authorities ?? []).map((a: any) => ({
+          id: a.id,
+          cluster_id: a.cluster_id,
+          case_name: a.cl_case_clusters?.case_name ?? 'Unknown Case',
+          court_name: a.cl_case_clusters?.court_name ?? null,
+          date_filed: a.cl_case_clusters?.date_filed ?? null,
+          citations: a.cl_case_clusters?.citations ?? [],
+          snippet: a.cl_case_clusters?.snippet ?? null,
+          pinned: a.pinned ?? false,
+        }))
+        setAuthorities(mapped)
       } catch {
         // Non-fatal
       } finally {
