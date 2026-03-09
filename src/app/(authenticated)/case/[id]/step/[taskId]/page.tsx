@@ -771,8 +771,21 @@ export default async function StepPage({
         />
       )
     }
-    case 'pi_file_with_court':
-      return <PIFileWithCourtStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_file_with_court': {
+      const { data: caseRow } = await supabase
+        .from('cases')
+        .select('state, court_type, county')
+        .eq('id', id)
+        .single()
+      return (
+        <PIFileWithCourtStep
+          caseId={id}
+          taskId={taskId}
+          existingAnswers={task.metadata?.guided_answers}
+          caseData={caseRow ?? undefined}
+        />
+      )
+    }
     case 'pi_serve_defendant':
       return <PIServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_wait_for_answer':
