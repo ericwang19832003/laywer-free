@@ -26,6 +26,9 @@ export function SmallClaimsIntakeStep({
   const [defendantIsBusiness, setDefendantIsBusiness] = useState(
     (existingMetadata?.defendant_is_business as boolean) || false
   )
+  const [caseStage, setCaseStage] = useState(
+    (existingMetadata?.guided_answers as Record<string, string>)?.case_stage || 'start'
+  )
 
   const parsedAmount = parseFloat(claimAmount.replace(/[^0-9.]/g, '')) || 0
   const exceedsLimit = parsedAmount > 20000
@@ -44,6 +47,7 @@ export function SmallClaimsIntakeStep({
       claim_amount: parsedAmount || null,
       description: description.trim() || null,
       defendant_is_business: defendantIsBusiness,
+      guided_answers: { case_stage: caseStage },
     }
   }
 
@@ -75,6 +79,16 @@ export function SmallClaimsIntakeStep({
 
   const reviewContent = (
     <dl className="space-y-4">
+      <div>
+        <dt className="text-sm font-medium text-warm-muted">Case stage</dt>
+        <dd className="text-warm-text mt-0.5">
+          {caseStage === 'start' && 'Just getting started'}
+          {caseStage === 'demand_sent' && 'Already sent a demand letter'}
+          {caseStage === 'filed' && 'Already filed with the court'}
+          {caseStage === 'served' && 'Already served the defendant'}
+          {caseStage === 'hearing' && 'Hearing is scheduled'}
+        </dd>
+      </div>
       <div>
         <dt className="text-sm font-medium text-warm-muted">Filing county</dt>
         <dd className="text-warm-text mt-0.5">
@@ -115,6 +129,47 @@ export function SmallClaimsIntakeStep({
       reviewContent={reviewContent}
     >
       <div className="space-y-5">
+        {/* Where are you in your case? */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-warm-text">
+            Where are you in this case?
+          </label>
+          <p className="text-xs text-warm-muted">
+            This helps us skip steps you&apos;ve already completed.
+          </p>
+          <div className="space-y-2">
+            {[
+              { value: 'start', label: 'Just getting started', desc: 'I haven\'t taken any action yet.' },
+              { value: 'demand_sent', label: 'Already sent a demand letter', desc: 'I\'ve sent a demand letter and need to file.' },
+              { value: 'filed', label: 'Already filed with the court', desc: 'I\'ve filed my small claims case.' },
+              { value: 'served', label: 'Already served the defendant', desc: 'I\'ve served the defendant and am waiting for a hearing.' },
+              { value: 'hearing', label: 'Hearing is scheduled', desc: 'My hearing date is coming up.' },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${
+                  caseStage === option.value
+                    ? 'border-calm-indigo bg-calm-indigo/5'
+                    : 'border-warm-border hover:bg-warm-bg/50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="sc-case-stage"
+                  value={option.value}
+                  checked={caseStage === option.value}
+                  onChange={() => setCaseStage(option.value)}
+                  className="mt-0.5 h-4 w-4 shrink-0 border-warm-border text-calm-indigo focus:ring-calm-indigo"
+                />
+                <div>
+                  <span className="text-sm font-medium text-warm-text">{option.label}</span>
+                  <p className="text-xs text-warm-muted mt-0.5">{option.desc}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
         {/* County */}
         <div className="space-y-2">
           <label

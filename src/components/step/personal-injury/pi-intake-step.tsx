@@ -39,6 +39,9 @@ export function PIIntakeStep({
   const [policeReportNumber, setPoliceReportNumber] = useState(
     (meta.police_report_number as string) ?? ''
   )
+  const [caseStage, setCaseStage] = useState(
+    (meta.guided_answers as Record<string, string>)?.case_stage || 'start'
+  )
 
   // Injury-specific
   const [injuryDescription, setInjuryDescription] = useState(
@@ -109,6 +112,7 @@ export function PIIntakeStep({
       incident_files: incidentFiles,
       detail_files: detailFiles,
       police_report_files: policeReportFiles,
+      guided_answers: { case_stage: caseStage },
     }
   }
 
@@ -175,6 +179,17 @@ export function PIIntakeStep({
 
   const reviewContent = (
     <dl className="space-y-4">
+      <div>
+        <dt className="text-sm font-medium text-warm-muted">Case stage</dt>
+        <dd className="text-warm-text mt-0.5">
+          {caseStage === 'start' && 'Just getting started'}
+          {caseStage === 'medical' && 'Collecting medical records / estimates'}
+          {caseStage === 'insurance' && 'Dealing with insurance'}
+          {caseStage === 'demand' && 'Ready to send a demand letter'}
+          {caseStage === 'negotiation' && 'Negotiating settlement'}
+          {caseStage === 'filing' && 'Filing a lawsuit'}
+        </dd>
+      </div>
       <div>
         <dt className="text-sm font-medium text-warm-muted">
           Date of incident
@@ -285,6 +300,48 @@ export function PIIntakeStep({
       reviewContent={reviewContent}
     >
       <div className="space-y-5">
+        {/* Where are you in your case? */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-warm-text">
+            Where are you in this case?
+          </label>
+          <p className="text-xs text-warm-muted">
+            This helps us skip steps you&apos;ve already completed.
+          </p>
+          <div className="space-y-2">
+            {[
+              { value: 'start', label: 'Just getting started', desc: 'I haven\'t taken any action yet.' },
+              { value: 'medical', label: 'Collecting medical records / estimates', desc: 'I\'m gathering documentation of my damages.' },
+              { value: 'insurance', label: 'Dealing with insurance', desc: 'I\'m communicating with the insurance company.' },
+              { value: 'demand', label: 'Ready to send a demand letter', desc: 'I\'m ready to make a formal demand.' },
+              { value: 'negotiation', label: 'Negotiating settlement', desc: 'I\'m in settlement negotiations.' },
+              { value: 'filing', label: 'Filing a lawsuit', desc: 'Negotiations failed and I\'m filing suit.' },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${
+                  caseStage === option.value
+                    ? 'border-calm-indigo bg-calm-indigo/5'
+                    : 'border-warm-border hover:bg-warm-bg/50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="pi-case-stage"
+                  value={option.value}
+                  checked={caseStage === option.value}
+                  onChange={() => setCaseStage(option.value)}
+                  className="mt-0.5 h-4 w-4 shrink-0 border-warm-border text-calm-indigo focus:ring-calm-indigo"
+                />
+                <div>
+                  <span className="text-sm font-medium text-warm-text">{option.label}</span>
+                  <p className="text-xs text-warm-muted mt-0.5">{option.desc}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
         {/* Incident date */}
         <div className="space-y-2">
           <label
