@@ -28,8 +28,10 @@ import {
   BookOpenIcon,
   Loader2Icon,
   InfoIcon,
+  LinkIcon,
 } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import type {
   DiscoveryPack,
   DiscoveryItem,
@@ -156,6 +158,25 @@ export function DiscoveryPackDetail({
   const [logs, setLogs] = useState(initialLogs)
   const [responses, setResponses] = useState(initialResponses)
   const [reviews, setReviews] = useState(initialReviews)
+  const [evidenceLinks, setEvidenceLinks] = useState<Record<string, string[]>>({})
+
+  async function handleLinkEvidence(itemId: string, evidenceId: string) {
+    try {
+      const res = await fetch(`/api/cases/${caseId}/case-file/evidence-links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discovery_item_id: itemId, evidence_item_id: evidenceId }),
+      })
+      if (!res.ok) throw new Error('Failed to link')
+      setEvidenceLinks(prev => ({
+        ...prev,
+        [itemId]: [...(prev[itemId] || []), evidenceId],
+      }))
+      toast.success('Evidence linked')
+    } catch {
+      toast.error('Failed to link evidence')
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -175,7 +196,11 @@ export function DiscoveryPackDetail({
 
       {/* Items list (always visible if there are items) */}
       {items.length > 0 && (
-        <ItemsList items={items} />
+        <ItemsList
+          items={items}
+          evidenceLinks={evidenceLinks}
+          onLinkEvidence={handleLinkEvidence}
+        />
       )}
 
       {/* Section B: Review — mark ready */}
@@ -544,7 +569,15 @@ function ExamplesDialog({
 // Items List
 // ============================================
 
-function ItemsList({ items }: { items: DiscoveryItem[] }) {
+function ItemsList({
+  items,
+  evidenceLinks,
+  onLinkEvidence,
+}: {
+  items: DiscoveryItem[]
+  evidenceLinks: Record<string, string[]>
+  onLinkEvidence: (itemId: string, evidenceId: string) => void
+}) {
   const grouped = TAB_KEYS.reduce(
     (acc, key) => {
       const filtered = items.filter((i) => i.item_type === key)
@@ -567,27 +600,48 @@ function ItemsList({ items }: { items: DiscoveryItem[] }) {
           <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">
             {ITEM_TYPE_LABELS[type]}
           </p>
-          {typeItems.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="py-3">
-                <div className="flex items-start gap-3">
-                  <Badge variant="outline" className="text-xs shrink-0 mt-0.5">
-                    {ITEM_TYPE_SHORT[item.item_type]} #{item.item_no}
-                  </Badge>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-warm-text">
-                      {item.prompt_text}
-                    </p>
-                    {item.generated_text && (
-                      <p className="text-xs text-warm-muted mt-1.5 line-clamp-2 whitespace-pre-line">
-                        {item.generated_text.split('\n').slice(2, 4).join(' ')}
+          {typeItems.map((item) => {
+            const linked = evidenceLinks[item.id] ?? []
+            return (
+              <Card key={item.id}>
+                <CardContent className="py-3">
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline" className="text-xs shrink-0 mt-0.5">
+                      {ITEM_TYPE_SHORT[item.item_type]} #{item.item_no}
+                    </Badge>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-warm-text">
+                        {item.prompt_text}
                       </p>
-                    )}
+                      {item.generated_text && (
+                        <p className="text-xs text-warm-muted mt-1.5 line-clamp-2 whitespace-pre-line">
+                          {item.generated_text.split('\n').slice(2, 4).join(' ')}
+                        </p>
+                      )}
+
+                      {/* Evidence linking */}
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        {linked.length > 0 && linked.map((eid) => (
+                          <Badge
+                            key={eid}
+                            variant="secondary"
+                            className="text-[10px] bg-calm-indigo/10 text-calm-indigo"
+                          >
+                            <LinkIcon className="size-2.5 mr-0.5" />
+                            {eid.slice(0, 8)}
+                          </Badge>
+                        ))}
+                        <Button size="sm" variant="ghost" className="text-xs text-warm-muted h-6 px-2">
+                          <LinkIcon className="size-3 mr-1" />
+                          Link evidence
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       ))}
     </div>

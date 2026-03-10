@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { PlusIcon, FolderOpenIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { DiscoveryPack } from './types'
 import { STATUS_STEPS } from './types'
 
@@ -30,6 +31,49 @@ const STATUS_COLORS: Record<string, string> = {
 
 function statusLabel(status: string): string {
   return STATUS_STEPS.find((s) => s.key === status)?.label ?? status
+}
+
+// ── Pack Progress Stepper ─────────────────────────────
+
+function PackProgressStepper({ status }: { status: string }) {
+  const steps = ['draft', 'ready', 'served', 'responses_pending', 'complete']
+  const labels: Record<string, string> = {
+    draft: 'Draft',
+    ready: 'Ready',
+    served: 'Served',
+    responses_pending: 'Responses',
+    complete: 'Done',
+  }
+  const currentIndex = steps.indexOf(status)
+
+  return (
+    <div className="flex items-center gap-1 mt-2">
+      {steps.map((step, i) => (
+        <div key={step} className="flex items-center">
+          {i > 0 && (
+            <div className={cn(
+              'h-px w-3 mx-0.5',
+              i <= currentIndex ? 'bg-calm-green' : 'bg-warm-border'
+            )} />
+          )}
+          <div className="flex flex-col items-center">
+            <div className={cn(
+              'size-2 rounded-full',
+              i < currentIndex ? 'bg-calm-green' :
+              i === currentIndex ? 'bg-calm-indigo' :
+              'bg-warm-border'
+            )} />
+            <span className={cn(
+              'text-[9px] mt-0.5 whitespace-nowrap',
+              i <= currentIndex ? 'text-warm-text' : 'text-warm-muted/60'
+            )}>
+              {labels[step]}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 // ── Component ────────────────────────────────────────
@@ -164,6 +208,7 @@ export function DiscoveryListView({ caseId, initialPacks }: DiscoveryListViewPro
                     {statusLabel(pack.status)}
                   </Badge>
                 </div>
+                <PackProgressStepper status={pack.status} />
               </CardContent>
             </Card>
           ))}

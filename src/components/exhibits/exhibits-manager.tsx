@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -40,7 +40,9 @@ import {
   Loader2Icon,
   SearchIcon,
   CheckIcon,
+  ListOrderedIcon,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // ── Types ──────────────────────────────────────
 
@@ -98,6 +100,67 @@ export function ExhibitsManager({
 }: ExhibitsManagerProps) {
   const [activeSet, setActiveSet] = useState<ExhibitSet | null>(initialSet)
   const [exhibits, setExhibits] = useState<Exhibit[]>(initialExhibits)
+  const [renumbering, setRenumbering] = useState(false)
+  const [showRenumberPrompt, setShowRenumberPrompt] = useState(false)
+  const [addingEvidence, setAddingEvidence] = useState<string | null>(null)
+
+  // Derive unexhibited evidence from props — no extra fetch needed
+  const unexhibitedEvidence = useMemo(() => {
+    const exhibitedIds = new Set(exhibits.map((e) => e.evidence_item_id))
+    return evidenceItems.filter((e) => !exhibitedIds.has(e.id))
+  }, [exhibits, evidenceItems])
+
+  async function handleRenumber() {
+    if (!activeSet) return
+    setRenumbering(true)
+    try {
+      const res = await fetch(`/api/exhibit-sets/${activeSet.id}/renumber`, {
+        method: 'POST',
+      })
+      if (!res.ok) throw new Error('Failed to renumber')
+      const { exhibits: renumbered } = await res.json()
+      setExhibits(renumbered)
+      toast.success('Exhibits renumbered successfully')
+      setShowRenumberPrompt(false)
+    } catch {
+      toast.error('Failed to renumber exhibits')
+    } finally {
+      setRenumbering(false)
+    }
+  }
+
+  function handleExhibitRemoved(updatedExhibits: Exhibit[]) {
+    setExhibits(updatedExhibits)
+    // If there are still exhibits after removal, prompt to renumber
+    if (updatedExhibits.length > 0) {
+      setShowRenumberPrompt(true)
+    }
+  }
+
+  async function handleAddAsExhibit(evidenceItemId: string) {
+    if (!activeSet) return
+    setAddingEvidence(evidenceItemId)
+    try {
+      const res = await fetch(`/api/exhibit-sets/${activeSet.id}/exhibits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_item_id: evidenceItemId }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to add exhibit')
+      }
+      const { exhibit } = await res.json()
+      setExhibits((prev) => [...prev, exhibit])
+      toast.success('Evidence added as exhibit')
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to add exhibit'
+      )
+    } finally {
+      setAddingEvidence(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -106,15 +169,57 @@ export function ExhibitsManager({
       ) : (
         <>
           <SetHeader activeSet={activeSet} />
-          <AddFromVaultButton
-            caseId={caseId}
-            activeSet={activeSet}
-            exhibits={exhibits}
-            evidenceItems={evidenceItems}
-            onExhibitAdded={(exhibit) =>
-              setExhibits((prev) => [...prev, exhibit])
-            }
-          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <AddFromVaultButton
+              caseId={caseId}
+              activeSet={activeSet}
+              exhibits={exhibits}
+              evidenceItems={evidenceItems}
+              onExhibitAdded={(exhibit) =>
+                setExhibits((prev) => [...prev, exhibit])
+              }
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRenumber}
+              disabled={renumbering || exhibits.length === 0}
+            >
+              {renumbering ? (
+                <Loader2Icon className="size-3.5 animate-spin" />
+              ) : (
+                <ListOrderedIcon className="size-3.5" />
+              )}
+              Renumber
+            </Button>
+          </div>
+
+          {showRenumberPrompt && (
+            <div className="flex items-center gap-2 rounded-lg border border-calm-amber/30 bg-calm-amber/5 px-3 py-2 text-sm">
+              <span className="text-warm-text">
+                Exhibits have gaps in numbering.
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRenumber}
+                disabled={renumbering}
+              >
+                {renumbering && (
+                  <Loader2Icon className="size-3 animate-spin" />
+                )}
+                Renumber to close gaps
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowRenumberPrompt(false)}
+              >
+                Dismiss
+              </Button>
+            </div>
+          )}
+
           {exhibits.length === 0 ? (
             <EmptyState />
           ) : (
@@ -124,7 +229,51 @@ export function ExhibitsManager({
               exhibits={exhibits}
               evidenceItems={evidenceItems}
               onExhibitsChange={setExhibits}
+              onExhibitRemoved={handleExhibitRemoved}
             />
+          )}
+
+          {/* Unexhibited Evidence Section */}
+          {unexhibitedEvidence.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-warm-text mb-3">
+                Unexhibited Evidence ({unexhibitedEvidence.length})
+              </h3>
+              <div className="space-y-2">
+                {unexhibitedEvidence.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between rounded-lg border border-warm-border bg-white px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileTextIcon className="size-4 text-warm-muted shrink-0" />
+                      <span className="text-sm text-warm-text truncate">
+                        {item.label || item.file_name}
+                      </span>
+                      {item.label && (
+                        <span className="text-xs text-warm-muted hidden sm:inline">
+                          {item.file_name}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleAddAsExhibit(item.id)}
+                      disabled={addingEvidence === item.id}
+                      className="shrink-0 ml-2"
+                    >
+                      {addingEvidence === item.id ? (
+                        <Loader2Icon className="size-3 animate-spin" />
+                      ) : (
+                        <PlusIcon className="size-3" />
+                      )}
+                      Add as Exhibit
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </>
       )}
@@ -414,12 +563,14 @@ function ExhibitsList({
   exhibits,
   evidenceItems,
   onExhibitsChange,
+  onExhibitRemoved,
 }: {
   caseId: string
   setId: string
   exhibits: Exhibit[]
   evidenceItems: EvidenceItem[]
   onExhibitsChange: (exhibits: Exhibit[]) => void
+  onExhibitRemoved: (exhibits: Exhibit[]) => void
 }) {
   const [saving, setSaving] = useState(false)
 
@@ -472,7 +623,8 @@ function ExhibitsList({
   async function handleRemove(exhibitId: string) {
     // Optimistic remove
     const prev = exhibits
-    onExhibitsChange(exhibits.filter((e) => e.id !== exhibitId))
+    const updated = exhibits.filter((e) => e.id !== exhibitId)
+    onExhibitsChange(updated)
 
     try {
       const res = await fetch(`/api/exhibits/${exhibitId}`, {
@@ -480,6 +632,9 @@ function ExhibitsList({
       })
       if (!res.ok) {
         onExhibitsChange(prev)
+      } else {
+        // Notify parent that an exhibit was removed (triggers renumber prompt)
+        onExhibitRemoved(updated)
       }
     } catch {
       onExhibitsChange(prev)

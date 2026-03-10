@@ -18,6 +18,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
+import { CaseFileCard } from '@/components/dashboard/case-file-card'
 import Link from 'next/link'
 import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
 
@@ -190,6 +191,17 @@ export default async function DashboardPage({
     .eq('case_id', id)
     .eq('status', 'skipped')
 
+  // Case file counts
+  const { count: evidenceCount } = await supabase
+    .from('evidence_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('case_id', id)
+
+  const { count: binderCount } = await supabase
+    .from('trial_binders')
+    .select('id', { count: 'exact', head: true })
+    .eq('case_id', id)
+
   // AI cache fetches
   const dashboard = data as DashboardData | null
   const [taskDescResult, timelineSummaryResult, healthTipsResult, strategyResult] = await Promise.all([
@@ -237,6 +249,14 @@ export default async function DashboardPage({
 
         <ProSeBanner />
         <BackfillBanner caseId={id} skippedCount={skippedCount ?? 0} />
+
+        <CaseFileCard
+          caseId={id}
+          evidenceCount={evidenceCount ?? 0}
+          exhibitCount={0}
+          discoveryPackCount={discoveryPackCount}
+          binderCount={binderCount ?? 0}
+        />
 
         <div className="space-y-6">
           <PriorityAlertsSection caseId={id} alerts={alerts} />

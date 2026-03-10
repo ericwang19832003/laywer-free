@@ -28,6 +28,9 @@ export function BinderCta({ caseId, exhibitSetId }: BinderCtaProps) {
   const [includeTimeline, setIncludeTimeline] = useState(false)
   const [includeDeadlines, setIncludeDeadlines] = useState(false)
   const [includeAllEvidence, setIncludeAllEvidence] = useState(false)
+  const [includeDiscovery, setIncludeDiscovery] = useState(false)
+  const [includeCaseSummary, setIncludeCaseSummary] = useState(true)
+  const [includeStrategyNotes, setIncludeStrategyNotes] = useState(false)
   const [totalBytes, setTotalBytes] = useState<number | null>(null)
 
   const SIZE_THRESHOLD = 250 * 1024 * 1024 // 250 MB
@@ -81,6 +84,9 @@ export function BinderCta({ caseId, exhibitSetId }: BinderCtaProps) {
             include_timeline: includeTimeline,
             include_deadlines: includeDeadlines,
             include_all_evidence: includeAllEvidence,
+            include_discovery: includeDiscovery,
+            include_case_summary: includeCaseSummary,
+            include_strategy_notes: includeStrategyNotes,
           },
         }),
       })
@@ -174,6 +180,24 @@ export function BinderCta({ caseId, exhibitSetId }: BinderCtaProps) {
               description="Bundle every uploaded file, not just exhibited ones"
               checked={includeAllEvidence}
               onChange={setIncludeAllEvidence}
+            />
+            <ToggleOption
+              label="Include discovery materials"
+              description="Attach discovery documents to the binder"
+              checked={includeDiscovery}
+              onChange={setIncludeDiscovery}
+            />
+            <ToggleOption
+              label="AI Case Summary"
+              description="Auto-generated overview of your case"
+              checked={includeCaseSummary}
+              onChange={setIncludeCaseSummary}
+            />
+            <ToggleOption
+              label="AI Strategy Notes"
+              description="Preparation tips for your hearing"
+              checked={includeStrategyNotes}
+              onChange={setIncludeStrategyNotes}
             />
           </div>
 

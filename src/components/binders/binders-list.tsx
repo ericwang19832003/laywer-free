@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   DownloadIcon,
   FolderOpenIcon,
@@ -9,6 +10,7 @@ import {
   AlertCircleIcon,
   CheckCircle2Icon,
   ClockIcon,
+  RefreshCwIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -63,8 +65,10 @@ function formatDate(dateStr: string): string {
 }
 
 export function BindersList({ caseId, initialBinders }: BindersListProps) {
+  const router = useRouter()
   const [binders, setBinders] = useState<Binder[]>(initialBinders)
   const [downloading, setDownloading] = useState<string | null>(null)
+  const [regenerating, setRegenerating] = useState<string | null>(null)
 
   const hasPending = binders.some(
     (b) => b.status === 'queued' || b.status === 'building'
@@ -99,6 +103,23 @@ export function BindersList({ caseId, initialBinders }: BindersListProps) {
       toast.error('Could not download binder. Please try again.')
     } finally {
       setDownloading(null)
+    }
+  }
+
+  async function handleRegenerate(binderId: string) {
+    setRegenerating(binderId)
+    try {
+      toast.info('Regenerating binder...')
+      await fetch(`/api/binders/${binderId}/generate`, {
+        method: 'POST',
+        headers: { 'Cookie': document.cookie },
+      })
+      router.refresh()
+      poll()
+    } catch {
+      toast.error('Could not regenerate binder. Please try again.')
+    } finally {
+      setRegenerating(null)
     }
   }
 
@@ -158,18 +179,49 @@ export function BindersList({ caseId, initialBinders }: BindersListProps) {
               </div>
 
               {binder.status === 'ready' && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRegenerate(binder.id)}
+                    disabled={regenerating === binder.id}
+                  >
+                    {regenerating === binder.id ? (
+                      <Loader2Icon className="mr-1.5 size-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCwIcon className="mr-1.5 size-3.5" />
+                    )}
+                    Regenerate
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(binder.id)}
+                    disabled={downloading === binder.id}
+                  >
+                    {downloading === binder.id ? (
+                      <Loader2Icon className="mr-1.5 size-3.5 animate-spin" />
+                    ) : (
+                      <DownloadIcon className="mr-1.5 size-3.5" />
+                    )}
+                    Download
+                  </Button>
+                </div>
+              )}
+
+              {binder.status === 'failed' && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleDownload(binder.id)}
-                  disabled={downloading === binder.id}
+                  onClick={() => handleRegenerate(binder.id)}
+                  disabled={regenerating === binder.id}
                 >
-                  {downloading === binder.id ? (
+                  {regenerating === binder.id ? (
                     <Loader2Icon className="mr-1.5 size-3.5 animate-spin" />
                   ) : (
-                    <DownloadIcon className="mr-1.5 size-3.5" />
+                    <RefreshCwIcon className="mr-1.5 size-3.5" />
                   )}
-                  Download
+                  Regenerate
                 </Button>
               )}
 

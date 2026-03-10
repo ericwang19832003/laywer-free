@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon, Sparkles } from 'lucide-react'
+import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon, Sparkles, SearchIcon, PencilIcon, CheckIcon, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 // ── Types ──────────────────────────────────────────────
@@ -77,12 +77,21 @@ function formatDate(dateStr: string): string {
 interface EvidenceVaultProps {
   caseId: string
   initialEvidence: EvidenceItem[]
+  exhibitedIds?: string[]
 }
 
-export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
+export function EvidenceVault({ caseId, initialEvidence, exhibitedIds = [] }: EvidenceVaultProps) {
   // Evidence list state
   const [evidence, setEvidence] = useState<EvidenceItem[]>(initialEvidence)
   const [filterCategory, setFilterCategory] = useState<string>('all')
+
+  // Search & status filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'exhibited' | 'not_exhibited'>('all')
+
+  // Inline edit state
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<{ label: string; notes: string; captured_at: string }>({ label: '', notes: '', captured_at: '' })
 
   // Upload form state
   const [file, setFile] = useState<File | null>(null)
@@ -273,10 +282,64 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
     }
   }
 
-  const filteredEvidence =
-    filterCategory === 'all'
-      ? evidence
-      : evidence.filter((e) => e.label === filterCategory)
+  // ── Inline edit handlers ──────────────────────────
+
+  function startEdit(item: EvidenceItem) {
+    setEditingId(item.id)
+    setEditForm({
+      label: item.label || '',
+      notes: item.notes || '',
+      captured_at: item.captured_at || '',
+    })
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditForm({ label: '', notes: '', captured_at: '' })
+  }
+
+  async function saveEdit(itemId: string) {
+    try {
+      const res = await fetch(`/api/cases/${caseId}/evidence/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      setEvidence((prev) =>
+        prev.map((e) =>
+          e.id === itemId ? { ...e, ...editForm } : e
+        )
+      )
+      setEditingId(null)
+      toast.success('Evidence updated')
+    } catch {
+      toast.error('Failed to update evidence')
+    }
+  }
+
+  // ── Filtered evidence ──────────────────────────────
+
+  const filteredEvidence = evidence.filter((item) => {
+    // Category filter (existing)
+    if (filterCategory !== 'all' && item.label !== filterCategory) return false
+
+    // Search filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      const matchesSearch =
+        item.file_name.toLowerCase().includes(q) ||
+        (item.label?.toLowerCase().includes(q) ?? false) ||
+        (item.notes?.toLowerCase().includes(q) ?? false)
+      if (!matchesSearch) return false
+    }
+
+    // Status filter
+    if (statusFilter === 'exhibited') return exhibitedIds.includes(item.id)
+    if (statusFilter === 'not_exhibited') return !exhibitedIds.includes(item.id)
+
+    return true
+  })
 
   return (
     <div className="space-y-8">
@@ -428,6 +491,29 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
           </Select>
         </div>
 
+        {/* Search + Status filter */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-warm-muted" />
+            <Input
+              placeholder="Search evidence..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as 'all' | 'exhibited' | 'not_exhibited')}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All evidence</SelectItem>
+              <SelectItem value="exhibited">Exhibited</SelectItem>
+              <SelectItem value="not_exhibited">Not exhibited</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {filteredEvidence.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center">
@@ -501,6 +587,15 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
                       <Button
                         variant="ghost"
                         size="icon-xs"
+                        onClick={() => startEdit(item)}
+                        title="Edit"
+                        disabled={editingId === item.id}
+                      >
+                        <PencilIcon className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
                         onClick={() => handleDownload(item)}
                         title="Download"
                       >
@@ -517,6 +612,67 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Inline edit form */}
+                  {editingId === item.id && (
+                    <div className="mt-3 pt-3 border-t border-warm-border space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-warm-muted">Category</Label>
+                          <Select
+                            value={editForm.label}
+                            onValueChange={(v) => setEditForm((f) => ({ ...f, label: v }))}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CATEGORIES.map((cat) => (
+                                <SelectItem key={cat} value={cat}>
+                                  {cat}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-warm-muted">Date captured</Label>
+                          <Input
+                            type="date"
+                            value={editForm.captured_at}
+                            onChange={(e) => setEditForm((f) => ({ ...f, captured_at: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-warm-muted">Notes</Label>
+                        <Textarea
+                          placeholder="Describe this evidence..."
+                          value={editForm.notes}
+                          onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
+                          maxLength={2000}
+                          className="min-h-16"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => saveEdit(item.id)}
+                        >
+                          <CheckIcon className="size-3.5 mr-1.5" />
+                          Save
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={cancelEdit}
+                        >
+                          <XIcon className="size-3.5 mr-1.5" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
