@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { EvidenceVaultStep } from '@/components/step/evidence-vault-step'
 
 vi.mock('next/link', () => ({
@@ -13,25 +13,20 @@ vi.mock('next/navigation', () => ({
 }))
 
 describe('EvidenceVaultStep', () => {
-  it('offers a quick start checklist with controls', () => {
+  it('renders the Evidence Vault title and reassurance text', () => {
     render(<EvidenceVaultStep caseId="case-123" taskId="task-123" />)
 
-    expect(screen.getByText(/Quick start checklist/i)).toBeInTheDocument()
-
-    const checkboxes = screen.getAllByRole('checkbox')
-    expect(checkboxes.length).toBeGreaterThan(0)
-
-    fireEvent.click(screen.getByRole('button', { name: /Mark all done/i }))
-    checkboxes.forEach((checkbox) => expect(checkbox).toBeChecked())
-
-    fireEvent.click(screen.getByRole('button', { name: /Reset checklist/i }))
-    checkboxes.forEach((checkbox) => expect(checkbox).not.toBeChecked())
+    expect(screen.getByText(/Evidence Vault/i)).toBeInTheDocument()
+    expect(screen.getByText(/organized evidence/i)).toBeInTheDocument()
   })
 
-  it('shows file naming templates for evidence', () => {
+  it('shows the first question about contracts', () => {
     render(<EvidenceVaultStep caseId="case-123" taskId="task-123" />)
 
-    expect(screen.getByText(/File naming templates/i)).toBeInTheDocument()
-    expect(screen.getAllByText(/YYYY-MM-DD/i).length).toBeGreaterThan(0)
+    // GuidedStep shows one question at a time; first is about contracts
+    expect(screen.getByText(/contracts or written agreements/i)).toBeInTheDocument()
+    // Yes/No buttons should be rendered
+    expect(screen.getByRole('button', { name: /Yes/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /No/i })).toBeInTheDocument()
   })
 })

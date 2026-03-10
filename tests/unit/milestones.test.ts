@@ -158,8 +158,8 @@ describe('getTasksToSkip', () => {
     expect(tasks).toEqual(['welcome', 'pi_intake'])
   })
 
-  it('returns correct tasks for PI "litigation" milestone', () => {
-    const tasks = getTasksToSkip('personal_injury', 'litigation')
+  it('returns correct tasks for PI "waiting_for_answer" milestone', () => {
+    const tasks = getTasksToSkip('personal_injury', 'waiting_for_answer')
     expect(tasks).toContain('prepare_pi_petition')
     expect(tasks).toContain('pi_file_with_court')
     expect(tasks).toContain('pi_serve_defendant')
@@ -309,8 +309,8 @@ describe('milestone counts', () => {
     }
   })
 
-  it('personal injury has 7 milestones', () => {
-    expect(getMilestones('personal_injury')).toHaveLength(7)
+  it('personal injury has 9 milestones', () => {
+    expect(getMilestones('personal_injury')).toHaveLength(9)
   })
 
   it('debt defense has 4 milestones', () => {

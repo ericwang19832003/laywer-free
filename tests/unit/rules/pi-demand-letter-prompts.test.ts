@@ -125,10 +125,11 @@ describe('piDemandLetterFactsSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('accepts all 8 pi_sub_types', () => {
+  it('accepts all 12 pi_sub_types', () => {
     const subTypes = [
       'auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist',
-      'slip_and_fall', 'dog_bite', 'product_liability', 'other',
+      'slip_and_fall', 'dog_bite', 'product_liability', 'other_injury',
+      'vehicle_damage', 'property_damage_negligence', 'vandalism', 'other_property_damage',
     ] as const
 
     for (const subType of subTypes) {

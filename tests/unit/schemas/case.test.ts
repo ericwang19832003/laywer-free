@@ -87,7 +87,7 @@ describe('createCaseSchema', () => {
   })
 
   it('accepts all valid pi_sub_type values', () => {
-    for (const st of ['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist', 'slip_and_fall', 'dog_bite', 'product_liability', 'other']) {
+    for (const st of ['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist', 'slip_and_fall', 'dog_bite', 'product_liability', 'other_injury', 'vehicle_damage', 'property_damage_negligence', 'vandalism', 'other_property_damage']) {
       const result = createCaseSchema.safeParse({ role: 'plaintiff', pi_sub_type: st })
       expect(result.success).toBe(true)
     }
