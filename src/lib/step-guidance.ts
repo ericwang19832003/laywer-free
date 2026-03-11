@@ -104,6 +104,22 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'List of questions you want answered',
     ],
   },
+  rule_26f_prep: {
+    why: 'Rule 26(f) requires both sides to meet and plan for discovery before the court conference. Being prepared shows the judge you are organized.',
+    checklist: [
+      'List of proposed discovery topics',
+      'Your calendar for scheduling deadlines',
+      'Any preservation concerns to raise',
+    ],
+  },
+  mandatory_disclosures: {
+    why: 'Federal rules require you to disclose key witnesses and documents early, even without being asked. Missing this deadline can limit your evidence at trial.',
+    checklist: [
+      'Names and contact info of witnesses',
+      'Documents supporting your claims or defenses',
+      'Computation of damages with supporting materials',
+    ],
+  },
 
   // --- Personal Injury ---
   pi_intake: {
