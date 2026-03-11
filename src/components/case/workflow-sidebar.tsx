@@ -47,7 +47,7 @@ function getStatusIcon(status: string, isCurrent: boolean) {
 }
 
 function isClickable(status: string) {
-  return ['todo', 'in_progress', 'needs_review', 'completed'].includes(status)
+  return ['todo', 'in_progress', 'needs_review', 'completed', 'skipped'].includes(status)
 }
 
 export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps) {
