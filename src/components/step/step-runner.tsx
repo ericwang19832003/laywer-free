@@ -82,11 +82,12 @@ export function StepRunner({
               {children}
               <div className="mt-6 flex flex-col gap-3">
                 {skipReview ? (
-                  <Button onClick={handleConfirm} disabled={loading}>
+                  <Button className="h-11 px-6 text-base" onClick={handleConfirm} disabled={loading}>
                     {loading ? 'Saving...' : "I'm ready"}
                   </Button>
                 ) : (
                   <Button
+                    className="h-11 px-6 text-base group"
                     onClick={async () => {
                       if (onBeforeReview) {
                         setLoading(true)
@@ -102,13 +103,14 @@ export function StepRunner({
                     }}
                     disabled={loading}
                   >
-                    {loading ? 'Processing...' : (reviewButtonLabel ?? 'Review \u2192')}
+                    {loading ? 'Processing...' : (reviewButtonLabel ?? 'Review')}
+                    {!loading && <span className="inline-block transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true">→</span>}
                   </Button>
                 )}
                 {onSave && !skipReview && (
                   <button
                     onClick={handleSave}
-                    className="text-sm text-warm-muted hover:text-warm-text"
+                    className="text-sm text-warm-muted hover:text-calm-indigo transition-colors duration-150"
                     disabled={loading}
                   >
                     Save and come back later
@@ -125,12 +127,13 @@ export function StepRunner({
                 {reviewContent}
               </div>
               <div className="flex flex-col gap-3">
-                <Button onClick={handleConfirm} disabled={loading}>
+                <Button className="h-11 px-6 text-base group" onClick={handleConfirm} disabled={loading}>
                   {loading ? 'Saving...' : 'Confirm & Continue'}
+                  {!loading && <span className="inline-block transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true">→</span>}
                 </Button>
                 <button
                   onClick={() => setPhase('input')}
-                  className="text-sm text-warm-muted hover:text-warm-text"
+                  className="text-sm text-warm-muted hover:text-calm-indigo transition-colors duration-150"
                   disabled={loading}
                 >
                   &larr; Back to edit
