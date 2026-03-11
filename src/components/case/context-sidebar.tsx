@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   CheckCircle2,
@@ -13,7 +16,8 @@ import { STEP_GUIDANCE } from '@/lib/step-guidance'
 
 interface ContextSidebarProps {
   caseId: string
-  currentTaskKey: string | null
+  tasks: { id: string; task_key: string }[]
+  fallbackTaskKey: string | null
   deadline: {
     key: string
     due_at: string
@@ -47,7 +51,15 @@ function getRiskColor(level: string): string {
   }
 }
 
-export function ContextSidebar({ caseId, currentTaskKey, deadline, riskScore }: ContextSidebarProps) {
+export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskScore }: ContextSidebarProps) {
+  const params = useParams()
+  const taskId = params?.taskId as string | undefined
+
+  // If on a step page, use that step's task_key; otherwise fall back
+  const currentTaskKey = taskId
+    ? tasks.find((t) => t.id === taskId)?.task_key ?? fallbackTaskKey
+    : fallbackTaskKey
+
   const guidance = currentTaskKey ? STEP_GUIDANCE[currentTaskKey] : null
 
   return (

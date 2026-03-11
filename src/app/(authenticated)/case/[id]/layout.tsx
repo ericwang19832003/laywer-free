@@ -75,7 +75,8 @@ export default async function CaseLayout({
       <aside className="hidden xl:block w-72 shrink-0 border-l border-warm-border bg-white sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
         <ContextSidebar
           caseId={id}
-          currentTaskKey={currentTaskKey}
+          tasks={taskList.map((t) => ({ id: t.id, task_key: t.task_key }))}
+          fallbackTaskKey={currentTaskKey}
           deadline={deadline}
           riskScore={riskScore}
         />
