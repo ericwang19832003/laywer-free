@@ -5,15 +5,25 @@ import { Search, Scale } from 'lucide-react'
 import { Breadcrumbs } from './breadcrumbs'
 import { NotificationBell } from './notification-bell'
 import { UserMenu } from './user-menu'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
 
 export function TopNav() {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 0)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
     <>
-      <nav className="sticky top-0 z-40 w-full border-b border-warm-border bg-warm-bg/95 backdrop-blur supports-[backdrop-filter]:bg-warm-bg/80">
+      <nav className={`sticky top-0 z-40 w-full border-b border-warm-border bg-warm-bg/95 backdrop-blur supports-[backdrop-filter]:bg-warm-bg/80 transition-shadow duration-200 ${scrolled ? 'scroll-shadow' : ''}`}>
         <div className="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <Link
             href="/cases"
@@ -29,10 +39,10 @@ export function TopNav() {
             <Breadcrumbs />
           </div>
 
-          <div className="flex items-center gap-1 ml-2">
+          <div className="flex items-center gap-2 ml-2">
             <button
               onClick={() => setSearchOpen(true)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-warm-muted hover:text-warm-text hover:bg-warm-border/50 transition-colors"
+              className="inline-flex items-center justify-center size-9 rounded-lg text-warm-muted hover:text-warm-text hover:bg-warm-border/40 transition-colors duration-150"
               aria-label="Search"
             >
               <Search className="h-4 w-4" />
