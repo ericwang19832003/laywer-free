@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
 import { Fragment } from 'react'
 
 export interface Crumb {
@@ -85,11 +84,11 @@ export function Breadcrumbs() {
     <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
       {crumbs.map((crumb, i) => (
         <Fragment key={i}>
-          {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-warm-border flex-shrink-0" />}
+          {i > 0 && <span className="text-warm-border flex-shrink-0 text-sm" aria-hidden="true">›</span>}
           {crumb.href ? (
             <Link
               href={crumb.href}
-              className="text-warm-muted hover:text-warm-text transition-colors whitespace-nowrap"
+              className="text-warm-muted hover:text-warm-text transition-colors duration-150 whitespace-nowrap"
             >
               {crumb.label}
             </Link>
