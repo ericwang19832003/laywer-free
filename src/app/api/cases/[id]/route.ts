@@ -53,18 +53,51 @@ export async function PATCH(
     const { supabase } = auth
 
     const body = await request.json()
-    const { court_type } = body
+    const { court_type, county, description } = body
 
-    if (!court_type || !['jp', 'county', 'district', 'federal'].includes(court_type)) {
+    // Build partial update object — only include provided fields
+    const updates: Record<string, unknown> = {}
+
+    if (court_type !== undefined) {
+      if (!['jp', 'county', 'district', 'federal'].includes(court_type)) {
+        return NextResponse.json(
+          { error: 'Invalid court_type' },
+          { status: 422 }
+        )
+      }
+      updates.court_type = court_type
+    }
+
+    if (county !== undefined) {
+      if (county !== null && typeof county !== 'string') {
+        return NextResponse.json(
+          { error: 'Invalid county' },
+          { status: 422 }
+        )
+      }
+      updates.county = county
+    }
+
+    if (description !== undefined) {
+      if (description !== null && typeof description !== 'string') {
+        return NextResponse.json(
+          { error: 'Invalid description' },
+          { status: 422 }
+        )
+      }
+      updates.description = description
+    }
+
+    if (Object.keys(updates).length === 0) {
       return NextResponse.json(
-        { error: 'Invalid court_type' },
+        { error: 'No valid fields to update' },
         { status: 422 }
       )
     }
 
     const { data, error } = await supabase
       .from('cases')
-      .update({ court_type })
+      .update(updates)
       .eq('id', id)
       .select()
       .single()

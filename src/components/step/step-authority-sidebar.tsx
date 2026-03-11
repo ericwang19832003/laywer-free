@@ -54,7 +54,11 @@ export function StepAuthoritySidebar({
           case_name: a.cl_case_clusters?.case_name ?? 'Unknown Case',
           court_name: a.cl_case_clusters?.court_name ?? null,
           date_filed: a.cl_case_clusters?.date_filed ?? null,
-          citations: a.cl_case_clusters?.citations ?? [],
+          citations: Array.isArray(a.cl_case_clusters?.citations)
+            ? a.cl_case_clusters.citations
+            : a.cl_case_clusters?.citations
+              ? [a.cl_case_clusters.citations]
+              : [],
           snippet: a.cl_case_clusters?.snippet ?? null,
           pinned: a.pinned ?? false,
         }))

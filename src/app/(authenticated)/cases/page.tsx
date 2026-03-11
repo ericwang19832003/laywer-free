@@ -13,7 +13,7 @@ export default async function CasesPage() {
 
   const { data: cases } = await supabase
     .from('cases')
-    .select('id, county, role, court_type, dispute_type, created_at')
+    .select('id, county, role, court_type, dispute_type, description, created_at')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
 
@@ -119,6 +119,7 @@ export default async function CasesPage() {
     return {
       id: c.id,
       county: c.county,
+      description: c.description ?? null,
       role: c.role,
       courtType: c.court_type,
       disputeType: c.dispute_type,

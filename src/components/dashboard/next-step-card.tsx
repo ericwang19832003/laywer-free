@@ -1,8 +1,17 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+
+const SKIPPABLE_TASKS = new Set([
+  'prepare_pi_demand_letter',
+  'prepare_demand_letter',
+  'prepare_lt_demand_letter',
+  'preservation_letter',
+])
 
 interface NextStepCardProps {
   caseId: string
@@ -16,6 +25,28 @@ interface NextStepCardProps {
 }
 
 export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCardProps) {
+  const router = useRouter()
+  const [skipping, setSkipping] = useState(false)
+
+  async function handleSkip() {
+    if (!nextTask || skipping) return
+    setSkipping(true)
+    try {
+      // First transition to in_progress (required before skipped for 'todo' tasks)
+      const res = await fetch(`/api/tasks/${nextTask.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'skipped',
+          metadata: { skip_reason: 'already_filed_petition' },
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to skip')
+      router.refresh()
+    } catch {
+      setSkipping(false)
+    }
+  }
   if (!nextTask) {
     return (
       <Card>
@@ -64,6 +95,15 @@ export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCard
             Review &amp; Continue
           </Link>
         </Button>
+        {SKIPPABLE_TASKS.has(nextTask.task_key) && (
+          <button
+            onClick={handleSkip}
+            disabled={skipping}
+            className="mt-2 text-sm text-warm-muted hover:text-warm-text transition-colors"
+          >
+            {skipping ? 'Skipping...' : 'Already done this? Skip this step'}
+          </button>
+        )}
       </CardContent>
     </Card>
   )

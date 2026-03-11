@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Upload, Tags, Search, FileText } from 'lucide-react'
+import { Upload, Tags, Search, FileText, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -46,6 +46,13 @@ export function BeginnerWalkthrough({ onStart }: BeginnerWalkthroughProps) {
     }
   }, [])
 
+  function handleDismiss() {
+    if (dontShowAgain) {
+      localStorage.setItem(STORAGE_KEY, 'true')
+    }
+    setVisible(false)
+  }
+
   function handleStart() {
     if (dontShowAgain) {
       localStorage.setItem(STORAGE_KEY, 'true')
@@ -59,7 +66,17 @@ export function BeginnerWalkthrough({ onStart }: BeginnerWalkthroughProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <Card className="w-full max-w-lg border-calm-indigo/20 bg-white shadow-xl">
-        <CardContent className="space-y-5 px-6 py-6">
+        <CardContent className="relative space-y-5 px-6 py-6">
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="absolute right-4 top-4 rounded-sm p-1 text-warm-muted hover:text-warm-text transition-colors"
+            aria-label="Close"
+          >
+            <X className="size-4" />
+          </button>
+
           {/* Title */}
           <h2 className="text-lg font-semibold text-foreground">
             Welcome to Your Case File

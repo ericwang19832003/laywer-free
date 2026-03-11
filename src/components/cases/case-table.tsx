@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
+import { CaseEditDialog } from '@/components/cases/case-edit-dialog'
 
 interface CaseRow {
   id: string
   county: string | null
+  description: string | null
   role: string
   courtType: string | null
   disputeType: string | null
@@ -79,12 +81,22 @@ export function CaseTable({ cases }: CaseTableProps) {
             return (
               <tr key={c.id} className="group hover:bg-gray-50/50 transition-colors">
                 <td className="px-5 py-3.5">
-                  <Link href={`/case/${c.id}`} className="block">
-                    <p className="text-sm font-medium text-warm-text">
-                      {displayName}{courtLabel ? ` · ${courtLabel}` : ''}
-                    </p>
-                    <p className="text-xs text-warm-muted mt-0.5">{roleLabel}</p>
-                  </Link>
+                  <div className="flex items-start gap-2">
+                    <Link href={`/case/${c.id}`} className="block min-w-0 flex-1">
+                      <p className="text-sm font-medium text-warm-text">
+                        {displayName}{courtLabel ? ` · ${courtLabel}` : ''}
+                      </p>
+                      {c.description && (
+                        <p className="text-xs text-warm-muted mt-0.5 truncate">{c.description}</p>
+                      )}
+                      <p className="text-xs text-warm-muted mt-0.5">{roleLabel}</p>
+                    </Link>
+                    <CaseEditDialog
+                      caseId={c.id}
+                      currentCounty={c.county}
+                      currentDescription={c.description}
+                    />
+                  </div>
                 </td>
                 <td className="px-5 py-3.5 hidden sm:table-cell">
                   <span className="text-xs text-warm-muted">{disputeLabel ?? '\u2014'}</span>
@@ -104,7 +116,7 @@ export function CaseTable({ cases }: CaseTableProps) {
                   {c.nextDeadline ? (
                     <span className="text-xs font-medium text-amber-600">{relativeDate(c.nextDeadline)}</span>
                   ) : (
-                    <span className="text-xs text-warm-muted">\u2014</span>
+                    <span className="text-xs text-warm-muted">{'\u2014'}</span>
                   )}
                 </td>
                 <td className="px-5 py-3.5 hidden md:table-cell">
