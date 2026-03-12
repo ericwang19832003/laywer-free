@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { SkipForward } from 'lucide-react'
+import { Lightbulb, SkipForward } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 interface StepRunnerProps {
   caseId: string
@@ -21,6 +22,8 @@ interface StepRunnerProps {
   reviewButtonLabel?: string
   wrapperClassName?: string
   skippable?: boolean
+  phaseLabel?: string
+  stepPosition?: string
 }
 
 export function StepRunner({
@@ -37,6 +40,8 @@ export function StepRunner({
   reviewButtonLabel,
   wrapperClassName,
   skippable = false,
+  phaseLabel,
+  stepPosition,
 }: StepRunnerProps) {
   const [phase, setPhase] = useState<'input' | 'review'>('input')
   const [loading, setLoading] = useState(false)
@@ -67,6 +72,7 @@ export function StepRunner({
     setLoading(true)
     try {
       await onConfirm()
+      toast.success('Nice work! Step complete.')
       router.push(`/case/${caseId}`)
       router.refresh()
     } catch {
@@ -88,18 +94,36 @@ export function StepRunner({
   }
 
   return (
-    <div className={wrapperClassName ?? "max-w-2xl mx-auto px-4 py-8"}>
-      <Link
-        href={`/case/${caseId}`}
-        className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block"
-      >
-        &larr; Back to dashboard
-      </Link>
+    <div className={wrapperClassName ?? "max-w-2xl mx-auto px-4 py-10"}>
+      {phaseLabel && stepPosition ? (
+        <div className="mb-6">
+          <p className="text-xs font-medium text-warm-muted">
+            {phaseLabel} &middot; {stepPosition}
+          </p>
+          <Link
+            href={`/case/${caseId}`}
+            className="text-xs text-warm-muted/60 hover:text-warm-muted mt-0.5 inline-block"
+          >
+            &larr; Back to dashboard
+          </Link>
+        </div>
+      ) : (
+        <Link
+          href={`/case/${caseId}`}
+          className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block"
+        >
+          &larr; Back to dashboard
+        </Link>
+      )}
 
-      <h1 className="text-2xl font-semibold text-warm-text mb-1">{title}</h1>
-      <p className="text-warm-muted mb-8">{reassurance}</p>
+      <h1 className="text-2xl font-semibold text-warm-text mb-3">{title}</h1>
 
-      <Card>
+      <div className="rounded-lg bg-calm-indigo/[0.03] border border-calm-indigo/10 px-4 py-3 flex items-start gap-2.5 mb-8">
+        <Lightbulb className="h-4 w-4 text-calm-indigo shrink-0 mt-0.5" />
+        <p className="text-sm text-warm-muted leading-relaxed">{reassurance}</p>
+      </div>
+
+      <Card className="shadow-sm">
         <CardContent className="pt-6">
           {phase === 'input' ? (
             <>

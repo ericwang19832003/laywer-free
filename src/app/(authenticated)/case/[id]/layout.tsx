@@ -64,15 +64,15 @@ export default async function CaseLayout({
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
-      <aside className="hidden lg:block w-64 shrink-0 border-r border-warm-border bg-white sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <aside className="hidden lg:block w-64 shrink-0 bg-warm-bg shadow-[1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
         <WorkflowSidebar caseId={id} tasks={taskList} phases={phases} />
       </aside>
 
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 bg-warm-bg">
         {children}
       </main>
 
-      <aside className="hidden xl:block w-72 shrink-0 border-l border-warm-border bg-white sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <aside className="hidden xl:block w-72 shrink-0 bg-white shadow-[-1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
         <ContextSidebar
           caseId={id}
           tasks={taskList.map((t) => ({ id: t.id, task_key: t.task_key }))}
