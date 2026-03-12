@@ -551,10 +551,42 @@ BEGIN
     WHERE case_id = NEW.case_id AND task_key = 'contract_intake' AND status = 'locked';
   END IF;
 
-  -- Contract: contract_intake -> evidence_vault
+  -- Contract: contract_intake -> CONDITIONAL BRANCHING based on case_stage
   IF NEW.task_key = 'contract_intake' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
-    UPDATE public.tasks SET status = 'todo', unlocked_at = now()
-    WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+    v_case_stage := COALESCE(NEW.metadata->'guided_answers'->>'case_stage', 'start');
+
+    IF v_case_stage = 'start' THEN
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+
+    ELSIF v_case_stage = 'demand_sent' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'contract_demand_letter', 'contract_negotiation')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'contract_prepare_filing' AND status = 'locked';
+
+    ELSIF v_case_stage = 'filed' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'contract_demand_letter', 'contract_negotiation', 'contract_prepare_filing')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'contract_file_with_court' AND status = 'locked';
+
+    ELSIF v_case_stage = 'served' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'contract_demand_letter', 'contract_negotiation', 'contract_prepare_filing', 'contract_file_with_court', 'contract_serve_defendant')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'contract_wait_for_answer' AND status = 'locked';
+
+    ELSE
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+    END IF;
   END IF;
 
   -- Contract: evidence_vault -> contract_demand_letter
@@ -626,9 +658,42 @@ BEGIN
     WHERE case_id = NEW.case_id AND task_key = 'property_intake' AND status = 'locked';
   END IF;
 
+  -- Property: property_intake -> CONDITIONAL BRANCHING based on case_stage
   IF NEW.task_key = 'property_intake' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
-    UPDATE public.tasks SET status = 'todo', unlocked_at = now()
-    WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+    v_case_stage := COALESCE(NEW.metadata->'guided_answers'->>'case_stage', 'start');
+
+    IF v_case_stage = 'start' THEN
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+
+    ELSIF v_case_stage = 'demand_sent' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'property_demand_letter', 'property_negotiation')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'property_prepare_filing' AND status = 'locked';
+
+    ELSIF v_case_stage = 'filed' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'property_demand_letter', 'property_negotiation', 'property_prepare_filing')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'property_file_with_court' AND status = 'locked';
+
+    ELSIF v_case_stage = 'served' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'property_demand_letter', 'property_negotiation', 'property_prepare_filing', 'property_file_with_court', 'property_serve_defendant')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'property_wait_for_answer' AND status = 'locked';
+
+    ELSE
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+    END IF;
   END IF;
 
   IF NEW.task_key = 'evidence_vault' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
@@ -685,9 +750,42 @@ BEGIN
     WHERE case_id = NEW.case_id AND task_key = 'other_intake' AND status = 'locked';
   END IF;
 
+  -- Other: other_intake -> CONDITIONAL BRANCHING based on case_stage
   IF NEW.task_key = 'other_intake' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN
-    UPDATE public.tasks SET status = 'todo', unlocked_at = now()
-    WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+    v_case_stage := COALESCE(NEW.metadata->'guided_answers'->>'case_stage', 'start');
+
+    IF v_case_stage = 'start' THEN
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+
+    ELSIF v_case_stage = 'demand_sent' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'other_demand_letter')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'other_prepare_filing' AND status = 'locked';
+
+    ELSIF v_case_stage = 'filed' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'other_demand_letter', 'other_prepare_filing')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'other_file_with_court' AND status = 'locked';
+
+    ELSIF v_case_stage = 'served' THEN
+      UPDATE public.tasks SET status = 'skipped'
+      WHERE case_id = NEW.case_id
+        AND task_key IN ('evidence_vault', 'other_demand_letter', 'other_prepare_filing', 'other_file_with_court', 'other_serve_defendant')
+        AND status = 'locked';
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'other_wait_for_answer' AND status = 'locked';
+
+    ELSE
+      UPDATE public.tasks SET status = 'todo', unlocked_at = now()
+      WHERE case_id = NEW.case_id AND task_key = 'evidence_vault' AND status = 'locked';
+    END IF;
   END IF;
 
   IF NEW.task_key = 'evidence_vault' AND NEW.status = 'completed' AND OLD.status != 'completed' THEN

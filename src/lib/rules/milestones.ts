@@ -22,7 +22,7 @@ export interface Milestone {
   tasksToSkip: string[]
 }
 
-// -- Civil Milestones (contract, property, other) -----------------------------
+// -- Civil Milestones (generic civil fallback) --------------------------------
 
 const CIVIL_MILESTONES: Milestone[] = [
   {
@@ -140,6 +140,168 @@ const CIVIL_MILESTONES: Milestone[] = [
       'rule_26f_prep',
       'mandatory_disclosures',
       'default_packet_prep',
+    ],
+  },
+]
+
+// -- Contract Milestones ------------------------------------------------------
+
+const CONTRACT_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand letter',
+    description: 'I\'ve already sent a demand letter.',
+    firstUnlockedTask: 'contract_prepare_filing',
+    tasksToSkip: [
+      'welcome',
+      'contract_intake',
+      'evidence_vault',
+      'contract_demand_letter',
+      'contract_negotiation',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed with court',
+    description: 'I\'ve already filed my case with the court.',
+    firstUnlockedTask: 'contract_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      'contract_intake',
+      'evidence_vault',
+      'contract_demand_letter',
+      'contract_negotiation',
+      'contract_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the other party',
+    description: 'I\'ve served the other party with the lawsuit.',
+    firstUnlockedTask: 'contract_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      'contract_intake',
+      'evidence_vault',
+      'contract_demand_letter',
+      'contract_negotiation',
+      'contract_prepare_filing',
+      'contract_file_with_court',
+      'contract_serve_defendant',
+    ],
+  },
+]
+
+// -- Property Milestones ------------------------------------------------------
+
+const PROPERTY_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand letter',
+    description: 'I\'ve already sent a demand letter.',
+    firstUnlockedTask: 'property_prepare_filing',
+    tasksToSkip: [
+      'welcome',
+      'property_intake',
+      'evidence_vault',
+      'property_demand_letter',
+      'property_negotiation',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed with court',
+    description: 'I\'ve already filed my case with the court.',
+    firstUnlockedTask: 'property_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      'property_intake',
+      'evidence_vault',
+      'property_demand_letter',
+      'property_negotiation',
+      'property_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the other party',
+    description: 'I\'ve served the other party with the lawsuit.',
+    firstUnlockedTask: 'property_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      'property_intake',
+      'evidence_vault',
+      'property_demand_letter',
+      'property_negotiation',
+      'property_prepare_filing',
+      'property_file_with_court',
+      'property_serve_defendant',
+    ],
+  },
+]
+
+// -- Other Dispute Milestones -------------------------------------------------
+
+const OTHER_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand letter',
+    description: 'I\'ve already sent a demand letter.',
+    firstUnlockedTask: 'other_prepare_filing',
+    tasksToSkip: [
+      'welcome',
+      'other_intake',
+      'evidence_vault',
+      'other_demand_letter',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed with court',
+    description: 'I\'ve already filed my case with the court.',
+    firstUnlockedTask: 'other_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      'other_intake',
+      'evidence_vault',
+      'other_demand_letter',
+      'other_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the other party',
+    description: 'I\'ve served the other party with the lawsuit.',
+    firstUnlockedTask: 'other_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      'other_intake',
+      'evidence_vault',
+      'other_demand_letter',
+      'other_prepare_filing',
+      'other_file_with_court',
+      'other_serve_defendant',
     ],
   },
 ]
@@ -626,9 +788,9 @@ const LANDLORD_TENANT_MILESTONES: Milestone[] = [
 // -- Dispatch Map -------------------------------------------------------------
 
 const MILESTONES_BY_TYPE: Record<string, Milestone[]> = {
-  contract: CIVIL_MILESTONES,
-  property: CIVIL_MILESTONES,
-  other: CIVIL_MILESTONES,
+  contract: CONTRACT_MILESTONES,
+  property: PROPERTY_MILESTONES,
+  other: OTHER_MILESTONES,
   personal_injury: PERSONAL_INJURY_MILESTONES,
   debt_collection: DEBT_DEFENSE_MILESTONES,
   small_claims: SMALL_CLAIMS_MILESTONES,
