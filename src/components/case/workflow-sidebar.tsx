@@ -4,14 +4,13 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
-  CheckCircle2,
+  Check,
   Circle,
   Lock,
   SkipForward,
   ChevronDown,
   ChevronRight,
 } from 'lucide-react'
-import { Progress } from '@/components/ui/progress'
 import type { WorkflowPhase } from '@/lib/workflow-phases'
 
 export interface SidebarTask {
@@ -30,18 +29,32 @@ interface WorkflowSidebarProps {
 function getStatusIcon(status: string, isCurrent: boolean) {
   switch (status) {
     case 'completed':
-      return <CheckCircle2 className="h-4 w-4 text-calm-green shrink-0" />
-    case 'skipped':
-      return <SkipForward className="h-4 w-4 text-warm-muted shrink-0" />
-    case 'locked':
-      return <Lock className="h-3.5 w-3.5 text-warm-muted/50 shrink-0" />
-    default:
       return (
-        <Circle
-          className={`h-4 w-4 shrink-0 ${
-            isCurrent ? 'text-calm-indigo fill-calm-indigo/20' : 'text-warm-muted'
-          }`}
-        />
+        <span className="flex items-center justify-center size-5 rounded-full bg-calm-green/10 shrink-0">
+          <Check className="size-3 text-calm-green" strokeWidth={2.5} />
+        </span>
+      )
+    case 'skipped':
+      return (
+        <span className="flex items-center justify-center size-5 rounded-full bg-warm-border/40 shrink-0">
+          <SkipForward className="size-3 text-warm-muted" />
+        </span>
+      )
+    case 'locked':
+      return (
+        <span className="flex items-center justify-center size-5 shrink-0">
+          <Lock className="size-3.5 text-warm-muted/40" />
+        </span>
+      )
+    default:
+      return isCurrent ? (
+        <span className="flex items-center justify-center size-5 rounded-full bg-calm-indigo/10 shrink-0">
+          <Circle className="size-2.5 text-calm-indigo fill-calm-indigo" />
+        </span>
+      ) : (
+        <span className="flex items-center justify-center size-5 shrink-0">
+          <Circle className="size-2 text-warm-muted/60 fill-warm-muted/20" />
+        </span>
       )
   }
 }
@@ -99,20 +112,27 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
   }
 
   return (
-    <nav className="flex flex-col h-full overflow-y-auto py-4 pr-2">
-      <div className="px-3 mb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs font-medium text-warm-muted uppercase tracking-wide">
+    <nav className="flex flex-col h-full overflow-y-auto py-5 px-3">
+      {/* Progress section */}
+      <div className="mb-6 px-1">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[11px] font-semibold text-warm-muted/70 uppercase tracking-widest">
             Progress
           </span>
-          <span className="text-xs font-medium text-warm-text">{percentage}%</span>
+          <span className="text-xs font-semibold text-warm-text tabular-nums">{percentage}%</span>
         </div>
-        <Progress value={percentage} className="h-1.5" />
-        <p className="text-xs text-warm-muted mt-1">
-          {completedCount} of {totalCount} steps
+        <div className="h-1.5 bg-warm-border/40 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-calm-indigo to-[#6366F1] rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <p className="text-[11px] text-warm-muted/60 mt-1.5 tabular-nums">
+          {completedCount} of {totalCount} steps complete
         </p>
       </div>
 
+      {/* Phase sections */}
       <div className="space-y-1">
         {phases.map((phase, phaseIdx) => {
           const phaseTasks = phase.taskKeys
@@ -124,31 +144,40 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
           const doneInPhase = phaseTasks.filter(
             (t) => t.status === 'completed' || t.status === 'skipped'
           ).length
+          const allPhaseComplete = doneInPhase === phaseTasks.length
           const isCollapsed = collapsed.has(phaseIdx)
 
           return (
-            <div key={phaseIdx}>
+            <div key={phaseIdx} className="mb-1">
+              {/* Phase header */}
               <button
                 onClick={() => togglePhase(phaseIdx)}
-                className="flex items-center justify-between w-full px-3 py-1.5 text-left hover:bg-warm-bg/60 rounded-md transition-colors"
+                className="flex items-center justify-between w-full px-2 py-2 text-left rounded-lg hover:bg-warm-border/20 transition-colors duration-150 group"
               >
-                <div className="flex items-center gap-1.5">
-                  {isCollapsed ? (
-                    <ChevronRight className="h-3.5 w-3.5 text-warm-muted" />
-                  ) : (
-                    <ChevronDown className="h-3.5 w-3.5 text-warm-muted" />
-                  )}
-                  <span className="text-xs font-semibold text-warm-text">
+                <div className="flex items-center gap-2">
+                  <span className={`transition-transform duration-200 ${isCollapsed ? '' : 'rotate-0'}`}>
+                    {isCollapsed ? (
+                      <ChevronRight className="size-3.5 text-warm-muted/50 group-hover:text-warm-muted" />
+                    ) : (
+                      <ChevronDown className="size-3.5 text-warm-muted/50 group-hover:text-warm-muted" />
+                    )}
+                  </span>
+                  <span className={`text-[11px] font-semibold uppercase tracking-widest ${
+                    allPhaseComplete ? 'text-warm-muted/50' : 'text-warm-muted/70'
+                  }`}>
                     {phase.label}
                   </span>
                 </div>
-                <span className="text-xs text-warm-muted">
+                <span className={`text-[11px] font-medium tabular-nums ${
+                  allPhaseComplete ? 'text-calm-green/70' : 'text-warm-muted/40'
+                }`}>
                   {doneInPhase}/{phaseTasks.length}
                 </span>
               </button>
 
+              {/* Phase tasks */}
               {!isCollapsed && (
-                <div className="ml-3 border-l border-warm-border/50 pl-2 space-y-0.5 mt-0.5 mb-1">
+                <div className="mt-0.5 mb-2 space-y-0.5 pl-1">
                   {phaseTasks.map((task) => {
                     const isCurrent = task.task_key === currentTaskKey
                     const isActive = task.id === activeTaskId
@@ -156,28 +185,30 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
 
                     const content = (
                       <div
-                        className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
+                        className={`relative flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[13px] transition-all duration-150 ${
                           isActive
-                            ? 'bg-calm-indigo/10 border-l-2 border-calm-indigo -ml-[3px] pl-[11px]'
+                            ? 'bg-calm-indigo/[0.07] shadow-[inset_3px_0_0_0] shadow-calm-indigo'
                             : isCurrent
-                            ? 'bg-calm-indigo/5'
+                            ? 'bg-calm-indigo/[0.04]'
                             : clickable
-                            ? 'hover:bg-warm-bg/60'
+                            ? 'hover:bg-warm-border/20'
                             : ''
                         }`}
                       >
                         {getStatusIcon(task.status, isCurrent)}
                         <span
-                          className={`truncate ${
+                          className={`truncate leading-snug ${
                             task.status === 'locked'
-                              ? 'text-warm-muted/50'
+                              ? 'text-warm-muted/40'
                               : task.status === 'skipped'
-                              ? 'text-warm-muted line-through'
-                              : isActive || isCurrent
+                              ? 'text-warm-muted/60'
+                              : isActive
+                              ? 'text-calm-indigo font-semibold'
+                              : isCurrent
                               ? 'text-warm-text font-medium'
                               : task.status === 'completed'
-                              ? 'text-warm-muted'
-                              : 'text-warm-text'
+                              ? 'text-warm-muted/70'
+                              : 'text-warm-text/80'
                           }`}
                         >
                           {task.title}
