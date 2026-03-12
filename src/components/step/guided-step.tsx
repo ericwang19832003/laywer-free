@@ -202,24 +202,12 @@ export function GuidedStep({
 
   return (
     <div className={wrapperClassName ?? "max-w-2xl mx-auto px-4 py-8"}>
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href={`/case/${caseId}`}
-          className="text-sm text-warm-muted hover:text-warm-text"
-        >
-          &larr; Back to dashboard
-        </Link>
-        {skippable && (
-          <button
-            onClick={handleSkip}
-            disabled={skipping}
-            className="inline-flex items-center gap-1.5 text-sm text-warm-muted hover:text-warm-text transition-colors duration-150"
-          >
-            <SkipForward className="size-3.5" />
-            {skipping ? 'Skipping...' : 'Skip this step'}
-          </button>
-        )}
-      </div>
+      <Link
+        href={`/case/${caseId}`}
+        className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block"
+      >
+        &larr; Back to dashboard
+      </Link>
 
       <h1 className="text-2xl font-semibold text-warm-text mb-1">
         {config.title}
@@ -349,6 +337,16 @@ export function GuidedStep({
                   &larr; Previous question
                 </button>
               )}
+              {skippable && (
+                <button
+                  onClick={handleSkip}
+                  disabled={skipping}
+                  className="mt-4 inline-flex items-center justify-center gap-1.5 w-full text-sm text-warm-muted/70 hover:text-warm-muted transition-colors duration-150"
+                >
+                  <SkipForward className="size-3" />
+                  {skipping ? 'Skipping...' : 'Already done this? Skip'}
+                </button>
+              )}
             </CardContent>
           </Card>
         </>
@@ -404,6 +402,16 @@ export function GuidedStep({
               >
                 &larr; Review my answers
               </button>
+              {skippable && (
+                <button
+                  onClick={handleSkip}
+                  disabled={skipping}
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 w-full text-sm text-warm-muted/70 hover:text-warm-muted transition-colors duration-150"
+                >
+                  <SkipForward className="size-3" />
+                  {skipping ? 'Skipping...' : 'Already done this? Skip'}
+                </button>
+              )}
             </CardContent>
           </Card>
         </>
