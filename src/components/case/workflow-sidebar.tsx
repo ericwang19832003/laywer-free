@@ -28,6 +28,8 @@ const SKIPPABLE_TASKS = new Set([
   'property_demand_letter',
   'property_negotiation',
   'other_demand_letter',
+  'temporary_orders',
+  'mediation',
 ])
 
 export interface SidebarTask {
