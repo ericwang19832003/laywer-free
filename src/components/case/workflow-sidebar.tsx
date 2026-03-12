@@ -16,6 +16,7 @@ import type { WorkflowPhase } from '@/lib/workflow-phases'
 const SKIPPABLE_TASKS = new Set([
   'prepare_pi_demand_letter',
   'pi_settlement_negotiation',
+  'pi_mediation',
   'prepare_demand_letter',
   'prepare_lt_demand_letter',
   'lt_negotiation',
