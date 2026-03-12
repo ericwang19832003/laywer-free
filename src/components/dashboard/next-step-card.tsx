@@ -90,9 +90,10 @@ export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCard
             This helps us organize your documents and timeline.
           </p>
         )}
-        <Button asChild>
+        <Button size="lg" asChild className="w-full group">
           <Link href={`/case/${caseId}/step/${nextTask.id}`}>
             Review &amp; Continue
+            <span className="inline-block transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true">→</span>
           </Link>
         </Button>
         {SKIPPABLE_TASKS.has(nextTask.task_key) && (

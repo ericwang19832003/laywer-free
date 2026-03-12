@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-b from-calm-indigo to-[#4338CA] text-white shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_8px_rgba(79,70,229,0.25)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_4px_16px_rgba(79,70,229,0.35)] hover:brightness-110 active:scale-[0.97] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)]",
+          "bg-gradient-to-b from-[#6366F1] to-calm-indigo text-white shadow-[0_1px_2px_rgba(0,0,0,0.12),0_3px_10px_rgba(79,70,229,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.15),0_6px_20px_rgba(79,70,229,0.4)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.97] active:shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_3px_rgba(0,0,0,0.1)]",
         destructive:
-          "bg-gradient-to-b from-destructive to-[#DC2626] text-white shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_8px_rgba(220,38,38,0.25)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_4px_16px_rgba(220,38,38,0.35)] hover:brightness-110 active:scale-[0.97] active:shadow-[0_1px_2px_rgba(0,0,0,0.1)] focus-visible:ring-destructive/30",
+          "bg-gradient-to-b from-[#EF4444] to-[#DC2626] text-white shadow-[0_1px_2px_rgba(0,0,0,0.12),0_3px_10px_rgba(220,38,38,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.15),0_6px_20px_rgba(220,38,38,0.4)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.97] active:shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_3px_rgba(0,0,0,0.1)] focus-visible:ring-destructive/30",
         outline:
-          "border border-warm-border bg-white text-warm-text shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-warm-bg hover:border-calm-indigo/30 hover:text-calm-indigo hover:shadow-[0_1px_3px_rgba(79,70,229,0.1)] active:scale-[0.97]",
+          "border border-warm-border/80 bg-white text-warm-text shadow-[0_1px_2px_rgba(0,0,0,0.05),0_1px_1px_rgba(0,0,0,0.03)] hover:border-calm-indigo/40 hover:text-calm-indigo hover:bg-calm-indigo/[0.03] hover:shadow-[0_1px_3px_rgba(79,70,229,0.12),0_2px_6px_rgba(79,70,229,0.06)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.97] active:bg-calm-indigo/[0.06]",
         secondary:
-          "bg-calm-indigo/8 text-calm-indigo border border-calm-indigo/15 hover:bg-calm-indigo/15 hover:border-calm-indigo/25 active:scale-[0.97]",
+          "bg-calm-indigo/[0.07] text-calm-indigo border border-calm-indigo/[0.12] shadow-[0_1px_2px_rgba(79,70,229,0.06)] hover:bg-calm-indigo/[0.12] hover:border-calm-indigo/25 hover:shadow-[0_1px_4px_rgba(79,70,229,0.12)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.97]",
         ghost:
-          "text-warm-text hover:bg-warm-border/50 hover:text-warm-text active:bg-warm-border/70 dark:hover:bg-accent/50",
+          "text-warm-text hover:bg-warm-border/40 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04)] active:bg-warm-border/60 dark:hover:bg-accent/50",
         link: "text-calm-indigo underline-offset-4 hover:underline hover:text-calm-indigo/80",
       },
       size: {
