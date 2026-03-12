@@ -325,25 +325,23 @@ export function PIDemandLetterStep({
   )
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex gap-6 items-start">
-        <div className="flex-1 min-w-0">
-          <StepRunner
-            caseId={caseId}
-            taskId={taskId}
-            title="Draft Your Demand Letter"
-            reassurance={isPropertyDamage
-              ? "A demand letter formally notifies the at-fault party's insurance of your property damage claim and the compensation you are seeking."
-              : "A demand letter is your first step in seeking fair compensation. It puts the insurance company on notice of your claim."
-            }
-            onConfirm={handleConfirm}
-            onSave={handleSave}
-            onBeforeReview={generateDraft}
-            reviewContent={reviewContent}
-            reviewButtonLabel="Generate Letter &rarr;"
-            wrapperClassName=""
-            skippable={skippable}
-          >
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <StepRunner
+        caseId={caseId}
+        taskId={taskId}
+        title="Draft Your Demand Letter"
+        reassurance={isPropertyDamage
+          ? "A demand letter formally notifies the at-fault party's insurance of your property damage claim and the compensation you are seeking."
+          : "A demand letter is your first step in seeking fair compensation. It puts the insurance company on notice of your claim."
+        }
+        onConfirm={handleConfirm}
+        onSave={handleSave}
+        onBeforeReview={generateDraft}
+        reviewContent={reviewContent}
+        reviewButtonLabel="Generate Letter &rarr;"
+        wrapperClassName=""
+        skippable={skippable}
+      >
       <div className="space-y-8">
         {genError && (
           <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
@@ -353,6 +351,13 @@ export function PIDemandLetterStep({
             </p>
           </div>
         )}
+
+        <StepAuthoritySidebar
+          caseId={caseId}
+          mode="select"
+          selectedClusterIds={selectedAuthorityIds}
+          onSelectionChange={setSelectedAuthorityIds}
+        />
 
         {/* Context card from personalInjuryDetails */}
         {pid && (
@@ -795,25 +800,7 @@ export function PIDemandLetterStep({
           </p>
         </div>
       </div>
-          </StepRunner>
-        </div>
-        <div className="hidden lg:block w-72 shrink-0 sticky top-8">
-          <StepAuthoritySidebar
-            caseId={caseId}
-            mode="select"
-            selectedClusterIds={selectedAuthorityIds}
-            onSelectionChange={setSelectedAuthorityIds}
-          />
-        </div>
-      </div>
-      <div className="lg:hidden mt-6">
-        <StepAuthoritySidebar
-          caseId={caseId}
-          mode="select"
-          selectedClusterIds={selectedAuthorityIds}
-          onSelectionChange={setSelectedAuthorityIds}
-        />
-      </div>
+      </StepRunner>
     </div>
   )
 }
