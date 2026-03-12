@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { SkipForward } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { GuidedStepConfig, SummaryItem } from '@/lib/guided-steps/types'
@@ -14,6 +15,7 @@ interface GuidedStepProps {
   existingAnswers?: Record<string, string>
   onAfterComplete?: () => Promise<void>
   wrapperClassName?: string
+  skippable?: boolean
 }
 
 export function GuidedStep({
@@ -23,8 +25,31 @@ export function GuidedStep({
   existingAnswers,
   onAfterComplete,
   wrapperClassName,
+  skippable = false,
 }: GuidedStepProps) {
   const router = useRouter()
+  const [skipping, setSkipping] = useState(false)
+
+  async function handleSkip() {
+    if (skipping) return
+    setSkipping(true)
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'skipped',
+          metadata: { skip_reason: 'user_skipped_from_step_page' },
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to skip')
+      router.push(`/case/${caseId}`)
+      router.refresh()
+    } catch {
+      setSkipping(false)
+    }
+  }
+
   const [answers, setAnswers] = useState<Record<string, string>>(
     existingAnswers ?? {}
   )
@@ -177,12 +202,24 @@ export function GuidedStep({
 
   return (
     <div className={wrapperClassName ?? "max-w-2xl mx-auto px-4 py-8"}>
-      <Link
-        href={`/case/${caseId}`}
-        className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block"
-      >
-        &larr; Back to dashboard
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          href={`/case/${caseId}`}
+          className="text-sm text-warm-muted hover:text-warm-text"
+        >
+          &larr; Back to dashboard
+        </Link>
+        {skippable && (
+          <button
+            onClick={handleSkip}
+            disabled={skipping}
+            className="inline-flex items-center gap-1.5 text-sm text-warm-muted hover:text-warm-text transition-colors duration-150"
+          >
+            <SkipForward className="size-3.5" />
+            {skipping ? 'Skipping...' : 'Skip this step'}
+          </button>
+        )}
+      </div>
 
       <h1 className="text-2xl font-semibold text-warm-text mb-1">
         {config.title}

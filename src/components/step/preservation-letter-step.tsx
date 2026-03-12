@@ -13,6 +13,7 @@ import { generatePreservationLetter } from '@/lib/templates/preservation-letter'
 interface PreservationLetterStepProps {
   caseId: string
   taskId: string
+  skippable?: boolean
 }
 
 const EVIDENCE_CATEGORIES = [
@@ -43,6 +44,7 @@ async function computeSHA256(text: string): Promise<string> {
 export function PreservationLetterStep({
   caseId,
   taskId,
+  skippable,
 }: PreservationLetterStepProps) {
   const router = useRouter()
 
@@ -364,6 +366,7 @@ export function PreservationLetterStep({
       onBeforeReview={handleBeforeReview}
       reviewContent={reviewContent}
       reviewButtonLabel="Review Draft &rarr;"
+      skippable={skippable}
     >
       <div className="space-y-6">
         {/* Prominent disclaimer — always visible */}

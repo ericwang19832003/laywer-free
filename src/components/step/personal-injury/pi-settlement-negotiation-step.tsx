@@ -11,9 +11,10 @@ interface Props {
   taskId: string
   existingAnswers?: Record<string, string>
   piSubType?: string
+  skippable?: boolean
 }
 
-export function PISettlementNegotiationStep({ caseId, taskId, existingAnswers, piSubType }: Props) {
+export function PISettlementNegotiationStep({ caseId, taskId, existingAnswers, piSubType, skippable }: Props) {
   const config = isPropertyDamageSubType(piSubType)
     ? piSettlementNegotiationPropertyConfig
     : piSettlementNegotiationConfig
@@ -28,6 +29,7 @@ export function PISettlementNegotiationStep({ caseId, taskId, existingAnswers, p
             config={config}
             existingAnswers={existingAnswers}
             wrapperClassName=""
+            skippable={skippable}
           />
         </div>
         <div className="hidden lg:block w-72 shrink-0 sticky top-8">

@@ -20,6 +20,7 @@ interface DemandLetterStepProps {
     defendant_is_business: boolean
   } | null
   caseData: { county: string | null }
+  skippable?: boolean
 }
 
 export function DemandLetterStep({
@@ -28,6 +29,7 @@ export function DemandLetterStep({
   existingMetadata,
   claimDetails,
   caseData,
+  skippable,
 }: DemandLetterStepProps) {
   const meta = existingMetadata ?? {}
 
@@ -242,6 +244,7 @@ export function DemandLetterStep({
       onBeforeReview={generateDraft}
       reviewContent={reviewContent}
       reviewButtonLabel="Generate Letter &rarr;"
+      skippable={skippable}
     >
       <div className="space-y-8">
         {genError && (

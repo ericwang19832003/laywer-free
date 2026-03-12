@@ -210,6 +210,7 @@ export default async function StepPage({
         <PreservationLetterStep
           caseId={id}
           taskId={taskId}
+          skippable
         />
       )
     case 'upload_return_of_service':
@@ -580,6 +581,7 @@ export default async function StepPage({
           existingMetadata={task.metadata}
           claimDetails={claimDetails}
           caseData={{ county: caseRow?.county ?? null }}
+          skippable
         />
       )
     }
@@ -640,6 +642,7 @@ export default async function StepPage({
           existingMetadata={task.metadata}
           landlordTenantDetails={ltDetails}
           caseData={{ county: caseRow?.county ?? null }}
+          skippable
         />
       )
     }
@@ -748,13 +751,14 @@ export default async function StepPage({
           existingMetadata={task.metadata}
           personalInjuryDetails={piDetails}
           caseData={{ county: caseRow?.county ?? null }}
+          skippable
         />
       )
     }
     case 'pi_settlement_negotiation': {
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
-      return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
+      return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} skippable />
     }
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase

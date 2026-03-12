@@ -36,6 +36,7 @@ interface PIDemandLetterStepProps {
     your_policy_number?: string
   } | null
   caseData: { county: string | null }
+  skippable?: boolean
 }
 
 export function PIDemandLetterStep({
@@ -44,6 +45,7 @@ export function PIDemandLetterStep({
   existingMetadata,
   personalInjuryDetails,
   caseData,
+  skippable,
 }: PIDemandLetterStepProps) {
   const meta = existingMetadata ?? {}
   const pid = personalInjuryDetails
@@ -340,6 +342,7 @@ export function PIDemandLetterStep({
             reviewContent={reviewContent}
             reviewButtonLabel="Generate Letter &rarr;"
             wrapperClassName=""
+            skippable={skippable}
           >
       <div className="space-y-8">
         {genError && (

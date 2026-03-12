@@ -23,6 +23,7 @@ interface LtDemandLetterStepProps {
     demand_letter_sent: boolean
   } | null
   caseData: { county: string | null }
+  skippable?: boolean
 }
 
 const SUB_TYPE_LABELS: Record<string, string> = {
@@ -42,6 +43,7 @@ export function LtDemandLetterStep({
   existingMetadata,
   landlordTenantDetails,
   caseData,
+  skippable,
 }: LtDemandLetterStepProps) {
   const meta = existingMetadata ?? {}
   const partyRole = landlordTenantDetails?.party_role ?? 'tenant'
@@ -257,6 +259,7 @@ export function LtDemandLetterStep({
       onBeforeReview={generateDraft}
       reviewContent={reviewContent}
       reviewButtonLabel="Generate Letter &rarr;"
+      skippable={skippable}
     >
       <div className="space-y-8">
         {genError && (
