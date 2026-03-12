@@ -257,6 +257,311 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     ],
   },
 
+  // --- Personal Injury: Property Damage Variants ---
+  pi_intake_property: {
+    why: 'Property damage details shape your entire strategy — from documenting the damage to calculating your claim value.',
+    checklist: [
+      'Date and location of the incident',
+      'Other party\'s name and insurance info',
+      'Your insurance policy number',
+      'Police report number (if applicable)',
+    ],
+    tip: 'Don\'t worry if you don\'t have everything yet — you can update details later.',
+  },
+  pi_medical_records_property: {
+    why: 'Thorough damage documentation is the foundation of your property damage claim. Photos, estimates, and receipts prove your losses.',
+    checklist: [
+      'Photos of the damage from multiple angles',
+      'Professional repair estimates',
+      'Receipts for any repairs already made',
+      'Pre-damage condition records or photos',
+    ],
+  },
+  pi_insurance_communication_property: {
+    why: 'How you communicate with insurance companies can significantly impact your claim. Being prepared helps protect your interests.',
+    checklist: [
+      'Your claim number (if you have one)',
+      'Insurance adjuster\'s name and contact info',
+      'Notes from any prior conversations',
+    ],
+    tip: 'Never agree to a settlement before you have complete repair estimates.',
+  },
+  prepare_pi_demand_letter_property: {
+    why: 'A demand letter formally requests compensation and often leads to settlement without going to court.',
+    checklist: [
+      'Complete damage documentation and photos',
+      'Professional repair or replacement estimates',
+      'Evidence of loss of use costs',
+      'Receipts for all related expenses',
+    ],
+  },
+  pi_settlement_negotiation_property: {
+    why: 'Most property damage cases settle before trial. Knowing your property\'s value and repair costs gives you leverage.',
+    checklist: [
+      'Total repair or replacement costs',
+      'Loss of use documentation',
+      'Your minimum acceptable settlement amount',
+    ],
+  },
+  prepare_pi_petition_property: {
+    why: 'If settlement talks fail, filing a lawsuit preserves your right to recover damages through the court.',
+    checklist: [
+      'All evidence from your vault',
+      'Completed demand letter (if sent)',
+      'Filing fee for your county',
+    ],
+  },
+  pi_post_resolution_property: {
+    why: 'After your case resolves, there are important follow-up steps to ensure you receive your compensation and complete any remaining repairs.',
+    checklist: [
+      'Settlement agreement or court order',
+      'Outstanding repair or replacement invoices',
+    ],
+  },
+
+  // --- Contract ---
+  contract_intake: {
+    why: 'Contract details — the parties, terms, and breach — form the foundation of your legal claim.',
+    checklist: [
+      'A copy of the contract (written or summary of oral terms)',
+      'Names of all parties involved',
+      'Description of what the other party failed to do',
+      'Amount of damages you\'re claiming',
+    ],
+    tip: 'Even if you don\'t have a written contract, oral agreements can be enforceable.',
+  },
+  contract_demand_letter: {
+    why: 'A demand letter formally notifies the other party and often resolves disputes without court involvement.',
+    checklist: [
+      'Other party\'s name and mailing address',
+      'Specific contract terms that were breached',
+      'Amount you\'re demanding',
+      'Deadline for response (typically 30 days)',
+    ],
+  },
+  contract_negotiation: {
+    why: 'Many contract disputes settle through negotiation. Understanding your leverage helps you reach a fair resolution.',
+    checklist: [
+      'Your minimum acceptable settlement amount',
+      'Evidence of the breach and your damages',
+      'Any prior communications about the dispute',
+    ],
+  },
+  contract_prepare_filing: {
+    why: 'Your petition establishes your legal claims in court. Getting the format and content right is essential.',
+    checklist: [
+      'Completed demand letter (if sent)',
+      'All evidence from your vault',
+      'Filing fee for your county',
+    ],
+  },
+  contract_file_with_court: {
+    why: 'Filing officially starts your lawsuit. This step guides you through the filing process.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  contract_serve_defendant: {
+    why: 'The defendant must be formally notified of the lawsuit before the case can proceed.',
+    checklist: [
+      'Defendant\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  contract_wait_for_answer: {
+    why: 'After service, the defendant has a set number of days to respond. This waiting period is normal.',
+    checklist: [
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  contract_review_answer: {
+    why: 'Understanding the defendant\'s response helps you identify their defenses and plan your strategy.',
+    checklist: [
+      'The defendant\'s filed answer',
+      'Note any counterclaims or affirmative defenses',
+    ],
+  },
+  contract_discovery: {
+    why: 'Discovery lets you formally request evidence from the other side to strengthen your position.',
+    checklist: [
+      'List of documents you want from the defendant',
+      'Questions about the contract and breach',
+      'Financial records related to damages',
+    ],
+  },
+  contract_mediation: {
+    why: 'Mediation with a neutral third party can resolve your dispute faster and cheaper than going to trial.',
+    checklist: [
+      'Your settlement range (minimum to ideal)',
+      'Summary of your strongest evidence',
+      'All financial documentation of damages',
+    ],
+  },
+  contract_post_resolution: {
+    why: 'After your case resolves, there are steps to collect payment or enforce the judgment.',
+    checklist: [
+      'Settlement agreement or court order',
+      'Payment timeline and method',
+    ],
+  },
+
+  // --- Property Dispute ---
+  property_intake: {
+    why: 'Property dispute details — location, parties, and the nature of the dispute — shape your legal strategy.',
+    checklist: [
+      'Property address',
+      'Other party\'s name and relationship (neighbor, seller, HOA, etc.)',
+      'Description of the dispute',
+      'Any surveys, deeds, or title documents',
+    ],
+    tip: 'Photos and documentation of the property issue are especially valuable.',
+  },
+  property_demand_letter: {
+    why: 'A demand letter formally notifies the other party and establishes a record of your attempt to resolve the issue.',
+    checklist: [
+      'Other party\'s name and address',
+      'Specific property right being violated',
+      'What you want them to do (stop, pay, fix)',
+      'Deadline for response',
+    ],
+  },
+  property_negotiation: {
+    why: 'Property disputes often benefit from negotiation, especially between neighbors or in real estate transactions.',
+    checklist: [
+      'Your ideal resolution',
+      'Evidence supporting your position (surveys, photos, deeds)',
+      'Any prior communications about the issue',
+    ],
+  },
+  property_prepare_filing: {
+    why: 'Your court filing establishes your property rights claims. Getting the legal basis right is essential.',
+    checklist: [
+      'Property deed or title documents',
+      'Survey (if applicable)',
+      'Evidence from your vault',
+      'Filing fee for your county',
+    ],
+  },
+  property_file_with_court: {
+    why: 'Filing officially starts your lawsuit to protect your property rights.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  property_serve_defendant: {
+    why: 'The other party must be formally notified of the lawsuit before the case can proceed.',
+    checklist: [
+      'Other party\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  property_wait_for_answer: {
+    why: 'After service, the other party has a set number of days to respond.',
+    checklist: [
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  property_review_answer: {
+    why: 'Understanding the other party\'s response reveals their legal position and any counterclaims.',
+    checklist: [
+      'The defendant\'s filed answer',
+      'Note any counterclaims about property rights',
+    ],
+  },
+  property_discovery: {
+    why: 'Discovery in property cases often involves surveys, appraisals, and title searches.',
+    checklist: [
+      'Documents you want from the other party',
+      'Whether you need a professional survey or appraisal',
+      'Title search records',
+    ],
+  },
+  property_post_resolution: {
+    why: 'After resolution, you may need to record the judgment or take steps to enforce property rights.',
+    checklist: [
+      'Court order or settlement agreement',
+      'Recording requirements at the county clerk',
+    ],
+  },
+
+  // --- Other ---
+  other_intake: {
+    why: 'Understanding your situation helps us guide you through the right legal process.',
+    checklist: [
+      'Names of the parties involved',
+      'Description of what happened',
+      'What outcome you\'re seeking',
+      'Any deadlines you\'re aware of',
+    ],
+    tip: 'Even if your situation feels unique, the legal process follows the same basic steps.',
+  },
+  other_demand_letter: {
+    why: 'A demand letter formally requests resolution and creates a record of your attempt to settle before court.',
+    checklist: [
+      'Other party\'s name and address',
+      'Clear description of your complaint',
+      'What you want (compensation, action, or both)',
+      'Deadline for response',
+    ],
+  },
+  other_prepare_filing: {
+    why: 'Your court filing establishes your legal claims. Getting the content right helps the court understand your case.',
+    checklist: [
+      'All evidence from your vault',
+      'Demand letter (if sent)',
+      'Filing fee for your county',
+    ],
+  },
+  other_file_with_court: {
+    why: 'Filing officially starts your case with the court.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  other_serve_defendant: {
+    why: 'The other party must receive formal notice of the lawsuit before the case can move forward.',
+    checklist: [
+      'Other party\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  other_wait_for_answer: {
+    why: 'After service, the other party has a set number of days to respond.',
+    checklist: [
+      'Monitor the court docket',
+      'Watch for court mail',
+    ],
+  },
+  other_review_answer: {
+    why: 'The other party\'s response reveals their defenses and any counterclaims.',
+    checklist: [
+      'The filed answer document',
+      'Note any counterclaims or defenses',
+    ],
+  },
+  other_discovery: {
+    why: 'Discovery lets you formally obtain evidence and information from the other side.',
+    checklist: [
+      'List of documents you need',
+      'Questions for the other party',
+    ],
+  },
+  other_post_resolution: {
+    why: 'After your case resolves, there may be steps to enforce the judgment or finalize the outcome.',
+    checklist: [
+      'Court order or settlement agreement',
+      'Payment or compliance deadlines',
+    ],
+  },
+
   // --- Small Claims ---
   small_claims_intake: {
     why: 'These details determine your filing court, fees, and whether your claim fits within the small claims limit.',
@@ -315,6 +620,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Landlord or property manager\'s name and address',
       'Description of the issue',
     ],
+    tip: 'Take photos and video of the property condition now — this evidence is time-sensitive.',
   },
   prepare_lt_demand_letter: {
     why: 'Many landlord-tenant issues require a written demand before you can take legal action. This letter starts that clock.',
@@ -322,6 +628,16 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Specific amount owed or issue to be fixed',
       'Landlord\'s mailing address',
       'Copies of relevant lease provisions',
+    ],
+    tip: 'Send the letter by certified mail with return receipt — this creates proof of delivery.',
+  },
+  lt_negotiation: {
+    why: 'Settling a landlord-tenant dispute without court saves time, money, and preserves the relationship if needed.',
+    checklist: [
+      'Copy of your demand letter and proof of delivery',
+      'Documentation of damages or issues',
+      'Your minimum acceptable settlement terms',
+      'Any response from the other party',
     ],
   },
   prepare_landlord_tenant_filing: {
@@ -331,6 +647,16 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Lease agreement',
       'Evidence of the issue (photos, communications)',
     ],
+    tip: 'JP courts handle claims up to $20,000. For larger amounts, file in county or district court.',
+  },
+  lt_file_with_court: {
+    why: 'Filing officially starts your landlord-tenant case. JP and district courts have different procedures.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Copy of the lease agreement',
+      'Proof that demand letter was sent',
+    ],
   },
   serve_other_party: {
     why: 'The other party must be formally notified. Landlord-tenant cases often have specific service requirements.',
@@ -338,12 +664,65 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Other party\'s address for service',
       'Correct service method for your court',
     ],
+    tip: 'For contested cases, consider using a process server instead of certified mail for more reliable service.',
   },
-  post_judgment: {
-    why: 'After the ruling, there may be steps to enforce the judgment or handle an appeal.',
+  lt_wait_for_response: {
+    why: 'After being served, the other party has a limited number of days to file a response. Tracking this deadline is critical.',
     checklist: [
-      'Copy of the court\'s order or judgment',
-      'Notes on any payment or compliance deadlines',
+      'Calendar the answer deadline based on the service date',
+      'Check the court docket regularly for filings',
+      'Watch your mailbox for court notices',
+    ],
+  },
+  lt_review_response: {
+    why: 'Understanding the other party\'s defenses and any counterclaims shapes your hearing strategy.',
+    checklist: [
+      'The other party\'s filed answer or response',
+      'List of claims they admitted vs. denied',
+      'Note any counterclaims or affirmative defenses',
+    ],
+  },
+  lt_discovery: {
+    why: 'District court landlord-tenant cases may involve formal discovery. This lets you request evidence from the other side.',
+    checklist: [
+      'List of documents you want from the other party',
+      'Interrogatories (written questions) to send',
+      'Whether depositions are needed',
+    ],
+  },
+  lt_prepare_for_hearing: {
+    why: 'Landlord-tenant hearings focus on lease terms, property condition, and compliance. Being organized wins cases.',
+    checklist: [
+      'Lease agreement with key terms highlighted',
+      'Photos and videos of property condition',
+      'Rent payment records and receipts',
+      'Timeline of events written out',
+      'Three copies of everything (you, judge, other party)',
+    ],
+  },
+  lt_mediation: {
+    why: 'Courts often prefer mediated settlements for landlord-tenant disputes. Mediation can resolve issues faster than a full hearing.',
+    checklist: [
+      'Your settlement authority (what you can agree to)',
+      'Your bottom line and ideal outcome',
+      'Key lease terms and evidence summary',
+    ],
+  },
+  lt_hearing_day: {
+    why: 'This is your day in court for your landlord-tenant case. Preparation and composure make the strongest impression.',
+    checklist: [
+      'All exhibits organized and labeled',
+      'Government-issued ID',
+      'Arrive 30 minutes early',
+      'Copies for the judge and other party',
+    ],
+  },
+  lt_post_judgment: {
+    why: 'Landlord-tenant judgments have unique enforcement options including writs of possession and specific appeal timelines.',
+    checklist: [
+      'Copy of the court\'s judgment or order',
+      'Compliance deadlines noted on your calendar',
+      'Appeal deadline (5 days for evictions, 21 days for money judgments)',
     ],
   },
 

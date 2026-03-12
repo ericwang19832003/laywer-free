@@ -15,7 +15,7 @@ export default async function CaseLayout({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: tasks }, { data: caseRow }, { data: deadline }, { data: riskScore }] =
+  const [{ data: tasks }, { data: caseRow }, { data: deadline }, { data: riskScore }, { data: piDetails }] =
     await Promise.all([
       supabase
         .from('tasks')
@@ -41,6 +41,11 @@ export default async function CaseLayout({
         .eq('case_id', id)
         .order('computed_at', { ascending: false })
         .limit(1)
+        .maybeSingle(),
+      supabase
+        .from('personal_injury_details')
+        .select('pi_sub_type')
+        .eq('case_id', id)
         .maybeSingle(),
     ])
 
@@ -79,6 +84,8 @@ export default async function CaseLayout({
           fallbackTaskKey={currentTaskKey}
           deadline={deadline}
           riskScore={riskScore}
+          disputeType={disputeType}
+          piSubType={piDetails?.pi_sub_type ?? undefined}
         />
       </aside>
 

@@ -40,9 +40,15 @@ import { LtIntakeStep } from '@/components/step/landlord-tenant/lt-intake-step'
 import { LtDemandLetterStep } from '@/components/step/landlord-tenant/lt-demand-letter-step'
 import { LandlordTenantWizard } from '@/components/step/landlord-tenant-wizard'
 import { ServeOtherPartyStep } from '@/components/step/landlord-tenant/serve-other-party-step'
-import { LtHearingPrepStep } from '@/components/step/landlord-tenant/lt-hearing-prep-step'
-import { LtHearingDayStep } from '@/components/step/landlord-tenant/lt-hearing-day-step'
-import { PostJudgmentStep } from '@/components/step/landlord-tenant/post-judgment-step'
+import { ltNegotiationConfig } from '@/lib/guided-steps/landlord-tenant/lt-negotiation'
+import { ltFileWithCourtConfig } from '@/lib/guided-steps/landlord-tenant/lt-file-with-court'
+import { ltWaitForResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-wait-for-response'
+import { ltReviewResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-review-response'
+import { ltDiscoveryConfig } from '@/lib/guided-steps/landlord-tenant/lt-discovery'
+import { ltMediationConfig } from '@/lib/guided-steps/landlord-tenant/lt-mediation'
+import { ltHearingPrepConfig } from '@/lib/guided-steps/landlord-tenant/lt-hearing-prep'
+import { ltHearingDayConfig } from '@/lib/guided-steps/landlord-tenant/lt-hearing-day'
+import { postJudgmentConfig } from '@/lib/guided-steps/landlord-tenant/post-judgment'
 import { DebtDefenseIntakeStep } from '@/components/step/debt-defense/debt-defense-intake-step'
 import { DebtValidationLetterStep } from '@/components/step/debt-defense/debt-validation-letter-step'
 import { DebtDefenseWizard } from '@/components/step/debt-defense-wizard'
@@ -68,6 +74,37 @@ import { PIDiscoveryResponsesStep } from '@/components/step/personal-injury/pi-d
 import { PISchedulingConferenceStep } from '@/components/step/personal-injury/pi-scheduling-conference-step'
 import { PIPretrialMotionsStep } from '@/components/step/personal-injury/pi-pretrial-motions-step'
 import { PIMediationStep } from '@/components/step/personal-injury/pi-mediation-step'
+import { ContractIntakeStep } from '@/components/step/contract/contract-intake-step'
+import { ContractWizard } from '@/components/step/contract/contract-wizard'
+import { PropertyIntakeStep } from '@/components/step/property/property-intake-step'
+import { PropertyWizard } from '@/components/step/property/property-wizard'
+import { OtherIntakeStep } from '@/components/step/other/other-intake-step'
+import { OtherWizard } from '@/components/step/other/other-wizard'
+import { GuidedStep } from '@/components/step/guided-step'
+import { contractDemandLetterConfig } from '@/lib/guided-steps/contract/contract-demand-letter'
+import { contractNegotiationConfig } from '@/lib/guided-steps/contract/contract-negotiation'
+import { contractFileWithCourtConfig } from '@/lib/guided-steps/contract/contract-file-with-court'
+import { contractServeDefendantConfig } from '@/lib/guided-steps/contract/contract-serve-defendant'
+import { contractWaitForAnswerConfig } from '@/lib/guided-steps/contract/contract-wait-for-answer'
+import { contractReviewAnswerConfig } from '@/lib/guided-steps/contract/contract-review-answer'
+import { contractDiscoveryConfig } from '@/lib/guided-steps/contract/contract-discovery'
+import { contractMediationConfig } from '@/lib/guided-steps/contract/contract-mediation'
+import { contractPostResolutionConfig } from '@/lib/guided-steps/contract/contract-post-resolution'
+import { propertyDemandLetterConfig } from '@/lib/guided-steps/property/property-demand-letter'
+import { propertyNegotiationConfig } from '@/lib/guided-steps/property/property-negotiation'
+import { propertyFileWithCourtConfig } from '@/lib/guided-steps/property/property-file-with-court'
+import { propertyServeDefendantConfig } from '@/lib/guided-steps/property/property-serve-defendant'
+import { propertyWaitForAnswerConfig } from '@/lib/guided-steps/property/property-wait-for-answer'
+import { propertyReviewAnswerConfig } from '@/lib/guided-steps/property/property-review-answer'
+import { propertyDiscoveryConfig } from '@/lib/guided-steps/property/property-discovery'
+import { propertyPostResolutionConfig } from '@/lib/guided-steps/property/property-post-resolution'
+import { otherDemandLetterConfig } from '@/lib/guided-steps/other/other-demand-letter'
+import { otherFileWithCourtConfig } from '@/lib/guided-steps/other/other-file-with-court'
+import { otherServeDefendantConfig } from '@/lib/guided-steps/other/other-serve-defendant'
+import { otherWaitForAnswerConfig } from '@/lib/guided-steps/other/other-wait-for-answer'
+import { otherReviewAnswerConfig } from '@/lib/guided-steps/other/other-review-answer'
+import { otherDiscoveryConfig } from '@/lib/guided-steps/other/other-discovery'
+import { otherPostResolutionConfig } from '@/lib/guided-steps/other/other-post-resolution'
 import { MOTION_CONFIGS } from '@/lib/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
@@ -602,24 +639,10 @@ export default async function StepPage({
     }
     case 'serve_defendant':
       return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'prepare_for_hearing': {
-      // Check if this is a landlord-tenant case
-      const { data: caseCheck } = await supabase
-        .from('cases').select('dispute_type').eq('id', id).single()
-      if (caseCheck?.dispute_type === 'landlord_tenant') {
-        return <LtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-      }
+    case 'prepare_for_hearing':
       return <PrepareForHearingStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    }
-    case 'hearing_day': {
-      // Check if this is a landlord-tenant case
-      const { data: caseCheck } = await supabase
-        .from('cases').select('dispute_type').eq('id', id).single()
-      if (caseCheck?.dispute_type === 'landlord_tenant') {
-        return <LtHearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-      }
+    case 'hearing_day':
       return <HearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    }
 
     // Landlord-tenant task chain steps
     case 'landlord_tenant_intake':
@@ -646,6 +669,8 @@ export default async function StepPage({
         />
       )
     }
+    case 'lt_negotiation':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'prepare_landlord_tenant_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type').eq('id', id).single()
@@ -661,10 +686,24 @@ export default async function StepPage({
         />
       )
     }
+    case 'lt_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'serve_other_party':
       return <ServeOtherPartyStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'post_judgment':
-      return <PostJudgmentStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_wait_for_response':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltWaitForResponseConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_review_response':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltReviewResponseConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_prepare_for_hearing':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltHearingPrepConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_mediation':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltMediationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_hearing_day':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_post_judgment':
+      return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
 
     // Debt defense task chain steps
     case 'debt_defense_intake':
@@ -813,6 +852,129 @@ export default async function StepPage({
         .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
       return <PIPostResolutionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
+
+    // Contract dispute task chain steps
+    case 'contract_intake':
+      return (
+        <ContractIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'contract_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'contract_negotiation':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'contract_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county, court_type').eq('id', id).single()
+      const { data: contractDetails } = await supabase
+        .from('contract_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <ContractWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          contractDetails={contractDetails}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+        />
+      )
+    }
+    case 'contract_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_review_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractReviewAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_mediation':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractMediationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'contract_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Property dispute task chain steps
+    case 'property_intake':
+      return (
+        <PropertyIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'property_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'property_negotiation':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'property_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county, court_type').eq('id', id).single()
+      const { data: propertyDetails } = await supabase
+        .from('property_dispute_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <PropertyWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          propertyDetails={propertyDetails}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+        />
+      )
+    }
+    case 'property_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_review_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyReviewAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Other dispute task chain steps
+    case 'other_intake':
+      return (
+        <OtherIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'other_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'other_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('county, court_type').eq('id', id).single()
+      const { data: otherDetails } = await supabase
+        .from('other_case_details').select('*').eq('case_id', id).maybeSingle()
+      return (
+        <OtherWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          otherDetails={otherDetails}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+        />
+      )
+    }
+    case 'other_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'other_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'other_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'other_review_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherReviewAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'other_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'other_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={otherPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
 
     default:
       return (

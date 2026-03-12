@@ -66,19 +66,23 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     },
     {
       label: 'Building Your Case',
-      taskKeys: ['evidence_vault', 'prepare_lt_demand_letter'],
+      taskKeys: ['evidence_vault', 'prepare_lt_demand_letter', 'lt_negotiation'],
     },
     {
       label: 'Filing & Service',
-      taskKeys: ['prepare_landlord_tenant_filing', 'file_with_court', 'serve_other_party'],
+      taskKeys: ['prepare_landlord_tenant_filing', 'lt_file_with_court', 'serve_other_party'],
+    },
+    {
+      label: 'Pre-Hearing',
+      taskKeys: ['lt_wait_for_response', 'lt_review_response', 'lt_discovery', 'lt_prepare_for_hearing', 'lt_mediation'],
     },
     {
       label: 'Hearing',
-      taskKeys: ['prepare_for_hearing', 'hearing_day'],
+      taskKeys: ['lt_hearing_day'],
     },
     {
       label: 'Resolution',
-      taskKeys: ['post_judgment'],
+      taskKeys: ['lt_post_judgment'],
     },
   ],
 
@@ -125,6 +129,75 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     {
       label: 'Resolution',
       taskKeys: ['final_orders'],
+    },
+  ],
+
+  contract: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 'contract_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['evidence_vault', 'contract_demand_letter', 'contract_negotiation'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['contract_prepare_filing', 'contract_file_with_court', 'contract_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['contract_wait_for_answer', 'contract_review_answer', 'contract_discovery', 'contract_mediation'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['contract_post_resolution'],
+    },
+  ],
+
+  property: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 'property_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['evidence_vault', 'property_demand_letter', 'property_negotiation'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['property_prepare_filing', 'property_file_with_court', 'property_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['property_wait_for_answer', 'property_review_answer', 'property_discovery'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['property_post_resolution'],
+    },
+  ],
+
+  other: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 'other_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['evidence_vault', 'other_demand_letter'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['other_prepare_filing', 'other_file_with_court', 'other_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['other_wait_for_answer', 'other_review_answer', 'other_discovery'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['other_post_resolution'],
     },
   ],
 

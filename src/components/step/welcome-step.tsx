@@ -18,8 +18,12 @@ export function WelcomeStep({ caseId, taskId }: WelcomeStepProps) {
 
     if (!firstRes.ok) {
       const err = await firstRes.json()
-      // If already in_progress, that's fine — continue to completed
-      if (!err.details?.includes?.("'in_progress'")) {
+      // If already completed, just redirect back
+      if (err.details?.includes?.("from 'completed'")) {
+        return
+      }
+      // If already in_progress, continue to completed
+      if (!err.details?.includes?.("from 'in_progress'")) {
         throw new Error(err.error || 'Failed to update task')
       }
     }

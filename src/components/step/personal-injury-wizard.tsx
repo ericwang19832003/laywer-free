@@ -23,6 +23,7 @@ import {
 import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Shield, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import { StepAuthoritySidebar } from './step-authority-sidebar'
+import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -79,6 +80,10 @@ function getSubTypeLabel(subType: string): string {
     case 'slip_and_fall': return 'Slip and Fall'
     case 'dog_bite': return 'Dog Bite'
     case 'product_liability': return 'Product Liability'
+    case 'vehicle_damage': return 'Vehicle Damage'
+    case 'property_damage_negligence': return 'Property Damage'
+    case 'vandalism': return 'Vandalism'
+    case 'other_property_damage': return 'Property Damage'
     case 'other': return 'Other Personal Injury'
     default: return 'Personal Injury'
   }
@@ -97,6 +102,14 @@ function getPreflightTip(subType: string): string {
       return 'For dog bite cases, document the animal, the owner, and any prior incidents you know of. Report to local animal control if you have not already.'
     case 'product_liability':
       return 'For product liability cases, preserve the defective product if possible. Do not discard packaging, manuals, or receipts.'
+    case 'vehicle_damage':
+      return 'For vehicle damage cases, get at least three repair estimates and document the damage with timestamped photos from multiple angles.'
+    case 'property_damage_negligence':
+      return 'For property damage cases, document the damage thoroughly with photos, get professional repair estimates, and preserve any evidence of what caused the damage.'
+    case 'vandalism':
+      return 'For vandalism cases, file a police report if you have not already. Preserve any surveillance footage and document the damage with photos before making repairs.'
+    case 'other_property_damage':
+      return 'Document all property damage with photos and written descriptions. Get professional repair estimates and keep all receipts.'
     default:
       return 'Gather all evidence related to how the injury happened and who was responsible.'
   }
@@ -112,6 +125,7 @@ function getStepsForSubType(subType: string): WizardStep[] {
   const otherDriver: WizardStep = { id: 'other_driver', title: 'Other Driver Info', subtitle: 'Information about the other driver.' }
   const premises: WizardStep = { id: 'premises', title: 'Property/Location Info', subtitle: 'Details about where it happened.' }
   const product: WizardStep = { id: 'product', title: 'Product Information', subtitle: 'Details about the defective product.' }
+  const damageDetails: WizardStep = { id: 'damage_details', title: 'Damage Details', subtitle: 'Describe the property damage.' }
   const injuries: WizardStep = { id: 'injuries', title: 'Your Injuries', subtitle: 'Describe your injuries.' }
   const medical: WizardStep = { id: 'medical', title: 'Medical Treatment', subtitle: 'Your medical providers and costs.' }
   const damages: WizardStep = { id: 'damages', title: 'Your Damages', subtitle: 'Calculate your total damages.' }
@@ -120,6 +134,15 @@ function getStepsForSubType(subType: string): WizardStep[] {
   const review: WizardStep = { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' }
 
   const common = [preflight, incident]
+
+  // Property damage cases: no injuries/medical steps
+  if (isPropertyDamageSubType(subType)) {
+    if (subType === 'vehicle_damage') {
+      return [...common, otherDriver, damageDetails, damages, insurance, venue, review]
+    }
+    return [...common, damageDetails, damages, insurance, venue, review]
+  }
+
   const tail = [injuries, medical, damages, insurance, venue, review]
 
   if (MOTOR_VEHICLE_TYPES.includes(subType)) {
@@ -135,7 +158,8 @@ function getStepsForSubType(subType: string): WizardStep[] {
 }
 
 function getDocumentTitle(subType: string): string {
-  return `Personal Injury Petition - ${getSubTypeLabel(subType)}`
+  const docType = isPropertyDamageSubType(subType) ? 'Property Damage Petition' : 'Personal Injury Petition'
+  return `${docType} - ${getSubTypeLabel(subType)}`
 }
 
 function getDraftTitle(subType: string): string {
@@ -216,6 +240,7 @@ export function PersonalInjuryWizard({
   const router = useRouter()
   const meta = (existingMetadata ?? {}) as Record<string, unknown>
   const piSubType = personalInjuryDetails?.pi_sub_type ?? 'other_injury'
+  const isPropertyDamage = isPropertyDamageSubType(piSubType)
   const totalEstimateMinutes = 35
 
   const steps = useMemo(() => getStepsForSubType(piSubType), [piSubType])
@@ -311,6 +336,26 @@ export function PersonalInjuryWizard({
       defaultMultiplier(personalInjuryDetails?.injury_severity ?? '')
   )
 
+  /* ---- Property damage details (property damage sub-types) ---- */
+  const [propertyDamageDescription, setPropertyDamageDescription] = useState<string>(
+    (meta.property_damage_description as string) ?? ''
+  )
+  const [damageSeverity, setDamageSeverity] = useState<string>(
+    (meta.damage_severity as string) ?? ''
+  )
+  const [repairEstimate, setRepairEstimate] = useState<string>(
+    (meta.repair_estimate as string) ?? ''
+  )
+  const [hasRepairReceipts, setHasRepairReceipts] = useState<boolean>(
+    (meta.has_repair_receipts as boolean) ?? false
+  )
+  const [lossOfUse, setLossOfUse] = useState<string>(
+    (meta.loss_of_use as string) ?? ''
+  )
+  const [additionalCosts, setAdditionalCosts] = useState<string>(
+    (meta.additional_costs as string) ?? ''
+  )
+
   /* ---- Insurance ---- */
   const [yourInsuranceCarrier, setYourInsuranceCarrier] = useState<string>(
     (meta.your_insurance_carrier as string) ?? personalInjuryDetails?.your_insurance_carrier ?? ''
@@ -375,6 +420,14 @@ export function PersonalInjuryWizard({
     return totalMedical + lost + prop + painSufferingAmount
   }, [totalMedical, lostWages, propertyDamage, painSufferingAmount])
 
+  const propertyGrandTotal = useMemo(() => {
+    return (parseFloat(repairEstimate) || 0) +
+      (parseFloat(lossOfUse) || 0) +
+      (parseFloat(additionalCosts) || 0)
+  }, [repairEstimate, lossOfUse, additionalCosts])
+
+  const effectiveGrandTotal = isPropertyDamage ? propertyGrandTotal : grandTotal
+
   /* ---- Medical provider handlers ---- */
 
   const addProvider = useCallback(() => {
@@ -420,6 +473,14 @@ export function PersonalInjuryWizard({
         return `The defendant owned or harbored an animal with known dangerous propensities, and negligently failed to restrain or control the animal, proximately causing the bite/attack on ${incidentDate} at ${incidentLocation}.`
       case 'product_liability':
         return `${manufacturer || 'The manufacturer'} designed, manufactured, and/or sold a defective product (${productName || 'the product'}), which was unreasonably dangerous due to: ${defectDescription || 'a defect'}, proximately causing injury.`
+      case 'vehicle_damage':
+        return `The defendant negligently operated their vehicle on ${incidentDate} at ${incidentLocation}, causing damage to Plaintiff's property. ${incidentDescription}`
+      case 'property_damage_negligence':
+        return `The defendant's negligent actions on ${incidentDate} at ${incidentLocation} proximately caused damage to Plaintiff's property. ${incidentDescription}`
+      case 'vandalism':
+        return `The defendant intentionally or recklessly damaged Plaintiff's property on ${incidentDate} at ${incidentLocation}. ${incidentDescription}`
+      case 'other_property_damage':
+        return `The defendant's negligent or wrongful conduct on ${incidentDate} at ${incidentLocation} caused damage to Plaintiff's property. ${incidentDescription}`
       default:
         return `The defendant acted negligently, proximately causing the incident on ${incidentDate} at ${incidentLocation}. ${incidentDescription}`
     }
@@ -460,15 +521,29 @@ export function PersonalInjuryWizard({
       incident_date: incidentDate,
       incident_location: incidentLocation,
       incident_description: incidentDescription,
-      injuries_description: injuryDescription,
-      injury_severity: injurySeverity as 'minor' | 'moderate' | 'severe',
-      damages: {
-        medical: totalMedical,
-        lost_wages: lost,
-        property_damage: prop,
-        pain_suffering: painSufferingAmount,
-        total: grandTotal,
-      },
+      ...(isPropertyDamage
+        ? {
+            property_damage_description: propertyDamageDescription,
+            damage_severity: damageSeverity,
+          }
+        : {
+            injuries_description: injuryDescription,
+            injury_severity: injurySeverity as 'minor' | 'moderate' | 'severe',
+          }),
+      damages: isPropertyDamage
+        ? {
+            repair_estimate: parseFloat(repairEstimate) || 0,
+            loss_of_use: parseFloat(lossOfUse) || 0,
+            additional_costs: parseFloat(additionalCosts) || 0,
+            total: propertyGrandTotal,
+          }
+        : {
+            medical: totalMedical,
+            lost_wages: lost,
+            property_damage: prop,
+            pain_suffering: painSufferingAmount,
+            total: grandTotal,
+          },
       negligence_theory: buildNegligenceTheory(),
       prior_demand_sent: false,
     }
@@ -490,8 +565,15 @@ export function PersonalInjuryWizard({
     incidentDate,
     incidentLocation,
     incidentDescription,
+    isPropertyDamage,
     injuryDescription,
     injurySeverity,
+    propertyDamageDescription,
+    damageSeverity,
+    repairEstimate,
+    lossOfUse,
+    additionalCosts,
+    propertyGrandTotal,
     totalMedical,
     painSufferingAmount,
     grandTotal,
@@ -530,6 +612,15 @@ export function PersonalInjuryWizard({
       lost_wages: lostWages || null,
       property_damage: propertyDamage || null,
       pain_suffering_multiplier: painSufferingMultiplier,
+      // Property damage details (property damage sub-types)
+      ...(isPropertyDamage ? {
+        property_damage_description: propertyDamageDescription,
+        damage_severity: damageSeverity,
+        repair_estimate: repairEstimate,
+        has_repair_receipts: hasRepairReceipts,
+        loss_of_use: lossOfUse,
+        additional_costs: additionalCosts,
+      } : {}),
       // Insurance
       your_insurance_carrier: yourInsuranceCarrier || null,
       your_policy_number: yourPolicyNumber || null,
@@ -575,6 +666,13 @@ export function PersonalInjuryWizard({
       lostWages,
       propertyDamage,
       painSufferingMultiplier,
+      isPropertyDamage,
+      propertyDamageDescription,
+      damageSeverity,
+      repairEstimate,
+      hasRepairReceipts,
+      lossOfUse,
+      additionalCosts,
       yourInsuranceCarrier,
       yourPolicyNumber,
       umUimCoverage,
@@ -678,6 +776,8 @@ export function PersonalInjuryWizard({
         return premisesOwnerName.trim() !== ''
       case 'product':
         return productName.trim() !== ''
+      case 'damage_details':
+        return propertyDamageDescription.trim().length >= 10
       case 'injuries':
         return (
           injuryDescription.trim().length >= 10 &&
@@ -686,7 +786,7 @@ export function PersonalInjuryWizard({
       case 'medical':
         return true // medical providers are helpful but not strictly required
       case 'damages':
-        return grandTotal > 0
+        return effectiveGrandTotal > 0
       case 'insurance':
         return true
       case 'venue':
@@ -705,9 +805,10 @@ export function PersonalInjuryWizard({
     otherDriverName,
     premisesOwnerName,
     productName,
+    propertyDamageDescription,
     injuryDescription,
     injurySeverity,
-    grandTotal,
+    effectiveGrandTotal,
     county,
     courtType,
   ])
@@ -740,13 +841,22 @@ export function PersonalInjuryWizard({
             </p>
 
             <div className="space-y-3">
-              {[
-                { icon: Camera, label: 'Photos of injuries and scene' },
-                { icon: FileText, label: 'Medical records and bills' },
-                { icon: Shield, label: 'Police report (if filed)' },
-                { icon: Shield, label: 'Insurance information (yours and theirs)' },
-                { icon: Receipt, label: 'Bills and receipts for expenses' },
-              ].map(({ icon: Icon, label }) => (
+              {(isPropertyDamage
+                ? [
+                    { icon: Camera, label: 'Photos of the damage (multiple angles)' },
+                    { icon: FileText, label: 'Repair estimates or invoices' },
+                    { icon: Shield, label: 'Police report (if filed)' },
+                    { icon: Shield, label: 'Insurance information (yours and theirs)' },
+                    { icon: Receipt, label: 'Receipts for damaged property or repairs' },
+                  ]
+                : [
+                    { icon: Camera, label: 'Photos of injuries and scene' },
+                    { icon: FileText, label: 'Medical records and bills' },
+                    { icon: Shield, label: 'Police report (if filed)' },
+                    { icon: Shield, label: 'Insurance information (yours and theirs)' },
+                    { icon: Receipt, label: 'Bills and receipts for expenses' },
+                  ]
+              ).map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-calm-indigo/10 flex items-center justify-center shrink-0">
                     <Icon className="h-4 w-4 text-calm-indigo" />
@@ -802,7 +912,9 @@ export function PersonalInjuryWizard({
               <Label htmlFor="incident-description">What happened?</Label>
               <Textarea
                 id="incident-description"
-                placeholder="Describe the incident in detail. Include who was involved, what happened, and how it led to your injuries."
+                placeholder={isPropertyDamage
+                  ? "Describe the incident in detail. Include who was involved, what happened, and how your property was damaged."
+                  : "Describe the incident in detail. Include who was involved, what happened, and how it led to your injuries."}
                 value={incidentDescription}
                 onChange={(e) => setIncidentDescription(e.target.value)}
                 rows={5}
@@ -978,6 +1090,70 @@ export function PersonalInjuryWizard({
                 onChange={(e) => setDefectDescription(e.target.value)}
                 rows={4}
               />
+            </div>
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  DAMAGE DETAILS (property damage sub-types)                   */
+      /* ============================================================ */
+      case 'damage_details':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="damage-description">Describe the Damage</Label>
+              <Textarea
+                id="damage-description"
+                placeholder="Describe all property damage in detail (e.g. front bumper crushed, hood dented, fence destroyed, water damage to living room)"
+                value={propertyDamageDescription}
+                onChange={(e) => setPropertyDamageDescription(e.target.value)}
+                rows={4}
+              />
+              <p className="text-xs text-warm-muted">Be as specific as possible about what was damaged and how.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Damage Severity</Label>
+              <div className="flex gap-2">
+                {(['minor', 'moderate', 'severe', 'total_loss'] as const).map((s) => (
+                  <Button
+                    key={s}
+                    type="button"
+                    variant={damageSeverity === s ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setDamageSeverity(s)}
+                  >
+                    {s === 'total_loss' ? 'Total Loss' : s.charAt(0).toUpperCase() + s.slice(1)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="repair-estimate">Repair/Replacement Estimate ($)</Label>
+              <Input
+                id="repair-estimate"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={repairEstimate}
+                onChange={(e) => setRepairEstimate(e.target.value)}
+              />
+              <p className="text-xs text-warm-muted">
+                Professional estimate from a contractor, mechanic, or appraiser.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <Checkbox
+                id="has-repair-receipts"
+                checked={hasRepairReceipts}
+                onCheckedChange={(c) => setHasRepairReceipts(c === true)}
+              />
+              <Label htmlFor="has-repair-receipts" className="text-sm cursor-pointer">
+                I have repair estimates or receipts to upload
+              </Label>
             </div>
           </div>
         )
@@ -1161,105 +1337,178 @@ export function PersonalInjuryWizard({
       case 'damages':
         return (
           <div className="space-y-4">
-            {/* Medical expenses (read-only, auto-summed) */}
-            <div className="space-y-2">
-              <Label>Medical Expenses</Label>
-              <div className="rounded-lg border border-warm-border p-3 bg-warm-surface/50">
-                <p className="text-sm font-medium text-warm-text">
-                  ${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-warm-muted">Auto-calculated from medical providers</p>
-              </div>
-            </div>
+            {isPropertyDamage ? (
+              <>
+                {/* Repair/replacement cost (from damage details) */}
+                <div className="space-y-2">
+                  <Label>Repair/Replacement Cost</Label>
+                  <div className="rounded-lg border border-warm-border p-3 bg-warm-surface/50">
+                    <p className="text-sm font-medium text-warm-text">
+                      ${(parseFloat(repairEstimate) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-warm-muted">From the Damage Details step</p>
+                  </div>
+                </div>
 
-            {/* Lost wages */}
-            <div className="space-y-2">
-              <Label htmlFor="lost-wages">Lost Wages ($)</Label>
-              <Input
-                id="lost-wages"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={lostWages}
-                onChange={(e) => setLostWages(e.target.value)}
-              />
-              <p className="text-xs text-warm-muted">
-                Total lost income from missed work due to your injuries.
-              </p>
-            </div>
+                {/* Loss of use */}
+                <div className="space-y-2">
+                  <Label htmlFor="loss-of-use">Loss of Use ($)</Label>
+                  <Input
+                    id="loss-of-use"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={lossOfUse}
+                    onChange={(e) => setLossOfUse(e.target.value)}
+                  />
+                  <p className="text-xs text-warm-muted">
+                    Rental car costs, temporary housing, or other costs from not having your property.
+                  </p>
+                </div>
 
-            {/* Property damage */}
-            <div className="space-y-2">
-              <Label htmlFor="property-damage">Property Damage ($)</Label>
-              <Input
-                id="property-damage"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={propertyDamage}
-                onChange={(e) => setPropertyDamage(e.target.value)}
-              />
-              <p className="text-xs text-warm-muted">
-                Vehicle repair, personal property, etc.
-              </p>
-            </div>
+                {/* Additional out-of-pocket */}
+                <div className="space-y-2">
+                  <Label htmlFor="additional-costs">Additional Out-of-Pocket Costs ($)</Label>
+                  <Input
+                    id="additional-costs"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={additionalCosts}
+                    onChange={(e) => setAdditionalCosts(e.target.value)}
+                  />
+                  <p className="text-xs text-warm-muted">
+                    Towing, storage, temporary fixes, or other related expenses.
+                  </p>
+                </div>
 
-            {/* Pain & suffering multiplier */}
-            <div className="space-y-2">
-              <Label>Pain & Suffering Multiplier</Label>
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min="1.5"
-                  max="5"
-                  step="0.5"
-                  value={painSufferingMultiplier}
-                  onChange={(e) => setPainSufferingMultiplier(parseFloat(e.target.value))}
-                  className="w-full accent-calm-indigo"
-                />
-                <div className="flex justify-between text-xs text-warm-muted">
-                  <span>1.5x</span>
-                  <span>3x</span>
-                  <span>5x</span>
+                {/* Grand total for property damage */}
+                <div className="rounded-lg bg-warm-surface p-4 border border-warm-border">
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Repair/replacement</span>
+                      <span>${(parseFloat(repairEstimate) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Loss of use</span>
+                      <span>${(parseFloat(lossOfUse) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Additional costs</span>
+                      <span>${(parseFloat(additionalCosts) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="border-t border-warm-border pt-2 mt-2 flex justify-between font-semibold text-warm-text">
+                      <span>Grand Total</span>
+                      <span>${propertyGrandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
-                <p className="text-sm text-warm-text">
-                  Pain & suffering = {painSufferingMultiplier}x x ${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ={' '}
-                  <span className="font-semibold">
-                    ${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </p>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                {/* Medical expenses (read-only, auto-summed) */}
+                <div className="space-y-2">
+                  <Label>Medical Expenses</Label>
+                  <div className="rounded-lg border border-warm-border p-3 bg-warm-surface/50">
+                    <p className="text-sm font-medium text-warm-text">
+                      ${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-warm-muted">Auto-calculated from medical providers</p>
+                  </div>
+                </div>
 
-            {/* Grand total */}
-            <div className="rounded-lg bg-warm-surface p-4 border border-warm-border">
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between text-warm-muted">
-                  <span>Medical expenses</span>
-                  <span>${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                {/* Lost wages */}
+                <div className="space-y-2">
+                  <Label htmlFor="lost-wages">Lost Wages ($)</Label>
+                  <Input
+                    id="lost-wages"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={lostWages}
+                    onChange={(e) => setLostWages(e.target.value)}
+                  />
+                  <p className="text-xs text-warm-muted">
+                    Total lost income from missed work due to your injuries.
+                  </p>
                 </div>
-                <div className="flex justify-between text-warm-muted">
-                  <span>Lost wages</span>
-                  <span>${(parseFloat(lostWages) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+
+                {/* Property damage */}
+                <div className="space-y-2">
+                  <Label htmlFor="property-damage">Property Damage ($)</Label>
+                  <Input
+                    id="property-damage"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={propertyDamage}
+                    onChange={(e) => setPropertyDamage(e.target.value)}
+                  />
+                  <p className="text-xs text-warm-muted">
+                    Vehicle repair, personal property, etc.
+                  </p>
                 </div>
-                <div className="flex justify-between text-warm-muted">
-                  <span>Property damage</span>
-                  <span>${(parseFloat(propertyDamage) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+
+                {/* Pain & suffering multiplier */}
+                <div className="space-y-2">
+                  <Label>Pain & Suffering Multiplier</Label>
+                  <div className="space-y-2">
+                    <input
+                      type="range"
+                      min="1.5"
+                      max="5"
+                      step="0.5"
+                      value={painSufferingMultiplier}
+                      onChange={(e) => setPainSufferingMultiplier(parseFloat(e.target.value))}
+                      className="w-full accent-calm-indigo"
+                    />
+                    <div className="flex justify-between text-xs text-warm-muted">
+                      <span>1.5x</span>
+                      <span>3x</span>
+                      <span>5x</span>
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+                    <p className="text-sm text-warm-text">
+                      Pain & suffering = {painSufferingMultiplier}x x ${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ={' '}
+                      <span className="font-semibold">
+                        ${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <div className="flex justify-between text-warm-muted">
-                  <span>Pain & suffering ({painSufferingMultiplier}x)</span>
-                  <span>${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+
+                {/* Grand total */}
+                <div className="rounded-lg bg-warm-surface p-4 border border-warm-border">
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Medical expenses</span>
+                      <span>${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Lost wages</span>
+                      <span>${(parseFloat(lostWages) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Property damage</span>
+                      <span>${(parseFloat(propertyDamage) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-warm-muted">
+                      <span>Pain & suffering ({painSufferingMultiplier}x)</span>
+                      <span>${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="border-t border-warm-border pt-2 mt-2 flex justify-between font-semibold text-warm-text">
+                      <span>Grand Total</span>
+                      <span>${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="border-t border-warm-border pt-2 mt-2 flex justify-between font-semibold text-warm-text">
-                  <span>Grand Total</span>
-                  <span>${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )
 
@@ -1320,7 +1569,7 @@ export function PersonalInjuryWizard({
       /*  VENUE                                                        */
       /* ============================================================ */
       case 'venue': {
-        const suggested = suggestCourtType(grandTotal)
+        const suggested = suggestCourtType(effectiveGrandTotal)
         return (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -1398,9 +1647,9 @@ export function PersonalInjuryWizard({
                   </Button>
                 ))}
               </div>
-              {grandTotal > 0 && (
+              {effectiveGrandTotal > 0 && (
                 <p className="text-xs text-warm-muted">
-                  Based on your total damages of ${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })},
+                  Based on your total damages of ${effectiveGrandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })},
                   we suggest {courtTypeLabel(suggested).toLowerCase()}.
                 </p>
               )}
@@ -1442,7 +1691,7 @@ export function PersonalInjuryWizard({
             </ReviewSection>
 
             {/* Sub-type-specific section */}
-            {MOTOR_VEHICLE_TYPES.includes(piSubType) && (
+            {(MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && (
               <ReviewSection
                 title="Other Driver"
                 stepId="other_driver"
@@ -1480,55 +1729,85 @@ export function PersonalInjuryWizard({
               </ReviewSection>
             )}
 
-            {/* Injuries */}
-            <ReviewSection
-              title="Injuries"
-              stepId="injuries"
-              onEdit={handleReviewEdit}
-            >
-              <ReviewRow label="Description" value={injuryDescription || 'Not provided'} />
-              <ReviewRow label="Severity" value={injurySeverity ? injurySeverity.charAt(0).toUpperCase() + injurySeverity.slice(1) : 'Not selected'} />
-              <ReviewRow label="Body parts" value={bodyPartsAffected.length > 0 ? bodyPartsAffected.join(', ') : 'None selected'} />
-            </ReviewSection>
+            {isPropertyDamage ? (
+              <>
+                {/* Damage Details */}
+                <ReviewSection
+                  title="Damage Details"
+                  stepId="damage_details"
+                  onEdit={handleReviewEdit}
+                >
+                  <ReviewRow label="Description" value={propertyDamageDescription || 'Not provided'} />
+                  <ReviewRow label="Severity" value={damageSeverity ? (damageSeverity === 'total_loss' ? 'Total Loss' : damageSeverity.charAt(0).toUpperCase() + damageSeverity.slice(1)) : 'Not selected'} />
+                  <ReviewRow label="Repair estimate" value={`$${(parseFloat(repairEstimate) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Has receipts" value={hasRepairReceipts ? 'Yes' : 'No'} />
+                </ReviewSection>
 
-            {/* Medical */}
-            <ReviewSection
-              title="Medical Treatment"
-              stepId="medical"
-              onEdit={handleReviewEdit}
-            >
-              {medicalProviders.length > 0 ? (
-                <>
-                  {medicalProviders.map((p, i) => (
-                    <ReviewRow
-                      key={i}
-                      label={p.name || `Provider ${i + 1}`}
-                      value={`${PROVIDER_TYPES.find((t) => t.value === p.type)?.label ?? p.type} - $${(parseFloat(p.amount) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    />
-                  ))}
-                  <ReviewRow
-                    label="Total medical"
-                    value={`$${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    bold
-                  />
-                </>
-              ) : (
-                <p className="text-sm text-warm-muted">No providers added</p>
-              )}
-            </ReviewSection>
+                {/* Property Damages */}
+                <ReviewSection
+                  title="Damages"
+                  stepId="damages"
+                  onEdit={handleReviewEdit}
+                >
+                  <ReviewRow label="Repair/replacement" value={`$${(parseFloat(repairEstimate) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Loss of use" value={`$${(parseFloat(lossOfUse) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Additional costs" value={`$${(parseFloat(additionalCosts) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Grand total" value={`$${propertyGrandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} bold />
+                </ReviewSection>
+              </>
+            ) : (
+              <>
+                {/* Injuries */}
+                <ReviewSection
+                  title="Injuries"
+                  stepId="injuries"
+                  onEdit={handleReviewEdit}
+                >
+                  <ReviewRow label="Description" value={injuryDescription || 'Not provided'} />
+                  <ReviewRow label="Severity" value={injurySeverity ? injurySeverity.charAt(0).toUpperCase() + injurySeverity.slice(1) : 'Not selected'} />
+                  <ReviewRow label="Body parts" value={bodyPartsAffected.length > 0 ? bodyPartsAffected.join(', ') : 'None selected'} />
+                </ReviewSection>
 
-            {/* Damages */}
-            <ReviewSection
-              title="Damages"
-              stepId="damages"
-              onEdit={handleReviewEdit}
-            >
-              <ReviewRow label="Medical" value={`$${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-              <ReviewRow label="Lost wages" value={`$${(parseFloat(lostWages) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-              <ReviewRow label="Property damage" value={`$${(parseFloat(propertyDamage) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-              <ReviewRow label={`Pain & suffering (${painSufferingMultiplier}x)`} value={`$${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-              <ReviewRow label="Grand total" value={`$${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} bold />
-            </ReviewSection>
+                {/* Medical */}
+                <ReviewSection
+                  title="Medical Treatment"
+                  stepId="medical"
+                  onEdit={handleReviewEdit}
+                >
+                  {medicalProviders.length > 0 ? (
+                    <>
+                      {medicalProviders.map((p, i) => (
+                        <ReviewRow
+                          key={i}
+                          label={p.name || `Provider ${i + 1}`}
+                          value={`${PROVIDER_TYPES.find((t) => t.value === p.type)?.label ?? p.type} - $${(parseFloat(p.amount) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        />
+                      ))}
+                      <ReviewRow
+                        label="Total medical"
+                        value={`$${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        bold
+                      />
+                    </>
+                  ) : (
+                    <p className="text-sm text-warm-muted">No providers added</p>
+                  )}
+                </ReviewSection>
+
+                {/* Damages */}
+                <ReviewSection
+                  title="Damages"
+                  stepId="damages"
+                  onEdit={handleReviewEdit}
+                >
+                  <ReviewRow label="Medical" value={`$${totalMedical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Lost wages" value={`$${(parseFloat(lostWages) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Property damage" value={`$${(parseFloat(propertyDamage) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label={`Pain & suffering (${painSufferingMultiplier}x)`} value={`$${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                  <ReviewRow label="Grand total" value={`$${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} bold />
+                </ReviewSection>
+              </>
+            )}
 
             {/* Insurance */}
             <ReviewSection

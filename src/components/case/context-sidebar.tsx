@@ -7,6 +7,7 @@ import {
   Lightbulb,
 } from 'lucide-react'
 import { STEP_GUIDANCE } from '@/lib/step-guidance'
+import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
 
 interface ContextSidebarProps {
   caseId: string
@@ -21,6 +22,8 @@ interface ContextSidebarProps {
     risk_level: string
     breakdown: Record<string, unknown>
   } | null
+  disputeType?: string
+  piSubType?: string
 }
 
 function formatDeadlineKey(key: string): string {
@@ -45,7 +48,7 @@ function getRiskColor(level: string): string {
   }
 }
 
-export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskScore }: ContextSidebarProps) {
+export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskScore, disputeType, piSubType }: ContextSidebarProps) {
   const params = useParams()
   const taskId = params?.taskId as string | undefined
 
@@ -54,7 +57,13 @@ export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskS
     ? tasks.find((t) => t.id === taskId)?.task_key ?? fallbackTaskKey
     : fallbackTaskKey
 
-  const guidance = currentTaskKey ? STEP_GUIDANCE[currentTaskKey] : null
+  const isPropertyDamage = disputeType === 'personal_injury' && isPropertyDamageSubType(piSubType)
+  const guidanceKey = currentTaskKey
+    ? (isPropertyDamage && STEP_GUIDANCE[currentTaskKey + '_property']
+        ? currentTaskKey + '_property'
+        : currentTaskKey)
+    : null
+  const guidance = guidanceKey ? STEP_GUIDANCE[guidanceKey] : null
 
   return (
     <div className="flex flex-col py-4 px-3.5 space-y-4">

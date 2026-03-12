@@ -76,6 +76,43 @@ export const PI_SUB_TYPES = [
 
 export type PiSubType = (typeof PI_SUB_TYPES)[number]
 
+export const CONTRACT_SUB_TYPES = [
+  'breach_of_contract',
+  'non_payment',
+  'fraud_misrepresentation',
+  'warranty',
+  'employment',
+  'construction',
+  'other_contract',
+] as const
+
+export type ContractSubType = (typeof CONTRACT_SUB_TYPES)[number]
+
+export const PROPERTY_DISPUTE_SUB_TYPES = [
+  'boundary_dispute',
+  'easement',
+  'title_defect',
+  'trespass',
+  'nuisance',
+  'hoa_dispute',
+  'real_estate_transaction',
+  'other_property',
+] as const
+
+export type PropertyDisputeSubType = (typeof PROPERTY_DISPUTE_SUB_TYPES)[number]
+
+export const OTHER_SUB_TYPES = [
+  'consumer_protection',
+  'civil_rights',
+  'defamation',
+  'harassment',
+  'insurance_dispute',
+  'government_action',
+  'general_civil',
+] as const
+
+export type OtherSubType = (typeof OTHER_SUB_TYPES)[number]
+
 export const STATES = ['TX', 'CA', 'NY', 'FL', 'PA'] as const
 export type State = (typeof STATES)[number]
 
@@ -99,6 +136,9 @@ export const createCaseSchema = z.object({
   landlord_tenant_sub_type: z.enum(LANDLORD_TENANT_SUB_TYPES).optional(),
   debt_sub_type: z.enum(DEBT_SUB_TYPES).optional(),
   pi_sub_type: z.enum(PI_SUB_TYPES).optional(),
+  contract_sub_type: z.enum(CONTRACT_SUB_TYPES).optional(),
+  property_sub_type: z.enum(PROPERTY_DISPUTE_SUB_TYPES).optional(),
+  other_sub_type: z.enum(OTHER_SUB_TYPES).optional(),
 })
 
 export type CreateCaseInput = z.infer<typeof createCaseSchema>

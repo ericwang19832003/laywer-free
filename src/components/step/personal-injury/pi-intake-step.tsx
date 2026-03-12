@@ -366,10 +366,12 @@ export function PIIntakeStep({
               &#x26A0; Statute of Limitations Warning
             </p>
             <p className="text-xs text-warm-muted mt-1">
-              The Texas statute of limitations for personal injury is 2 years
-              from the date of injury (Tex. Civ. Prac. &amp; Rem. Code
-              &sect; 16.003). You have approximately {solWarning.daysRemaining}{' '}
-              days remaining to file.
+              The Texas statute of limitations for{' '}
+              {isPropertyDamage ? 'property damage' : 'personal injury'} is 2
+              years from the{' '}
+              {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
+              (Tex. Civ. Prac. &amp; Rem. Code &sect; 16.003). You have
+              approximately {solWarning.daysRemaining} days remaining to file.
             </p>
           </div>
         )}
@@ -592,13 +594,17 @@ export function PIIntakeStep({
         {/* Texas PI SOL info callout */}
         <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
           <p className="text-xs font-medium text-warm-text">
-            Texas statute of limitations for personal injury
+            {isPropertyDamage
+              ? 'Texas statute of limitations for property damage'
+              : 'Texas statute of limitations for personal injury'}
           </p>
           <p className="text-xs text-warm-muted mt-0.5">
-            In Texas, the statute of limitations for personal injury claims is 2
-            years from the date of injury (Tex. Civ. Prac. &amp; Rem. Code
-            &sect; 16.003). Filing after this deadline can result in your case
-            being dismissed.
+            In Texas, the statute of limitations for{' '}
+            {isPropertyDamage ? 'property damage' : 'personal injury'} claims is
+            2 years from the{' '}
+            {isPropertyDamage ? 'date of the incident' : 'date of injury'} (Tex.
+            Civ. Prac. &amp; Rem. Code &sect; 16.003). Filing after this
+            deadline can result in your case being dismissed.
           </p>
         </div>
       </div>

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type, pi_sub_type, state } = parsed.data
+    const { role, county, court_type, dispute_type, family_sub_type, small_claims_sub_type, landlord_tenant_sub_type, debt_sub_type, pi_sub_type, contract_sub_type, property_sub_type, other_sub_type, state } = parsed.data
 
     // Insert the case
     const { data: newCase, error: caseError } = await supabase
@@ -123,6 +123,57 @@ export async function POST(request: NextRequest) {
       if (piError) {
         return NextResponse.json(
           { error: 'Case created but failed to save personal injury details', details: piError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Insert contract details if this is a contract case
+    if (contract_sub_type) {
+      const { error: contractError } = await supabase
+        .from('contract_details')
+        .insert({
+          case_id: newCase.id,
+          contract_sub_type,
+        })
+
+      if (contractError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save contract details', details: contractError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Insert property dispute details if this is a property case
+    if (property_sub_type) {
+      const { error: propertyError } = await supabase
+        .from('property_dispute_details')
+        .insert({
+          case_id: newCase.id,
+          property_sub_type,
+        })
+
+      if (propertyError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save property dispute details', details: propertyError.message },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Insert other case details if this is an other case
+    if (other_sub_type) {
+      const { error: otherError } = await supabase
+        .from('other_case_details')
+        .insert({
+          case_id: newCase.id,
+          other_sub_type,
+        })
+
+      if (otherError) {
+        return NextResponse.json(
+          { error: 'Case created but failed to save other case details', details: otherError.message },
           { status: 500 }
         )
       }

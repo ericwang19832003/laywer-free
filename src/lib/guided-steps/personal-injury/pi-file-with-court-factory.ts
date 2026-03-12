@@ -1,4 +1,5 @@
 import type { GuidedStepConfig } from '../types'
+import { isPropertyDamageSubType } from './constants'
 import { STATE_FILING_INFO } from './state-filing-info'
 import type { StateFilingInfo, CourtFilingInfo } from './state-filing-info'
 
@@ -110,7 +111,7 @@ function buildSolPrompt(
     return 'Critical: You must file your lawsuit before the statute of limitations expires. Check your state\'s deadline — missing it means losing your right to sue.'
   }
 
-  const isProperty = piSubType === 'property_damage'
+  const isProperty = isPropertyDamageSubType(piSubType)
   const solYears = isProperty
     ? stateInfo.sol.propertyDamage
     : stateInfo.sol.personalInjury
@@ -264,7 +265,7 @@ export function createPiFileWithCourtConfig(
           text: 'You know your statute of limitations deadline.',
         })
       } else {
-        const isProperty = piSubType === 'property_damage'
+        const isProperty = isPropertyDamageSubType(piSubType)
         const solYears = stateInfo
           ? isProperty
             ? stateInfo.sol.propertyDamage
