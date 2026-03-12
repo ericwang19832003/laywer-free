@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 
 const SKIPPABLE_TASKS = new Set([
   'prepare_pi_demand_letter',
+  'pi_settlement_negotiation',
   'prepare_demand_letter',
   'prepare_lt_demand_letter',
   'preservation_letter',
@@ -32,7 +33,7 @@ export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCard
     if (!nextTask || skipping) return
     setSkipping(true)
     try {
-      // First transition to in_progress (required before skipped for 'todo' tasks)
+      // Transition directly to skipped (todo -> skipped is a valid transition)
       const res = await fetch(`/api/tasks/${nextTask.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
