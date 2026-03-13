@@ -7,11 +7,15 @@ import { SafetyResources } from './safety-resources'
 interface SafetyScreeningStepProps {
   caseId: string
   taskId: string
+  /** When true, suppresses the "consider filing for a Protective Order" recommendation
+   *  since the user is already in the PO workflow. */
+  isProtectiveOrder?: boolean
 }
 
 export function SafetyScreeningStep({
   caseId,
   taskId,
+  isProtectiveOrder = false,
 }: SafetyScreeningStepProps) {
   const [physicalHarm, setPhysicalHarm] = useState(false)
   const [afraid, setAfraid] = useState(false)
@@ -118,14 +122,28 @@ export function SafetyScreeningStep({
         {/* Conditional recommendation */}
         {anyConcern && (
           <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4 space-y-2">
-            <p className="text-sm font-medium text-warm-text">
-              Based on your answers, you may want to consider filing for a
-              Protective Order. This can provide immediate legal protection.
-            </p>
-            <p className="text-sm text-warm-muted">
-              You can still proceed with your current filing type. We&apos;ll
-              include safety considerations in your case.
-            </p>
+            {isProtectiveOrder ? (
+              <>
+                <p className="text-sm font-medium text-warm-text">
+                  Thank you for sharing this information. Your responses confirm
+                  that seeking a Protective Order is appropriate for your situation.
+                </p>
+                <p className="text-sm text-warm-muted">
+                  We&apos;ll use your answers to help build your case in the next steps.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-warm-text">
+                  Based on your answers, you may want to consider filing for a
+                  Protective Order. This can provide immediate legal protection.
+                </p>
+                <p className="text-sm text-warm-muted">
+                  You can still proceed with your current filing type. We&apos;ll
+                  include safety considerations in your case.
+                </p>
+              </>
+            )}
           </div>
         )}
 

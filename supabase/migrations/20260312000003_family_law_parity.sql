@@ -204,6 +204,50 @@ WHERE c.dispute_type = 'family'
 
 
 -- =============================================================
+-- STEP 2b: Unlock newly inserted tasks if predecessor is done
+-- =============================================================
+-- If a case is already past the predecessor step, the new task
+-- would stay permanently locked because unlock_next_task() only
+-- reacts to future status transitions.
+
+-- divorce_property_division: predecessor is divorce_mediation
+UPDATE public.tasks t
+SET status = 'todo', unlocked_at = now()
+WHERE t.task_key = 'divorce_property_division'
+  AND t.status = 'locked'
+  AND EXISTS (
+    SELECT 1 FROM public.tasks pred
+    WHERE pred.case_id = t.case_id
+      AND pred.task_key = 'divorce_mediation'
+      AND pred.status IN ('completed', 'skipped')
+  );
+
+-- mod_existing_order_review: predecessor is mod_intake
+UPDATE public.tasks t
+SET status = 'todo', unlocked_at = now()
+WHERE t.task_key = 'mod_existing_order_review'
+  AND t.status = 'locked'
+  AND EXISTS (
+    SELECT 1 FROM public.tasks pred
+    WHERE pred.case_id = t.case_id
+      AND pred.task_key = 'mod_intake'
+      AND pred.status IN ('completed', 'skipped')
+  );
+
+-- po_hearing: predecessor is po_file_with_court
+UPDATE public.tasks t
+SET status = 'todo', unlocked_at = now()
+WHERE t.task_key = 'po_hearing'
+  AND t.status = 'locked'
+  AND EXISTS (
+    SELECT 1 FROM public.tasks pred
+    WHERE pred.case_id = t.case_id
+      AND pred.task_key = 'po_file_with_court'
+      AND pred.status IN ('completed', 'skipped')
+  );
+
+
+-- =============================================================
 -- STEP 3: Delete tasks that don't apply per sub-type
 -- =============================================================
 

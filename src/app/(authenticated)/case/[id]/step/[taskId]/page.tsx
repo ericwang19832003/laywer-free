@@ -600,7 +600,7 @@ export default async function StepPage({
     case 'po_intake':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('protective_order')} existingAnswers={task.metadata?.guided_answers} />
     case 'po_safety_screening':
-      return <SafetyScreeningStep caseId={id} taskId={taskId} />
+      return <SafetyScreeningStep caseId={id} taskId={taskId} isProtectiveOrder />
     case 'po_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
