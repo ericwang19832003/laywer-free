@@ -229,6 +229,75 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     },
   ],
 
+  partnership: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 'biz_partnership_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['biz_partnership_evidence', 'biz_partnership_demand_letter', 'biz_partnership_adr'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['biz_partnership_prepare_filing', 'biz_partnership_file_with_court', 'biz_partnership_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['biz_partnership_wait_for_answer', 'biz_partnership_discovery'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['biz_partnership_post_resolution'],
+    },
+  ],
+
+  employment: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 'biz_employment_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['biz_employment_evidence', 'biz_employment_demand_letter', 'biz_employment_eeoc'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['biz_employment_prepare_filing', 'biz_employment_file_with_court', 'biz_employment_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['biz_employment_wait_for_answer', 'biz_employment_discovery'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['biz_employment_post_resolution'],
+    },
+  ],
+
+  b2b_commercial: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 'biz_b2b_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['biz_b2b_evidence', 'biz_b2b_demand_letter', 'biz_b2b_negotiation'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['biz_b2b_prepare_filing', 'biz_b2b_file_with_court', 'biz_b2b_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['biz_b2b_wait_for_answer', 'biz_b2b_discovery'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['biz_b2b_post_resolution'],
+    },
+  ],
+
   other: [
     {
       label: 'Getting Started',
