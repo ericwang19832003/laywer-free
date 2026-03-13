@@ -20,6 +20,9 @@ const SKIPPABLE_TASKS = new Set([
   'biz_b2b_negotiation',
   'prepare_lt_demand_letter',
   'preservation_letter',
+  'contract_demand_letter',
+  'contract_negotiation',
+  'contract_mediation',
 ])
 
 interface NextStepCardProps {
