@@ -1370,4 +1370,307 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Hearing date scheduled',
     ],
   },
+
+  // ── BUSINESS: PARTNERSHIP ────────────────────────────────
+  biz_partnership_intake: {
+    why: 'Understanding the business structure, partners involved, and the nature of the dispute helps us determine the best legal strategy for your partnership or LLC case.',
+    checklist: [
+      'Partnership or operating agreement',
+      'Names and roles of all partners/members',
+      'Ownership percentages',
+      'Financial records showing the dispute',
+      'Timeline of key events',
+    ],
+    tip: 'If you have an operating or partnership agreement, it may contain dispute resolution clauses that affect your options.',
+  },
+  biz_partnership_evidence: {
+    why: 'Strong evidence is critical in partnership disputes, where the facts often involve complex financial arrangements and verbal agreements.',
+    checklist: [
+      'Partnership/operating agreement and amendments',
+      'Financial statements and tax returns',
+      'Bank statements and transaction records',
+      'Emails, texts, and letters between partners',
+      'Meeting minutes or written decisions',
+    ],
+    tip: 'Forensic accounting may be needed if you suspect financial misconduct — start gathering bank and financial records early.',
+  },
+  biz_partnership_demand_letter: {
+    why: 'A formal demand letter notifies your partner of the dispute and your intent to seek resolution, creating a record that you attempted to resolve the matter before filing suit.',
+    checklist: [
+      'Specific breaches or actions you are alleging',
+      'Dollar amount of damages or relief requested',
+      'Deadline for response (typically 30 days)',
+      'Reference to any agreement provisions violated',
+    ],
+    tip: 'Reference specific sections of your partnership or operating agreement to strengthen your demand.',
+  },
+  biz_partnership_adr: {
+    why: 'Many partnership and LLC agreements require mediation or arbitration before filing a lawsuit. Skipping mandatory ADR could get your case dismissed.',
+    checklist: [
+      'Review operating/partnership agreement for ADR clauses',
+      'Identify whether mediation or arbitration is required',
+      'Research qualified business mediators in your area',
+      'Prepare a summary of the dispute for the mediator',
+    ],
+    tip: 'Even if ADR is not mandatory, mediation is often faster and cheaper than litigation for partnership disputes.',
+  },
+  biz_partnership_prepare_filing: {
+    why: 'Preparing your court filing correctly ensures your case proceeds without delays or dismissals due to procedural errors.',
+    checklist: [
+      'Completed petition or complaint',
+      'Filing fee payment ready',
+      'Correct court identified (county where business operates)',
+      'All defendants properly named',
+    ],
+  },
+  biz_partnership_file_with_court: {
+    why: 'Filing your lawsuit with the court officially starts the legal process and establishes your case timeline.',
+    checklist: [
+      'File petition with the district clerk',
+      'Pay filing fee',
+      'Get file-stamped copies for your records',
+      'Note your cause number',
+    ],
+    tip: 'Many Texas counties support e-filing at efiletexas.gov — check if yours does.',
+  },
+  biz_partnership_serve_defendant: {
+    why: 'Proper service notifies the other party of the lawsuit. Improper service can delay or invalidate your case.',
+    checklist: [
+      'Serve each defendant individually',
+      'Use a licensed process server or constable',
+      'Serve at the registered agent address for LLCs/corporations',
+      'File proof of service (return of citation) with the court',
+    ],
+    tip: 'For business entities, serve the registered agent listed with the Texas Secretary of State.',
+  },
+  biz_partnership_wait_for_answer: {
+    why: 'After service, the defendant has a deadline to respond. Understanding this timeline helps you prepare for what comes next.',
+    checklist: [
+      'Monitor the court docket for the defendant\'s answer',
+      'Note the answer deadline (typically 20 days after service in Texas)',
+      'Watch for counterclaims or cross-claims',
+      'Consult an attorney if the response is complex',
+    ],
+  },
+  biz_partnership_discovery: {
+    why: 'Discovery lets both sides gather evidence. In partnership disputes, this often involves financial records, communications, and depositions.',
+    checklist: [
+      'Prepare interrogatories (written questions)',
+      'Draft requests for production of documents',
+      'Plan depositions of key witnesses',
+      'Review discovery responses from the other side',
+    ],
+    tip: 'Request complete financial records, including bank statements, QuickBooks exports, and tax returns for the partnership.',
+  },
+  biz_partnership_post_resolution: {
+    why: 'After your case resolves, there are important steps to protect the outcome — whether you won, settled, or need to dissolve the business.',
+    checklist: [
+      'Enforce the judgment or settlement terms',
+      'File any required dissolution paperwork with the state',
+      'Update business registrations if ownership changed',
+      'Close shared business accounts if applicable',
+    ],
+  },
+
+  // ── BUSINESS: EMPLOYMENT ─────────────────────────────────
+  biz_employment_intake: {
+    why: 'Employment disputes have strict deadlines and specific legal requirements. Understanding your situation early helps us guide you to the right process.',
+    checklist: [
+      'Employer name and size',
+      'Your position and employment dates',
+      'Description of what happened',
+      'Any HR complaints you\'ve filed',
+      'Employment contract or handbook (if available)',
+    ],
+    tip: 'Discrimination and harassment claims have strict filing deadlines — usually 180-300 days from the incident.',
+  },
+  biz_employment_evidence: {
+    why: 'Employment cases depend heavily on documentation. The more records you have, the stronger your case.',
+    checklist: [
+      'Pay stubs and W-2s showing compensation',
+      'Employment contract, offer letter, or handbook',
+      'Performance reviews and evaluations',
+      'Emails, texts, and written communications',
+      'Witness names and contact information',
+    ],
+    tip: 'Save copies of all work-related communications before you lose access to company systems.',
+  },
+  biz_employment_demand_letter: {
+    why: 'A demand letter formally notifies your employer of the dispute and gives them a chance to resolve it before litigation.',
+    checklist: [
+      'Specific violations or wrongful actions alleged',
+      'Dollar amount of damages (lost wages, benefits, etc.)',
+      'Deadline for response',
+      'Reference to applicable employment laws',
+    ],
+    tip: 'For wage claims, reference the Texas Payday Law or FLSA provisions that apply to your situation.',
+  },
+  biz_employment_eeoc: {
+    why: 'For discrimination or harassment claims, you must file a charge with the EEOC or Texas Workforce Commission (TWC) before you can sue in court. This is a legal prerequisite.',
+    checklist: [
+      'Determine if your claim requires EEOC/TWC filing',
+      'File charge within 180 days (TWC) or 300 days (EEOC) of the incident',
+      'Provide a clear description of the discriminatory actions',
+      'Wait for right-to-sue letter (or request one after 180 days)',
+    ],
+    tip: 'You can file with the EEOC online at publicportal.eeoc.gov. Filing with one agency automatically cross-files with the other.',
+  },
+  biz_employment_prepare_filing: {
+    why: 'Employment lawsuits require careful preparation to ensure all claims are properly stated and the right court is selected.',
+    checklist: [
+      'Completed petition with all causes of action',
+      'Filing fee payment ready',
+      'Right-to-sue letter (if discrimination claim)',
+      'Correct court identified',
+    ],
+  },
+  biz_employment_file_with_court: {
+    why: 'Filing your employment lawsuit officially begins the legal process and preserves your right to recovery.',
+    checklist: [
+      'File petition with the district clerk',
+      'Pay filing fee',
+      'Get file-stamped copies',
+      'Note your cause number',
+    ],
+    tip: 'Some employment claims can be filed in federal court. Consider whether state or federal court is more favorable.',
+  },
+  biz_employment_serve_defendant: {
+    why: 'Your employer must be properly served to respond to the lawsuit. Service on a business has specific requirements.',
+    checklist: [
+      'Serve the employer\'s registered agent',
+      'Use a licensed process server or constable',
+      'For federal claims, follow federal service rules',
+      'File proof of service with the court',
+    ],
+    tip: 'Look up the employer\'s registered agent on the Texas Secretary of State website.',
+  },
+  biz_employment_wait_for_answer: {
+    why: 'After service, your employer has a deadline to respond. Their answer may include counterclaims or affirmative defenses.',
+    checklist: [
+      'Monitor the court docket for the answer',
+      'Note the answer deadline (20 days in Texas state court)',
+      'Watch for motions to dismiss',
+      'Review any counterclaims carefully',
+    ],
+  },
+  biz_employment_discovery: {
+    why: 'Discovery in employment cases focuses on company records, policies, and communications that support your claim.',
+    checklist: [
+      'Request your complete personnel file',
+      'Request company policies and handbooks',
+      'Request communications about your termination/discipline',
+      'Depose key decision-makers (supervisor, HR)',
+    ],
+    tip: 'Request comparator evidence — how were similarly situated employees treated?',
+  },
+  biz_employment_post_resolution: {
+    why: 'After resolution, there are practical steps to take regardless of the outcome — from enforcing a judgment to managing your career transition.',
+    checklist: [
+      'Enforce judgment or settlement terms',
+      'Negotiate reference letter terms if applicable',
+      'File for unemployment benefits if not already done',
+      'Update professional references and resume',
+    ],
+  },
+
+  // ── BUSINESS: B2B COMMERCIAL ─────────────────────────────
+  biz_b2b_intake: {
+    why: 'Understanding the business relationship, contract terms, and nature of the commercial dispute helps us build the strongest case strategy.',
+    checklist: [
+      'Other business name and contact information',
+      'Contract or agreement (if written)',
+      'Description of goods or services involved',
+      'Amount in dispute',
+      'Timeline of key events',
+    ],
+    tip: 'Check your contract for a forum selection clause — it may specify where disputes must be filed.',
+  },
+  biz_b2b_evidence: {
+    why: 'Commercial disputes are won with documentation. Contracts, invoices, communications, and deliverables tell the story of what was agreed and what went wrong.',
+    checklist: [
+      'Signed contracts and amendments',
+      'Invoices, purchase orders, and payment records',
+      'Emails and written communications',
+      'Deliverables, reports, or work product',
+      'Witness statements from employees involved',
+    ],
+    tip: 'Organize evidence chronologically — courts want to see the timeline of events.',
+  },
+  biz_b2b_demand_letter: {
+    why: 'A formal demand letter puts the other business on notice and creates a record of your good-faith attempt to resolve the dispute before litigation.',
+    checklist: [
+      'Specific contract provisions breached',
+      'Dollar amount of damages claimed',
+      'Deadline for response (typically 30 days)',
+      'Reference to applicable contract terms',
+    ],
+    tip: 'Send the demand via certified mail with return receipt for proof of delivery.',
+  },
+  biz_b2b_negotiation: {
+    why: 'Business-to-business disputes often resolve through negotiation, saving both sides the cost and disruption of litigation.',
+    checklist: [
+      'Determine your minimum acceptable settlement',
+      'Prepare a settlement proposal with supporting evidence',
+      'Consider the ongoing business relationship',
+      'Document all negotiation communications in writing',
+    ],
+    tip: 'Consider whether preserving the business relationship matters — this may influence your negotiation strategy.',
+  },
+  biz_b2b_prepare_filing: {
+    why: 'Commercial litigation requires careful pleading to capture all causes of action and potential damages.',
+    checklist: [
+      'Completed petition with all causes of action',
+      'Filing fee payment ready',
+      'Correct court identified (check contract for forum clause)',
+      'All business entity defendants properly named',
+    ],
+  },
+  biz_b2b_file_with_court: {
+    why: 'Filing your commercial lawsuit starts the litigation clock and preserves your right to recover damages.',
+    checklist: [
+      'File petition with the district clerk',
+      'Pay filing fee',
+      'Get file-stamped copies',
+      'Note your cause number',
+    ],
+    tip: 'For disputes over $75,000 between businesses in different states, consider federal diversity jurisdiction.',
+  },
+  biz_b2b_serve_defendant: {
+    why: 'Proper service on a business entity requires serving the registered agent, not just any employee.',
+    checklist: [
+      'Identify the registered agent for each business defendant',
+      'Use a licensed process server or constable',
+      'For out-of-state businesses, follow long-arm statute requirements',
+      'File proof of service with the court',
+    ],
+    tip: 'Look up registered agents on the Secretary of State website for the state where the business is incorporated.',
+  },
+  biz_b2b_wait_for_answer: {
+    why: 'After service, the defendant business has a deadline to respond. Their answer may include counterclaims for amounts they claim you owe.',
+    checklist: [
+      'Monitor the court docket for the answer',
+      'Note the answer deadline',
+      'Watch for counterclaims and affirmative defenses',
+      'Prepare responses to any counterclaims',
+    ],
+  },
+  biz_b2b_discovery: {
+    why: 'Commercial discovery focuses on contracts, financial records, and communications that prove the breach and damages.',
+    checklist: [
+      'Request all contracts and amendments',
+      'Request financial records showing damages',
+      'Request internal communications about the dispute',
+      'Depose key personnel who managed the relationship',
+    ],
+    tip: 'In IP/trade secret cases, request forensic imaging of relevant computers and storage devices early.',
+  },
+  biz_b2b_post_resolution: {
+    why: 'After resolution, enforce the outcome and make business decisions about the ongoing relationship.',
+    checklist: [
+      'Enforce judgment or settlement terms',
+      'Collect on the judgment if the other side doesn\'t pay voluntarily',
+      'Decide whether to continue the business relationship',
+      'Update internal contracts and processes to prevent future disputes',
+    ],
+  },
 }
