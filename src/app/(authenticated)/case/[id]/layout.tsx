@@ -15,7 +15,7 @@ export default async function CaseLayout({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: tasks }, { data: caseRow }, { data: deadline }, { data: riskScore }, { data: piDetails }, { data: familyDetails }] =
+  const [{ data: tasks }, { data: caseRow }, { data: deadline }, { data: riskScore }, { data: piDetails }, { data: familyDetails }, { data: businessDetails }] =
     await Promise.all([
       supabase
         .from('tasks')
@@ -52,6 +52,11 @@ export default async function CaseLayout({
         .select('family_sub_type')
         .eq('case_id', id)
         .maybeSingle(),
+      supabase
+        .from('business_details')
+        .select('business_sub_type')
+        .eq('case_id', id)
+        .maybeSingle(),
     ])
 
   const taskList: SidebarTask[] = (tasks ?? []).map((t) => ({
@@ -62,10 +67,12 @@ export default async function CaseLayout({
   }))
 
   const disputeType = caseRow?.dispute_type ?? 'civil'
-  // Family cases use sub-type-specific phases (divorce, custody, etc.)
-  const phaseKey = disputeType === 'family' && familyDetails?.family_sub_type
-    ? familyDetails.family_sub_type
-    : disputeType
+  // Family and business cases use sub-type-specific phases
+  const phaseKey = disputeType === 'business' && businessDetails?.business_sub_type
+    ? businessDetails.business_sub_type
+    : disputeType === 'family' && familyDetails?.family_sub_type
+      ? familyDetails.family_sub_type
+      : disputeType
   const phases = WORKFLOW_PHASES[phaseKey] ?? WORKFLOW_PHASES['civil']
 
   // Determine current task_key (first actionable task)

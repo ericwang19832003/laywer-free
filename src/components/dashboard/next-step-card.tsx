@@ -12,6 +12,12 @@ const SKIPPABLE_TASKS = new Set([
   'sc_demand_letter',
   're_demand_letter',
   're_negotiation',
+  'biz_partnership_demand_letter',
+  'biz_partnership_adr',
+  'biz_employment_demand_letter',
+  'biz_employment_eeoc',
+  'biz_b2b_demand_letter',
+  'biz_b2b_negotiation',
   'prepare_lt_demand_letter',
   'preservation_letter',
 ])
