@@ -223,6 +223,40 @@ export default async function StepPage({
     )
   }
 
+  // Pre-populate filing/wizard tasks with intake metadata so users
+  // don't re-enter information they already provided during intake.
+  const FILING_TO_INTAKE: Record<string, string> = {
+    prepare_filing: 'intake',
+    divorce_prepare_filing: 'divorce_intake',
+    custody_prepare_filing: 'custody_intake',
+    child_support_prepare_filing: 'child_support_intake',
+    visitation_prepare_filing: 'visitation_intake',
+    spousal_support_prepare_filing: 'spousal_support_intake',
+    po_prepare_filing: 'po_intake',
+    mod_prepare_filing: 'mod_intake',
+    prepare_small_claims_filing: 'small_claims_intake',
+    prepare_landlord_tenant_filing: 'lt_intake',
+    prepare_debt_validation_letter: 'debt_defense_intake',
+    prepare_debt_defense_answer: 'debt_defense_intake',
+    prepare_pi_petition: 'pi_intake',
+    contract_prepare_filing: 'contract_intake',
+    property_prepare_filing: 'property_intake',
+    re_prepare_filing: 're_intake',
+    biz_partnership_prepare_filing: 'biz_partnership_intake',
+    biz_employment_prepare_filing: 'biz_employment_intake',
+    biz_b2b_prepare_filing: 'biz_b2b_intake',
+    other_prepare_filing: 'other_intake',
+  }
+  const intakeTaskKey = FILING_TO_INTAKE[task.task_key]
+  if (intakeTaskKey) {
+    const { data: intakeRow } = await supabase
+      .from('tasks').select('metadata')
+      .eq('case_id', id).eq('task_key', intakeTaskKey).maybeSingle()
+    const intakeMeta = (intakeRow?.metadata as Record<string, unknown>) ?? {}
+    // Merge: filing task's own metadata (from save-for-later) wins over intake
+    task.metadata = { ...intakeMeta, ...(task.metadata ?? {}) }
+  }
+
   switch (task.task_key) {
     case 'welcome':
       return <WelcomeStep caseId={id} taskId={taskId} />
