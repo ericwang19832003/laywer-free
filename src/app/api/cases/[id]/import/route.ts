@@ -58,10 +58,22 @@ export async function POST(
     // Use the case's actual dispute_type from DB, not the request body
     const disputeType = (caseData.dispute_type ?? parsed.data.disputeType) as string
 
+    // For family cases, look up sub-type to get correct milestones
+    let familySubType: string | undefined
+    if (disputeType === 'family') {
+      const { data: familyDetails } = await supabase
+        .from('family_case_details')
+        .select('family_sub_type')
+        .eq('case_id', id)
+        .maybeSingle()
+      familySubType = familyDetails?.family_sub_type ?? undefined
+    }
+
     // 3. Look up milestone definition
     const milestone = getMilestoneByID(
       disputeType as DisputeType,
-      milestoneId
+      milestoneId,
+      familySubType
     )
 
     if (!milestone) {
@@ -74,7 +86,8 @@ export async function POST(
     // 4. Get tasks to skip
     const tasksToSkip = getTasksToSkip(
       disputeType as DisputeType,
-      milestoneId
+      milestoneId,
+      familySubType
     )
 
     const { firstUnlockedTask } = milestone

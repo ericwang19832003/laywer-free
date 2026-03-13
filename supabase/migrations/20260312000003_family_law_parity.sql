@@ -270,7 +270,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_family_sub_type TEXT;
+  -- v_family_sub_type removed: family tasks are seeded by seed_family_tasks() trigger
 BEGIN
   -- ========================================
   -- Contract cases — early return
@@ -570,184 +570,13 @@ BEGIN
   END IF;
 
   -- ========================================
-  -- Family law cases — 7 sub-type branches
+  -- Family law cases — seed welcome only
+  -- Sub-type tasks are seeded by seed_family_tasks()
+  -- trigger on family_case_details INSERT
   -- ========================================
   IF NEW.dispute_type = 'family' THEN
-    -- Look up family_sub_type from the details table
-    SELECT family_sub_type INTO v_family_sub_type
-    FROM public.family_case_details
-    WHERE case_id = NEW.id;
-
-    -- Fallback: if details not yet created, seed divorce as default
-    IF v_family_sub_type IS NULL THEN
-      v_family_sub_type := 'divorce';
-    END IF;
-
-    -- Welcome task (all sub-types)
     INSERT INTO public.tasks (case_id, task_key, title, status, unlocked_at)
     VALUES (NEW.id, 'welcome', 'Welcome — Get Started', 'todo', now());
-
-    -- ---- DIVORCE (12 tasks) ----
-    IF v_family_sub_type = 'divorce' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'divorce_intake', 'Tell Us About Your Divorce', 'locked'),
-        (NEW.id, 'divorce_safety_screening', 'Safety Check', 'locked'),
-        (NEW.id, 'divorce_evidence_vault', 'Organize Your Evidence', 'locked'),
-        (NEW.id, 'divorce_prepare_filing', 'Prepare Your Divorce Filing', 'locked'),
-        (NEW.id, 'divorce_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'divorce_serve_respondent', 'Serve the Respondent', 'locked'),
-        (NEW.id, 'divorce_waiting_period', 'Mandatory Waiting Period', 'locked'),
-        (NEW.id, 'divorce_temporary_orders', 'Request Temporary Orders', 'locked'),
-        (NEW.id, 'divorce_mediation', 'Attend Mediation', 'locked'),
-        (NEW.id, 'divorce_property_division', 'Divide Community Property', 'locked'),
-        (NEW.id, 'divorce_final_orders', 'Final Decree of Divorce', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 12
-      ));
-
-    -- ---- CUSTODY (10 tasks) ----
-    ELSIF v_family_sub_type = 'custody' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'custody_intake', 'Tell Us About Your Custody Matter', 'locked'),
-        (NEW.id, 'custody_safety_screening', 'Safety Check', 'locked'),
-        (NEW.id, 'custody_evidence_vault', 'Organize Your Evidence', 'locked'),
-        (NEW.id, 'custody_prepare_filing', 'Prepare Your Custody Filing', 'locked'),
-        (NEW.id, 'custody_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'custody_serve_respondent', 'Serve the Respondent', 'locked'),
-        (NEW.id, 'custody_temporary_orders', 'Request Temporary Orders', 'locked'),
-        (NEW.id, 'custody_mediation', 'Attend Mediation', 'locked'),
-        (NEW.id, 'custody_final_orders', 'Final Custody Orders', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 10
-      ));
-
-    -- ---- CHILD SUPPORT (8 tasks) ----
-    ELSIF v_family_sub_type = 'child_support' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'child_support_intake', 'Tell Us About Your Child Support Matter', 'locked'),
-        (NEW.id, 'child_support_evidence_vault', 'Organize Your Evidence', 'locked'),
-        (NEW.id, 'child_support_prepare_filing', 'Prepare Your Filing', 'locked'),
-        (NEW.id, 'child_support_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'child_support_serve_respondent', 'Serve the Respondent', 'locked'),
-        (NEW.id, 'child_support_temporary_orders', 'Request Temporary Orders', 'locked'),
-        (NEW.id, 'child_support_final_orders', 'Final Child Support Orders', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 8
-      ));
-
-    -- ---- VISITATION (9 tasks) ----
-    ELSIF v_family_sub_type = 'visitation' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'visitation_intake', 'Tell Us About Your Visitation Matter', 'locked'),
-        (NEW.id, 'visitation_safety_screening', 'Safety Check', 'locked'),
-        (NEW.id, 'visitation_evidence_vault', 'Organize Your Evidence', 'locked'),
-        (NEW.id, 'visitation_prepare_filing', 'Prepare Your Visitation Filing', 'locked'),
-        (NEW.id, 'visitation_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'visitation_serve_respondent', 'Serve the Respondent', 'locked'),
-        (NEW.id, 'visitation_mediation', 'Attend Mediation', 'locked'),
-        (NEW.id, 'visitation_final_orders', 'Final Visitation Orders', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 9
-      ));
-
-    -- ---- SPOUSAL SUPPORT (8 tasks) ----
-    ELSIF v_family_sub_type = 'spousal_support' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'spousal_support_intake', 'Tell Us About Your Spousal Support Matter', 'locked'),
-        (NEW.id, 'spousal_support_evidence_vault', 'Organize Your Evidence', 'locked'),
-        (NEW.id, 'spousal_support_prepare_filing', 'Prepare Your Filing', 'locked'),
-        (NEW.id, 'spousal_support_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'spousal_support_serve_respondent', 'Serve the Respondent', 'locked'),
-        (NEW.id, 'spousal_support_temporary_orders', 'Request Temporary Orders', 'locked'),
-        (NEW.id, 'spousal_support_final_orders', 'Final Spousal Support Orders', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 8
-      ));
-
-    -- ---- PROTECTIVE ORDER (6 tasks) ----
-    ELSIF v_family_sub_type = 'protective_order' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'po_intake', 'Tell Us About Your Situation', 'locked'),
-        (NEW.id, 'po_safety_screening', 'Safety Check', 'locked'),
-        (NEW.id, 'po_prepare_filing', 'Prepare Your Protective Order Filing', 'locked'),
-        (NEW.id, 'po_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'po_hearing', 'Protective Order Hearing', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 6
-      ));
-
-    -- ---- MODIFICATION (9 tasks) ----
-    ELSIF v_family_sub_type = 'modification' THEN
-      INSERT INTO public.tasks (case_id, task_key, title, status)
-      VALUES
-        (NEW.id, 'mod_intake', 'Tell Us About Your Modification', 'locked'),
-        (NEW.id, 'mod_evidence_vault', 'Organize Your Evidence', 'locked'),
-        (NEW.id, 'mod_existing_order_review', 'Review Existing Court Order', 'locked'),
-        (NEW.id, 'mod_prepare_filing', 'Prepare Your Modification Filing', 'locked'),
-        (NEW.id, 'mod_file_with_court', 'File With the Court', 'locked'),
-        (NEW.id, 'mod_serve_respondent', 'Serve the Respondent', 'locked'),
-        (NEW.id, 'mod_mediation', 'Attend Mediation', 'locked'),
-        (NEW.id, 'mod_final_orders', 'Modified Court Orders', 'locked');
-
-      INSERT INTO public.task_events (case_id, kind, payload)
-      VALUES (NEW.id, 'case_created', jsonb_build_object(
-        'role', NEW.role,
-        'county', NEW.county,
-        'court_type', NEW.court_type,
-        'dispute_type', NEW.dispute_type,
-        'family_sub_type', v_family_sub_type,
-        'tasks_seeded', 9
-      ));
-
-    END IF;
 
     RETURN NEW;
   END IF;
@@ -2166,3 +1995,145 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+
+-- =============================================================
+-- STEP 6: seed_family_tasks() — trigger on family_case_details INSERT
+-- =============================================================
+-- Seeds sub-type-specific tasks AFTER the case row and family_case_details
+-- both exist. This avoids the timing issue where seed_case_tasks() fires
+-- on cases INSERT before family_case_details is created.
+
+CREATE OR REPLACE FUNCTION public.seed_family_tasks()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_case RECORD;
+BEGIN
+  -- Get the parent case info
+  SELECT id, role, county, court_type, dispute_type
+  INTO v_case
+  FROM public.cases
+  WHERE id = NEW.case_id;
+
+  IF v_case IS NULL OR v_case.dispute_type != 'family' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Idempotency: skip if sub-type tasks already exist
+  IF EXISTS (
+    SELECT 1 FROM public.tasks
+    WHERE case_id = NEW.case_id AND task_key LIKE '%\_intake'
+    LIMIT 1
+  ) THEN
+    RETURN NEW;
+  END IF;
+
+  -- ---- DIVORCE (11 tasks after welcome) ----
+  IF NEW.family_sub_type = 'divorce' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'divorce_intake', 'Tell Us About Your Divorce', 'locked'),
+      (NEW.case_id, 'divorce_safety_screening', 'Safety Check', 'locked'),
+      (NEW.case_id, 'divorce_evidence_vault', 'Organize Your Evidence', 'locked'),
+      (NEW.case_id, 'divorce_prepare_filing', 'Prepare Your Divorce Filing', 'locked'),
+      (NEW.case_id, 'divorce_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'divorce_serve_respondent', 'Serve the Respondent', 'locked'),
+      (NEW.case_id, 'divorce_waiting_period', 'Mandatory Waiting Period', 'locked'),
+      (NEW.case_id, 'divorce_temporary_orders', 'Request Temporary Orders', 'locked'),
+      (NEW.case_id, 'divorce_mediation', 'Attend Mediation', 'locked'),
+      (NEW.case_id, 'divorce_property_division', 'Divide Community Property', 'locked'),
+      (NEW.case_id, 'divorce_final_orders', 'Final Decree of Divorce', 'locked');
+
+  ELSIF NEW.family_sub_type = 'custody' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'custody_intake', 'Tell Us About Your Custody Matter', 'locked'),
+      (NEW.case_id, 'custody_safety_screening', 'Safety Check', 'locked'),
+      (NEW.case_id, 'custody_evidence_vault', 'Organize Your Evidence', 'locked'),
+      (NEW.case_id, 'custody_prepare_filing', 'Prepare Your Custody Filing', 'locked'),
+      (NEW.case_id, 'custody_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'custody_serve_respondent', 'Serve the Respondent', 'locked'),
+      (NEW.case_id, 'custody_temporary_orders', 'Request Temporary Orders', 'locked'),
+      (NEW.case_id, 'custody_mediation', 'Attend Mediation', 'locked'),
+      (NEW.case_id, 'custody_final_orders', 'Final Custody Orders', 'locked');
+
+  ELSIF NEW.family_sub_type = 'child_support' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'child_support_intake', 'Tell Us About Your Child Support Matter', 'locked'),
+      (NEW.case_id, 'child_support_evidence_vault', 'Organize Your Evidence', 'locked'),
+      (NEW.case_id, 'child_support_prepare_filing', 'Prepare Your Filing', 'locked'),
+      (NEW.case_id, 'child_support_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'child_support_serve_respondent', 'Serve the Respondent', 'locked'),
+      (NEW.case_id, 'child_support_temporary_orders', 'Request Temporary Orders', 'locked'),
+      (NEW.case_id, 'child_support_final_orders', 'Final Child Support Orders', 'locked');
+
+  ELSIF NEW.family_sub_type = 'visitation' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'visitation_intake', 'Tell Us About Your Visitation Matter', 'locked'),
+      (NEW.case_id, 'visitation_safety_screening', 'Safety Check', 'locked'),
+      (NEW.case_id, 'visitation_evidence_vault', 'Organize Your Evidence', 'locked'),
+      (NEW.case_id, 'visitation_prepare_filing', 'Prepare Your Visitation Filing', 'locked'),
+      (NEW.case_id, 'visitation_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'visitation_serve_respondent', 'Serve the Respondent', 'locked'),
+      (NEW.case_id, 'visitation_mediation', 'Attend Mediation', 'locked'),
+      (NEW.case_id, 'visitation_final_orders', 'Final Visitation Orders', 'locked');
+
+  ELSIF NEW.family_sub_type = 'spousal_support' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'spousal_support_intake', 'Tell Us About Your Spousal Support Matter', 'locked'),
+      (NEW.case_id, 'spousal_support_evidence_vault', 'Organize Your Evidence', 'locked'),
+      (NEW.case_id, 'spousal_support_prepare_filing', 'Prepare Your Filing', 'locked'),
+      (NEW.case_id, 'spousal_support_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'spousal_support_serve_respondent', 'Serve the Respondent', 'locked'),
+      (NEW.case_id, 'spousal_support_temporary_orders', 'Request Temporary Orders', 'locked'),
+      (NEW.case_id, 'spousal_support_final_orders', 'Final Spousal Support Orders', 'locked');
+
+  ELSIF NEW.family_sub_type = 'protective_order' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'po_intake', 'Tell Us About Your Situation', 'locked'),
+      (NEW.case_id, 'po_safety_screening', 'Safety Check', 'locked'),
+      (NEW.case_id, 'po_prepare_filing', 'Prepare Your Protective Order Filing', 'locked'),
+      (NEW.case_id, 'po_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'po_hearing', 'Protective Order Hearing', 'locked');
+
+  ELSIF NEW.family_sub_type = 'modification' THEN
+    INSERT INTO public.tasks (case_id, task_key, title, status)
+    VALUES
+      (NEW.case_id, 'mod_intake', 'Tell Us About Your Modification', 'locked'),
+      (NEW.case_id, 'mod_evidence_vault', 'Organize Your Evidence', 'locked'),
+      (NEW.case_id, 'mod_existing_order_review', 'Review Existing Court Order', 'locked'),
+      (NEW.case_id, 'mod_prepare_filing', 'Prepare Your Modification Filing', 'locked'),
+      (NEW.case_id, 'mod_file_with_court', 'File With the Court', 'locked'),
+      (NEW.case_id, 'mod_serve_respondent', 'Serve the Respondent', 'locked'),
+      (NEW.case_id, 'mod_mediation', 'Attend Mediation', 'locked'),
+      (NEW.case_id, 'mod_final_orders', 'Modified Court Orders', 'locked');
+
+  END IF;
+
+  -- Write case_created event with sub-type info
+  INSERT INTO public.task_events (case_id, kind, payload)
+  VALUES (NEW.case_id, 'case_created', jsonb_build_object(
+    'role', v_case.role,
+    'county', v_case.county,
+    'court_type', v_case.court_type,
+    'dispute_type', v_case.dispute_type,
+    'family_sub_type', NEW.family_sub_type
+  ));
+
+  RETURN NEW;
+END;
+$$;
+
+-- Create trigger on family_case_details INSERT
+DROP TRIGGER IF EXISTS on_family_details_created ON public.family_case_details;
+CREATE TRIGGER on_family_details_created
+  AFTER INSERT ON public.family_case_details
+  FOR EACH ROW
+  EXECUTE FUNCTION public.seed_family_tasks();

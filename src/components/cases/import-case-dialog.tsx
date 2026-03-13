@@ -391,7 +391,7 @@ export function ImportCaseDialog() {
   // -- Milestones for the current dispute type --------------------------------
 
   const milestones = state.disputeType
-    ? getMilestones(state.disputeType)
+    ? getMilestones(state.disputeType, state.familySubType || undefined)
     : []
 
   // -- Scroll handling (same pattern as new-case-dialog) ----------------------
