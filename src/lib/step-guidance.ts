@@ -571,7 +571,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Description of what happened',
     ],
   },
-  prepare_demand_letter: {
+  sc_demand_letter: {
     why: 'Many disputes resolve after a formal demand letter. It shows you\'re serious and gives the other side a chance to settle.',
     checklist: [
       'Amount you\'re demanding',
@@ -587,14 +587,34 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Brief description of the dispute',
     ],
   },
-  serve_defendant: {
+  sc_evidence_vault: {
+    why: 'Organized evidence is the foundation of a strong small claims case. Judges appreciate clear, well-organized documentation.',
+    checklist: [
+      'Receipts or invoices showing the amount owed',
+      'Written contracts or agreements',
+      'Photos or videos of damage',
+      'Text messages, emails, or letters with the other party',
+      'Witness contact information',
+    ],
+    tip: 'Upload what you have now. You can always add more later.',
+  },
+  sc_serve_defendant: {
     why: 'The defendant must receive formal notice of your claim. The court requires proof this was done correctly.',
     checklist: [
       'Defendant\'s address for service',
       'Budget for certified mail or process server',
     ],
   },
-  prepare_for_hearing: {
+  sc_file_with_court: {
+    why: 'Small claims court has simplified filing, but filing in the right court with the correct forms is essential for your case to proceed.',
+    checklist: [
+      'Completed small claims petition',
+      'Filing fee ready (typically $35-$100)',
+      'Defendant\'s full name and address',
+    ],
+    tip: 'File in the Justice of the Peace court where the defendant lives or where the issue occurred. Claims up to $20,000.',
+  },
+  sc_prepare_for_hearing: {
     why: 'Small claims hearings are brief — usually 15-30 minutes. Being prepared and organized makes a strong impression on the judge.',
     checklist: [
       'All evidence organized in order',
@@ -603,7 +623,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     ],
     tip: 'Practice explaining your case in under 5 minutes.',
   },
-  hearing_day: {
+  sc_hearing_day: {
     why: 'This is your day in court. Arriving prepared, on time, and organized is the best thing you can do.',
     checklist: [
       'All exhibits and copies',

@@ -47,15 +47,15 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     },
     {
       label: 'Building Your Case',
-      taskKeys: ['evidence_vault', 'prepare_demand_letter'],
+      taskKeys: ['sc_evidence_vault', 'sc_demand_letter'],
     },
     {
       label: 'Filing & Service',
-      taskKeys: ['prepare_small_claims_filing', 'file_with_court', 'serve_defendant'],
+      taskKeys: ['prepare_small_claims_filing', 'sc_file_with_court', 'sc_serve_defendant'],
     },
     {
       label: 'Hearing',
-      taskKeys: ['prepare_for_hearing', 'hearing_day'],
+      taskKeys: ['sc_prepare_for_hearing', 'sc_hearing_day'],
     },
   ],
 

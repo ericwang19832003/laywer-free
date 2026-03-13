@@ -42,6 +42,8 @@ import { SmallClaimsWizard } from '@/components/step/small-claims-wizard'
 import { ServeDefendantStep } from '@/components/step/small-claims/serve-defendant-step'
 import { PrepareForHearingStep } from '@/components/step/small-claims/prepare-for-hearing-step'
 import { HearingDayStep } from '@/components/step/small-claims/hearing-day-step'
+import { scEvidenceVaultConfig } from '@/lib/guided-steps/small-claims/sc-evidence-vault'
+import { scFileWithCourtConfig } from '@/lib/guided-steps/small-claims/sc-file-with-court'
 import { LtIntakeStep } from '@/components/step/landlord-tenant/lt-intake-step'
 import { LtDemandLetterStep } from '@/components/step/landlord-tenant/lt-demand-letter-step'
 import { LandlordTenantWizard } from '@/components/step/landlord-tenant-wizard'
@@ -714,7 +716,7 @@ export default async function StepPage({
           existingMetadata={task.metadata}
         />
       )
-    case 'prepare_demand_letter': {
+    case 'sc_demand_letter': {
       const { data: caseRow } = await supabase
         .from('cases').select('county').eq('id', id).single()
       const { data: claimDetails } = await supabase
@@ -745,11 +747,15 @@ export default async function StepPage({
         />
       )
     }
-    case 'serve_defendant':
+    case 'sc_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={scEvidenceVaultConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={scFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_serve_defendant':
       return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'prepare_for_hearing':
+    case 'sc_prepare_for_hearing':
       return <PrepareForHearingStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'hearing_day':
+    case 'sc_hearing_day':
       return <HearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
     // Landlord-tenant task chain steps

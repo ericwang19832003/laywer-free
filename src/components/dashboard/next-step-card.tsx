@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 const SKIPPABLE_TASKS = new Set([
   'prepare_pi_demand_letter',
   'pi_settlement_negotiation',
-  'prepare_demand_letter',
+  'sc_demand_letter',
   'prepare_lt_demand_letter',
   'preservation_letter',
 ])

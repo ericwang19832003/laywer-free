@@ -17,7 +17,7 @@ const SKIPPABLE_TASKS = new Set([
   'prepare_pi_demand_letter',
   'pi_settlement_negotiation',
   'pi_mediation',
-  'prepare_demand_letter',
+  'sc_demand_letter',
   'prepare_lt_demand_letter',
   'lt_negotiation',
   'lt_mediation',
