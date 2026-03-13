@@ -327,6 +327,221 @@ const REAL_ESTATE_MILESTONES: Milestone[] = [
   },
 ]
 
+// -- Partnership Milestones ---------------------------------------------------
+
+const PARTNERSHIP_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand or attempted ADR',
+    description: 'I\'ve already sent a demand letter or attempted mediation/arbitration.',
+    firstUnlockedTask: 'biz_partnership_prepare_filing',
+    tasksToSkip: [
+      'welcome',
+      'biz_partnership_intake',
+      'biz_partnership_evidence',
+      'biz_partnership_demand_letter',
+      'biz_partnership_adr',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed with court',
+    description: 'I\'ve already filed my case with the court.',
+    firstUnlockedTask: 'biz_partnership_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      'biz_partnership_intake',
+      'biz_partnership_evidence',
+      'biz_partnership_demand_letter',
+      'biz_partnership_adr',
+      'biz_partnership_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the other party',
+    description: 'I\'ve served the other party with the lawsuit.',
+    firstUnlockedTask: 'biz_partnership_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      'biz_partnership_intake',
+      'biz_partnership_evidence',
+      'biz_partnership_demand_letter',
+      'biz_partnership_adr',
+      'biz_partnership_prepare_filing',
+      'biz_partnership_file_with_court',
+      'biz_partnership_serve_defendant',
+    ],
+  },
+  {
+    id: 'in_litigation',
+    label: 'In litigation',
+    description: 'I\'m in the litigation phase (discovery, motions, etc.).',
+    firstUnlockedTask: 'biz_partnership_discovery',
+    tasksToSkip: [
+      'welcome',
+      'biz_partnership_intake',
+      'biz_partnership_evidence',
+      'biz_partnership_demand_letter',
+      'biz_partnership_adr',
+      'biz_partnership_prepare_filing',
+      'biz_partnership_file_with_court',
+      'biz_partnership_serve_defendant',
+      'biz_partnership_wait_for_answer',
+    ],
+  },
+]
+
+// -- Employment Milestones ----------------------------------------------------
+
+const EMPLOYMENT_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand letter',
+    description: 'I\'ve already sent a demand letter to my employer.',
+    firstUnlockedTask: 'biz_employment_eeoc',
+    tasksToSkip: [
+      'welcome',
+      'biz_employment_intake',
+      'biz_employment_evidence',
+      'biz_employment_demand_letter',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed complaint or EEOC charge',
+    description: 'I\'ve filed with the EEOC/TWC or filed a lawsuit.',
+    firstUnlockedTask: 'biz_employment_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      'biz_employment_intake',
+      'biz_employment_evidence',
+      'biz_employment_demand_letter',
+      'biz_employment_eeoc',
+      'biz_employment_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the employer',
+    description: 'I\'ve served my employer with the lawsuit.',
+    firstUnlockedTask: 'biz_employment_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      'biz_employment_intake',
+      'biz_employment_evidence',
+      'biz_employment_demand_letter',
+      'biz_employment_eeoc',
+      'biz_employment_prepare_filing',
+      'biz_employment_file_with_court',
+      'biz_employment_serve_defendant',
+    ],
+  },
+  {
+    id: 'in_litigation',
+    label: 'In litigation',
+    description: 'I\'m in the litigation phase (discovery, motions, etc.).',
+    firstUnlockedTask: 'biz_employment_discovery',
+    tasksToSkip: [
+      'welcome',
+      'biz_employment_intake',
+      'biz_employment_evidence',
+      'biz_employment_demand_letter',
+      'biz_employment_eeoc',
+      'biz_employment_prepare_filing',
+      'biz_employment_file_with_court',
+      'biz_employment_serve_defendant',
+      'biz_employment_wait_for_answer',
+    ],
+  },
+]
+
+// -- B2B / Commercial Milestones ----------------------------------------------
+
+const B2B_COMMERCIAL_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand letter',
+    description: 'I\'ve already sent a demand letter.',
+    firstUnlockedTask: 'biz_b2b_prepare_filing',
+    tasksToSkip: [
+      'welcome',
+      'biz_b2b_intake',
+      'biz_b2b_evidence',
+      'biz_b2b_demand_letter',
+      'biz_b2b_negotiation',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed with court',
+    description: 'I\'ve already filed my case with the court.',
+    firstUnlockedTask: 'biz_b2b_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      'biz_b2b_intake',
+      'biz_b2b_evidence',
+      'biz_b2b_demand_letter',
+      'biz_b2b_negotiation',
+      'biz_b2b_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the other party',
+    description: 'I\'ve served the other business with the lawsuit.',
+    firstUnlockedTask: 'biz_b2b_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      'biz_b2b_intake',
+      'biz_b2b_evidence',
+      'biz_b2b_demand_letter',
+      'biz_b2b_negotiation',
+      'biz_b2b_prepare_filing',
+      'biz_b2b_file_with_court',
+      'biz_b2b_serve_defendant',
+    ],
+  },
+  {
+    id: 'in_litigation',
+    label: 'In litigation',
+    description: 'I\'m in the litigation phase (discovery, motions, etc.).',
+    firstUnlockedTask: 'biz_b2b_discovery',
+    tasksToSkip: [
+      'welcome',
+      'biz_b2b_intake',
+      'biz_b2b_evidence',
+      'biz_b2b_demand_letter',
+      'biz_b2b_negotiation',
+      'biz_b2b_prepare_filing',
+      'biz_b2b_file_with_court',
+      'biz_b2b_serve_defendant',
+      'biz_b2b_wait_for_answer',
+    ],
+  },
+]
+
 // -- Other Dispute Milestones -------------------------------------------------
 
 const OTHER_MILESTONES: Milestone[] = [
@@ -879,6 +1094,9 @@ const MILESTONES_BY_TYPE: Record<string, Milestone[]> = {
   contract: CONTRACT_MILESTONES,
   property: PROPERTY_MILESTONES,
   real_estate: REAL_ESTATE_MILESTONES,
+  partnership: PARTNERSHIP_MILESTONES,
+  employment: EMPLOYMENT_MILESTONES,
+  b2b_commercial: B2B_COMMERCIAL_MILESTONES,
   other: OTHER_MILESTONES,
   personal_injury: PERSONAL_INJURY_MILESTONES,
   debt_collection: DEBT_DEFENSE_MILESTONES,
@@ -899,9 +1117,12 @@ const MILESTONES_BY_TYPE: Record<string, Milestone[]> = {
  * Returns the ordered list of milestones for a given dispute type.
  * Falls back to civil milestones for unknown types.
  */
-export function getMilestones(disputeType: DisputeType, familySubType?: string): Milestone[] {
+export function getMilestones(disputeType: DisputeType, familySubType?: string, businessSubType?: string): Milestone[] {
   if (disputeType === 'family' && familySubType) {
     return MILESTONES_BY_TYPE[familySubType] ?? DIVORCE_MILESTONES
+  }
+  if (disputeType === 'business' && businessSubType) {
+    return MILESTONES_BY_TYPE[businessSubType] ?? PARTNERSHIP_MILESTONES
   }
   return MILESTONES_BY_TYPE[disputeType] ?? CIVIL_MILESTONES
 }
@@ -914,9 +1135,10 @@ export function getMilestones(disputeType: DisputeType, familySubType?: string):
 export function getTasksToSkip(
   disputeType: DisputeType,
   milestoneId: string,
-  familySubType?: string
+  familySubType?: string,
+  businessSubType?: string
 ): string[] {
-  const milestones = getMilestones(disputeType, familySubType)
+  const milestones = getMilestones(disputeType, familySubType, businessSubType)
   const milestone = milestones.find((m) => m.id === milestoneId)
   return milestone?.tasksToSkip ?? []
 }
@@ -928,8 +1150,9 @@ export function getTasksToSkip(
 export function getMilestoneByID(
   disputeType: DisputeType,
   milestoneId: string,
-  familySubType?: string
+  familySubType?: string,
+  businessSubType?: string
 ): Milestone | undefined {
-  const milestones = getMilestones(disputeType, familySubType)
+  const milestones = getMilestones(disputeType, familySubType, businessSubType)
   return milestones.find((m) => m.id === milestoneId)
 }

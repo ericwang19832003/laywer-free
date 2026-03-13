@@ -38,6 +38,10 @@ import {
 import { DebtSideStep, type DebtSide } from './wizard/debt-side-step'
 import { DebtSubTypeStep, type DebtSubType } from './wizard/debt-sub-type-step'
 import { PISubTypeStep } from './wizard/pi-sub-type-step'
+import {
+  BusinessSubTypeStep,
+} from './wizard/business-sub-type-step'
+import type { BusinessSubType } from '@/lib/schemas/case'
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -50,6 +54,7 @@ const HAS_SUB_TYPE = new Set<DisputeType>([
   'landlord_tenant',
   'personal_injury',
   'debt_collection',
+  'business',
 ])
 
 /**
@@ -160,6 +165,7 @@ interface ImportWizardState {
   role: 'plaintiff' | 'defendant' | ''
   disputeType: DisputeType | ''
   familySubType: FamilySubType | ''
+  businessSubType: BusinessSubType | ''
   smallClaimsSubType: SmallClaimsSubType | ''
   landlordTenantSubType: LandlordTenantSubType | ''
   debtSide: DebtSide | ''
@@ -175,6 +181,7 @@ type ImportWizardAction =
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
   | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
+  | { type: 'SET_BUSINESS_SUB_TYPE'; businessSubType: BusinessSubType }
   | { type: 'SET_SMALL_CLAIMS_SUB_TYPE'; smallClaimsSubType: SmallClaimsSubType }
   | { type: 'SET_LANDLORD_TENANT_SUB_TYPE'; landlordTenantSubType: LandlordTenantSubType }
   | { type: 'SET_DEBT_SIDE'; debtSide: DebtSide }
@@ -202,6 +209,7 @@ const initialState: ImportWizardState = {
   role: '',
   disputeType: '',
   familySubType: '',
+  businessSubType: '',
   smallClaimsSubType: '',
   landlordTenantSubType: '',
   debtSide: '',
@@ -224,6 +232,7 @@ function reducer(state: ImportWizardState, action: ImportWizardAction): ImportWi
         disputeType: action.disputeType,
         role: action.disputeType === 'personal_injury' ? 'plaintiff' : state.role,
         familySubType: action.disputeType === 'family' ? state.familySubType : '',
+        businessSubType: action.disputeType === 'business' ? state.businessSubType : '',
         smallClaimsSubType: action.disputeType === 'small_claims' ? state.smallClaimsSubType : '',
         landlordTenantSubType: action.disputeType === 'landlord_tenant' ? state.landlordTenantSubType : '',
         debtSide: action.disputeType === 'debt_collection' ? state.debtSide : '',
@@ -234,6 +243,8 @@ function reducer(state: ImportWizardState, action: ImportWizardAction): ImportWi
       }
     case 'SET_FAMILY_SUB_TYPE':
       return { ...state, familySubType: action.familySubType, step: state.step + 1 }
+    case 'SET_BUSINESS_SUB_TYPE':
+      return { ...state, businessSubType: action.businessSubType, step: state.step + 1 }
     case 'SET_SMALL_CLAIMS_SUB_TYPE':
       return { ...state, smallClaimsSubType: action.smallClaimsSubType, step: state.step + 1 }
     case 'SET_LANDLORD_TENANT_SUB_TYPE':
@@ -286,6 +297,7 @@ export function ImportCaseDialog() {
   const isPersonalInjury = state.disputeType === 'personal_injury'
   const isLandlordTenant = state.disputeType === 'landlord_tenant'
   const isDebtCollection = state.disputeType === 'debt_collection'
+  const isBusiness = state.disputeType === 'business'
 
   async function handleAccept(courtOverride: string | null) {
     if (!state.role) return
@@ -323,6 +335,9 @@ export function ImportCaseDialog() {
           ...(state.county.trim() ? { county: state.county.trim() } : {}),
           ...(isFamily && state.familySubType
             ? { family_sub_type: state.familySubType }
+            : {}),
+          ...(isBusiness && state.businessSubType
+            ? { business_sub_type: state.businessSubType }
             : {}),
           ...(isSmallClaims && state.smallClaimsSubType
             ? { small_claims_sub_type: state.smallClaimsSubType }
@@ -391,7 +406,7 @@ export function ImportCaseDialog() {
   // -- Milestones for the current dispute type --------------------------------
 
   const milestones = state.disputeType
-    ? getMilestones(state.disputeType, state.familySubType || undefined)
+    ? getMilestones(state.disputeType, state.familySubType || undefined, state.businessSubType || undefined)
     : []
 
   // -- Scroll handling (same pattern as new-case-dialog) ----------------------
@@ -499,6 +514,15 @@ export function ImportCaseDialog() {
           />
         )}
 
+        {state.step === 4 && isBusiness && (
+          <BusinessSubTypeStep
+            value={state.businessSubType}
+            onSelect={(businessSubType) =>
+              dispatch({ type: 'SET_BUSINESS_SUB_TYPE', businessSubType })
+            }
+          />
+        )}
+
         {state.step === 4 && isSmallClaims && (
           <SmallClaimsSubTypeStep
             value={state.smallClaimsSubType}
@@ -546,7 +570,7 @@ export function ImportCaseDialog() {
         )}
 
         {/* Milestone step (step number varies by dispute type) */}
-        {state.step === milestoneStep && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
+        {state.step === milestoneStep && !isFamily && !isBusiness && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <MilestoneStep
             milestones={milestones}
             value={state.milestone}
@@ -557,6 +581,16 @@ export function ImportCaseDialog() {
         )}
 
         {state.step === milestoneStep && isFamily && (
+          <MilestoneStep
+            milestones={milestones}
+            value={state.milestone}
+            onSelect={(milestone) =>
+              dispatch({ type: 'SET_MILESTONE', milestone })
+            }
+          />
+        )}
+
+        {state.step === milestoneStep && isBusiness && (
           <MilestoneStep
             milestones={milestones}
             value={state.milestone}
