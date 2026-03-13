@@ -129,6 +129,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert business details if this is a business case
+    if (dispute_type === 'business' && !business_sub_type) {
+      return NextResponse.json(
+        { error: 'business_sub_type is required for business cases' },
+        { status: 422 }
+      )
+    }
     if (business_sub_type) {
       const { error: bizError } = await supabase
         .from('business_details')
@@ -138,7 +144,10 @@ export async function POST(request: NextRequest) {
         })
 
       if (bizError) {
-        console.error('Failed to create business details:', bizError)
+        return NextResponse.json(
+          { error: 'Case created but failed to save business details', details: bizError.message },
+          { status: 500 }
+        )
       }
     }
 

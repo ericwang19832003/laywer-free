@@ -1226,8 +1226,13 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentEvidenceConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'biz_employment_demand_letter':
       return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
-    case 'biz_employment_eeoc':
-      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentEeocConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_employment_eeoc': {
+      const { data: empIntakeTask } = await supabase
+        .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_employment_intake').maybeSingle()
+      const empIntakeMeta = empIntakeTask?.metadata as Record<string, unknown> | null
+      const isDiscrimination = empIntakeMeta?.specific_dispute_type === 'discrimination_harassment'
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentEeocConfig} existingAnswers={task.metadata?.guided_answers} skippable={!isDiscrimination} />
+    }
     case 'biz_employment_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
