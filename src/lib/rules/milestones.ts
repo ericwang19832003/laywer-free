@@ -254,6 +254,79 @@ const PROPERTY_MILESTONES: Milestone[] = [
   },
 ]
 
+// -- Real Estate Milestones ---------------------------------------------------
+
+const REAL_ESTATE_MILESTONES: Milestone[] = [
+  {
+    id: 'start',
+    label: 'Just getting started',
+    description: 'I haven\'t taken any action yet.',
+    firstUnlockedTask: 'welcome',
+    tasksToSkip: [],
+  },
+  {
+    id: 'demand_sent',
+    label: 'Sent a demand letter',
+    description: 'I\'ve already sent a demand letter.',
+    firstUnlockedTask: 're_prepare_filing',
+    tasksToSkip: [
+      'welcome',
+      're_intake',
+      're_evidence_vault',
+      're_demand_letter',
+      're_negotiation',
+    ],
+  },
+  {
+    id: 'filed',
+    label: 'Filed with court',
+    description: 'I\'ve already filed my case with the court.',
+    firstUnlockedTask: 're_file_with_court',
+    tasksToSkip: [
+      'welcome',
+      're_intake',
+      're_evidence_vault',
+      're_demand_letter',
+      're_negotiation',
+      're_prepare_filing',
+    ],
+  },
+  {
+    id: 'served',
+    label: 'Served the other party',
+    description: 'I\'ve served the other party with the lawsuit.',
+    firstUnlockedTask: 're_wait_for_answer',
+    tasksToSkip: [
+      'welcome',
+      're_intake',
+      're_evidence_vault',
+      're_demand_letter',
+      're_negotiation',
+      're_prepare_filing',
+      're_file_with_court',
+      're_serve_defendant',
+    ],
+  },
+  {
+    id: 'in_litigation',
+    label: 'In litigation',
+    description: 'I\'m in the litigation phase (discovery, motions, etc.).',
+    firstUnlockedTask: 're_discovery',
+    tasksToSkip: [
+      'welcome',
+      're_intake',
+      're_evidence_vault',
+      're_demand_letter',
+      're_negotiation',
+      're_prepare_filing',
+      're_file_with_court',
+      're_serve_defendant',
+      're_wait_for_answer',
+      're_review_answer',
+    ],
+  },
+]
+
 // -- Other Dispute Milestones -------------------------------------------------
 
 const OTHER_MILESTONES: Milestone[] = [
@@ -805,6 +878,7 @@ const LANDLORD_TENANT_MILESTONES: Milestone[] = [
 const MILESTONES_BY_TYPE: Record<string, Milestone[]> = {
   contract: CONTRACT_MILESTONES,
   property: PROPERTY_MILESTONES,
+  real_estate: REAL_ESTATE_MILESTONES,
   other: OTHER_MILESTONES,
   personal_injury: PERSONAL_INJURY_MILESTONES,
   debt_collection: DEBT_DEFENSE_MILESTONES,

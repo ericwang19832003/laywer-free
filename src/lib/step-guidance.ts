@@ -490,6 +490,106 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     ],
   },
 
+  // --- Real Estate ---
+  re_intake: {
+    why: 'Property details, transaction timeline, and the nature of the dispute form the foundation of your real estate claim.',
+    checklist: [
+      'Purchase agreement or contract',
+      'Property address and description',
+      'Other party\'s name and role (buyer, seller, agent, etc.)',
+      'Timeline of key events',
+      'Amount of damages you\'re claiming',
+    ],
+    tip: 'Gather your closing documents and any correspondence with agents or title companies.',
+  },
+  re_evidence_vault: {
+    why: 'Real estate disputes are document-heavy — organized evidence strengthens your position significantly.',
+    checklist: [
+      'Purchase agreement or contract',
+      'Title report or title insurance policy',
+      'Inspection report',
+      'Closing documents (HUD-1 or settlement statement)',
+      'Communications with other party or agents',
+    ],
+  },
+  re_demand_letter: {
+    why: 'A formal demand letter puts the other party on notice and often resolves real estate disputes without court.',
+    checklist: [
+      'Clear description of the breach or issue',
+      'Specific dollar amount of damages',
+      'Deadline to respond (typically 30 days)',
+      'Copies of key supporting documents',
+    ],
+  },
+  re_negotiation: {
+    why: 'Many real estate disputes settle through negotiation, saving time and court costs.',
+    checklist: [
+      'Your minimum acceptable outcome',
+      'Key evidence to reference',
+      'Written record of all offers',
+      'Timeline for resolution',
+    ],
+  },
+  re_prepare_filing: {
+    why: 'Filing requires specific forms and accurate information about the property and dispute.',
+    checklist: [
+      'Completed petition with property details',
+      'Filing fee or fee waiver application',
+      'Legal description of the property',
+      'Correct court jurisdiction',
+    ],
+  },
+  re_file_with_court: {
+    why: 'Filing officially starts your lawsuit and establishes your claim timeline.',
+    checklist: [
+      'Completed petition and copies',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  re_serve_defendant: {
+    why: 'The defendant must be properly served for the court to have jurisdiction.',
+    checklist: [
+      'Certified copy of the petition',
+      'Process server or constable contact',
+      'Defendant\'s address for service',
+    ],
+  },
+  re_wait_for_answer: {
+    why: 'After service, the defendant typically has 20 days (Texas) to file an answer.',
+    checklist: [
+      'Service date and deadline calculation',
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  re_review_answer: {
+    why: 'Understanding the defendant\'s response helps you prepare your strategy.',
+    checklist: [
+      'Read all claims and defenses',
+      'Identify disputed vs. admitted facts',
+      'Note any counterclaims against you',
+    ],
+  },
+  re_discovery: {
+    why: 'Discovery lets you request documents and information from the other party.',
+    checklist: [
+      'Written interrogatories (questions)',
+      'Requests for production of documents',
+      'Requests for admissions',
+      'Responses to their discovery requests',
+    ],
+  },
+  re_post_resolution: {
+    why: 'After resolution, there may be steps to enforce a judgment or complete a transaction.',
+    checklist: [
+      'Record any judgment with the county',
+      'Follow up on payment deadlines',
+      'Update title records if needed',
+      'Keep copies of all final documents',
+    ],
+  },
+
   // --- Other ---
   other_intake: {
     why: 'Understanding your situation helps us guide you through the right legal process.',

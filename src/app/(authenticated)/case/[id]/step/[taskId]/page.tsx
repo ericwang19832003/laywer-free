@@ -106,6 +106,16 @@ import { propertyWaitForAnswerConfig } from '@/lib/guided-steps/property/propert
 import { propertyReviewAnswerConfig } from '@/lib/guided-steps/property/property-review-answer'
 import { propertyDiscoveryConfig } from '@/lib/guided-steps/property/property-discovery'
 import { propertyPostResolutionConfig } from '@/lib/guided-steps/property/property-post-resolution'
+import { REIntakeStep } from '@/components/step/real-estate/re-intake-step'
+import { reEvidenceVaultConfig } from '@/lib/guided-steps/real-estate/re-evidence-vault'
+import { reDemandLetterConfig } from '@/lib/guided-steps/real-estate/re-demand-letter'
+import { reNegotiationConfig } from '@/lib/guided-steps/real-estate/re-negotiation'
+import { reFileWithCourtConfig } from '@/lib/guided-steps/real-estate/re-file-with-court'
+import { reServeDefendantConfig } from '@/lib/guided-steps/real-estate/re-serve-defendant'
+import { reWaitForAnswerConfig } from '@/lib/guided-steps/real-estate/re-wait-for-answer'
+import { reReviewAnswerConfig } from '@/lib/guided-steps/real-estate/re-review-answer'
+import { reDiscoveryConfig } from '@/lib/guided-steps/real-estate/re-discovery'
+import { rePostResolutionConfig } from '@/lib/guided-steps/real-estate/re-post-resolution'
 import { otherDemandLetterConfig } from '@/lib/guided-steps/other/other-demand-letter'
 import { otherFileWithCourtConfig } from '@/lib/guided-steps/other/other-file-with-court'
 import { otherServeDefendantConfig } from '@/lib/guided-steps/other/other-serve-defendant'
@@ -1050,6 +1060,66 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={propertyDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'property_post_resolution':
       return <GuidedStep caseId={id} taskId={taskId} config={propertyPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Real estate dispute task chain steps
+    case 're_intake':
+      return (
+        <REIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 're_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={reEvidenceVaultConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={reDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_negotiation':
+      return <GuidedStep caseId={id} taskId={taskId} config={reNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+      const { data: reIntakeTask } = await supabase
+        .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 're_intake').maybeSingle()
+      const reIntakeMeta = reIntakeTask?.metadata as Record<string, unknown> | null
+      const governmentEntity = (reIntakeMeta?.government_entity as boolean) ?? false
+
+      if (!caseRow || caseRow.court_type === 'unknown') {
+        return (
+          <div className="max-w-2xl mx-auto px-4 py-8">
+            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
+            <Card><CardContent className="pt-6 text-center py-12">
+              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
+              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
+            </CardContent></Card>
+          </div>
+        )
+      }
+
+      return (
+        <PetitionWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={{
+            ...caseRow,
+            government_entity: governmentEntity,
+          }}
+        />
+      )
+    }
+    case 're_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={reFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={reServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={reWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_review_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={reReviewAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={reDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={rePostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
 
     // Other dispute task chain steps
     case 'other_intake':

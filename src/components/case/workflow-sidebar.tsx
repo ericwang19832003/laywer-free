@@ -27,6 +27,8 @@ const SKIPPABLE_TASKS = new Set([
   'contract_mediation',
   'property_demand_letter',
   'property_negotiation',
+  're_demand_letter',
+  're_negotiation',
   'other_demand_letter',
   'divorce_temporary_orders',
   'divorce_mediation',

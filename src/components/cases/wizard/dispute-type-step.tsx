@@ -23,7 +23,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
     { id: 'contract', value: 'contract', label: 'Contract dispute', description: 'Breach of agreement, broken contract' },
     { id: 'business', value: 'contract', label: 'Business dispute', description: 'Partnership issues, business disagreements' },
     { id: 'property', value: 'property', label: 'Property dispute', description: 'Land ownership, boundary, or title dispute' },
-    { id: 'real_estate', value: 'property', label: 'Real estate', description: 'Real estate transactions, liens, or deed issues' },
+    { id: 'real_estate', value: 'real_estate', label: 'Real estate', description: 'Real estate transactions, liens, or deed issues' },
     { id: 'family', value: 'family', label: 'Family matter', description: 'Custody, divorce, child support, or protective order' },
     { id: 'small_claims', value: 'small_claims', label: 'Small claim', description: `General dispute under ${limitFormatted} that doesn\u2019t fit above` },
     { id: 'other', value: 'other', label: 'Something else', description: "Doesn't fit the categories above" },

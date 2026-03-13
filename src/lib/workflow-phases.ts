@@ -206,6 +206,29 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     },
   ],
 
+  real_estate: [
+    {
+      label: 'Getting Started',
+      taskKeys: ['welcome', 're_intake'],
+    },
+    {
+      label: 'Building Your Case',
+      taskKeys: ['re_evidence_vault', 're_demand_letter', 're_negotiation'],
+    },
+    {
+      label: 'Filing & Service',
+      taskKeys: ['re_prepare_filing', 're_file_with_court', 're_serve_defendant'],
+    },
+    {
+      label: 'Litigation',
+      taskKeys: ['re_wait_for_answer', 're_review_answer', 're_discovery'],
+    },
+    {
+      label: 'Resolution',
+      taskKeys: ['re_post_resolution'],
+    },
+  ],
+
   other: [
     {
       label: 'Getting Started',

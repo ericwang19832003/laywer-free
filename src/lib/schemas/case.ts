@@ -6,6 +6,7 @@ export const DISPUTE_TYPES = [
   'personal_injury',
   'contract',
   'property',
+  'real_estate',
   'family',
   'small_claims',
   'other',
@@ -101,6 +102,19 @@ export const PROPERTY_DISPUTE_SUB_TYPES = [
 
 export type PropertyDisputeSubType = (typeof PROPERTY_DISPUTE_SUB_TYPES)[number]
 
+export const REAL_ESTATE_SUB_TYPES = [
+  'failed_closing',
+  'seller_disclosure',
+  'buyer_breach',
+  'title_defect',
+  'earnest_money',
+  'real_estate_fraud',
+  'construction_defect',
+  'other_real_estate',
+] as const
+
+export type RealEstateSubType = (typeof REAL_ESTATE_SUB_TYPES)[number]
+
 export const OTHER_SUB_TYPES = [
   'consumer_protection',
   'civil_rights',
@@ -138,6 +152,7 @@ export const createCaseSchema = z.object({
   pi_sub_type: z.enum(PI_SUB_TYPES).optional(),
   contract_sub_type: z.enum(CONTRACT_SUB_TYPES).optional(),
   property_sub_type: z.enum(PROPERTY_DISPUTE_SUB_TYPES).optional(),
+  re_sub_type: z.enum(REAL_ESTATE_SUB_TYPES).optional(),
   other_sub_type: z.enum(OTHER_SUB_TYPES).optional(),
 })
 
