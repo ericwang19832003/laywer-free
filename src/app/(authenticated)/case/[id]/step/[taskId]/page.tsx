@@ -116,6 +116,40 @@ import { reWaitForAnswerConfig } from '@/lib/guided-steps/real-estate/re-wait-fo
 import { reReviewAnswerConfig } from '@/lib/guided-steps/real-estate/re-review-answer'
 import { reDiscoveryConfig } from '@/lib/guided-steps/real-estate/re-discovery'
 import { rePostResolutionConfig } from '@/lib/guided-steps/real-estate/re-post-resolution'
+
+// Business: Partnership
+import { BizPartnershipIntakeStep } from '@/components/step/business/biz-partnership-intake-step'
+import { bizPartnershipEvidenceConfig } from '@/lib/guided-steps/business/biz-partnership-evidence'
+import { bizPartnershipDemandLetterConfig } from '@/lib/guided-steps/business/biz-partnership-demand-letter'
+import { bizPartnershipAdrConfig } from '@/lib/guided-steps/business/biz-partnership-adr'
+import { bizPartnershipFileWithCourtConfig } from '@/lib/guided-steps/business/biz-partnership-file-with-court'
+import { bizPartnershipServeDefendantConfig } from '@/lib/guided-steps/business/biz-partnership-serve-defendant'
+import { bizPartnershipWaitForAnswerConfig } from '@/lib/guided-steps/business/biz-partnership-wait-for-answer'
+import { bizPartnershipDiscoveryConfig } from '@/lib/guided-steps/business/biz-partnership-discovery'
+import { bizPartnershipPostResolutionConfig } from '@/lib/guided-steps/business/biz-partnership-post-resolution'
+
+// Business: Employment
+import { BizEmploymentIntakeStep } from '@/components/step/business/biz-employment-intake-step'
+import { bizEmploymentEvidenceConfig } from '@/lib/guided-steps/business/biz-employment-evidence'
+import { bizEmploymentDemandLetterConfig } from '@/lib/guided-steps/business/biz-employment-demand-letter'
+import { bizEmploymentEeocConfig } from '@/lib/guided-steps/business/biz-employment-eeoc'
+import { bizEmploymentFileWithCourtConfig } from '@/lib/guided-steps/business/biz-employment-file-with-court'
+import { bizEmploymentServeDefendantConfig } from '@/lib/guided-steps/business/biz-employment-serve-defendant'
+import { bizEmploymentWaitForAnswerConfig } from '@/lib/guided-steps/business/biz-employment-wait-for-answer'
+import { bizEmploymentDiscoveryConfig } from '@/lib/guided-steps/business/biz-employment-discovery'
+import { bizEmploymentPostResolutionConfig } from '@/lib/guided-steps/business/biz-employment-post-resolution'
+
+// Business: B2B Commercial
+import { BizB2bIntakeStep } from '@/components/step/business/biz-b2b-intake-step'
+import { bizB2bEvidenceConfig } from '@/lib/guided-steps/business/biz-b2b-evidence'
+import { bizB2bDemandLetterConfig } from '@/lib/guided-steps/business/biz-b2b-demand-letter'
+import { bizB2bNegotiationConfig } from '@/lib/guided-steps/business/biz-b2b-negotiation'
+import { bizB2bFileWithCourtConfig } from '@/lib/guided-steps/business/biz-b2b-file-with-court'
+import { bizB2bServeDefendantConfig } from '@/lib/guided-steps/business/biz-b2b-serve-defendant'
+import { bizB2bWaitForAnswerConfig } from '@/lib/guided-steps/business/biz-b2b-wait-for-answer'
+import { bizB2bDiscoveryConfig } from '@/lib/guided-steps/business/biz-b2b-discovery'
+import { bizB2bPostResolutionConfig } from '@/lib/guided-steps/business/biz-b2b-post-resolution'
+
 import { otherDemandLetterConfig } from '@/lib/guided-steps/other/other-demand-letter'
 import { otherFileWithCourtConfig } from '@/lib/guided-steps/other/other-file-with-court'
 import { otherServeDefendantConfig } from '@/lib/guided-steps/other/other-serve-defendant'
@@ -1120,6 +1154,180 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={reDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
     case 're_post_resolution':
       return <GuidedStep caseId={id} taskId={taskId} config={rePostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Business: Partnership dispute task chain steps
+    case 'biz_partnership_intake':
+      return (
+        <BizPartnershipIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'biz_partnership_evidence':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipEvidenceConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_partnership_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_partnership_adr':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipAdrConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_partnership_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+      const { data: bizIntakeTask } = await supabase
+        .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_partnership_intake').maybeSingle()
+      const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
+      const governmentEntity = (bizIntakeMeta?.government_entity as boolean) ?? false
+
+      if (!caseRow || caseRow.court_type === 'unknown') {
+        return (
+          <div className="max-w-2xl mx-auto px-4 py-8">
+            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
+            <Card><CardContent className="pt-6 text-center py-12">
+              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
+              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
+            </CardContent></Card>
+          </div>
+        )
+      }
+
+      return (
+        <PetitionWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={{
+            ...caseRow,
+            government_entity: governmentEntity,
+          }}
+        />
+      )
+    }
+    case 'biz_partnership_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_partnership_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_partnership_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_partnership_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_partnership_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Business: Employment dispute task chain steps
+    case 'biz_employment_intake':
+      return (
+        <BizEmploymentIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'biz_employment_evidence':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentEvidenceConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_employment_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_employment_eeoc':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentEeocConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_employment_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+      const { data: bizIntakeTask } = await supabase
+        .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_employment_intake').maybeSingle()
+      const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
+      const governmentEntity = (bizIntakeMeta?.government_entity as boolean) ?? false
+
+      if (!caseRow || caseRow.court_type === 'unknown') {
+        return (
+          <div className="max-w-2xl mx-auto px-4 py-8">
+            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
+            <Card><CardContent className="pt-6 text-center py-12">
+              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
+              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
+            </CardContent></Card>
+          </div>
+        )
+      }
+
+      return (
+        <PetitionWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={{
+            ...caseRow,
+            government_entity: governmentEntity,
+          }}
+        />
+      )
+    }
+    case 'biz_employment_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_employment_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_employment_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_employment_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_employment_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Business: B2B Commercial dispute task chain steps
+    case 'biz_b2b_intake':
+      return (
+        <BizB2bIntakeStep
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+        />
+      )
+    case 'biz_b2b_evidence':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bEvidenceConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_b2b_demand_letter':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_b2b_negotiation':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_b2b_prepare_filing': {
+      const { data: caseRow } = await supabase
+        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+      const { data: bizIntakeTask } = await supabase
+        .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_b2b_intake').maybeSingle()
+      const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
+      const governmentEntity = (bizIntakeMeta?.government_entity as boolean) ?? false
+
+      if (!caseRow || caseRow.court_type === 'unknown') {
+        return (
+          <div className="max-w-2xl mx-auto px-4 py-8">
+            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
+            <Card><CardContent className="pt-6 text-center py-12">
+              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
+              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
+            </CardContent></Card>
+          </div>
+        )
+      }
+
+      return (
+        <PetitionWizard
+          caseId={id}
+          taskId={taskId}
+          existingMetadata={task.metadata}
+          caseData={{
+            ...caseRow,
+            government_entity: governmentEntity,
+          }}
+        />
+      )
+    }
+    case 'biz_b2b_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bFileWithCourtConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_b2b_serve_defendant':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bServeDefendantConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_b2b_wait_for_answer':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bWaitForAnswerConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_b2b_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_b2b_post_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bPostResolutionConfig} existingAnswers={task.metadata?.guided_answers} />
 
     // Other dispute task chain steps
     case 'other_intake':
