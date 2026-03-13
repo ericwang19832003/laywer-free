@@ -42,10 +42,12 @@ import {
 import { DebtSideStep, type DebtSide } from './wizard/debt-side-step'
 import { DebtSubTypeStep, type DebtSubType } from './wizard/debt-sub-type-step'
 import { PISubTypeStep } from './wizard/pi-sub-type-step'
-import type { PiSubType } from '@/lib/schemas/case'
+import { BusinessSubTypeStep } from './wizard/business-sub-type-step'
+import type { PiSubType, BusinessSubType } from '@/lib/schemas/case'
 
 function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: string, debtSide?: string): number {
   if (disputeType === 'family') return 5
+  if (disputeType === 'business') return 5
   if (disputeType === 'small_claims') return 5
   if (disputeType === 'personal_injury') return 6
   if (disputeType === 'landlord_tenant') {
@@ -65,6 +67,7 @@ interface WizardState {
   role: 'plaintiff' | 'defendant' | ''
   disputeType: DisputeType | ''
   familySubType: FamilySubType | ''
+  businessSubType: BusinessSubType | ''
   smallClaimsSubType: SmallClaimsSubType | ''
   landlordTenantSubType: LandlordTenantSubType | ''
   debtSide: DebtSide | ''
@@ -80,6 +83,7 @@ type WizardAction =
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
   | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
+  | { type: 'SET_BUSINESS_SUB_TYPE'; businessSubType: BusinessSubType }
   | { type: 'SET_SMALL_CLAIMS_SUB_TYPE'; smallClaimsSubType: SmallClaimsSubType }
   | { type: 'SET_LANDLORD_TENANT_SUB_TYPE'; landlordTenantSubType: LandlordTenantSubType }
   | { type: 'SET_DEBT_SIDE'; debtSide: DebtSide }
@@ -98,6 +102,7 @@ const initialState: WizardState = {
   role: '',
   disputeType: '',
   familySubType: '',
+  businessSubType: '',
   smallClaimsSubType: '',
   landlordTenantSubType: '',
   debtSide: '',
@@ -125,6 +130,7 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
         disputeType: action.disputeType,
         role: action.disputeType === 'personal_injury' ? 'plaintiff' : state.role,
         familySubType: action.disputeType === 'family' ? state.familySubType : '',
+        businessSubType: action.disputeType === 'business' ? state.businessSubType : '',
         smallClaimsSubType: action.disputeType === 'small_claims' ? state.smallClaimsSubType : '',
         landlordTenantSubType: action.disputeType === 'landlord_tenant' ? state.landlordTenantSubType : '',
         debtSide: action.disputeType === 'debt_collection' ? state.debtSide : '',
@@ -134,6 +140,8 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       }
     case 'SET_FAMILY_SUB_TYPE':
       return { ...state, familySubType: action.familySubType, step: 5 }
+    case 'SET_BUSINESS_SUB_TYPE':
+      return { ...state, businessSubType: action.businessSubType, step: 5 }
     case 'SET_SMALL_CLAIMS_SUB_TYPE':
       return { ...state, smallClaimsSubType: action.smallClaimsSubType, step: 5 }
     case 'SET_LANDLORD_TENANT_SUB_TYPE':
@@ -172,6 +180,7 @@ export function NewCaseDialog() {
   const router = useRouter()
 
   const isFamily = state.disputeType === 'family'
+  const isBusiness = state.disputeType === 'business'
   const isSmallClaims = state.disputeType === 'small_claims'
   const isPersonalInjury = state.disputeType === 'personal_injury'
   const isLandlordTenant = state.disputeType === 'landlord_tenant'
@@ -197,7 +206,9 @@ export function NewCaseDialog() {
       courtOverride ??
       (isFamily
         ? (isPA ? 'pa_common_pleas' : isFL ? 'fl_circuit' : isNY ? 'ny_supreme' : isCA ? 'unlimited_civil' : 'district')
-        : isSmallClaims
+        : isBusiness
+          ? (isPA ? 'pa_common_pleas' : isFL ? 'fl_circuit' : isNY ? 'ny_supreme' : isCA ? 'unlimited_civil' : 'district')
+          : isSmallClaims
           ? (isPA ? 'pa_magisterial' : isFL ? 'fl_small_claims' : isNY ? 'ny_small_claims' : isCA ? 'small_claims' : 'jp')
           : isEviction
             ? (isPA ? 'pa_magisterial' : isFL ? 'fl_county' : isNY ? 'ny_civil' : isCA ? 'unlimited_civil' : 'jp')
@@ -237,6 +248,9 @@ export function NewCaseDialog() {
           ...(state.county.trim() ? { county: state.county.trim() } : {}),
           ...(isFamily && state.familySubType
             ? { family_sub_type: state.familySubType }
+            : {}),
+          ...(isBusiness && state.businessSubType
+            ? { business_sub_type: state.businessSubType }
             : {}),
           ...(isSmallClaims && state.smallClaimsSubType
             ? { small_claims_sub_type: state.smallClaimsSubType }
@@ -284,7 +298,7 @@ export function NewCaseDialog() {
   const isPA = selectedState === 'PA'
 
   const civilRecommendation =
-    !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
+    !isFamily && !isBusiness && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
       ? recommendCourt({
           disputeType: state.disputeType,
           amount: state.amount,
@@ -340,6 +354,36 @@ export function NewCaseDialog() {
           : {
               recommended: 'district' as const,
               reasoning: 'Family law cases are filed in District Court.',
+              confidence: 'high' as const,
+            }
+
+  const businessRecommendation = isPA
+    ? {
+        recommended: 'pa_common_pleas' as const,
+        reasoning: 'Business disputes are heard in Pennsylvania Court of Common Pleas.',
+        confidence: 'high' as const,
+      }
+    : isFL
+      ? {
+          recommended: 'fl_circuit' as const,
+          reasoning: 'Business disputes are heard in Florida Circuit Court.',
+          confidence: 'high' as const,
+        }
+      : isNY
+        ? {
+            recommended: 'ny_supreme' as const,
+            reasoning: 'Business disputes are heard in New York Supreme Court.',
+            confidence: 'high' as const,
+          }
+        : isCA
+          ? {
+              recommended: 'unlimited_civil' as const,
+              reasoning: 'Business disputes are heard in California Superior Court (Unlimited Civil division).',
+              confidence: 'high' as const,
+            }
+          : {
+              recommended: 'district' as const,
+              reasoning: 'Business disputes are filed in District Court.',
               confidence: 'high' as const,
             }
 
@@ -522,6 +566,15 @@ export function NewCaseDialog() {
           />
         )}
 
+        {state.step === 4 && isBusiness && (
+          <BusinessSubTypeStep
+            value={state.businessSubType || null}
+            onSelect={(businessSubType) =>
+              dispatch({ type: 'SET_BUSINESS_SUB_TYPE', businessSubType })
+            }
+          />
+        )}
+
         {state.step === 4 && isSmallClaims && (
           <SmallClaimsSubTypeStep
             value={state.smallClaimsSubType}
@@ -557,7 +610,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 4 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
+        {state.step === 4 && !isFamily && !isBusiness && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <AmountStep
             value={state.amount}
             selectedState={selectedState}
@@ -568,6 +621,17 @@ export function NewCaseDialog() {
         {state.step === 5 && isFamily && (
           <RecommendationStep
             recommendation={familyRecommendation}
+            selectedState={selectedState}
+            county={state.county}
+            onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
+            onAccept={handleAccept}
+            loading={loading}
+          />
+        )}
+
+        {state.step === 5 && isBusiness && (
+          <RecommendationStep
+            recommendation={businessRecommendation}
             selectedState={selectedState}
             county={state.county}
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
@@ -642,7 +706,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 5 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
+        {state.step === 5 && !isFamily && !isBusiness && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && (
           <CircumstancesStep
             value={state.circumstances}
             onChange={(circumstances) =>
@@ -692,7 +756,7 @@ export function NewCaseDialog() {
           />
         )}
 
-        {state.step === 6 && !isFamily && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && civilRecommendation && (
+        {state.step === 6 && !isFamily && !isBusiness && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && civilRecommendation && (
           <RecommendationStep
             recommendation={civilRecommendation}
             selectedState={selectedState}

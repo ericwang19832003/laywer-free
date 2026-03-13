@@ -21,7 +21,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
     { id: 'personal_injury', value: 'personal_injury', label: 'Personal injury', description: 'Accident, negligence, or injury claims' },
     { id: 'property_damage', value: 'personal_injury', label: 'Property damage', description: 'Vehicle damage, property damage from negligence, or vandalism' },
     { id: 'contract', value: 'contract', label: 'Contract dispute', description: 'Breach of agreement, broken contract' },
-    { id: 'business', value: 'contract', label: 'Business dispute', description: 'Partnership issues, business disagreements' },
+    { id: 'business', value: 'business', label: 'Business dispute', description: 'Partnership, employment, or commercial dispute' },
     { id: 'property', value: 'property', label: 'Property dispute', description: 'Land ownership, boundary, or title dispute' },
     { id: 'real_estate', value: 'real_estate', label: 'Real estate', description: 'Real estate transactions, liens, or deed issues' },
     { id: 'family', value: 'family', label: 'Family matter', description: 'Custody, divorce, child support, or protective order' },
