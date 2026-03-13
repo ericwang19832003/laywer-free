@@ -789,59 +789,465 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     ],
   },
 
-  // --- Family ---
-  family_intake: {
-    why: 'Family law cases involve unique considerations. These details help us tailor the process to your specific situation.',
+  // --- Family: Divorce ---
+  divorce_intake: {
+    why: 'Divorce details — marriage dates, children, property — shape every document and deadline in your case.',
     checklist: [
       'Marriage date and separation date',
-      'Names and ages of any children',
-      'General overview of property and debts',
+      'Whether you have children together',
+      'General overview of community property and debts',
+      'County where you or your spouse has lived for at least 90 days',
     ],
+    tip: 'Texas requires 6 months of state residency and 90 days of county residency before filing.',
   },
-  safety_screening: {
-    why: 'Your safety comes first. This screening helps us identify if any protective measures are needed.',
-    checklist: [
-      'A private, safe space to answer honestly',
-    ],
+  divorce_safety_screening: {
+    why: 'Your safety comes first. This screening helps identify if protective measures are needed.',
+    checklist: ['A private, safe space to answer honestly'],
     tip: 'Your answers are confidential and help us provide appropriate resources.',
   },
-  prepare_family_filing: {
-    why: 'Family court filings have specific requirements. Getting the paperwork right avoids delays and additional fees.',
+  divorce_evidence_vault: {
+    why: 'Organized evidence strengthens your case at every stage — from temporary orders to final decree.',
+    checklist: [
+      'Financial documents (tax returns, bank statements, pay stubs)',
+      'Property records (deeds, titles, appraisals)',
+      'Photos and communications relevant to the case',
+    ],
+    tip: 'Upload what you have now. You can always add more later.',
+  },
+  divorce_prepare_filing: {
+    why: 'Your divorce petition establishes your claims. Getting the paperwork right avoids delays.',
     checklist: [
       'Financial information (income, debts, assets)',
       'Children\'s information (if applicable)',
       'Filing fee or fee waiver application',
     ],
   },
-  waiting_period: {
-    why: 'Many family law cases have a mandatory waiting period before the court can finalize orders.',
+  divorce_file_with_court: {
+    why: 'Filing officially starts your divorce case and sets legal deadlines in motion.',
     checklist: [
-      'Mark the waiting period end date on your calendar',
-      'Use this time to gather any remaining documents',
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
     ],
   },
-  temporary_orders: {
-    why: 'Temporary orders set the rules while your case is pending — custody, support, property use.',
+  divorce_serve_respondent: {
+    why: 'Your spouse must be formally notified of the divorce filing before the case can proceed.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or constable',
+    ],
+    tip: 'If your spouse will sign a waiver of service, that can save time and money.',
+  },
+  divorce_waiting_period: {
+    why: 'Texas requires a 60-day waiting period from filing before the court can finalize a divorce.',
+    checklist: [
+      'Mark the 60-day end date on your calendar',
+      'Use this time to gather financial documents and prepare',
+    ],
+  },
+  divorce_temporary_orders: {
+    why: 'Temporary orders set the rules while your divorce is pending — custody, support, property use.',
     checklist: [
       'Current living and custody arrangements',
       'Monthly income and expenses',
       'Immediate concerns that need court attention',
     ],
   },
-  mediation: {
-    why: 'Mediation helps both sides reach agreement with a neutral third party. Courts often require it before trial.',
+  divorce_mediation: {
+    why: 'Mediation helps both sides reach agreement with a neutral third party. Courts often require it.',
     checklist: [
       'Your ideal outcome for each issue',
       'Your minimum acceptable terms',
       'All relevant financial documents',
     ],
   },
-  final_orders: {
-    why: 'Final orders are the court\'s binding decisions on all issues in your case.',
+  divorce_property_division: {
+    why: 'Texas is a community property state. This step helps you inventory and value marital assets and debts.',
     checklist: [
-      'Review all temporary orders',
-      'List of unresolved issues',
-      'Proposed final terms',
+      'List of all community property (real estate, vehicles, accounts)',
+      'List of separate property with proof of separate character',
+      'Debt inventory with account balances',
+      'Appraisals or valuations of major assets',
+    ],
+    tip: 'Property acquired during marriage is presumed community property. You must prove separate property with clear and convincing evidence.',
+  },
+  divorce_final_orders: {
+    why: 'The final decree is the court\'s binding decision on property, custody, and support.',
+    checklist: [
+      'Proposed final decree prepared',
+      'All financial documents gathered',
+      'Hearing date scheduled (if needed)',
+    ],
+  },
+
+  // --- Family: Custody ---
+  custody_intake: {
+    why: 'Custody details — children\'s ages, current arrangements, existing orders — shape your legal strategy.',
+    checklist: [
+      'Number and ages of children',
+      'Current living arrangement',
+      'Whether existing court orders affect custody',
+      'County where the children have lived for at least 6 months',
+    ],
+    tip: 'Texas uses "best interest of the child" as the primary standard for custody decisions.',
+  },
+  custody_safety_screening: {
+    why: 'Your safety and your children\'s safety come first. This screening helps identify protective measures.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'Your answers are confidential and help us provide appropriate resources.',
+  },
+  custody_evidence_vault: {
+    why: 'Custody cases rely heavily on evidence of parenting involvement, stability, and the children\'s needs.',
+    checklist: [
+      'School records and report cards',
+      'Medical records for children',
+      'Photos showing your involvement in the children\'s lives',
+      'Communications about custody arrangements',
+    ],
+  },
+  custody_prepare_filing: {
+    why: 'Your custody petition (SAPCR) establishes your requests for conservatorship and possession.',
+    checklist: [
+      'Children\'s information (names, DOB, current arrangements)',
+      'Proposed custody schedule',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  custody_file_with_court: {
+    why: 'Filing officially starts your custody case. Family courts handle SAPCR filings.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  custody_serve_respondent: {
+    why: 'The other parent must be formally notified of the custody filing before the case can proceed.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or constable',
+    ],
+  },
+  custody_temporary_orders: {
+    why: 'Temporary custody orders protect the children while the case is pending.',
+    checklist: [
+      'Current custody and visitation arrangements',
+      'Children\'s school and activity schedules',
+      'Any immediate safety concerns',
+    ],
+  },
+  custody_mediation: {
+    why: 'Texas Family Code §153.0071 requires mediation in custody cases before trial. This is mandatory.',
+    checklist: [
+      'Your proposed custody schedule',
+      'Children\'s needs and best interests',
+      'Your minimum acceptable terms',
+    ],
+    tip: 'Mediation is required by Texas law in custody cases. Come prepared with a detailed proposed schedule.',
+  },
+  custody_final_orders: {
+    why: 'The final custody order establishes conservatorship, possession schedule, and child support.',
+    checklist: [
+      'Proposed parenting plan / possession schedule',
+      'Child support calculations',
+      'Hearing date scheduled',
+    ],
+  },
+
+  // --- Family: Child Support ---
+  child_support_intake: {
+    why: 'Child support is calculated based on income, number of children, and special needs.',
+    checklist: [
+      'Number of children requiring support',
+      'Both parents\' employment status and income',
+      'Whether an existing support order is in place',
+      'Children\'s special needs (medical, educational)',
+    ],
+  },
+  child_support_evidence_vault: {
+    why: 'Income documentation is critical for child support calculations.',
+    checklist: [
+      'Recent pay stubs (both parents if available)',
+      'Tax returns (last 2 years)',
+      'Documentation of other income sources',
+      'Children\'s expense records (medical, childcare, activities)',
+    ],
+  },
+  child_support_prepare_filing: {
+    why: 'Your child support petition must include income information and the proposed support amount.',
+    checklist: [
+      'Income documentation gathered',
+      'Child support calculation worksheet',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  child_support_file_with_court: {
+    why: 'Filing officially starts your child support case.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  child_support_serve_respondent: {
+    why: 'The other parent must be formally notified of the child support filing.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  child_support_temporary_orders: {
+    why: 'Temporary child support orders ensure the children are financially supported while the case is pending.',
+    checklist: [
+      'Both parents\' current income documentation',
+      'Children\'s monthly expenses',
+      'Childcare and medical insurance costs',
+    ],
+  },
+  child_support_final_orders: {
+    why: 'The final child support order sets the ongoing support amount and wage withholding.',
+    checklist: [
+      'Updated income documentation',
+      'Child support calculation worksheet',
+      'Proposed wage withholding order',
+    ],
+    tip: 'Texas child support is typically 20% of net resources for one child, 25% for two, up to 40% for five or more.',
+  },
+
+  // --- Family: Visitation ---
+  visitation_intake: {
+    why: 'Visitation details help us craft a schedule that serves the children\'s best interests.',
+    checklist: [
+      'Number and ages of children',
+      'Current custody arrangement',
+      'Your relationship to the children (parent, grandparent, etc.)',
+      'Any existing court orders',
+    ],
+  },
+  visitation_safety_screening: {
+    why: 'Your safety and your children\'s safety come first.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'Your answers are confidential and help us provide appropriate resources.',
+  },
+  visitation_evidence_vault: {
+    why: 'Evidence of your relationship with the children and involvement in their lives strengthens your case.',
+    checklist: [
+      'Photos showing your relationship with the children',
+      'Communications about visitation arrangements',
+      'Records of your involvement (school events, activities)',
+    ],
+  },
+  visitation_prepare_filing: {
+    why: 'Your visitation petition requests a specific possession schedule.',
+    checklist: [
+      'Proposed visitation schedule',
+      'Children\'s school and activity schedules',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  visitation_file_with_court: {
+    why: 'Filing officially starts your visitation case.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  visitation_serve_respondent: {
+    why: 'The other party must be formally notified of the visitation filing.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  visitation_mediation: {
+    why: 'Texas Family Code §153.0071 requires mediation in visitation cases before trial. This is mandatory.',
+    checklist: [
+      'Your proposed visitation schedule',
+      'Children\'s needs and best interests',
+      'Your minimum acceptable terms',
+    ],
+    tip: 'Mediation is required by Texas law. Come prepared with a detailed proposed schedule.',
+  },
+  visitation_final_orders: {
+    why: 'The final visitation order establishes the possession and access schedule.',
+    checklist: [
+      'Proposed possession schedule',
+      'Holiday and summer schedule',
+      'Hearing date scheduled',
+    ],
+  },
+
+  // --- Family: Spousal Support ---
+  spousal_support_intake: {
+    why: 'Spousal support eligibility depends on marriage duration, income disparity, and other factors.',
+    checklist: [
+      'Marriage date and anticipated end date',
+      'Marriage duration',
+      'Both spouses\' employment status and income',
+      'Any disability or health concerns',
+    ],
+    tip: 'Texas spousal maintenance is typically limited to marriages of 10+ years, unless there are special circumstances.',
+  },
+  spousal_support_evidence_vault: {
+    why: 'Financial documentation proves the need for (or ability to pay) spousal support.',
+    checklist: [
+      'Income documentation for both spouses',
+      'Monthly living expenses',
+      'Education and employment history',
+      'Medical records (if disability is a factor)',
+    ],
+  },
+  spousal_support_prepare_filing: {
+    why: 'Your spousal support petition must demonstrate eligibility and the requested amount.',
+    checklist: [
+      'Income and expense documentation',
+      'Marriage duration documentation',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  spousal_support_file_with_court: {
+    why: 'Filing officially starts your spousal support case.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  spousal_support_serve_respondent: {
+    why: 'Your spouse must be formally notified of the support filing.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  spousal_support_temporary_orders: {
+    why: 'Temporary spousal support ensures financial stability while the case is pending.',
+    checklist: [
+      'Both spouses\' current income',
+      'Monthly expenses and financial needs',
+      'Existing financial obligations',
+    ],
+  },
+  spousal_support_final_orders: {
+    why: 'The final support order sets the amount, duration, and terms of spousal maintenance.',
+    checklist: [
+      'Updated income documentation',
+      'Proposed support amount and duration',
+      'Hearing date scheduled',
+    ],
+    tip: 'Texas caps spousal maintenance at $5,000/month or 20% of the obligor\'s average monthly gross income, whichever is less.',
+  },
+
+  // --- Family: Protective Order ---
+  po_intake: {
+    why: 'Protective order details help us prepare your application and assess urgency.',
+    checklist: [
+      'Your relationship to the respondent',
+      'Type of abuse or violence experienced',
+      'Whether you are in immediate danger',
+      'Any prior incidents or existing orders',
+    ],
+    tip: 'If you are in immediate danger, call 911. The National DV Hotline is 1-800-799-7233.',
+  },
+  po_safety_screening: {
+    why: 'This screening helps assess the level of danger and determine if an emergency protective order is needed.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'If you need immediate protection, you can request an emergency ex parte order.',
+  },
+  po_prepare_filing: {
+    why: 'Your protective order application must detail the abuse and the protections you need.',
+    checklist: [
+      'Specific dates and descriptions of abuse incidents',
+      'Names of witnesses',
+      'Photos or documentation of injuries',
+      'Filing fee waiver application (PO filings are free in Texas)',
+    ],
+  },
+  po_file_with_court: {
+    why: 'Filing your protective order application starts the court process. The court may grant a temporary ex parte order the same day.',
+    checklist: [
+      'Your prepared application',
+      'Government-issued ID',
+      'Safety plan in place',
+    ],
+    tip: 'There is no filing fee for protective orders in Texas. The court handles service to the respondent.',
+  },
+  po_hearing: {
+    why: 'The full protective order hearing occurs within 14 days of filing. The court decides whether to grant a 2-year order.',
+    checklist: [
+      'All evidence of abuse (photos, messages, medical records)',
+      'Witness availability',
+      'Government-issued ID',
+      'Arrive early and check in with the court coordinator',
+    ],
+    tip: 'The respondent has a right to be present and contest the order. Focus on specific incidents and evidence.',
+  },
+
+  // --- Family: Modification ---
+  mod_intake: {
+    why: 'Modification requires showing a material and substantial change in circumstances since the last order.',
+    checklist: [
+      'Existing order court and cause number',
+      'What you want to modify (custody, support, visitation)',
+      'Description of the change in circumstances',
+    ],
+    tip: 'Texas law requires a "material and substantial change" or that the order was entered more than 3 years ago (for support).',
+  },
+  mod_evidence_vault: {
+    why: 'Evidence of changed circumstances is the foundation of your modification case.',
+    checklist: [
+      'Copy of the existing court order',
+      'Documentation of changed circumstances',
+      'Updated financial information (if modifying support)',
+    ],
+  },
+  mod_existing_order_review: {
+    why: 'Understanding your existing order helps identify exactly what to modify and what legal standard applies.',
+    checklist: [
+      'Upload or review your existing court order',
+      'List the specific provisions you want to change',
+      'Document the change in circumstances for each provision',
+    ],
+  },
+  mod_prepare_filing: {
+    why: 'Your modification petition must specify what changed and what new terms you\'re requesting.',
+    checklist: [
+      'Existing order details (court, cause number)',
+      'Proposed changes and supporting evidence',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  mod_file_with_court: {
+    why: 'Filing officially starts your modification case. It should be filed in the court that issued the original order.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+    tip: 'Modifications are usually filed in the same court that issued the original order.',
+  },
+  mod_serve_respondent: {
+    why: 'The other party must be formally notified of the modification filing.',
+    checklist: [
+      'Respondent\'s current address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  mod_mediation: {
+    why: 'Mediation can resolve modification disputes without the cost and uncertainty of a hearing.',
+    checklist: [
+      'Your proposed modified terms',
+      'Evidence of changed circumstances',
+      'Your minimum acceptable terms',
+    ],
+  },
+  mod_final_orders: {
+    why: 'The modified order replaces the relevant provisions of the original order.',
+    checklist: [
+      'Proposed modified order prepared',
+      'All evidence of changed circumstances',
+      'Hearing date scheduled',
     ],
   },
 }

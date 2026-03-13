@@ -66,3 +66,7 @@ export const waitingPeriodConfig: GuidedStepConfig = {
     return items
   },
 }
+
+export function createWaitingPeriodConfig(): GuidedStepConfig {
+  return waitingPeriodConfig
+}

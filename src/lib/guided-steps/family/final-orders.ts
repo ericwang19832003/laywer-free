@@ -96,3 +96,19 @@ export const finalOrdersConfig: GuidedStepConfig = {
     return items
   },
 }
+
+export function createFinalOrdersConfig(subType: 'divorce' | 'custody' | 'child_support' | 'visitation' | 'spousal_support' | 'modification'): GuidedStepConfig {
+  const titles: Record<string, string> = {
+    divorce: 'Final Decree of Divorce',
+    custody: 'Final Custody Order',
+    child_support: 'Final Child Support Order',
+    visitation: 'Final Visitation Order',
+    spousal_support: 'Final Spousal Support Order',
+    modification: 'Modified Order',
+  }
+
+  return {
+    ...finalOrdersConfig,
+    title: titles[subType] ?? 'Final Orders',
+  }
+}

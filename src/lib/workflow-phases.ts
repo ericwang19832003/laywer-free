@@ -109,27 +109,55 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     },
   ],
 
-  family: [
-    {
-      label: 'Getting Started',
-      taskKeys: ['welcome', 'family_intake', 'safety_screening'],
-    },
-    {
-      label: 'Building Your Case',
-      taskKeys: ['evidence_vault'],
-    },
-    {
-      label: 'Filing & Service',
-      taskKeys: ['prepare_family_filing', 'file_with_court', 'upload_return_of_service', 'confirm_service_facts'],
-    },
-    {
-      label: 'Process',
-      taskKeys: ['waiting_period', 'temporary_orders', 'mediation'],
-    },
-    {
-      label: 'Resolution',
-      taskKeys: ['final_orders'],
-    },
+  divorce: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'divorce_intake', 'divorce_safety_screening'] },
+    { label: 'Building Your Case', taskKeys: ['divorce_evidence_vault'] },
+    { label: 'Filing & Service', taskKeys: ['divorce_prepare_filing', 'divorce_file_with_court', 'divorce_serve_respondent'] },
+    { label: 'Pre-Trial', taskKeys: ['divorce_waiting_period', 'divorce_temporary_orders', 'divorce_mediation'] },
+    { label: 'Resolution', taskKeys: ['divorce_property_division', 'divorce_final_orders'] },
+  ],
+
+  custody: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'custody_intake', 'custody_safety_screening'] },
+    { label: 'Building Your Case', taskKeys: ['custody_evidence_vault'] },
+    { label: 'Filing & Service', taskKeys: ['custody_prepare_filing', 'custody_file_with_court', 'custody_serve_respondent'] },
+    { label: 'Pre-Trial', taskKeys: ['custody_temporary_orders', 'custody_mediation'] },
+    { label: 'Resolution', taskKeys: ['custody_final_orders'] },
+  ],
+
+  child_support: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'child_support_intake'] },
+    { label: 'Building Your Case', taskKeys: ['child_support_evidence_vault'] },
+    { label: 'Filing & Service', taskKeys: ['child_support_prepare_filing', 'child_support_file_with_court', 'child_support_serve_respondent'] },
+    { label: 'Resolution', taskKeys: ['child_support_temporary_orders', 'child_support_final_orders'] },
+  ],
+
+  visitation: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'visitation_intake', 'visitation_safety_screening'] },
+    { label: 'Building Your Case', taskKeys: ['visitation_evidence_vault'] },
+    { label: 'Filing & Service', taskKeys: ['visitation_prepare_filing', 'visitation_file_with_court', 'visitation_serve_respondent'] },
+    { label: 'Pre-Trial', taskKeys: ['visitation_mediation'] },
+    { label: 'Resolution', taskKeys: ['visitation_final_orders'] },
+  ],
+
+  spousal_support: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'spousal_support_intake'] },
+    { label: 'Building Your Case', taskKeys: ['spousal_support_evidence_vault'] },
+    { label: 'Filing & Service', taskKeys: ['spousal_support_prepare_filing', 'spousal_support_file_with_court', 'spousal_support_serve_respondent'] },
+    { label: 'Resolution', taskKeys: ['spousal_support_temporary_orders', 'spousal_support_final_orders'] },
+  ],
+
+  protective_order: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'po_intake', 'po_safety_screening'] },
+    { label: 'Filing & Hearing', taskKeys: ['po_prepare_filing', 'po_file_with_court'] },
+    { label: 'Resolution', taskKeys: ['po_hearing'] },
+  ],
+
+  modification: [
+    { label: 'Getting Started', taskKeys: ['welcome', 'mod_intake'] },
+    { label: 'Building Your Case', taskKeys: ['mod_evidence_vault', 'mod_existing_order_review'] },
+    { label: 'Filing & Service', taskKeys: ['mod_prepare_filing', 'mod_file_with_court', 'mod_serve_respondent'] },
+    { label: 'Resolution', taskKeys: ['mod_mediation', 'mod_final_orders'] },
   ],
 
   contract: [

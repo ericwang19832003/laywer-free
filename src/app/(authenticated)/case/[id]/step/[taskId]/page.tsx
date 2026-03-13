@@ -23,13 +23,19 @@ import { EvidenceVaultStep } from '@/components/step/evidence-vault-step'
 import { DefaultPacketPrepStep } from '@/components/step/default-packet-prep-step'
 import { MotionBuilder } from '@/components/step/motion-builder'
 import { TrialPrepChecklistStep } from '@/components/step/trial-prep-checklist-step'
-import { FamilyIntakeStep } from '@/components/step/family/family-intake-step'
 import { SafetyScreeningStep } from '@/components/step/family/safety-screening-step'
 import { FamilyLawWizard } from '@/components/step/family-law-wizard'
-import { WaitingPeriodStep } from '@/components/step/family/waiting-period-step'
-import { TemporaryOrdersStep } from '@/components/step/family/temporary-orders-step'
-import { MediationStep } from '@/components/step/family/mediation-step'
-import { FinalOrdersStep } from '@/components/step/family/final-orders-step'
+import { createFamilyIntakeConfig } from '@/lib/guided-steps/family/family-intake-factory'
+import { createEvidenceVaultConfig } from '@/lib/guided-steps/family/family-evidence-vault'
+import { createFileWithCourtConfig as createFamilyFileWithCourtConfig } from '@/lib/guided-steps/family/family-file-with-court'
+import { createServeRespondentConfig } from '@/lib/guided-steps/family/family-serve-respondent'
+import { createWaitingPeriodConfig } from '@/lib/guided-steps/family/waiting-period'
+import { createTemporaryOrdersConfig } from '@/lib/guided-steps/family/temporary-orders'
+import { createMediationConfig } from '@/lib/guided-steps/family/mediation'
+import { createFinalOrdersConfig } from '@/lib/guided-steps/family/final-orders'
+import { propertyDivisionConfig as familyPropertyDivisionConfig } from '@/lib/guided-steps/family/family-property-division'
+import { existingOrderReviewConfig } from '@/lib/guided-steps/family/family-existing-order-review'
+import { poHearingConfig } from '@/lib/guided-steps/family/po-hearing'
 import { SmallClaimsIntakeStep } from '@/components/step/small-claims/small-claims-intake-step'
 import { DemandLetterStep } from '@/components/step/small-claims/demand-letter-step'
 import { SmallClaimsWizard } from '@/components/step/small-claims-wizard'
@@ -481,48 +487,150 @@ export default async function StepPage({
         />
       )
     }
-    // Family law task chain steps
-    case 'family_intake':
-      return (
-        <FamilyIntakeStep
-          caseId={id}
-          taskId={taskId}
-          existingMetadata={task.metadata}
-        />
-      )
-    case 'safety_screening':
+    // Family law — Divorce (12 tasks)
+    case 'divorce_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_safety_screening':
       return <SafetyScreeningStep caseId={id} taskId={taskId} />
-    case 'prepare_family_filing': {
-      const { data: caseRow } = await supabase
-        .from('cases')
-        .select('county')
-        .eq('id', id)
-        .single()
-
-      const { data: familyDetails } = await supabase
-        .from('family_case_details')
-        .select('*')
-        .eq('case_id', id)
-        .maybeSingle()
-
-      return (
-        <FamilyLawWizard
-          caseId={id}
-          taskId={taskId}
-          existingMetadata={task.metadata}
-          familyDetails={familyDetails}
-          caseData={{ county: caseRow?.county ?? null }}
-        />
-      )
+    case 'divorce_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
     }
-    case 'waiting_period':
-      return <WaitingPeriodStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'temporary_orders':
-      return <TemporaryOrdersStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'mediation':
-      return <MediationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'final_orders':
-      return <FinalOrdersStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_serve_respondent':
+      return <GuidedStep caseId={id} taskId={taskId} config={createServeRespondentConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_waiting_period':
+      return <GuidedStep caseId={id} taskId={taskId} config={createWaitingPeriodConfig()} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_temporary_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createTemporaryOrdersConfig('divorce')} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'divorce_mediation':
+      return <GuidedStep caseId={id} taskId={taskId} config={createMediationConfig('divorce')} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'divorce_property_division':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyPropertyDivisionConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_final_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFinalOrdersConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Custody (10 tasks)
+    case 'custody_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_safety_screening':
+      return <SafetyScreeningStep caseId={id} taskId={taskId} />
+    case 'custody_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+    }
+    case 'custody_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_serve_respondent':
+      return <GuidedStep caseId={id} taskId={taskId} config={createServeRespondentConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_temporary_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createTemporaryOrdersConfig('custody')} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'custody_mediation':
+      return <GuidedStep caseId={id} taskId={taskId} config={createMediationConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_final_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFinalOrdersConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Child Support (8 tasks)
+    case 'child_support_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+    }
+    case 'child_support_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_serve_respondent':
+      return <GuidedStep caseId={id} taskId={taskId} config={createServeRespondentConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_temporary_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createTemporaryOrdersConfig('child_support')} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'child_support_final_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFinalOrdersConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Visitation (9 tasks)
+    case 'visitation_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_safety_screening':
+      return <SafetyScreeningStep caseId={id} taskId={taskId} />
+    case 'visitation_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+    }
+    case 'visitation_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_serve_respondent':
+      return <GuidedStep caseId={id} taskId={taskId} config={createServeRespondentConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_mediation':
+      return <GuidedStep caseId={id} taskId={taskId} config={createMediationConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_final_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFinalOrdersConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Spousal Support (8 tasks)
+    case 'spousal_support_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+    }
+    case 'spousal_support_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_serve_respondent':
+      return <GuidedStep caseId={id} taskId={taskId} config={createServeRespondentConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_temporary_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createTemporaryOrdersConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'spousal_support_final_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFinalOrdersConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Protective Order (6 tasks)
+    case 'po_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('protective_order')} existingAnswers={task.metadata?.guided_answers} />
+    case 'po_safety_screening':
+      return <SafetyScreeningStep caseId={id} taskId={taskId} />
+    case 'po_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+    }
+    case 'po_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('protective_order')} existingAnswers={task.metadata?.guided_answers} />
+    case 'po_hearing':
+      return <GuidedStep caseId={id} taskId={taskId} config={poHearingConfig} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Modification (9 tasks)
+    case 'mod_intake':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyIntakeConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_evidence_vault':
+      return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_existing_order_review':
+      return <GuidedStep caseId={id} taskId={taskId} config={existingOrderReviewConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_prepare_filing': {
+      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+    }
+    case 'mod_file_with_court':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_serve_respondent':
+      return <GuidedStep caseId={id} taskId={taskId} config={createServeRespondentConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_mediation':
+      return <GuidedStep caseId={id} taskId={taskId} config={createMediationConfig('modification')} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'mod_final_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={createFinalOrdersConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
 
     // Family motions (filed from Motions page)
     case 'protective_order': {

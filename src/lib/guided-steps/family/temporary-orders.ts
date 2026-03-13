@@ -102,3 +102,17 @@ export const temporaryOrdersConfig: GuidedStepConfig = {
     return items
   },
 }
+
+export function createTemporaryOrdersConfig(subType: 'divorce' | 'custody' | 'child_support' | 'spousal_support'): GuidedStepConfig {
+  const titles: Record<string, string> = {
+    divorce: 'Temporary Orders',
+    custody: 'Temporary Custody Orders',
+    child_support: 'Temporary Child Support',
+    spousal_support: 'Temporary Spousal Support',
+  }
+
+  return {
+    ...temporaryOrdersConfig,
+    title: titles[subType] ?? 'Temporary Orders',
+  }
+}

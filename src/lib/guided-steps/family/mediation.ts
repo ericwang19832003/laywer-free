@@ -97,3 +97,14 @@ export const mediationConfig: GuidedStepConfig = {
     return items
   },
 }
+
+export function createMediationConfig(subType: 'divorce' | 'custody' | 'visitation' | 'modification'): GuidedStepConfig {
+  const mandatory = subType === 'custody' || subType === 'visitation'
+
+  return {
+    ...mediationConfig,
+    reassurance: mandatory
+      ? 'Texas Family Code §153.0071 requires mediation in custody and visitation cases before trial. This is mandatory.'
+      : mediationConfig.reassurance,
+  }
+}

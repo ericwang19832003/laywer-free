@@ -565,9 +565,9 @@ const SMALL_CLAIMS_MILESTONES: Milestone[] = [
   },
 ]
 
-// -- Family Milestones --------------------------------------------------------
+// -- Divorce Milestones -------------------------------------------------------
 
-const FAMILY_MILESTONES: Milestone[] = [
+const DIVORCE_MILESTONES: Milestone[] = [
   {
     id: 'start',
     label: 'Just getting started',
@@ -578,86 +578,101 @@ const FAMILY_MILESTONES: Milestone[] = [
   {
     id: 'filed',
     label: 'Filed with court',
-    description: 'I\'ve filed my family law case.',
-    firstUnlockedTask: 'file_with_court',
-    tasksToSkip: [
-      'welcome',
-      'family_intake',
-      'safety_screening',
-      'evidence_vault',
-      'prepare_family_filing',
-    ],
+    description: 'I\'ve filed my divorce case.',
+    firstUnlockedTask: 'divorce_file_with_court',
+    tasksToSkip: ['welcome', 'divorce_intake', 'divorce_safety_screening', 'divorce_evidence_vault', 'divorce_prepare_filing'],
   },
   {
     id: 'served',
     label: 'Served the other party',
-    description: 'I\'ve served the other party.',
-    firstUnlockedTask: 'waiting_period',
-    tasksToSkip: [
-      'welcome',
-      'family_intake',
-      'safety_screening',
-      'evidence_vault',
-      'prepare_family_filing',
-      'file_with_court',
-      'upload_return_of_service',
-      'confirm_service_facts',
-    ],
+    description: 'I\'ve served my spouse.',
+    firstUnlockedTask: 'divorce_waiting_period',
+    tasksToSkip: ['welcome', 'divorce_intake', 'divorce_safety_screening', 'divorce_evidence_vault', 'divorce_prepare_filing', 'divorce_file_with_court', 'divorce_serve_respondent'],
   },
   {
-    id: 'temporary',
+    id: 'waiting_period',
+    label: 'In waiting period',
+    description: 'I\'m in the 60-day waiting period.',
+    firstUnlockedTask: 'divorce_temporary_orders',
+    tasksToSkip: ['welcome', 'divorce_intake', 'divorce_safety_screening', 'divorce_evidence_vault', 'divorce_prepare_filing', 'divorce_file_with_court', 'divorce_serve_respondent', 'divorce_waiting_period'],
+  },
+  {
+    id: 'temporary_orders',
     label: 'Temporary orders',
     description: 'I\'m dealing with temporary orders.',
-    firstUnlockedTask: 'temporary_orders',
-    tasksToSkip: [
-      'welcome',
-      'family_intake',
-      'safety_screening',
-      'evidence_vault',
-      'prepare_family_filing',
-      'file_with_court',
-      'upload_return_of_service',
-      'confirm_service_facts',
-      'waiting_period',
-    ],
+    firstUnlockedTask: 'divorce_mediation',
+    tasksToSkip: ['welcome', 'divorce_intake', 'divorce_safety_screening', 'divorce_evidence_vault', 'divorce_prepare_filing', 'divorce_file_with_court', 'divorce_serve_respondent', 'divorce_waiting_period', 'divorce_temporary_orders'],
   },
   {
     id: 'mediation',
     label: 'In mediation',
     description: 'I\'m in mediation.',
-    firstUnlockedTask: 'mediation',
-    tasksToSkip: [
-      'welcome',
-      'family_intake',
-      'safety_screening',
-      'evidence_vault',
-      'prepare_family_filing',
-      'file_with_court',
-      'upload_return_of_service',
-      'confirm_service_facts',
-      'waiting_period',
-      'temporary_orders',
-    ],
+    firstUnlockedTask: 'divorce_property_division',
+    tasksToSkip: ['welcome', 'divorce_intake', 'divorce_safety_screening', 'divorce_evidence_vault', 'divorce_prepare_filing', 'divorce_file_with_court', 'divorce_serve_respondent', 'divorce_waiting_period', 'divorce_temporary_orders', 'divorce_mediation'],
   },
   {
     id: 'final',
     label: 'Final orders',
     description: 'I\'m working on final orders.',
-    firstUnlockedTask: 'final_orders',
-    tasksToSkip: [
-      'welcome',
-      'family_intake',
-      'safety_screening',
-      'evidence_vault',
-      'prepare_family_filing',
-      'file_with_court',
-      'upload_return_of_service',
-      'confirm_service_facts',
-      'waiting_period',
-      'temporary_orders',
-      'mediation',
-    ],
+    firstUnlockedTask: 'divorce_final_orders',
+    tasksToSkip: ['welcome', 'divorce_intake', 'divorce_safety_screening', 'divorce_evidence_vault', 'divorce_prepare_filing', 'divorce_file_with_court', 'divorce_serve_respondent', 'divorce_waiting_period', 'divorce_temporary_orders', 'divorce_mediation', 'divorce_property_division'],
   },
+]
+
+// -- Custody Milestones -------------------------------------------------------
+
+const CUSTODY_MILESTONES: Milestone[] = [
+  { id: 'start', label: 'Just getting started', description: 'I haven\'t filed anything yet.', firstUnlockedTask: 'welcome', tasksToSkip: [] },
+  { id: 'filed', label: 'Filed with court', description: 'I\'ve filed my custody case.', firstUnlockedTask: 'custody_file_with_court', tasksToSkip: ['welcome', 'custody_intake', 'custody_safety_screening', 'custody_evidence_vault', 'custody_prepare_filing'] },
+  { id: 'served', label: 'Served the other party', description: 'I\'ve served the other parent.', firstUnlockedTask: 'custody_temporary_orders', tasksToSkip: ['welcome', 'custody_intake', 'custody_safety_screening', 'custody_evidence_vault', 'custody_prepare_filing', 'custody_file_with_court', 'custody_serve_respondent'] },
+  { id: 'temporary_orders', label: 'Temporary orders', description: 'I\'m dealing with temporary orders.', firstUnlockedTask: 'custody_mediation', tasksToSkip: ['welcome', 'custody_intake', 'custody_safety_screening', 'custody_evidence_vault', 'custody_prepare_filing', 'custody_file_with_court', 'custody_serve_respondent', 'custody_temporary_orders'] },
+  { id: 'mediation', label: 'In mediation', description: 'I\'m in mediation.', firstUnlockedTask: 'custody_final_orders', tasksToSkip: ['welcome', 'custody_intake', 'custody_safety_screening', 'custody_evidence_vault', 'custody_prepare_filing', 'custody_file_with_court', 'custody_serve_respondent', 'custody_temporary_orders', 'custody_mediation'] },
+  { id: 'final', label: 'Final orders', description: 'I\'m working on final orders.', firstUnlockedTask: 'custody_final_orders', tasksToSkip: ['welcome', 'custody_intake', 'custody_safety_screening', 'custody_evidence_vault', 'custody_prepare_filing', 'custody_file_with_court', 'custody_serve_respondent', 'custody_temporary_orders', 'custody_mediation'] },
+]
+
+// -- Child Support Milestones -------------------------------------------------
+
+const CHILD_SUPPORT_MILESTONES: Milestone[] = [
+  { id: 'start', label: 'Just getting started', description: 'I haven\'t filed anything yet.', firstUnlockedTask: 'welcome', tasksToSkip: [] },
+  { id: 'filed', label: 'Filed with court', description: 'I\'ve filed my child support case.', firstUnlockedTask: 'child_support_file_with_court', tasksToSkip: ['welcome', 'child_support_intake', 'child_support_evidence_vault', 'child_support_prepare_filing'] },
+  { id: 'served', label: 'Served the other party', description: 'I\'ve served the other parent.', firstUnlockedTask: 'child_support_temporary_orders', tasksToSkip: ['welcome', 'child_support_intake', 'child_support_evidence_vault', 'child_support_prepare_filing', 'child_support_file_with_court', 'child_support_serve_respondent'] },
+  { id: 'final', label: 'Final orders', description: 'I\'m working on final orders.', firstUnlockedTask: 'child_support_final_orders', tasksToSkip: ['welcome', 'child_support_intake', 'child_support_evidence_vault', 'child_support_prepare_filing', 'child_support_file_with_court', 'child_support_serve_respondent', 'child_support_temporary_orders'] },
+]
+
+// -- Visitation Milestones ----------------------------------------------------
+
+const VISITATION_MILESTONES: Milestone[] = [
+  { id: 'start', label: 'Just getting started', description: 'I haven\'t filed anything yet.', firstUnlockedTask: 'welcome', tasksToSkip: [] },
+  { id: 'filed', label: 'Filed with court', description: 'I\'ve filed my visitation case.', firstUnlockedTask: 'visitation_file_with_court', tasksToSkip: ['welcome', 'visitation_intake', 'visitation_safety_screening', 'visitation_evidence_vault', 'visitation_prepare_filing'] },
+  { id: 'served', label: 'Served the other party', description: 'I\'ve served the other party.', firstUnlockedTask: 'visitation_mediation', tasksToSkip: ['welcome', 'visitation_intake', 'visitation_safety_screening', 'visitation_evidence_vault', 'visitation_prepare_filing', 'visitation_file_with_court', 'visitation_serve_respondent'] },
+  { id: 'mediation', label: 'In mediation', description: 'I\'m in mediation.', firstUnlockedTask: 'visitation_final_orders', tasksToSkip: ['welcome', 'visitation_intake', 'visitation_safety_screening', 'visitation_evidence_vault', 'visitation_prepare_filing', 'visitation_file_with_court', 'visitation_serve_respondent', 'visitation_mediation'] },
+  { id: 'final', label: 'Final orders', description: 'I\'m working on final orders.', firstUnlockedTask: 'visitation_final_orders', tasksToSkip: ['welcome', 'visitation_intake', 'visitation_safety_screening', 'visitation_evidence_vault', 'visitation_prepare_filing', 'visitation_file_with_court', 'visitation_serve_respondent', 'visitation_mediation'] },
+]
+
+// -- Spousal Support Milestones -----------------------------------------------
+
+const SPOUSAL_SUPPORT_MILESTONES: Milestone[] = [
+  { id: 'start', label: 'Just getting started', description: 'I haven\'t filed anything yet.', firstUnlockedTask: 'welcome', tasksToSkip: [] },
+  { id: 'filed', label: 'Filed with court', description: 'I\'ve filed my spousal support case.', firstUnlockedTask: 'spousal_support_file_with_court', tasksToSkip: ['welcome', 'spousal_support_intake', 'spousal_support_evidence_vault', 'spousal_support_prepare_filing'] },
+  { id: 'served', label: 'Served the other party', description: 'I\'ve served my spouse.', firstUnlockedTask: 'spousal_support_temporary_orders', tasksToSkip: ['welcome', 'spousal_support_intake', 'spousal_support_evidence_vault', 'spousal_support_prepare_filing', 'spousal_support_file_with_court', 'spousal_support_serve_respondent'] },
+  { id: 'final', label: 'Final orders', description: 'I\'m working on final orders.', firstUnlockedTask: 'spousal_support_final_orders', tasksToSkip: ['welcome', 'spousal_support_intake', 'spousal_support_evidence_vault', 'spousal_support_prepare_filing', 'spousal_support_file_with_court', 'spousal_support_serve_respondent', 'spousal_support_temporary_orders'] },
+]
+
+// -- Protective Order Milestones ----------------------------------------------
+
+const PROTECTIVE_ORDER_MILESTONES: Milestone[] = [
+  { id: 'start', label: 'Just getting started', description: 'I haven\'t filed anything yet.', firstUnlockedTask: 'welcome', tasksToSkip: [] },
+  { id: 'filed', label: 'Filed with court', description: 'I\'ve filed my protective order application.', firstUnlockedTask: 'po_hearing', tasksToSkip: ['welcome', 'po_intake', 'po_safety_screening', 'po_prepare_filing', 'po_file_with_court'] },
+]
+
+// -- Modification Milestones --------------------------------------------------
+
+const MODIFICATION_MILESTONES: Milestone[] = [
+  { id: 'start', label: 'Just getting started', description: 'I haven\'t filed anything yet.', firstUnlockedTask: 'welcome', tasksToSkip: [] },
+  { id: 'filed', label: 'Filed with court', description: 'I\'ve filed my modification.', firstUnlockedTask: 'mod_file_with_court', tasksToSkip: ['welcome', 'mod_intake', 'mod_evidence_vault', 'mod_existing_order_review', 'mod_prepare_filing'] },
+  { id: 'served', label: 'Served the other party', description: 'I\'ve served the other party.', firstUnlockedTask: 'mod_mediation', tasksToSkip: ['welcome', 'mod_intake', 'mod_evidence_vault', 'mod_existing_order_review', 'mod_prepare_filing', 'mod_file_with_court', 'mod_serve_respondent'] },
+  { id: 'mediation', label: 'In mediation', description: 'I\'m in mediation.', firstUnlockedTask: 'mod_final_orders', tasksToSkip: ['welcome', 'mod_intake', 'mod_evidence_vault', 'mod_existing_order_review', 'mod_prepare_filing', 'mod_file_with_court', 'mod_serve_respondent', 'mod_mediation'] },
+  { id: 'final', label: 'Final orders', description: 'I\'m working on the modified order.', firstUnlockedTask: 'mod_final_orders', tasksToSkip: ['welcome', 'mod_intake', 'mod_evidence_vault', 'mod_existing_order_review', 'mod_prepare_filing', 'mod_file_with_court', 'mod_serve_respondent', 'mod_mediation'] },
 ]
 
 // -- Landlord-Tenant Milestones -----------------------------------------------
@@ -794,7 +809,13 @@ const MILESTONES_BY_TYPE: Record<string, Milestone[]> = {
   personal_injury: PERSONAL_INJURY_MILESTONES,
   debt_collection: DEBT_DEFENSE_MILESTONES,
   small_claims: SMALL_CLAIMS_MILESTONES,
-  family: FAMILY_MILESTONES,
+  divorce: DIVORCE_MILESTONES,
+  custody: CUSTODY_MILESTONES,
+  child_support: CHILD_SUPPORT_MILESTONES,
+  visitation: VISITATION_MILESTONES,
+  spousal_support: SPOUSAL_SUPPORT_MILESTONES,
+  protective_order: PROTECTIVE_ORDER_MILESTONES,
+  modification: MODIFICATION_MILESTONES,
   landlord_tenant: LANDLORD_TENANT_MILESTONES,
 }
 
@@ -804,7 +825,10 @@ const MILESTONES_BY_TYPE: Record<string, Milestone[]> = {
  * Returns the ordered list of milestones for a given dispute type.
  * Falls back to civil milestones for unknown types.
  */
-export function getMilestones(disputeType: DisputeType): Milestone[] {
+export function getMilestones(disputeType: DisputeType, familySubType?: string): Milestone[] {
+  if (disputeType === 'family' && familySubType) {
+    return MILESTONES_BY_TYPE[familySubType] ?? DIVORCE_MILESTONES
+  }
   return MILESTONES_BY_TYPE[disputeType] ?? CIVIL_MILESTONES
 }
 
@@ -815,9 +839,10 @@ export function getMilestones(disputeType: DisputeType): Milestone[] {
  */
 export function getTasksToSkip(
   disputeType: DisputeType,
-  milestoneId: string
+  milestoneId: string,
+  familySubType?: string
 ): string[] {
-  const milestones = getMilestones(disputeType)
+  const milestones = getMilestones(disputeType, familySubType)
   const milestone = milestones.find((m) => m.id === milestoneId)
   return milestone?.tasksToSkip ?? []
 }
@@ -828,8 +853,9 @@ export function getTasksToSkip(
  */
 export function getMilestoneByID(
   disputeType: DisputeType,
-  milestoneId: string
+  milestoneId: string,
+  familySubType?: string
 ): Milestone | undefined {
-  const milestones = getMilestones(disputeType)
+  const milestones = getMilestones(disputeType, familySubType)
   return milestones.find((m) => m.id === milestoneId)
 }
