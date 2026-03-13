@@ -7,6 +7,7 @@ export const DISPUTE_TYPES = [
   'contract',
   'property',
   'real_estate',
+  'business',
   'family',
   'small_claims',
   'other',
@@ -115,6 +116,35 @@ export const REAL_ESTATE_SUB_TYPES = [
 
 export type RealEstateSubType = (typeof REAL_ESTATE_SUB_TYPES)[number]
 
+export const BUSINESS_SUB_TYPES = [
+  'partnership',
+  'employment',
+  'b2b_commercial',
+] as const
+
+export type BusinessSubType = (typeof BUSINESS_SUB_TYPES)[number]
+
+export const BUSINESS_PARTNERSHIP_TYPES = [
+  'breach_fiduciary',
+  'profit_loss',
+  'dissolution_buyout',
+  'management_deadlock',
+] as const
+
+export const BUSINESS_EMPLOYMENT_TYPES = [
+  'wrongful_termination',
+  'wage_overtime',
+  'non_compete_nda',
+  'discrimination_harassment',
+] as const
+
+export const BUSINESS_B2B_TYPES = [
+  'vendor_service',
+  'ip_trade_secret',
+  'unfair_competition',
+  'breach_of_contract',
+] as const
+
 export const OTHER_SUB_TYPES = [
   'consumer_protection',
   'civil_rights',
@@ -153,6 +183,7 @@ export const createCaseSchema = z.object({
   contract_sub_type: z.enum(CONTRACT_SUB_TYPES).optional(),
   property_sub_type: z.enum(PROPERTY_DISPUTE_SUB_TYPES).optional(),
   re_sub_type: z.enum(REAL_ESTATE_SUB_TYPES).optional(),
+  business_sub_type: z.enum(BUSINESS_SUB_TYPES).optional(),
   other_sub_type: z.enum(OTHER_SUB_TYPES).optional(),
 })
 

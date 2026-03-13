@@ -16,6 +16,7 @@ export type DisputeType =
   | 'contract'
   | 'property'
   | 'real_estate'
+  | 'business'
   | 'family'
   | 'small_claims'
   | 'other'
