@@ -41,7 +41,12 @@ export function RecordOutcomeStep({ caseId, taskId, onComplete }: RecordOutcomeS
         return
       }
 
-      // Complete the task only after outcome is saved
+      // Transition task: todo → in_progress → completed
+      await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'in_progress' }),
+      })
       await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

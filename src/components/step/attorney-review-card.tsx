@@ -30,7 +30,13 @@ const STATUS_BADGES: Record<string, { label: string; color: string }> = {
 export function AttorneyReviewCard({ caseId, documentType, existingReviews = [] }: AttorneyReviewCardProps) {
   const [requesting, setRequesting] = useState(false)
 
-  const activeReview = existingReviews.find(r => r.status !== 'cancelled')
+  // Filter out cancelled reviews and stale pending reviews (payment abandoned after 1 hour)
+  const oneHourAgo = Date.now() - 60 * 60 * 1000
+  const activeReview = existingReviews.find(r => {
+    if (r.status === 'cancelled') return false
+    if (r.status === 'pending' && new Date(r.created_at).getTime() < oneHourAgo) return false
+    return true
+  })
 
   async function handleRequest() {
     setRequesting(true)

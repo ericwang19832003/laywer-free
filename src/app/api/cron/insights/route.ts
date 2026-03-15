@@ -43,8 +43,20 @@ export async function POST(request: NextRequest) {
 
     const activeInsightTypes = new Set(insights.map(i => i.insight_type))
 
-    // Upsert insights — update existing or insert new
+    // Upsert insights — update existing or insert new, but respect dismissed ones
     for (const insight of insights) {
+      // Check if this insight_type was previously dismissed — don't recreate it
+      const { data: dismissed } = await supabase
+        .from('case_insights')
+        .select('id')
+        .eq('case_id', caseRow.id)
+        .eq('insight_type', insight.insight_type)
+        .eq('dismissed', true)
+        .limit(1)
+        .maybeSingle()
+
+      if (dismissed) continue // User dismissed this — respect their choice
+
       const { data: existing } = await supabase
         .from('case_insights')
         .select('id, title, body, priority')

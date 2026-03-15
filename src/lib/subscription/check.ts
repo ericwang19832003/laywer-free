@@ -58,8 +58,7 @@ export async function getSubscription(
 
 export async function incrementAiUsage(
   supabase: SupabaseClient,
-  userId: string
 ): Promise<void> {
   const month = new Date().toISOString().slice(0, 7)
-  await supabase.rpc('increment_ai_usage', { p_user_id: userId, p_month: month })
+  await supabase.rpc('increment_ai_usage', { p_month: month })
 }
