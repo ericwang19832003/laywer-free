@@ -27,7 +27,7 @@ interface PropertyWizardProps {
     has_survey: boolean
     has_title_insurance: boolean
   } | null
-  caseData?: { county: string | null; court_type: string }
+  caseData?: { county: string | null; court_type: string; state?: string }
 }
 
 /* ------------------------------------------------------------------ */
@@ -544,6 +544,7 @@ export function PropertyWizard({
             county={propertyCounty}
             courtType={caseData?.court_type || 'district'}
             config={FILING_CONFIGS.property}
+            state={caseData?.state}
           />
         )
 

@@ -3,7 +3,14 @@
 import { Globe, Building2, ExternalLink, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { type FilingConfig, getEFileTexasUrl, getFeeRange } from '@/lib/filing-configs'
+import {
+  type FilingConfig,
+  getEFilingSystem,
+  getEFilingUrl,
+  getStateFeeRange,
+  getStateName,
+  getCourtLabel,
+} from '@/lib/filing-configs'
 
 interface FilingMethodStepProps {
   filingMethod: 'online' | 'in_person' | ''
@@ -11,16 +18,7 @@ interface FilingMethodStepProps {
   county: string
   courtType: string
   config: FilingConfig
-}
-
-function CourtLabel({ courtType }: { courtType: string }) {
-  switch (courtType) {
-    case 'jp': return <>Justice of the Peace</>
-    case 'county': return <>County Court</>
-    case 'district': return <>District Court</>
-    case 'federal': return <>Federal District Court</>
-    default: return <>{courtType}</>
-  }
+  state?: string
 }
 
 export function FilingMethodStep({
@@ -29,10 +27,14 @@ export function FilingMethodStep({
   county,
   courtType,
   config,
+  state = 'TX',
 }: FilingMethodStepProps) {
-  const feeRange = getFeeRange(courtType)
-  const eFileUrl = getEFileTexasUrl(config)
-  const isJP = courtType === 'jp'
+  const feeRange = getStateFeeRange(state, courtType)
+  const eFilingSystem = getEFilingSystem(state)
+  const eFileUrl = getEFilingUrl(state, config)
+  const stateName = getStateName(state)
+  const courtLabel = getCourtLabel(state, courtType)
+  const hasEFiling = !!eFilingSystem
 
   return (
     <div className="space-y-6">
@@ -41,21 +43,23 @@ export function FilingMethodStep({
       </p>
 
       {/* Filing Method Cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => onFilingMethodChange('online')}
-          className={cn(
-            'flex flex-col items-center gap-2 rounded-xl border-2 p-5 transition-all',
-            filingMethod === 'online'
-              ? 'border-calm-indigo bg-calm-indigo/5 ring-1 ring-calm-indigo/20'
-              : 'border-warm-border hover:border-calm-indigo/40'
-          )}
-        >
-          <Globe className="h-7 w-7 text-calm-indigo" />
-          <span className="font-semibold text-warm-text text-sm">File Online</span>
-          <span className="text-xs text-warm-muted text-center">(e-filing)</span>
-        </button>
+      <div className={cn('grid gap-3', hasEFiling ? 'grid-cols-2' : 'grid-cols-1')}>
+        {hasEFiling && (
+          <button
+            type="button"
+            onClick={() => onFilingMethodChange('online')}
+            className={cn(
+              'flex flex-col items-center gap-2 rounded-xl border-2 p-5 transition-all',
+              filingMethod === 'online'
+                ? 'border-calm-indigo bg-calm-indigo/5 ring-1 ring-calm-indigo/20'
+                : 'border-warm-border hover:border-calm-indigo/40'
+            )}
+          >
+            <Globe className="h-7 w-7 text-calm-indigo" />
+            <span className="font-semibold text-warm-text text-sm">File Online</span>
+            <span className="text-xs text-warm-muted text-center">(e-filing)</span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -73,8 +77,18 @@ export function FilingMethodStep({
         </button>
       </div>
 
-      {/* JP Court Caveat */}
-      {isJP && filingMethod === 'online' && (
+      {/* No e-filing available notice */}
+      {!hasEFiling && filingMethod === '' && (
+        <div className="flex items-start gap-2 rounded-lg border border-warm-border bg-warm-bg/50 p-3">
+          <Info className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+          <p className="text-xs text-warm-muted">
+            {stateName} courts may offer e-filing — check with your local court clerk for availability.
+          </p>
+        </div>
+      )}
+
+      {/* JP Court Caveat (TX-specific) */}
+      {state === 'TX' && courtType === 'jp' && filingMethod === 'online' && (
         <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
           <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
           <p className="text-xs text-amber-800">
@@ -83,18 +97,38 @@ export function FilingMethodStep({
         </div>
       )}
 
+      {/* PA Magisterial caveat */}
+      {state === 'PA' && courtType === 'pa_magisterial' && filingMethod === 'online' && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-xs text-amber-800">
+            PACFile does not cover Magisterial District Courts. You&apos;ll need to file in person or by mail.
+          </p>
+        </div>
+      )}
+
+      {/* E-filing mandatory notice */}
+      {eFilingSystem?.mandatory && filingMethod === 'in_person' && eFilingSystem.mandatoryNote && (
+        <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+          <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+          <p className="text-xs text-blue-800">
+            {eFilingSystem.mandatoryNote}. You may still be able to file in person as a self-represented litigant.
+          </p>
+        </div>
+      )}
+
       {/* Online Filing Guidance */}
-      {filingMethod === 'online' && (
+      {filingMethod === 'online' && hasEFiling && (
         <div className="space-y-4 rounded-lg border border-warm-border bg-warm-bg/50 p-4">
           <h4 className="font-semibold text-warm-text text-sm">Step-by-step e-filing guide</h4>
           <ol className="space-y-3 text-sm text-warm-muted">
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo">1</span>
-              <span>Go to <strong>eFileTexas.gov</strong> and create a free account</span>
+              <span>Go to <strong>{eFilingSystem.name}</strong> and create a free account</span>
             </li>
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo">2</span>
-              <span>Select your court: <strong>{county || 'your county'}</strong> — <strong><CourtLabel courtType={courtType} /></strong></span>
+              <span>Select your court: <strong>{county || 'your county'}</strong> — <strong>{courtLabel}</strong></span>
             </li>
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo">3</span>
@@ -110,14 +144,16 @@ export function FilingMethodStep({
             </li>
           </ol>
 
-          <div className="pt-2">
-            <Button variant="outline" size="sm" asChild className="w-full">
-              <a href={eFileUrl} target="_blank" rel="noopener noreferrer">
-                Open eFileTexas
-                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-              </a>
-            </Button>
-          </div>
+          {eFileUrl && (
+            <div className="pt-2">
+              <Button variant="outline" size="sm" asChild className="w-full">
+                <a href={eFileUrl} target="_blank" rel="noopener noreferrer">
+                  Open {eFilingSystem.name}
+                  <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                </a>
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -140,11 +176,11 @@ export function FilingMethodStep({
             </li>
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo">4</span>
-              <span>Go to <strong>{county || 'your county'} County Courthouse</strong> clerk&apos;s office</span>
+              <span>Go to <strong>{county ? `${county} County Courthouse` : `your local ${courtLabel}`}</strong> clerk&apos;s office</span>
             </li>
             <li className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo">5</span>
-              <span>File at the clerk&apos;s window — they&apos;ll stamp your copies and assign a cause number</span>
+              <span>File at the clerk&apos;s window — they&apos;ll stamp your copies and assign a case number</span>
             </li>
           </ol>
 
@@ -152,7 +188,7 @@ export function FilingMethodStep({
             <div className="pt-2">
               <Button variant="outline" size="sm" asChild className="w-full">
                 <a
-                  href={`https://www.google.com/maps/search/${encodeURIComponent(`${county} County Courthouse Texas`)}`}
+                  href={`https://www.google.com/maps/search/${encodeURIComponent(`${county} County Courthouse ${stateName}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -52,7 +52,7 @@ interface SmallClaimsWizardProps {
     defendant_is_business: boolean
     demand_letter_sent: boolean
   } | null
-  caseData: { county: string | null }
+  caseData: { county: string | null; state?: string }
 }
 
 /* ------------------------------------------------------------------ */
@@ -708,6 +708,7 @@ export function SmallClaimsWizard({
             county={defendantCounty || caseData.county || ''}
             courtType="jp"
             config={FILING_CONFIGS.small_claims}
+            state={caseData.state}
           />
         )
       case 'review':

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // Paths that don't require authentication
 const PUBLIC_PATHS = ['/', '/login', '/signup', '/reset-password']
-const PUBLIC_PATH_PREFIXES = ['/shared', '/api/cron']
+const PUBLIC_PATH_PREFIXES = ['/shared', '/api/cron', '/assess', '/api/webhooks']
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) return true
@@ -35,8 +35,10 @@ export async function middleware(request: NextRequest) {
   )
 
   // CSRF: Check Origin header on state-mutating requests
+  // Skip CSRF for webhook endpoints (external services like Stripe send POSTs)
   const method = request.method
-  if (method === 'POST' || method === 'PATCH' || method === 'PUT' || method === 'DELETE') {
+  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
+  if (!isWebhook && (method === 'POST' || method === 'PATCH' || method === 'PUT' || method === 'DELETE')) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
     if (origin && origin !== 'null' && host) {

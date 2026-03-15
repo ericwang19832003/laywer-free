@@ -60,7 +60,7 @@ interface LandlordTenantWizardProps {
     eviction_notice_type: string | null
     demand_letter_sent: boolean
   } | null
-  caseData: { county: string | null; court_type: string }
+  caseData: { county: string | null; court_type: string; state?: string }
 }
 
 /* ------------------------------------------------------------------ */
@@ -813,6 +813,7 @@ export function LandlordTenantWizard({
             county={propertyCounty || caseData.county || ''}
             courtType={caseData.court_type}
             config={subType === 'eviction' || subType === 'nonpayment' ? FILING_CONFIGS.eviction : FILING_CONFIGS.landlord_tenant}
+            state={caseData.state}
           />
         )
       case 'review':

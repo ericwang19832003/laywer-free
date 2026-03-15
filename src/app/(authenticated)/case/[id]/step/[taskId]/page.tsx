@@ -249,12 +249,20 @@ export default async function StepPage({
   }
   const intakeTaskKey = FILING_TO_INTAKE[task.task_key]
   if (intakeTaskKey) {
-    const { data: intakeRow } = await supabase
+    const { data: intakeRow, error: intakeErr } = await supabase
       .from('tasks').select('metadata')
       .eq('case_id', id).eq('task_key', intakeTaskKey).maybeSingle()
     const intakeMeta = (intakeRow?.metadata as Record<string, unknown>) ?? {}
-    // Merge: filing task's own metadata (from save-for-later) wins over intake
-    task.metadata = { ...intakeMeta, ...(task.metadata ?? {}) }
+    // Merge: start with intake data, then overlay filing task values that
+    // aren't null/undefined (so null wizard defaults don't stomp real intake values)
+    const merged: Record<string, unknown> = { ...intakeMeta }
+    const filingMeta = (task.metadata ?? {}) as Record<string, unknown>
+    for (const [key, value] of Object.entries(filingMeta)) {
+      if (value !== null && value !== undefined) {
+        merged[key] = value
+      }
+    }
+    task.metadata = merged
   }
 
   switch (task.task_key) {
@@ -279,7 +287,7 @@ export default async function StepPage({
     case 'prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases')
-        .select('role, court_type, county, dispute_type')
+        .select('role, court_type, county, dispute_type, state')
         .eq('id', id)
         .single()
 
@@ -575,9 +583,9 @@ export default async function StepPage({
     case 'divorce_evidence_vault':
       return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
     case 'divorce_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'divorce_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
@@ -602,9 +610,9 @@ export default async function StepPage({
     case 'custody_evidence_vault':
       return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
     case 'custody_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'custody_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
@@ -623,9 +631,9 @@ export default async function StepPage({
     case 'child_support_evidence_vault':
       return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
     case 'child_support_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'child_support_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
@@ -644,9 +652,9 @@ export default async function StepPage({
     case 'visitation_evidence_vault':
       return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
     case 'visitation_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'visitation_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
@@ -663,9 +671,9 @@ export default async function StepPage({
     case 'spousal_support_evidence_vault':
       return <GuidedStep caseId={id} taskId={taskId} config={createEvidenceVaultConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
     case 'spousal_support_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'spousal_support_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
@@ -682,9 +690,9 @@ export default async function StepPage({
     case 'po_safety_screening':
       return <SafetyScreeningStep caseId={id} taskId={taskId} isProtectiveOrder />
     case 'po_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'po_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('protective_order')} existingAnswers={task.metadata?.guided_answers} />
@@ -699,9 +707,9 @@ export default async function StepPage({
     case 'mod_existing_order_review':
       return <GuidedStep caseId={id} taskId={taskId} config={existingOrderReviewConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'mod_prepare_filing': {
-      const { data: caseRow } = await supabase.from('cases').select('county').eq('id', id).single()
+      const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
-      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null }} />
+      return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'mod_file_with_court':
       return <GuidedStep caseId={id} taskId={taskId} config={createFamilyFileWithCourtConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
@@ -812,7 +820,7 @@ export default async function StepPage({
     }
     case 'prepare_small_claims_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county').eq('id', id).single()
+        .from('cases').select('county, state').eq('id', id).single()
       const { data: claimDetails } = await supabase
         .from('small_claims_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -821,7 +829,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           claimDetails={claimDetails}
-          caseData={{ county: caseRow?.county ?? null }}
+          caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -865,7 +873,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'prepare_landlord_tenant_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: ltDetails } = await supabase
         .from('landlord_tenant_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -874,7 +882,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           landlordTenantDetails={ltDetails}
-          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'jp' }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'jp', state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -923,7 +931,7 @@ export default async function StepPage({
     }
     case 'prepare_debt_defense_answer': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: debtDetails } = await supabase
         .from('debt_defense_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -932,7 +940,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           debtDefenseDetails={debtDetails}
-          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'jp' }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'jp', state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -993,7 +1001,7 @@ export default async function StepPage({
     }
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -1002,7 +1010,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           personalInjuryDetails={piDetails}
-          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county', state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -1060,7 +1068,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={contractNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'contract_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: contractDetails } = await supabase
         .from('contract_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -1069,7 +1077,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           contractDetails={contractDetails}
-          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county', state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -1103,7 +1111,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={propertyNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'property_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: propertyDetails } = await supabase
         .from('property_dispute_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -1112,7 +1120,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           propertyDetails={propertyDetails}
-          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county', state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -1146,7 +1154,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={reNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 're_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
       const { data: reIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 're_intake').maybeSingle()
       const reIntakeMeta = reIntakeTask?.metadata as Record<string, unknown> | null
@@ -1206,7 +1214,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipAdrConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'biz_partnership_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
       const { data: bizIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_partnership_intake').maybeSingle()
       const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
@@ -1269,7 +1277,7 @@ export default async function StepPage({
     }
     case 'biz_employment_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
       const { data: bizIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_employment_intake').maybeSingle()
       const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
@@ -1327,7 +1335,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={bizB2bNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'biz_b2b_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type').eq('id', id).single()
+        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
       const { data: bizIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_b2b_intake').maybeSingle()
       const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
@@ -1381,7 +1389,7 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={otherDemandLetterConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'other_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: otherDetails } = await supabase
         .from('other_case_details').select('*').eq('case_id', id).maybeSingle()
       return (
@@ -1390,7 +1398,7 @@ export default async function StepPage({
           taskId={taskId}
           existingMetadata={task.metadata}
           otherDetails={otherDetails}
-          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county' }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county', state: caseRow?.state ?? undefined }}
         />
       )
     }

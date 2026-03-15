@@ -64,7 +64,7 @@ interface PersonalInjuryWizardProps {
     premises_owner?: string
     product_name?: string
   } | null
-  caseData: { county: string | null; court_type: string }
+  caseData: { county: string | null; court_type: string; state?: string }
 }
 
 /* ------------------------------------------------------------------ */
@@ -1693,6 +1693,7 @@ export function PersonalInjuryWizard({
             county={county}
             courtType={courtType}
             config={FILING_CONFIGS.personal_injury}
+            state={caseData.state}
           />
         )
 

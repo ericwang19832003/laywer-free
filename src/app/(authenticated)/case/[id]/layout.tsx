@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { WorkflowSidebar } from '@/components/case/workflow-sidebar'
 import { MobileSidebarDrawer } from '@/components/case/mobile-sidebar-drawer'
 import { ContextSidebar } from '@/components/case/context-sidebar'
+import { MobileNav } from '@/components/layout/mobile-nav'
 import { WORKFLOW_PHASES } from '@/lib/workflow-phases'
 import type { SidebarTask } from '@/components/case/workflow-sidebar'
 
@@ -84,28 +85,31 @@ export default async function CaseLayout({
     null
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)]">
-      <aside className="hidden lg:block w-64 shrink-0 bg-warm-bg shadow-[1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-        <WorkflowSidebar caseId={id} tasks={taskList} phases={phases} />
-      </aside>
+    <>
+      <div className="flex min-h-[calc(100vh-3.5rem)] pb-20 md:pb-0">
+        <aside className="hidden lg:block w-64 shrink-0 bg-warm-bg shadow-[1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+          <WorkflowSidebar caseId={id} tasks={taskList} phases={phases} />
+        </aside>
 
-      <main className="flex-1 min-w-0 bg-warm-bg">
-        {children}
-      </main>
+        <main className="flex-1 min-w-0 bg-warm-bg">
+          {children}
+        </main>
 
-      <aside className="hidden xl:block w-72 shrink-0 bg-white shadow-[-1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-        <ContextSidebar
-          caseId={id}
-          tasks={taskList.map((t) => ({ id: t.id, task_key: t.task_key }))}
-          fallbackTaskKey={currentTaskKey}
-          deadline={deadline}
-          riskScore={riskScore}
-          disputeType={disputeType}
-          piSubType={piDetails?.pi_sub_type ?? undefined}
-        />
-      </aside>
+        <aside className="hidden xl:block w-72 shrink-0 bg-white shadow-[-1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+          <ContextSidebar
+            caseId={id}
+            tasks={taskList.map((t) => ({ id: t.id, task_key: t.task_key }))}
+            fallbackTaskKey={currentTaskKey}
+            deadline={deadline}
+            riskScore={riskScore}
+            disputeType={disputeType}
+            piSubType={piDetails?.pi_sub_type ?? undefined}
+          />
+        </aside>
 
-      <MobileSidebarDrawer caseId={id} tasks={taskList} phases={phases} />
-    </div>
+        <MobileSidebarDrawer caseId={id} tasks={taskList} phases={phases} />
+      </div>
+      <MobileNav caseId={id} />
+    </>
   )
 }

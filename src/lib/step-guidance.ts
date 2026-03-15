@@ -1673,4 +1673,38 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Update internal contracts and processes to prevent future disputes',
     ],
   },
+
+  // --- Post-Filing Lifecycle ---
+  record_outcome: {
+    why: 'Recording your outcome helps us provide the right next steps and improves guidance for future users.',
+    checklist: [
+      'Know the result of your hearing or resolution',
+      'Any written judgment or order from the court',
+    ],
+  },
+  post_judgment: {
+    why: 'After a judgment, there are important deadlines and actions that can affect whether you actually get what you were awarded.',
+    checklist: [
+      'A copy of the court judgment or order',
+      'Notes on any payment terms discussed',
+    ],
+    tip: 'The judgment is not the end — enforcement may require additional steps.',
+  },
+  case_closure: {
+    why: 'Properly closing your case ensures all documents are saved and any remaining actions are tracked.',
+    checklist: [
+      'All court documents saved',
+      'Any payment received or made',
+    ],
+  },
+  courtroom_prep: {
+    why: 'Good preparation is the single biggest factor in how pro se litigants perform in court.',
+    checklist: [
+      'Know your courthouse location and courtroom number',
+      'Three copies of all documents',
+      'Practice your key points out loud',
+      'Professional attire ready',
+    ],
+    tip: 'Arrive 30 minutes early. Address the judge as "Your Honor."',
+  },
 }

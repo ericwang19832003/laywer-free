@@ -51,6 +51,7 @@ interface DebtDefenseWizardProps {
   caseData: {
     county: string | null
     court_type: string
+    state?: string
   }
 }
 
@@ -665,6 +666,7 @@ export function DebtDefenseWizard({
             county={county}
             courtType={courtType}
             config={FILING_CONFIGS.debt_defense}
+            state={caseData.state}
           />
         )
       case 'review':

@@ -7,6 +7,10 @@ import { ProgressCard } from '@/components/dashboard/progress-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
+import { ConfidenceScoreCard } from '@/components/dashboard/confidence-score-card'
+import { computeConfidenceScore } from '@/lib/confidence/compute'
+import { CaseComparisonCard } from '@/components/dashboard/case-comparison-card'
+import { InsightsCard } from '@/components/dashboard/insights-card'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { ResearchCard } from '@/components/dashboard/research-card'
@@ -89,6 +93,25 @@ export default async function DashboardPage({
       .limit(1)
       .maybeSingle(),
   ])
+
+  // Compute confidence score
+  const confidenceResult = await computeConfidenceScore(supabase, id)
+
+  // Case comparison data
+  const { data: caseRow } = await supabase
+    .from('cases')
+    .select('dispute_type, created_at')
+    .eq('id', id)
+    .single()
+
+  // Case insights
+  const { data: insightsData } = await supabase
+    .from('case_insights')
+    .select('id, insight_type, title, body, priority, created_at')
+    .eq('case_id', id)
+    .eq('dismissed', false)
+    .order('created_at', { ascending: false })
+    .limit(5)
 
   const { data, error } = dashboardResult
   const { data: escalationData } = escalationResult
@@ -239,6 +262,14 @@ export default async function DashboardPage({
     )
   }
 
+  const tasksSummary = (data as DashboardData)?.tasks_summary ?? {}
+  const totalTasks = Object.values(tasksSummary).reduce((s: number, v) => s + (v as number), 0)
+  const completedTasks = (tasksSummary.completed as number ?? 0) + (tasksSummary.skipped as number ?? 0)
+  const taskCompletionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+  const daysSinceCreation = caseRow?.created_at
+    ? Math.ceil((Date.now() - new Date(caseRow.created_at).getTime()) / 86400000)
+    : 0
+
   return (
     <div className="bg-warm-bg min-h-full">
       <main className="mx-auto max-w-2xl px-4 py-10">
@@ -268,6 +299,17 @@ export default async function DashboardPage({
             score30DaysAgo={score30dData}
             aiTips={aiTips}
           />
+          <ConfidenceScoreCard
+            score={confidenceResult.score}
+            breakdown={confidenceResult.breakdown}
+          />
+          <CaseComparisonCard
+            taskCompletionRate={taskCompletionRate}
+            evidenceCount={evidenceCount ?? 0}
+            daysSinceCreation={daysSinceCreation}
+            disputeType={caseRow?.dispute_type ?? 'other'}
+          />
+          <InsightsCard caseId={id} initialInsights={insightsData ?? []} />
           <StrategyCard
             caseId={id}
             recommendations={strategyRecs}

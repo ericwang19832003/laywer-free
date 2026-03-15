@@ -42,6 +42,7 @@ interface PetitionWizardProps {
     county: string | null
     dispute_type: string | null
     government_entity?: boolean
+    state?: string
   }
 }
 
@@ -423,6 +424,7 @@ export function PetitionWizard({
             county={caseData.county ?? ''}
             courtType={caseData.court_type}
             config={FILING_CONFIGS[caseData.dispute_type ?? 'civil'] ?? FILING_CONFIGS.civil}
+            state={caseData.state}
           />
         )
       case 'review':

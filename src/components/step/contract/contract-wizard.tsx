@@ -39,7 +39,7 @@ interface ContractWizardProps {
     other_party_name?: string
     other_party_type?: string
   } | null
-  caseData?: { county: string | null; court_type: string }
+  caseData?: { county: string | null; court_type: string; state?: string }
 }
 
 /* ------------------------------------------------------------------ */
@@ -891,6 +891,7 @@ export function ContractWizard({
             county={county}
             courtType={courtType}
             config={FILING_CONFIGS.contract}
+            state={caseData?.state}
           />
         )
 

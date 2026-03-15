@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { BillingSection } from '@/components/settings/billing-section'
 
 type NotificationPrefs = {
   deadline_approaching: boolean
@@ -358,6 +359,9 @@ export default function SettingsPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Billing & Subscription */}
+          <BillingSection />
 
           {/* Data Export */}
           <Card>

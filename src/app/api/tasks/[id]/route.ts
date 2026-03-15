@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { updateTaskSchema, VALID_TRANSITIONS } from '@/lib/schemas/task'
+import { computeAndStoreConfidence } from '@/lib/confidence/compute'
+import { trackEvent } from '@/lib/analytics/track'
 
 export async function PATCH(
   request: NextRequest,
@@ -87,6 +89,23 @@ export async function PATCH(
         task_key: currentTask.task_key,
       },
     })
+
+    // Recompute confidence score on task completion
+    if (newStatus === 'completed' || newStatus === 'skipped') {
+      computeAndStoreConfidence(supabase, currentTask.case_id).catch(() => {})
+    }
+
+    // Track analytics event
+    if (newStatus === 'completed') {
+      trackEvent(supabase, currentTask.case_id, 'wizard_step_completed', {
+        task_key: currentTask.task_key,
+      })
+    }
+    if (newStatus === 'skipped') {
+      trackEvent(supabase, currentTask.case_id, 'wizard_step_skipped', {
+        task_key: currentTask.task_key,
+      })
+    }
 
     return NextResponse.json({ task: updatedTask })
   } catch {

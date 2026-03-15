@@ -65,7 +65,7 @@ interface FamilyLawWizardProps {
     petitioner_county_months: number | null
     petitioner_state_months: number | null
   } | null
-  caseData: { county: string | null }
+  caseData: { county: string | null; state?: string }
 }
 
 /* ------------------------------------------------------------------ */
@@ -963,6 +963,7 @@ export function FamilyLawWizard({
             county={petitionerCounty || caseData.county || ''}
             courtType="district"
             config={FILING_CONFIGS[familySubType] ?? FILING_CONFIGS.civil}
+            state={caseData.state}
           />
         )
       case 'review':

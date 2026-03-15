@@ -42,6 +42,7 @@ interface OtherWizardProps {
   caseData?: {
     county: string | null
     court_type?: string | null
+    state?: string
   } | null
 }
 
@@ -620,6 +621,7 @@ export function OtherWizard({
             county={county}
             courtType={courtType}
             config={FILING_CONFIGS.other}
+            state={caseData?.state}
           />
         )
       case 'review':
