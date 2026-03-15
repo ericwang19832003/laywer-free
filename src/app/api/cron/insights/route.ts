@@ -41,18 +41,27 @@ export async function POST(request: NextRequest) {
       incidentDate: caseRow.incident_date,
     })
 
-    // Upsert insights (avoid duplicates by insight_type per case)
+    // Upsert insights — update existing or insert new
     for (const insight of insights) {
-      // Check if this insight_type already exists and is not dismissed
       const { data: existing } = await supabase
         .from('case_insights')
-        .select('id')
+        .select('id, title, body, priority')
         .eq('case_id', caseRow.id)
         .eq('insight_type', insight.insight_type)
         .eq('dismissed', false)
         .maybeSingle()
 
-      if (!existing) {
+      if (existing) {
+        // Update if content changed (e.g. countdown text)
+        if (existing.title !== insight.title || existing.body !== insight.body || existing.priority !== insight.priority) {
+          await supabase.from('case_insights').update({
+            title: insight.title,
+            body: insight.body,
+            priority: insight.priority,
+          }).eq('id', existing.id)
+          insightsGenerated++
+        }
+      } else {
         await supabase.from('case_insights').insert({
           case_id: caseRow.id,
           ...insight,

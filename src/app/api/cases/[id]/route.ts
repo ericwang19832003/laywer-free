@@ -53,7 +53,7 @@ export async function PATCH(
     const { supabase } = auth
 
     const body = await request.json()
-    const { court_type, county, description } = body
+    const { court_type, county, description, outcome } = body
 
     // Build partial update object — only include provided fields
     const updates: Record<string, unknown> = {}
@@ -86,6 +86,17 @@ export async function PATCH(
         )
       }
       updates.description = description
+    }
+
+    if (outcome !== undefined) {
+      const validOutcomes = ['won', 'lost', 'settled', 'dismissed', 'continued']
+      if (!validOutcomes.includes(outcome)) {
+        return NextResponse.json(
+          { error: 'Invalid outcome' },
+          { status: 422 }
+        )
+      }
+      updates.outcome = outcome
     }
 
     if (Object.keys(updates).length === 0) {

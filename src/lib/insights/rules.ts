@@ -28,8 +28,9 @@ const solWarning: InsightRule = (input) => {
 
 const missingEvidence: InsightRule = (input) => {
   const filingStarted = input.tasks.some(t =>
-    t.task_key.includes('prepare_filing') || t.task_key.includes('prepare_pi') ||
-    t.task_key.includes('prepare_small') || t.task_key.includes('prepare_debt')
+    (t.task_key.includes('prepare_filing') || t.task_key.includes('prepare_pi') ||
+    t.task_key.includes('prepare_small') || t.task_key.includes('prepare_debt')) &&
+    (t.status === 'in_progress' || t.status === 'completed' || t.status === 'todo' || t.status === 'needs_review')
   )
   if (!filingStarted) return null
   if (input.evidenceCount >= 3) return null

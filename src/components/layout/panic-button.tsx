@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Shield } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export function PanicButton() {
   const [enabled, setEnabled] = useState(false)
@@ -14,6 +15,10 @@ export function PanicButton() {
   if (!enabled) return null
 
   function handlePanic() {
+    // Sign out Supabase session
+    const supabase = createClient()
+    supabase.auth.signOut().catch(() => {})
+
     // Clear all local storage
     localStorage.clear()
     sessionStorage.clear()

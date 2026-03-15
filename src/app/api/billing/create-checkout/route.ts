@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?billing=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?billing=cancelled`,
       metadata: { user_id: user.id, tier },
+      subscription_data: { metadata: { tier } },
     }
 
     if (sub?.stripe_customer_id) {

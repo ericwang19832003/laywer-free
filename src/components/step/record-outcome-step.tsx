@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, XCircle, Handshake, Ban, Clock } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface RecordOutcomeStepProps {
   caseId: string
@@ -26,21 +27,32 @@ export function RecordOutcomeStep({ caseId, taskId, onComplete }: RecordOutcomeS
     if (!selected) return
     setSaving(true)
 
-    // Update case outcome
-    await fetch(`/api/cases/${caseId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ outcome: selected }),
-    })
+    try {
+      // Update case outcome
+      const outcomeRes = await fetch(`/api/cases/${caseId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ outcome: selected }),
+      })
 
-    // Complete the task
-    await fetch(`/api/tasks/${taskId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'completed' }),
-    })
+      if (!outcomeRes.ok) {
+        toast.error('Failed to save outcome')
+        setSaving(false)
+        return
+      }
 
-    onComplete()
+      // Complete the task only after outcome is saved
+      await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' }),
+      })
+
+      onComplete()
+    } catch {
+      toast.error('Something went wrong')
+      setSaving(false)
+    }
   }
 
   return (
