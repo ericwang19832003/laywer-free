@@ -24,6 +24,8 @@ import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Sh
 import Link from 'next/link'
 import { StepAuthoritySidebar } from './step-authority-sidebar'
 import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -131,6 +133,7 @@ function getStepsForSubType(subType: string): WizardStep[] {
   const damages: WizardStep = { id: 'damages', title: 'Your Damages', subtitle: 'Calculate your total damages.' }
   const insurance: WizardStep = { id: 'insurance', title: 'Insurance Information', subtitle: 'Your insurance details.' }
   const venue: WizardStep = { id: 'venue', title: 'Where to File', subtitle: "We'll help you pick the right court." }
+  const howToFile: WizardStep = { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how to submit your petition.' }
   const review: WizardStep = { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' }
 
   const common = [preflight, incident]
@@ -138,12 +141,12 @@ function getStepsForSubType(subType: string): WizardStep[] {
   // Property damage cases: no injuries/medical steps
   if (isPropertyDamageSubType(subType)) {
     if (subType === 'vehicle_damage') {
-      return [...common, otherDriver, damageDetails, damages, insurance, venue, review]
+      return [...common, otherDriver, damageDetails, damages, insurance, venue, howToFile, review]
     }
-    return [...common, damageDetails, damages, insurance, venue, review]
+    return [...common, damageDetails, damages, insurance, venue, howToFile, review]
   }
 
-  const tail = [injuries, medical, damages, insurance, venue, review]
+  const tail = [injuries, medical, damages, insurance, venue, howToFile, review]
 
   if (MOTOR_VEHICLE_TYPES.includes(subType)) {
     return [...common, otherDriver, ...tail]
@@ -383,6 +386,11 @@ export function PersonalInjuryWizard({
   )
   const [causeNumber, setCauseNumber] = useState<string>(
     (meta.cause_number as string) ?? ''
+  )
+
+  /* ---- Filing method ---- */
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person') ?? ''
   )
 
   /* ---- Wizard / draft state ---- */
@@ -635,6 +643,8 @@ export function PersonalInjuryWizard({
       county: county || null,
       court_type: courtType || null,
       cause_number: causeNumber || null,
+      // Filing method
+      filing_method: filingMethod || null,
       // Draft
       draft_text: draft || null,
       final_text: draft || null,
@@ -684,6 +694,7 @@ export function PersonalInjuryWizard({
       county,
       courtType,
       causeNumber,
+      filingMethod,
       draft,
       annotations,
       currentStep,
@@ -791,6 +802,8 @@ export function PersonalInjuryWizard({
         return true
       case 'venue':
         return county.trim() !== '' && courtType !== ''
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       default:
@@ -811,6 +824,7 @@ export function PersonalInjuryWizard({
     effectiveGrandTotal,
     county,
     courtType,
+    filingMethod,
   ])
 
   /* ---- Review step onEdit ---- */
@@ -1667,6 +1681,20 @@ export function PersonalInjuryWizard({
           </div>
         )
       }
+
+      /* ============================================================ */
+      /*  HOW TO FILE                                                  */
+      /* ============================================================ */
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={county}
+            courtType={courtType}
+            config={FILING_CONFIGS.personal_injury}
+          />
+        )
 
       /* ============================================================ */
       /*  REVIEW                                                       */

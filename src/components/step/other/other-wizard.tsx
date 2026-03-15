@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 import Link from 'next/link'
 
 /* ------------------------------------------------------------------ */
@@ -67,6 +69,11 @@ const STEPS: WizardStep[] = [
     id: 'venue',
     title: 'Where to File',
     subtitle: "We'll help you pick the right court.",
+  },
+  {
+    id: 'how_to_file',
+    title: 'How to File',
+    subtitle: 'Choose how you want to submit your petition.',
   },
   {
     id: 'review',
@@ -149,6 +156,9 @@ export function OtherWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  )
 
   /* ---- Build helpers ---- */
 
@@ -214,6 +224,8 @@ export function OtherWizard({
       draft_text: draft || null,
       final_text: draft || null,
       annotations,
+      // Filing method
+      filing_method: filingMethod || null,
       // Wizard position
       _wizard_step: currentStep,
     }),
@@ -232,6 +244,7 @@ export function OtherWizard({
       yourAddress,
       draft,
       annotations,
+      filingMethod,
       currentStep,
     ]
   )
@@ -315,6 +328,8 @@ export function OtherWizard({
         return true // damages are helpful but not strictly required
       case 'venue':
         return true
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       case 'generate':
@@ -322,7 +337,7 @@ export function OtherWizard({
       default:
         return true
     }
-  }, [currentStep, otherPartyName, disputeDescription])
+  }, [currentStep, otherPartyName, disputeDescription, filingMethod])
 
   /* ---- Formatting helpers ---- */
 
@@ -597,6 +612,16 @@ export function OtherWizard({
           </div>
         )
 
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={county}
+            courtType={courtType}
+            config={FILING_CONFIGS.other}
+          />
+        )
       case 'review':
         return (
           <div className="space-y-6">

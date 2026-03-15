@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AlertTriangle, FileText, Loader2, Plus, Trash2 } from 'lucide-react'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -50,6 +52,7 @@ const WIZARD_STEPS: WizardStep[] = [
   { id: 'breach', title: 'The Breach', subtitle: 'What went wrong?' },
   { id: 'damages', title: 'Your Damages', subtitle: 'Calculate what you are owed.' },
   { id: 'venue', title: 'Where to File', subtitle: 'We\'ll help you pick the right court.' },
+  { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how to submit your petition.' },
   { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' },
   { id: 'generate', title: 'Generate Petition', subtitle: 'We\'ll draft your contract petition.' },
 ]
@@ -197,6 +200,11 @@ export function ContractWizard({
     (meta.cause_number as string) ?? ''
   )
 
+  /* ---- Filing method ---- */
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person') ?? ''
+  )
+
   /* ---- Wizard / draft state ---- */
   const [currentStep, setCurrentStep] = useState(
     typeof meta._wizard_step === 'number' ? meta._wizard_step : 0
@@ -309,6 +317,7 @@ export function ContractWizard({
       county: county || null,
       court_type: courtType || null,
       cause_number: causeNumber || null,
+      filing_method: filingMethod || null,
       draft_text: draft || null,
       final_text: draft || null,
       annotations,
@@ -320,7 +329,7 @@ export function ContractWizard({
       yourName, yourAddress, yourCity, yourState, yourZip,
       breachDate, breachDescription, performedObligations, priorDemandSent,
       damageLineItems, lostProfits, costToCure,
-      county, courtType, causeNumber, draft, annotations, currentStep,
+      county, courtType, causeNumber, filingMethod, draft, annotations, currentStep,
     ]
   )
 
@@ -405,6 +414,8 @@ export function ContractWizard({
         return grandTotal > 0
       case 'venue':
         return county.trim() !== '' && courtType !== ''
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       case 'generate':
@@ -412,7 +423,7 @@ export function ContractWizard({
       default:
         return true
     }
-  }, [currentStep, otherPartyName, breachDescription, grandTotal, county, courtType])
+  }, [currentStep, otherPartyName, breachDescription, grandTotal, county, courtType, filingMethod])
 
   /* ---- Review step onEdit ---- */
 
@@ -868,6 +879,20 @@ export function ContractWizard({
           </div>
         )
       }
+
+      /* ============================================================ */
+      /*  HOW TO FILE                                                  */
+      /* ============================================================ */
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={county}
+            courtType={courtType}
+            config={FILING_CONFIGS.contract}
+          />
+        )
 
       /* ============================================================ */
       /*  REVIEW                                                       */

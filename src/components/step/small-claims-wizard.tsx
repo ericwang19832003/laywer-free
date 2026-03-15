@@ -25,6 +25,8 @@ import { SmallClaimsVenueStep } from './small-claims-wizard-steps/small-claims-v
 import { SmallClaimsReviewStep } from './small-claims-wizard-steps/small-claims-review-step'
 
 import { calculateDamages, type DamageItem } from '@/lib/small-claims/damages-calculator'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -103,6 +105,11 @@ function getStepsForSubType(subType: string): WizardStep[] {
     title: 'Where to File',
     subtitle: "We'll help you pick the right court.",
   }
+  const howToFile: WizardStep = {
+    id: 'how_to_file',
+    title: 'How to File',
+    subtitle: 'Choose how you want to submit your petition.',
+  }
   const review: WizardStep = {
     id: 'review',
     title: 'Review Everything',
@@ -111,22 +118,22 @@ function getStepsForSubType(subType: string): WizardStep[] {
 
   switch (subType) {
     case 'security_deposit':
-      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, howToFile, review]
     case 'breach_of_contract':
-      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, howToFile, review]
     case 'consumer_refund':
-      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, howToFile, review]
     case 'property_damage':
-      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, howToFile, review]
     case 'car_accident':
-      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, howToFile, review]
     case 'neighbor_dispute':
-      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, howToFile, review]
     case 'unpaid_loan':
-      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, timeline, demandInfo, venue, howToFile, review]
     case 'other':
     default:
-      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, review]
+      return [welcome, preview, preflight, parties, claimDetails, damages, demandInfo, venue, howToFile, review]
   }
 }
 
@@ -265,6 +272,9 @@ export function SmallClaimsWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  )
 
   /* ---- Demand letter field change handler ---- */
 
@@ -459,6 +469,8 @@ export function SmallClaimsWizard({
       draft_text: draft || null,
       final_text: draft || null,
       annotations,
+      // Filing method
+      filing_method: filingMethod || null,
       // Wizard position
       _wizard_step: currentStep,
     }
@@ -479,6 +491,7 @@ export function SmallClaimsWizard({
     precinct,
     draft,
     annotations,
+    filingMethod,
     currentStep,
   ])
 
@@ -572,6 +585,8 @@ export function SmallClaimsWizard({
         return true
       case 'venue':
         return true
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       default:
@@ -584,6 +599,7 @@ export function SmallClaimsWizard({
     defendant,
     claimDetails,
     damageItems,
+    filingMethod,
   ])
 
   /* ---- Review step onEdit ---- */
@@ -682,6 +698,16 @@ export function SmallClaimsWizard({
             incidentCounty={incidentCounty}
             precinct={precinct}
             onFieldChange={handleVenueFieldChange}
+          />
+        )
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={defendantCounty || caseData.county || ''}
+            courtType="jp"
+            config={FILING_CONFIGS.small_claims}
           />
         )
       case 'review':

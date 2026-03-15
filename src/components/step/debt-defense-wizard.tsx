@@ -21,6 +21,8 @@ import { AnswerTypeStep } from './debt-defense-wizard-steps/answer-type-step'
 import { DebtPartiesStep } from './debt-defense-wizard-steps/debt-parties-step'
 import { DebtVenueStep } from './debt-defense-wizard-steps/debt-venue-step'
 import { DebtReviewStep } from './debt-defense-wizard-steps/debt-review-step'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -64,6 +66,7 @@ const STEPS: WizardStep[] = [
   { id: 'answer_type', title: 'Answer Type', subtitle: 'Choose how to respond to the lawsuit.' },
   { id: 'parties', title: 'Parties', subtitle: 'Information about you and the plaintiff.' },
   { id: 'venue', title: 'Court Information', subtitle: 'Where your case is filed.' },
+  { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how you want to submit your answer.' },
   { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' },
 ]
 
@@ -189,6 +192,9 @@ export function DebtDefenseWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  )
 
   /* ---- Debt info field change handler ---- */
 
@@ -422,6 +428,8 @@ export function DebtDefenseWizard({
       draft_text: draft || null,
       final_text: draft || null,
       annotations,
+      // Filing method
+      filing_method: filingMethod || null,
       // Wizard position
       _wizard_step: currentStep,
     }),
@@ -456,6 +464,7 @@ export function DebtDefenseWizard({
       causeNumber,
       draft,
       annotations,
+      filingMethod,
       currentStep,
     ]
   )
@@ -546,6 +555,8 @@ export function DebtDefenseWizard({
         return yourName.trim() !== '' && plaintiffName.trim() !== ''
       case 'venue':
         return county.trim() !== '' && courtType !== ''
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       default:
@@ -561,6 +572,7 @@ export function DebtDefenseWizard({
     plaintiffName,
     county,
     courtType,
+    filingMethod,
   ])
 
   /* ---- Document title helpers ---- */
@@ -643,6 +655,16 @@ export function DebtDefenseWizard({
             courtType={courtType}
             causeNumber={causeNumber}
             onFieldChange={handleVenueFieldChange}
+          />
+        )
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={county}
+            courtType={courtType}
+            config={FILING_CONFIGS.debt_defense}
           />
         )
       case 'review':

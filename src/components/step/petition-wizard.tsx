@@ -17,6 +17,8 @@ import { validateJurisdiction } from '@/lib/rules/venue-helper'
 import { ChevronLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import type { FilingFacts } from '@/lib/schemas/filing'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -77,6 +79,11 @@ const WIZARD_STEPS: WizardStep[] = [
     id: 'relief',
     title: 'What Do You Want the Court to Do?',
     subtitle: 'Tell us how you want this resolved.',
+  },
+  {
+    id: 'how_to_file',
+    title: 'How to File',
+    subtitle: 'Choose how you want to submit your petition.',
   },
   {
     id: 'review',
@@ -150,6 +157,9 @@ export function PetitionWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  )
 
   /* ---- Jurisdiction check ---- */
   const jurisdictionCheck = useMemo(() => {
@@ -203,13 +213,14 @@ export function PetitionWizard({
       contract_county: contractCounty || null,
       draft_text: draft || null,
       final_text: draft || null,
+      filing_method: filingMethod || null,
       _wizard_step: currentStep,
     }
   }, [
     yourInfo, opposingParties, description, incidentDate, incidentLocation,
     claimDetails, amountSought, otherRelief, requestAttorneyFees,
     requestCourtCosts, defendantCounty, incidentCounty, propertyCounty,
-    contractCounty, draft, currentStep,
+    contractCounty, draft, filingMethod, currentStep,
   ])
 
   /* ---- API helpers ---- */
@@ -296,12 +307,14 @@ export function PetitionWizard({
         return true
       case 'relief':
         return true
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       default:
         return true
     }
-  }, [currentStep, yourInfo, opposingParties, description])
+  }, [currentStep, yourInfo, opposingParties, description, filingMethod])
 
   /* ---- Form data for review step ---- */
 
@@ -400,6 +413,16 @@ export function PetitionWizard({
             onCourtCostsChange={setRequestCourtCosts}
             courtType={caseData.court_type}
             jurisdictionWarning={jurisdictionCheck}
+          />
+        )
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={caseData.county ?? ''}
+            courtType={caseData.court_type}
+            config={FILING_CONFIGS[caseData.dispute_type ?? 'civil'] ?? FILING_CONFIGS.civil}
           />
         )
       case 'review':

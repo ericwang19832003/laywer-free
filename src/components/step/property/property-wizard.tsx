@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { WizardShell } from '@/components/ui/wizard-shell'
 import type { WizardStep } from '@/components/ui/wizard-shell'
 import { Loader2 } from 'lucide-react'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -61,6 +63,12 @@ const WIZARD_STEPS: WizardStep[] = [
     id: 'venue',
     title: 'Where to File',
     subtitle: "We'll help you pick the right court.",
+    estimateMinutes: 2,
+  },
+  {
+    id: 'how_to_file',
+    title: 'How to File',
+    subtitle: 'Choose how to submit your petition.',
     estimateMinutes: 2,
   },
   {
@@ -129,6 +137,11 @@ export function PropertyWizard({
     (meta.property_county as string) ?? caseData?.county ?? ''
   )
 
+  /* ---- Filing method ---- */
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person') ?? ''
+  )
+
   /* ---- Wizard state ---- */
   const [currentStep, setCurrentStep] = useState(
     typeof meta._wizard_step === 'number' ? meta._wizard_step : 0
@@ -167,6 +180,7 @@ export function PropertyWizard({
       repair_costs: repairCosts || null,
       total_damages: totalDamages,
       property_county: propertyCounty || null,
+      filing_method: filingMethod || null,
       _wizard_step: currentStep,
     }
   }, [
@@ -181,6 +195,7 @@ export function PropertyWizard({
     repairCosts,
     totalDamages,
     propertyCounty,
+    filingMethod,
     currentStep,
   ])
 
@@ -265,6 +280,8 @@ export function PropertyWizard({
         return true
       case 'venue':
         return true
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       case 'generate':
@@ -272,7 +289,7 @@ export function PropertyWizard({
       default:
         return true
     }
-  }, [currentStep, propertyAddress, disputeDescription, generating])
+  }, [currentStep, propertyAddress, disputeDescription, generating, filingMethod])
 
   /* ---- Step rendering ---- */
 
@@ -517,6 +534,17 @@ export function PropertyWizard({
               </p>
             </div>
           </div>
+        )
+
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={propertyCounty}
+            courtType={caseData?.court_type || 'district'}
+            config={FILING_CONFIGS.property}
+          />
         )
 
       case 'review':

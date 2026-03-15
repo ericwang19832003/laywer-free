@@ -27,6 +27,8 @@ import { ExistingOrdersStep } from './family-wizard-steps/existing-orders-step'
 import { FamilyGroundsStep } from './family-wizard-steps/family-grounds-step'
 import { FamilyVenueStep } from './family-wizard-steps/family-venue-step'
 import { FamilyReviewStep } from './family-wizard-steps/family-review-step'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -102,6 +104,11 @@ function getStepsForSubType(subType: string): WizardStep[] {
     title: 'Tell Us About Your Situation',
     subtitle: 'Describe the facts and reasons for your case.',
   }
+  const howToFile: WizardStep = {
+    id: 'how_to_file',
+    title: 'How to File',
+    subtitle: 'Choose how you want to submit your petition.',
+  }
   const review: WizardStep = {
     id: 'review',
     title: 'Review Everything',
@@ -147,21 +154,21 @@ function getStepsForSubType(subType: string): WizardStep[] {
 
   switch (subType) {
     case 'divorce':
-      return [welcome, preview, preflight, parties, marriage, children, venue, grounds, custody, support, spousal, property, review]
+      return [welcome, preview, preflight, parties, marriage, children, venue, grounds, custody, support, spousal, property, howToFile, review]
     case 'custody':
-      return [welcome, preview, preflight, parties, children, venue, grounds, custody, support, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, custody, support, howToFile, review]
     case 'child_support':
-      return [welcome, preview, preflight, parties, children, venue, grounds, support, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, support, howToFile, review]
     case 'visitation':
-      return [welcome, preview, preflight, parties, children, venue, grounds, custody, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, custody, howToFile, review]
     case 'spousal_support':
-      return [welcome, preview, preflight, parties, marriage, venue, grounds, spousal, review]
+      return [welcome, preview, preflight, parties, marriage, venue, grounds, spousal, howToFile, review]
     case 'protective_order':
-      return [welcome, preview, preflight, parties, venue, grounds, review]
+      return [welcome, preview, preflight, parties, venue, grounds, howToFile, review]
     case 'modification':
-      return [welcome, preview, preflight, parties, children, venue, grounds, custody, support, spousal, existingOrders, review]
+      return [welcome, preview, preflight, parties, children, venue, grounds, custody, support, spousal, existingOrders, howToFile, review]
     default:
-      return [welcome, preview, preflight, parties, venue, grounds, review]
+      return [welcome, preview, preflight, parties, venue, grounds, howToFile, review]
   }
 }
 
@@ -376,6 +383,9 @@ export function FamilyLawWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  )
 
   /* ---- Child support field change handler ---- */
 
@@ -548,6 +558,8 @@ export function FamilyLawWizard({
       draft_text: draft || null,
       final_text: draft || null,
       annotations,
+      // Filing method
+      filing_method: filingMethod || null,
       // Wizard position
       _wizard_step: currentStep,
     }
@@ -592,6 +604,7 @@ export function FamilyLawWizard({
     childrenCounty,
     draft,
     annotations,
+    filingMethod,
     currentStep,
   ])
 
@@ -701,6 +714,8 @@ export function FamilyLawWizard({
         return true
       case 'existing_orders':
         return existingOrderCourt.trim() !== ''
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       default:
@@ -718,6 +733,7 @@ export function FamilyLawWizard({
     divorceGroundsType,
     custodyArrangement,
     existingOrderCourt,
+    filingMethod,
   ])
 
   /* ---- Form data for review step ---- */
@@ -937,6 +953,16 @@ export function FamilyLawWizard({
             onCauseNumberChange={setExistingOrderCauseNumber}
             onWhatToModifyChange={setWhatToModify}
             onChangeDescriptionChange={setChangeDescription}
+          />
+        )
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={petitionerCounty || caseData.county || ''}
+            courtType="district"
+            config={FILING_CONFIGS[familySubType] ?? FILING_CONFIGS.civil}
           />
         )
       case 'review':

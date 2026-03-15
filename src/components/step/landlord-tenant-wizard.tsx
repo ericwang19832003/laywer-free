@@ -27,6 +27,8 @@ import { LtVenueStep } from './landlord-tenant-wizard-steps/lt-venue-step'
 import { LtReviewStep } from './landlord-tenant-wizard-steps/lt-review-step'
 
 import { calculateDamages, type DamageItem } from '@/lib/small-claims/damages-calculator'
+import { FilingMethodStep } from '@/components/step/filing-method-step'
+import { FILING_CONFIGS } from '@/lib/filing-configs'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -121,6 +123,11 @@ function getStepsForSubType(subType: string): WizardStep[] {
     title: 'Where to File',
     subtitle: "We'll help you pick the right court.",
   }
+  const howToFile: WizardStep = {
+    id: 'how_to_file',
+    title: 'How to File',
+    subtitle: 'Choose how you want to submit your petition.',
+  }
   const review: WizardStep = {
     id: 'review',
     title: 'Review Everything',
@@ -129,22 +136,22 @@ function getStepsForSubType(subType: string): WizardStep[] {
 
   switch (subType) {
     case 'eviction':
-      return [preflight, parties, property, lease, financial, evictionNotice, timeline, demandInfo, venue, review]
+      return [preflight, parties, property, lease, financial, evictionNotice, timeline, demandInfo, venue, howToFile, review]
     case 'nonpayment':
-      return [preflight, parties, property, lease, financial, evictionNotice, demandInfo, venue, review]
+      return [preflight, parties, property, lease, financial, evictionNotice, demandInfo, venue, howToFile, review]
     case 'security_deposit':
-      return [preflight, parties, property, lease, financial, deductions, timeline, demandInfo, venue, review]
+      return [preflight, parties, property, lease, financial, deductions, timeline, demandInfo, venue, howToFile, review]
     case 'property_damage':
-      return [preflight, parties, property, financial, timeline, demandInfo, venue, review]
+      return [preflight, parties, property, financial, timeline, demandInfo, venue, howToFile, review]
     case 'repair_maintenance':
-      return [preflight, parties, property, lease, financial, repairs, demandInfo, venue, review]
+      return [preflight, parties, property, lease, financial, repairs, demandInfo, venue, howToFile, review]
     case 'lease_termination':
-      return [preflight, parties, property, lease, financial, demandInfo, venue, review]
+      return [preflight, parties, property, lease, financial, demandInfo, venue, howToFile, review]
     case 'habitability':
-      return [preflight, parties, property, lease, financial, repairs, timeline, demandInfo, venue, review]
+      return [preflight, parties, property, lease, financial, repairs, timeline, demandInfo, venue, howToFile, review]
     case 'other':
     default:
-      return [preflight, parties, property, financial, demandInfo, venue, review]
+      return [preflight, parties, property, financial, demandInfo, venue, howToFile, review]
   }
 }
 
@@ -319,6 +326,9 @@ export function LandlordTenantWizard({
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  )
 
   /* ---- Property field change handler ---- */
 
@@ -527,6 +537,8 @@ export function LandlordTenantWizard({
       draft_text: draft || null,
       final_text: draft || null,
       annotations,
+      // Filing method
+      filing_method: filingMethod || null,
       // Wizard position
       _wizard_step: currentStep,
     }
@@ -557,6 +569,7 @@ export function LandlordTenantWizard({
     defendantCounty,
     draft,
     annotations,
+    filingMethod,
     currentStep,
   ])
 
@@ -656,6 +669,8 @@ export function LandlordTenantWizard({
         return true
       case 'venue':
         return true
+      case 'how_to_file':
+        return filingMethod !== ''
       case 'review':
         return true
       default:
@@ -668,6 +683,7 @@ export function LandlordTenantWizard({
     tenantInfo,
     propertyAddress,
     damageItems,
+    filingMethod,
   ])
 
   /* ---- Review step onEdit ---- */
@@ -787,6 +803,16 @@ export function LandlordTenantWizard({
             propertyCounty={propertyCounty}
             defendantCounty={defendantCounty}
             onFieldChange={handleVenueFieldChange}
+          />
+        )
+      case 'how_to_file':
+        return (
+          <FilingMethodStep
+            filingMethod={filingMethod}
+            onFilingMethodChange={setFilingMethod}
+            county={propertyCounty || caseData.county || ''}
+            courtType={caseData.court_type}
+            config={subType === 'eviction' || subType === 'nonpayment' ? FILING_CONFIGS.eviction : FILING_CONFIGS.landlord_tenant}
           />
         )
       case 'review':
