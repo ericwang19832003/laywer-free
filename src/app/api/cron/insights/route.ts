@@ -41,6 +41,8 @@ export async function POST(request: NextRequest) {
       incidentDate: caseRow.incident_date,
     })
 
+    const activeInsightTypes = new Set(insights.map(i => i.insight_type))
+
     // Upsert insights — update existing or insert new
     for (const insight of insights) {
       const { data: existing } = await supabase
@@ -67,6 +69,19 @@ export async function POST(request: NextRequest) {
           ...insight,
         })
         insightsGenerated++
+      }
+    }
+
+    // Retire stale insights whose rules no longer fire
+    const { data: staleInsights } = await supabase
+      .from('case_insights')
+      .select('id, insight_type')
+      .eq('case_id', caseRow.id)
+      .eq('dismissed', false)
+
+    for (const stale of staleInsights ?? []) {
+      if (!activeInsightTypes.has(stale.insight_type)) {
+        await supabase.from('case_insights').update({ dismissed: true }).eq('id', stale.id)
       }
     }
 

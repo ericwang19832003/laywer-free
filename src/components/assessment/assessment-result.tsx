@@ -3,7 +3,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import type { AssessmentResult } from '@/lib/assessment/evaluate'
 
 interface AssessmentResultProps {
@@ -68,10 +67,15 @@ export function AssessmentResultCard({ result, disputeType }: AssessmentResultPr
       )}
 
       <div className="space-y-3">
-        <Button asChild className="w-full bg-calm-indigo hover:bg-calm-indigo/90" size="lg">
-          <Link href={`/signup?disputeType=${disputeType}`}>
-            Start Your Case Free <ArrowRight className="h-4 w-4 ml-2" />
-          </Link>
+        <Button
+          className="w-full bg-calm-indigo hover:bg-calm-indigo/90"
+          size="lg"
+          onClick={() => {
+            localStorage.setItem('assessment_result', JSON.stringify({ result, disputeType }))
+            window.location.href = `/signup?disputeType=${disputeType}&assessed=1`
+          }}
+        >
+          Start Your Case Free <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
         <p className="text-xs text-center text-gray-400">
           Free to start. No credit card required.

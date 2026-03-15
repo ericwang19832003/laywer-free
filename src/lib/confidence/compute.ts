@@ -17,7 +17,7 @@ export async function computeConfidenceScore(
   ] = await Promise.all([
     supabase.from('tasks').select('task_key, status').eq('case_id', caseId),
     supabase.from('evidence_items').select('id').eq('case_id', caseId),
-    supabase.from('deadlines').select('due_at').eq('case_id', caseId).lt('due_at', new Date().toISOString()),
+    supabase.from('deadlines').select('key, due_at').eq('case_id', caseId).lt('due_at', new Date().toISOString()),
     supabase.from('discovery_packs').select('id').eq('case_id', caseId),
     supabase.from('case_authorities').select('id').eq('case_id', caseId),
     supabase.from('case_notes').select('id').eq('case_id', caseId),
@@ -53,9 +53,13 @@ export async function computeConfidenceScore(
 
   const hasAnyCompleted = (keys: string[]) => keys.some(k => completedKeys.has(k))
 
-  // Check for missed deadlines
-  const now = new Date()
-  const missedDeadlines = (deadlines ?? []).filter(d => new Date(d.due_at) < now)
+  // Check for missed deadlines — only count as missed if the associated
+  // task (matching the deadline key) is still not completed
+  const missedDeadlines = (deadlines ?? []).filter(d => {
+    const matchingTask = (tasks ?? []).find(t => t.task_key === d.key)
+    // Only penalize if the task exists and is not completed/skipped
+    return matchingTask && matchingTask.status !== 'completed' && matchingTask.status !== 'skipped'
+  })
 
   // Count tasks not completed/skipped that are unlocked
   const pendingTasks = (tasks ?? []).filter(t =>
