@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 
 export async function POST(
   request: NextRequest,
@@ -37,9 +37,9 @@ export async function POST(
       .select('id', { count: 'exact', head: true })
       .eq('case_id', caseId)
 
-    const client = new Anthropic()
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-5-20250514',
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       max_tokens: 1500,
       messages: [{
         role: 'user',
@@ -58,7 +58,7 @@ Include phases: Arrival, Check In, Opening Statement, Presenting Evidence, Cross
       }],
     })
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    const text = completion.choices[0]?.message?.content ?? ''
     let script
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/)
