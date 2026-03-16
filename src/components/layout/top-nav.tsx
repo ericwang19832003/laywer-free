@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Search, Scale } from 'lucide-react'
 import { Breadcrumbs } from './breadcrumbs'
-import { NotificationBell } from './notification-bell'
+import { NotificationCenter } from './notification-center'
 import { UserMenu } from './user-menu'
 import { useState, useEffect } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
@@ -47,7 +47,7 @@ export function TopNav() {
             >
               <Search className="h-4 w-4" />
             </button>
-            <NotificationBell />
+            <NotificationCenter />
             <UserMenu />
           </div>
         </div>
