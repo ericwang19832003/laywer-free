@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION public.get_case_dashboard(p_case_id uuid)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_user_id uuid;

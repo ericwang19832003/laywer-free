@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { daysUntil, formatDeadlineLabel, formatSource } from '@/lib/deadline-utils'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -59,44 +60,11 @@ function getTodayKey(): string {
   return toDateKey(new Date())
 }
 
-/** Number of calendar days from today (negative = overdue). */
-function daysUntil(dateStr: string): number {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const due = new Date(dateStr)
-  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate())
-  return Math.round((dueDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-}
-
 /** Return a dot color class based on urgency. */
 function getDotColor(days: number): string {
   if (days <= 0) return 'bg-red-500'
   if (days <= 7) return 'bg-amber-500'
   return 'bg-emerald-500'
-}
-
-/** Prefer `label` when present; otherwise format the snake_case key. */
-function formatLabel(key: string, label: string | null): string {
-  if (label) return label
-  return key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-/** Human-readable source badge text. */
-function formatSource(source: string): string {
-  switch (source) {
-    case 'user_confirmed':
-      return 'Confirmed'
-    case 'court_notice':
-      return 'Court notice'
-    case 'ai_generated':
-      return 'AI generated'
-    default:
-      return source
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (c) => c.toUpperCase())
-  }
 }
 
 /** Format a date key like "March 15, 2026". */
@@ -290,7 +258,7 @@ export function DeadlineCalendar({ deadlines }: DeadlineCalendarProps) {
                 className="flex items-center justify-between py-1.5"
               >
                 <span className="text-sm text-warm-text">
-                  {formatLabel(dl.key, dl.label)}
+                  {formatDeadlineLabel(dl.key, dl.label)}
                 </span>
                 <Badge variant="outline" className="text-[11px]">
                   {formatSource(dl.source)}

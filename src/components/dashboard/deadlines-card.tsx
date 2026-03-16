@@ -4,6 +4,12 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  daysUntil,
+  formatDeadlineLabel,
+  formatDateShort,
+  formatCountdown,
+} from '@/lib/deadline-utils'
 
 interface Deadline {
   id: string
@@ -19,45 +25,6 @@ interface DeadlinesCardProps {
   deadlines: Deadline[]
 }
 
-const KEY_LABELS: Record<string, string> = {
-  answer_deadline_estimated: 'Answer Deadline (Estimated)',
-  answer_deadline_confirmed: 'Answer Deadline',
-  check_docket_after_answer_deadline: 'Check Docket',
-  default_earliest_info: 'Earliest Default Info',
-}
-
-function formatKeyLabel(key: string, label?: string | null): string {
-  if (label) return label
-  if (key.startsWith('discovery_response_due_confirmed:')) {
-    return 'Discovery Response Due'
-  }
-  return KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function formatDateShort(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function daysUntil(dateStr: string): number {
-  const date = new Date(dateStr)
-  const now = new Date()
-  return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function formatCountdown(dateStr: string): string | null {
-  const days = daysUntil(dateStr)
-  if (days < 0) return 'Past due'
-  if (days === 0) return 'Due today'
-  if (days === 1) return 'Due tomorrow'
-  if (days <= 14) return `${days} days left`
-  return null
-}
-
 /**
  * Filter deadlines: if a confirmed answer deadline exists,
  * hide the estimated one (confirmed supersedes it).
@@ -68,7 +35,7 @@ function filterDeadlines(deadlines: Deadline[]): Deadline[] {
   return deadlines.filter((d) => d.key !== 'answer_deadline_estimated')
 }
 
-function CountdownBox({ deadline, caseId }: { deadline: Deadline; caseId: string }) {
+function CountdownBox({ deadline }: { deadline: Deadline }) {
   const days = daysUntil(deadline.due_at)
   const isOverdue = days < 0
   const borderColor = isOverdue || days === 0 ? 'border-red-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
@@ -84,7 +51,7 @@ function CountdownBox({ deadline, caseId }: { deadline: Deadline; caseId: string
       </div>
       <div className="space-y-1 min-w-0">
         <p className="text-sm font-medium text-warm-text">
-          {formatKeyLabel(deadline.key, deadline.label)}
+          {formatDeadlineLabel(deadline.key, deadline.label)}
         </p>
         <p className="text-xs text-warm-muted">{formatDateShort(deadline.due_at)}</p>
         {deadline.consequence && (
@@ -124,7 +91,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
         ) : (
           <div className="space-y-4">
             {heroDeadline && (
-              <CountdownBox deadline={heroDeadline} caseId={caseId} />
+              <CountdownBox deadline={heroDeadline} />
             )}
 
             {otherDeadlines.length > 0 && (
@@ -138,7 +105,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
                     <li key={deadline.id} className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-warm-text">
-                          {formatKeyLabel(deadline.key, deadline.label)}
+                          {formatDeadlineLabel(deadline.key, deadline.label)}
                         </p>
                         <p
                           className={`text-xs ${

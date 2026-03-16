@@ -30,7 +30,7 @@ export async function GET(
       title,
       description,
       startDate: new Date(deadline.due_at),
-      url: `https://lawyerfree.app/case/${id}/deadlines`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://lawyerfree.app'}/case/${id}/deadlines`,
     })
 
     return new NextResponse(ics, {

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
 import { CaseEditDialog } from '@/components/cases/case-edit-dialog'
+import { daysUntil, formatDeadlineLabelShort } from '@/lib/deadline-utils'
 
 interface CaseRow {
   id: string
@@ -32,34 +33,12 @@ function healthColor(score: number | null): string {
   return 'text-red-600'
 }
 
-const DEADLINE_KEY_LABELS: Record<string, string> = {
-  answer_deadline_estimated: 'Answer Due',
-  answer_deadline_confirmed: 'Answer Due',
-  check_docket_after_answer_deadline: 'Check Docket',
-  default_earliest_info: 'Default Info',
-  service_deadline: 'Service Due',
-  hearing_date: 'Hearing',
-}
-
-function formatDeadlineLabel(key: string, label?: string | null): string {
-  if (label) return label
-  if (key.startsWith('discovery_response_due_confirmed:')) return 'Discovery Due'
-  return DEADLINE_KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function daysUntil(dateStr: string): number {
-  const now = new Date()
-  const date = new Date(dateStr)
-  return Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-}
-
 function relativeDate(dateStr: string): string {
-  const now = new Date()
+  const days = daysUntil(dateStr)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Tomorrow'
+  if (days > 1 && days <= 7) return `In ${days}d`
   const date = new Date(dateStr)
-  const diffDays = Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Tomorrow'
-  if (diffDays > 1 && diffDays <= 7) return `In ${diffDays}d`
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
@@ -140,7 +119,7 @@ export function CaseTable({ cases }: CaseTableProps) {
                     const dayText = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `${days}d`
                     return (
                       <span className={`text-xs font-medium ${color}`}>
-                        {dayText} &mdash; {formatDeadlineLabel(c.nextDeadline.key, c.nextDeadline.label)}
+                        {dayText} &mdash; {formatDeadlineLabelShort(c.nextDeadline.key, c.nextDeadline.label)}
                       </span>
                     )
                   })() : (

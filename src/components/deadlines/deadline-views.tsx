@@ -6,6 +6,16 @@ import { DeadlineCalendar } from './deadline-calendar'
 import { Calendar, Clock, List } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  daysUntil,
+  isWithinDays,
+  formatDeadlineLabel,
+  formatCountdown,
+  formatDate,
+  formatDateTime,
+  formatSource,
+  formatReminderStatus,
+} from '@/lib/deadline-utils'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,94 +50,6 @@ const views = [
 type ViewKey = (typeof views)[number]['key']
 
 // ---------------------------------------------------------------------------
-// List view helpers (ported from original page.tsx)
-// ---------------------------------------------------------------------------
-
-const KEY_LABELS: Record<string, string> = {
-  answer_deadline: 'Answer Deadline',
-  answer_deadline_estimated: 'Answer Deadline (Estimated)',
-  answer_deadline_confirmed: 'Answer Deadline (Confirmed)',
-  check_docket_after_answer_deadline: 'Check Docket',
-  default_earliest_info: 'Earliest Default Info',
-  hearing_date: 'Hearing Date',
-}
-
-function formatDeadlineKey(key: string, label?: string | null): string {
-  if (label) return label
-  return KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function daysUntil(dateStr: string): number {
-  const date = new Date(dateStr)
-  const now = new Date()
-  return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function formatCountdown(dateStr: string): string | null {
-  const days = daysUntil(dateStr)
-  if (days < 0) return 'Past due'
-  if (days === 0) return 'Due today'
-  if (days === 1) return 'Due tomorrow'
-  if (days <= 14) return `${days} days left`
-  return null
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function formatDateTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-}
-
-function isWithinDays(dateStr: string, days: number): boolean {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = date.getTime() - now.getTime()
-  const diffDays = diffMs / (1000 * 60 * 60 * 24)
-  return diffDays >= 0 && diffDays <= days
-}
-
-function formatSource(source: string): string {
-  switch (source) {
-    case 'user_confirmed':
-      return 'You confirmed'
-    case 'court_notice':
-      return 'Court notice'
-    case 'system':
-      return 'System'
-    default:
-      return source
-  }
-}
-
-function formatReminderStatus(status: string): string {
-  switch (status) {
-    case 'scheduled':
-      return 'Scheduled'
-    case 'sent':
-      return 'Sent'
-    case 'failed':
-      return 'Failed'
-    default:
-      return status
-  }
-}
-
-// ---------------------------------------------------------------------------
 // List view sub-component
 // ---------------------------------------------------------------------------
 
@@ -144,7 +66,7 @@ function DeadlineListView({ deadlines }: { deadlines: Deadline[] }) {
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <h3 className="font-medium text-warm-text">
-                  {formatDeadlineKey(deadline.key, deadline.label)}
+                  {formatDeadlineLabel(deadline.key, deadline.label)}
                 </h3>
                 <p
                   className={`text-sm ${
