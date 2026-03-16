@@ -10,6 +10,8 @@ interface Deadline {
   key: string
   due_at: string
   source: string
+  label: string | null
+  consequence: string | null
 }
 
 interface DeadlinesCardProps {
@@ -24,20 +26,12 @@ const KEY_LABELS: Record<string, string> = {
   default_earliest_info: 'Earliest Default Info',
 }
 
-function formatKeyLabel(key: string): string {
+function formatKeyLabel(key: string, label?: string | null): string {
+  if (label) return label
   if (key.startsWith('discovery_response_due_confirmed:')) {
     return 'Discovery Response Due'
   }
   return KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 function formatDateShort(dateStr: string): string {
@@ -64,14 +58,6 @@ function formatCountdown(dateStr: string): string | null {
   return null
 }
 
-function formatHeroCountdown(dateStr: string): string {
-  const days = daysUntil(dateStr)
-  if (days < 0) return 'This deadline has passed'
-  if (days === 0) return 'Due today'
-  if (days === 1) return '1 day remaining'
-  return `${days} days remaining`
-}
-
 /**
  * Filter deadlines: if a confirmed answer deadline exists,
  * hide the estimated one (confirmed supersedes it).
@@ -82,49 +68,29 @@ function filterDeadlines(deadlines: Deadline[]): Deadline[] {
   return deadlines.filter((d) => d.key !== 'answer_deadline_estimated')
 }
 
-function AnswerDeadlineHero({
-  deadline,
-  isConfirmed,
-  caseId,
-}: {
-  deadline: Deadline
-  isConfirmed: boolean
-  caseId: string
-}) {
+function CountdownBox({ deadline, caseId }: { deadline: Deadline; caseId: string }) {
   const days = daysUntil(deadline.due_at)
-  const isPast = days < 0
+  const isOverdue = days < 0
+  const borderColor = isOverdue || days === 0 ? 'border-red-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
+  const textColor = isOverdue || days === 0 ? 'text-red-600' : days <= 7 ? 'text-amber-600' : 'text-emerald-600'
 
   return (
-    <div
-      className={`min-h-[4.5rem] rounded-lg border-l-4 px-4 py-3 ${
-        isConfirmed
-          ? 'border-l-calm-indigo bg-calm-indigo/5'
-          : 'border-l-calm-amber bg-calm-amber/5'
-      }`}
-    >
-      <p className="text-sm font-medium text-warm-text">
-        {isConfirmed
-          ? `Answer deadline: ${formatDate(deadline.due_at)}`
-          : `Estimated answer deadline: ${formatDate(deadline.due_at)}`}
-      </p>
-      <p
-        className={`text-sm mt-0.5 ${
-          isConfirmed
-            ? isPast
-              ? 'text-calm-amber'
-              : 'text-warm-muted'
-            : 'text-warm-muted'
-        }`}
-      >
-        {isConfirmed
-          ? formatHeroCountdown(deadline.due_at)
-          : 'Please confirm the exact date from your citation'}
-      </p>
-      {!isConfirmed && (
-        <Button variant="outline" size="sm" className="mt-3" asChild>
-          <Link href={`/case/${caseId}/deadlines`}>Confirm Deadline</Link>
-        </Button>
-      )}
+    <div className="flex items-start gap-4">
+      <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 ${borderColor} bg-white shrink-0`}>
+        <span className={`text-2xl font-bold tabular-nums ${textColor}`}>
+          {Math.abs(days)}
+        </span>
+        <span className="text-xs text-warm-muted">{isOverdue ? 'overdue' : 'days'}</span>
+      </div>
+      <div className="space-y-1 min-w-0">
+        <p className="text-sm font-medium text-warm-text">
+          {formatKeyLabel(deadline.key, deadline.label)}
+        </p>
+        <p className="text-xs text-warm-muted">{formatDateShort(deadline.due_at)}</p>
+        {deadline.consequence && (
+          <p className="text-xs text-warm-muted line-clamp-2">{deadline.consequence}</p>
+        )}
+      </div>
     </div>
   )
 }
@@ -132,15 +98,18 @@ function AnswerDeadlineHero({
 export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
   const visible = filterDeadlines(deadlines)
 
-  // Extract answer deadline for hero treatment
-  const confirmedAnswer = deadlines.find((d) => d.key === 'answer_deadline_confirmed')
-  const estimatedAnswer = deadlines.find((d) => d.key === 'answer_deadline_estimated')
-  const heroDeadline = confirmedAnswer ?? estimatedAnswer
-  const isConfirmed = !!confirmedAnswer
-
-  // Other deadlines (everything except the hero)
-  const heroKey = heroDeadline?.key
-  const otherDeadlines = visible.filter((d) => d.key !== heroKey)
+  // Find the most urgent deadline: earliest future, or most recent overdue
+  const sortedByUrgency = [...visible].sort((a, b) => {
+    const daysA = daysUntil(a.due_at)
+    const daysB = daysUntil(b.due_at)
+    // Future deadlines first (ascending), then overdue (descending by recency)
+    if (daysA >= 0 && daysB >= 0) return daysA - daysB
+    if (daysA < 0 && daysB < 0) return daysB - daysA // most recent overdue first
+    if (daysA >= 0) return -1 // future before overdue
+    return 1
+  })
+  const heroDeadline = sortedByUrgency[0] ?? null
+  const otherDeadlines = heroDeadline ? sortedByUrgency.slice(1) : []
 
   return (
     <Card>
@@ -150,16 +119,12 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
       <CardContent>
         {visible.length === 0 ? (
           <p className="text-warm-muted text-sm">
-            No deadlines yet. That&apos;s okay — we&apos;ll add them as your case develops.
+            No deadlines yet. Deadlines will appear automatically as you progress through your case steps.
           </p>
         ) : (
           <div className="space-y-4">
             {heroDeadline && (
-              <AnswerDeadlineHero
-                deadline={heroDeadline}
-                isConfirmed={isConfirmed}
-                caseId={caseId}
-              />
+              <CountdownBox deadline={heroDeadline} caseId={caseId} />
             )}
 
             {otherDeadlines.length > 0 && (
@@ -173,7 +138,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
                     <li key={deadline.id} className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-warm-text">
-                          {formatKeyLabel(deadline.key)}
+                          {formatKeyLabel(deadline.key, deadline.label)}
                         </p>
                         <p
                           className={`text-xs ${

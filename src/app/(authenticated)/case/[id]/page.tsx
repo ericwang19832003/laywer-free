@@ -39,6 +39,8 @@ interface DashboardData {
     key: string
     due_at: string
     source: string
+    label: string | null
+    consequence: string | null
   }>
   recent_events: Array<{
     id: string

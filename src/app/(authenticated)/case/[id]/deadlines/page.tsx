@@ -20,6 +20,9 @@ interface Deadline {
   due_at: string
   source: string
   rationale: string | null
+  label: string | null
+  consequence: string | null
+  auto_generated: boolean
   reminders: Reminder[]
 }
 
@@ -38,7 +41,8 @@ const KEY_LABELS: Record<string, string> = {
   hearing_date: 'Hearing Date',
 }
 
-function formatDeadlineKey(key: string): string {
+function formatDeadlineKey(key: string, label?: string | null): string {
+  if (label) return label
   return KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
@@ -187,7 +191,7 @@ export default async function DeadlinesPage({
           <Card>
             <CardContent className="py-10 text-center">
               <p className="text-warm-muted">
-                No deadlines yet. When you have important dates to track, add them here.
+                No deadlines yet. Deadlines will appear automatically as you progress through your case steps, or you can add them manually.
               </p>
             </CardContent>
           </Card>
@@ -199,7 +203,7 @@ export default async function DeadlinesPage({
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <h3 className="font-medium text-warm-text">
-                        {formatDeadlineKey(deadline.key)}
+                        {formatDeadlineKey(deadline.key, deadline.label)}
                       </h3>
                       <p
                         className={`text-sm ${
@@ -215,15 +219,33 @@ export default async function DeadlinesPage({
                         })()}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="text-xs shrink-0">
-                      {formatSource(deadline.source)}
-                    </Badge>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {deadline.auto_generated && (
+                        <Badge variant="outline" className="text-xs">
+                          Auto
+                        </Badge>
+                      )}
+                      <Badge variant="secondary" className="text-xs">
+                        {formatSource(deadline.source)}
+                      </Badge>
+                    </div>
                   </div>
 
                   {deadline.rationale && (
                     <p className="mt-3 text-sm text-warm-muted">
                       {deadline.rationale}
                     </p>
+                  )}
+
+                  {deadline.consequence && (
+                    <details className="mt-3">
+                      <summary className="text-sm font-medium text-warm-text cursor-pointer hover:text-calm-indigo">
+                        What happens if I miss this?
+                      </summary>
+                      <p className="mt-2 text-sm text-warm-muted pl-4 border-l-2 border-calm-amber">
+                        {deadline.consequence}
+                      </p>
+                    </details>
                   )}
 
                   {deadline.reminders && deadline.reminders.length > 0 && (

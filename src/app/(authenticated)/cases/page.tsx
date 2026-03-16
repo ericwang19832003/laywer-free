@@ -39,9 +39,9 @@ export default async function CasesPage() {
       ? supabase.from('tasks').select('case_id, status').in('case_id', caseIds)
       : Promise.resolve({ data: [] }),
     hasCases
-      ? supabase.from('deadlines').select('case_id, due_at').in('case_id', caseIds)
+      ? supabase.from('deadlines').select('case_id, due_at, key, label').in('case_id', caseIds)
           .gte('due_at', new Date().toISOString())
-          .lte('due_at', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
+          .order('due_at', { ascending: true })
       : Promise.resolve({ data: [] }),
     hasCases
       ? supabase.from('case_risk_scores').select('case_id, overall_score, computed_at')
@@ -58,7 +58,7 @@ export default async function CasesPage() {
   ])
 
   const allTasks = (tasksResult.data ?? []) as { case_id: string; status: string }[]
-  const allDeadlines = (deadlinesResult.data ?? []) as { case_id: string; due_at: string }[]
+  const allDeadlines = (deadlinesResult.data ?? []) as { case_id: string; due_at: string; key: string; label: string | null }[]
   const allHealth = (healthResult.data ?? []) as { case_id: string; overall_score: number; computed_at: string }[]
   const allActivity = (activityResult.data ?? []) as { case_id: string; created_at: string }[]
 
@@ -83,11 +83,12 @@ export default async function CasesPage() {
     tasksByCase.set(t.case_id, entry)
   }
 
-  // Per-case next deadline
-  const deadlineByCase = new Map<string, string>()
+  // Per-case next deadline (earliest future deadline)
+  const deadlineByCase = new Map<string, { due_at: string; key: string; label: string | null }>()
   for (const d of allDeadlines) {
-    if (!deadlineByCase.has(d.case_id) || d.due_at < deadlineByCase.get(d.case_id)!) {
-      deadlineByCase.set(d.case_id, d.due_at)
+    const existing = deadlineByCase.get(d.case_id)
+    if (!existing || d.due_at < existing.due_at) {
+      deadlineByCase.set(d.case_id, { due_at: d.due_at, key: d.key, label: d.label })
     }
   }
 
@@ -157,7 +158,7 @@ export default async function CasesPage() {
               activeCases={cases.length}
               tasksCompleted={totalCompleted}
               tasksTotal={totalTasks}
-              upcomingDeadlines={allDeadlines.length}
+              upcomingDeadlines={allDeadlines.filter(d => new Date(d.due_at).getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000).length}
               averageHealth={avgHealth}
             />
 

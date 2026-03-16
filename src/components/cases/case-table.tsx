@@ -17,7 +17,7 @@ interface CaseRow {
   healthScore: number | null
   tasksCompleted: number
   tasksTotal: number
-  nextDeadline: string | null
+  nextDeadline: { due_at: string; key: string; label: string | null } | null
   lastActivity: string | null
 }
 
@@ -30,6 +30,27 @@ function healthColor(score: number | null): string {
   if (score >= 70) return 'text-green-600'
   if (score >= 40) return 'text-amber-600'
   return 'text-red-600'
+}
+
+const DEADLINE_KEY_LABELS: Record<string, string> = {
+  answer_deadline_estimated: 'Answer Due',
+  answer_deadline_confirmed: 'Answer Due',
+  check_docket_after_answer_deadline: 'Check Docket',
+  default_earliest_info: 'Default Info',
+  service_deadline: 'Service Due',
+  hearing_date: 'Hearing',
+}
+
+function formatDeadlineLabel(key: string, label?: string | null): string {
+  if (label) return label
+  if (key.startsWith('discovery_response_due_confirmed:')) return 'Discovery Due'
+  return DEADLINE_KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function daysUntil(dateStr: string): number {
+  const now = new Date()
+  const date = new Date(dateStr)
+  return Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 }
 
 function relativeDate(dateStr: string): string {
@@ -113,9 +134,16 @@ export function CaseTable({ cases }: CaseTableProps) {
                   </div>
                 </td>
                 <td className="px-5 py-3.5 hidden lg:table-cell">
-                  {c.nextDeadline ? (
-                    <span className="text-xs font-medium text-amber-600">{relativeDate(c.nextDeadline)}</span>
-                  ) : (
+                  {c.nextDeadline ? (() => {
+                    const days = daysUntil(c.nextDeadline.due_at)
+                    const color = days < 0 ? 'text-red-600' : days <= 7 ? 'text-amber-600' : 'text-warm-muted'
+                    const dayText = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `${days}d`
+                    return (
+                      <span className={`text-xs font-medium ${color}`}>
+                        {dayText} &mdash; {formatDeadlineLabel(c.nextDeadline.key, c.nextDeadline.label)}
+                      </span>
+                    )
+                  })() : (
                     <span className="text-xs text-warm-muted">{'\u2014'}</span>
                   )}
                 </td>
