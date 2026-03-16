@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { BillingSection } from '@/components/settings/billing-section'
+import { NotificationPreferences, type NotificationPreferencesData } from '@/components/settings/notification-preferences'
 
 type NotificationPrefs = {
   deadline_approaching: boolean
@@ -45,6 +46,7 @@ export default function SettingsPage() {
 
   // Notification preferences
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS)
+  const [reminderPrefs, setReminderPrefs] = useState<Partial<NotificationPreferencesData> | undefined>(undefined)
 
   // Gmail MCP connection
   const [gmailStatus, setGmailStatus] = useState<{
@@ -82,6 +84,10 @@ export default function SettingsPage() {
             task_unlocked: prefs.task_unlocked ?? true,
             escalation_triggered: prefs.escalation_triggered ?? true,
           })
+        }
+        const remPrefs = data.user.user_metadata?.notification_preferences
+        if (remPrefs) {
+          setReminderPrefs(remPrefs)
         }
       }
     })
@@ -308,6 +314,9 @@ export default function SettingsPage() {
               <p className="text-xs text-warm-muted">Controls which in-app notifications you receive.</p>
             </CardContent>
           </Card>
+
+          {/* Reminder Timing & Channel Preferences */}
+          <NotificationPreferences initialPreferences={reminderPrefs} />
 
           {/* Connected Services */}
           <Card>
