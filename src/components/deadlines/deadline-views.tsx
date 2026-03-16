@@ -233,9 +233,13 @@ export function DeadlineViews({ deadlines }: DeadlineViewsProps) {
     return (
       <Card>
         <CardContent className="py-10 text-center">
+          <p className="text-lg font-medium text-warm-text mb-2">
+            No deadlines yet
+          </p>
           <p className="text-warm-muted">
-            No deadlines yet. Deadlines will appear automatically as you
-            progress through your case steps, or you can add them manually.
+            Deadlines are created automatically when you complete key steps like
+            filing with the court or serving the other party. You can also add
+            one manually.
           </p>
         </CardContent>
       </Card>

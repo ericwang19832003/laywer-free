@@ -119,7 +119,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
       <CardContent>
         {visible.length === 0 ? (
           <p className="text-warm-muted text-sm">
-            No deadlines yet. Deadlines will appear automatically as you progress through your case steps.
+            No deadlines yet. Deadlines will appear automatically as you progress through your case steps. You can also add one manually.
           </p>
         ) : (
           <div className="space-y-4">
