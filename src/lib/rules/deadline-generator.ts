@@ -102,6 +102,130 @@ function toISOString(date: Date): string {
  * 4. Apply Texas Rule 4 if the rule requires it
  * 5. Return an array of GeneratedDeadline objects ready for DB insert
  */
+// ---------------------------------------------------------------------------
+// Dispute type → trigger task key mapping (for intake-driven seeding)
+// ---------------------------------------------------------------------------
+
+/** Maps a dispute type string to the corresponding file_with_court task key */
+const FILING_TASK_MAP: Record<string, string> = {
+  property_damage: 'property_file_with_court',
+  property: 'property_file_with_court',
+  personal_injury: 'pi_file_with_court',
+  contract: 'contract_file_with_court',
+  small_claims: 'sc_file_with_court',
+  landlord_tenant: 'lt_file_with_court',
+  real_estate: 're_file_with_court',
+  debt: 'debt_file_with_court',
+  divorce: 'divorce_file_with_court',
+  custody: 'custody_file_with_court',
+  child_support: 'child_support_file_with_court',
+  spousal_support: 'spousal_support_file_with_court',
+  visitation: 'visitation_file_with_court',
+  modification: 'mod_file_with_court',
+  protective_order: 'po_file_with_court',
+  other: 'other_file_with_court',
+}
+
+/** Maps a dispute type string to the corresponding serve task key */
+const SERVICE_TASK_MAP: Record<string, string> = {
+  property_damage: 'property_serve_defendant',
+  property: 'property_serve_defendant',
+  personal_injury: 'pi_serve_defendant',
+  contract: 'contract_serve_defendant',
+  small_claims: 'sc_serve_defendant',
+  landlord_tenant: 'serve_other_party',
+  real_estate: 're_serve_defendant',
+  debt: 'serve_plaintiff',
+  divorce: 'divorce_serve_respondent',
+  custody: 'custody_serve_respondent',
+  child_support: 'child_support_serve_respondent',
+  spousal_support: 'spousal_support_serve_respondent',
+  visitation: 'visitation_serve_respondent',
+  modification: 'mod_serve_respondent',
+  other: 'other_serve_defendant',
+}
+
+// Also handle business sub-types
+const BIZ_FILING_MAP: Record<string, string> = {
+  partnership: 'biz_partnership_file_with_court',
+  b2b: 'biz_b2b_file_with_court',
+  employment: 'biz_employment_file_with_court',
+}
+
+const BIZ_SERVICE_MAP: Record<string, string> = {
+  partnership: 'biz_partnership_serve_defendant',
+  b2b: 'biz_b2b_serve_defendant',
+  employment: 'biz_employment_serve_defendant',
+}
+
+export interface SeedDeadlinesInput {
+  caseId: string
+  disputeType: string
+  /** Business sub-type, if dispute is 'business' */
+  businessSubType?: string
+  /** ISO date when the case was filed with the court */
+  filingDate?: string
+  /** ISO date when the other party was served */
+  serviceDate?: string
+  /** Deadline keys that already exist for this case */
+  existingDeadlineKeys: string[]
+}
+
+/**
+ * Generate deadlines from known dates (filing date, service date) provided
+ * during case import / intake. This is the primary fix for pre-filing cases
+ * that already have filing/service dates but haven't triggered auto-generation.
+ */
+export function seedDeadlinesFromDates(
+  input: SeedDeadlinesInput
+): GeneratedDeadline[] {
+  const results: GeneratedDeadline[] = []
+
+  // Resolve task keys for this dispute type
+  let filingTaskKey: string | undefined
+  let serviceTaskKey: string | undefined
+
+  if (input.disputeType === 'business' && input.businessSubType) {
+    filingTaskKey = BIZ_FILING_MAP[input.businessSubType]
+    serviceTaskKey = BIZ_SERVICE_MAP[input.businessSubType]
+  } else {
+    filingTaskKey = FILING_TASK_MAP[input.disputeType]
+    serviceTaskKey = SERVICE_TASK_MAP[input.disputeType]
+  }
+
+  // Seed deadlines from filing date (service deadline + dispute-specific)
+  if (input.filingDate && filingTaskKey) {
+    const filingDeadlines = generateDeadlines({
+      taskKey: filingTaskKey,
+      caseId: input.caseId,
+      completedAt: input.filingDate,
+      taskMetadata: {},
+      existingDeadlineKeys: [
+        ...input.existingDeadlineKeys,
+        ...results.map((d) => d.key),
+      ],
+    })
+    results.push(...filingDeadlines)
+  }
+
+  // Seed deadlines from service date (answer deadline)
+  if (input.serviceDate && serviceTaskKey) {
+    const serviceDeadlines = generateDeadlines({
+      taskKey: serviceTaskKey,
+      caseId: input.caseId,
+      completedAt: input.serviceDate,
+      taskMetadata: {},
+      existingDeadlineKeys: [
+        ...input.existingDeadlineKeys,
+        ...results.map((d) => d.key),
+      ],
+    })
+    results.push(...serviceDeadlines)
+  }
+
+  return results
+}
+
 export function generateDeadlines(
   input: GenerateDeadlinesInput
 ): GeneratedDeadline[] {

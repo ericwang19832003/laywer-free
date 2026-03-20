@@ -52,7 +52,7 @@ describe('piPetitionFactsSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('rejects federal court_type', () => {
+  it('accepts federal court_type', () => {
     const result = piPetitionFactsSchema.safeParse({
       your_info: { full_name: 'Jane Doe' },
       opposing_parties: [{ full_name: 'John Smith' }],
@@ -68,7 +68,7 @@ describe('piPetitionFactsSchema', () => {
       negligence_theory: 'Defendant failed to maintain a proper lookout and rear-ended plaintiff.',
       prior_demand_sent: false,
     })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 
   it('rejects empty opposing_parties', () => {
@@ -230,5 +230,20 @@ describe('buildPiPetitionPrompt', () => {
     const result = buildPiPetitionPrompt(makeFacts({ pi_sub_type: 'dog_bite' }))
     expect(result.system).toContain('knew or should have known of the animal')
     expect(result.system).toContain('failed to restrain or control')
+  })
+
+  // Federal court tests
+
+  it('system uses federal format for federal court_type', () => {
+    const result = buildPiPetitionPrompt(makeFacts({ court_type: 'federal' }))
+    expect(result.system).toContain('UNITED STATES DISTRICT COURT')
+    expect(result.system).toContain('COMPLAINT')
+    expect(result.system).toContain('PRELIMINARY STATEMENT')
+    expect(result.system).toContain('Federal Rule of Civil Procedure 38')
+  })
+
+  it('user labels document as COMPLAINT for federal court', () => {
+    const result = buildPiPetitionPrompt(makeFacts({ court_type: 'federal' }))
+    expect(result.user).toContain('COMPLAINT')
   })
 })

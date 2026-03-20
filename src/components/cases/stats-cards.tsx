@@ -20,24 +20,28 @@ export function StatsCards({ activeCases, tasksCompleted, tasksTotal, upcomingDe
     {
       label: 'Active Cases',
       value: activeCases,
+      subtitle: null as string | null,
       icon: Briefcase,
       iconColor: 'text-warm-muted',
     },
     {
       label: 'Tasks Done',
       value: `${tasksCompleted}/${tasksTotal}`,
+      subtitle: null as string | null,
       icon: CheckCircle2,
       iconColor: 'text-warm-muted',
     },
     {
       label: 'Deadlines (7d)',
       value: upcomingDeadlines,
+      subtitle: upcomingDeadlines === 0 ? 'None this week' : null,
       icon: Clock,
       iconColor: 'text-warm-muted',
     },
     {
       label: 'Avg Health',
       value: averageHealth !== null ? `${averageHealth}%` : '\u2014',
+      subtitle: null as string | null,
       icon: Heart,
       iconColor: healthColor === 'green' ? 'text-green-600' : healthColor === 'amber' ? 'text-amber-600' : averageHealth !== null ? 'text-red-600' : 'text-warm-muted',
     },
@@ -53,6 +57,9 @@ export function StatsCards({ activeCases, tasksCompleted, tasksTotal, upcomingDe
               <stat.icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
             </div>
             <p className="text-xl font-semibold text-warm-text">{stat.value}</p>
+            {stat.subtitle && (
+              <p className="text-xs text-warm-muted mt-0.5">{stat.subtitle}</p>
+            )}
           </CardContent>
         </Card>
       ))}

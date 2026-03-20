@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Download, Printer } from 'lucide-react'
+import { Download, FileText, Printer } from 'lucide-react'
 import { generateDocumentPdf } from '@/lib/pdf/generate-document-pdf'
 
 interface DraftViewerProps {
@@ -15,13 +15,16 @@ interface DraftViewerProps {
   acknowledged: boolean
   onAcknowledgeChange: (v: boolean) => void
   documentTitle?: string
+  caseId?: string
+  documentId?: string
 }
 
 export function DraftViewer({
   draft, onDraftChange, onRegenerate, regenerating, acknowledged, onAcknowledgeChange,
-  documentTitle,
+  documentTitle, caseId, documentId,
 }: DraftViewerProps) {
   const [downloading, setDownloading] = useState(false)
+  const [courtPdfLoading, setCourtPdfLoading] = useState(false)
 
   async function handleDownloadPdf() {
     setDownloading(true)
@@ -41,6 +44,30 @@ export function DraftViewer({
       URL.revokeObjectURL(url)
     } finally {
       setDownloading(false)
+    }
+  }
+
+  async function handleDownloadCourtPdf() {
+    if (!caseId) return
+    setCourtPdfLoading(true)
+    try {
+      const res = await fetch(`/api/cases/${caseId}/court-form-pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document_id: documentId }),
+      })
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `court-form-${caseId.slice(0, 8)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } finally {
+      setCourtPdfLoading(false)
     }
   }
 
@@ -67,6 +94,12 @@ export function DraftViewer({
           <Download className="h-3.5 w-3.5 mr-1.5" />
           {downloading ? 'Generating...' : 'Download PDF'}
         </Button>
+        {caseId && (
+          <Button type="button" variant="outline" size="sm" onClick={handleDownloadCourtPdf} disabled={courtPdfLoading}>
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            {courtPdfLoading ? 'Generating...' : 'Court-Ready PDF'}
+          </Button>
+        )}
         <Button type="button" variant="outline" size="sm" onClick={() => window.print()}>
           <Printer className="h-3.5 w-3.5 mr-1.5" />
           Print

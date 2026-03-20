@@ -753,6 +753,7 @@ export function MotionBuilder({
           regenerating={generating}
           acknowledged={acknowledged}
           onAcknowledgeChange={setAcknowledged}
+          caseId={caseId}
         />
       ) : (
         <p className="text-sm text-warm-muted">Generating your draft...</p>

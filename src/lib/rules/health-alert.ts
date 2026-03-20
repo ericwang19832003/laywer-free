@@ -78,7 +78,19 @@ export async function insertHealthAlertIfNeeded(
   )
   const dayEnd = new Date(dayStart.getTime() + 86_400_000)
 
-  // Application-level dedup: check for existing health alert same case + same UTC day
+  // Application-level dedup: skip if an unacknowledged health alert already exists
+  const { data: unacked } = await supabase
+    .from('reminder_escalations')
+    .select('id')
+    .eq('case_id', action.case_id)
+    .is('deadline_id', null)
+    .eq('acknowledged', false)
+    .limit(1)
+    .maybeSingle()
+
+  if (unacked) return false
+
+  // Also dedup within the same UTC day (even if previous ones were acknowledged)
   const { data: existing } = await supabase
     .from('reminder_escalations')
     .select('id')

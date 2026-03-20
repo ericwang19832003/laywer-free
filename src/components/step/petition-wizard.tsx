@@ -479,6 +479,7 @@ export function PetitionWizard({
               acknowledged={acknowledged}
               onAcknowledgeChange={setAcknowledged}
               documentTitle={isDefendant ? 'Answer' : 'Petition'}
+              caseId={caseId}
             />
 
             {acknowledged && (

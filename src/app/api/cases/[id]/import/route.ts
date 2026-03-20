@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { getMilestoneByID, getTasksToSkip } from '@/lib/rules/milestones'
 import type { DisputeType } from '@/lib/rules/court-recommendation'
+import { seedDeadlinesFromDates } from '@/lib/rules/deadline-generator'
+import { insertDeadlineWithReminders } from '@/lib/rules/insert-deadlines'
 
 const importSchema = z.object({
   milestone: z.string().min(1),
@@ -192,11 +194,44 @@ export async function POST(
       }
     }
 
-    // 10. Return success response
+    // 10. Seed deadlines from filing/service dates provided during import
+    let deadlinesCreated = 0
+    if (catchUp?.filingDate || catchUp?.serviceDate) {
+      // Fetch existing deadline keys for deduplication
+      const { data: existingDeadlines } = await supabase
+        .from('deadlines')
+        .select('key')
+        .eq('case_id', id)
+
+      const existingKeys = (existingDeadlines ?? []).map(
+        (d: { key: string }) => d.key
+      )
+
+      const seeded = seedDeadlinesFromDates({
+        caseId: id,
+        disputeType,
+        businessSubType: businessSubType,
+        filingDate: catchUp.filingDate || undefined,
+        serviceDate: catchUp.serviceDate || undefined,
+        existingDeadlineKeys: existingKeys,
+      })
+
+      for (const deadline of seeded) {
+        const insertedId = await insertDeadlineWithReminders(
+          supabase,
+          deadline,
+          { triggerSource: `import:${milestoneId}` }
+        )
+        if (insertedId) deadlinesCreated++
+      }
+    }
+
+    // 11. Return success response
     return NextResponse.json({
       success: true,
       tasksSkipped,
       firstUnlockedTask,
+      deadlinesCreated,
     })
   } catch {
     return NextResponse.json(

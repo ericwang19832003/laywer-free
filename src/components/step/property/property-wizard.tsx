@@ -217,24 +217,42 @@ export function PropertyWizard({
     setGenerating(true)
     setGenError(null)
     try {
+      // Build damages_breakdown array from the three damage fields
+      const damagesBreakdown: { category: string; amount: number }[] = []
+      const pd = parseFloat(propertyDamageAmount) || 0
+      const dv = parseFloat(diminishedValue) || 0
+      const rc = parseFloat(repairCosts) || 0
+      if (pd > 0) damagesBreakdown.push({ category: 'Property damage', amount: pd })
+      if (dv > 0) damagesBreakdown.push({ category: 'Diminished property value', amount: dv })
+      if (rc > 0) damagesBreakdown.push({ category: 'Repair costs', amount: rc })
+      // Ensure at least one entry
+      if (damagesBreakdown.length === 0) damagesBreakdown.push({ category: 'Property damage', amount: 0.01 })
+
+      const fullDescription = [
+        disputeDescription,
+        otherPartyActions ? `Other party's actions: ${otherPartyActions}` : null,
+      ].filter(Boolean).join('\n\n')
+
       const res = await fetch(`/api/cases/${caseId}/generate-filing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           document_type: 'property_petition',
           facts: {
-            property_address: propertyAddress,
-            property_type: propertyType,
-            ownership_status: ownershipStatus,
-            other_party_name: otherPartyName,
-            other_party_actions: otherPartyActions,
-            dispute_description: disputeDescription,
-            property_damage_amount: parseFloat(propertyDamageAmount) || 0,
-            diminished_value: parseFloat(diminishedValue) || 0,
-            repair_costs: parseFloat(repairCosts) || 0,
-            total_damages: totalDamages,
-            county: propertyCounty,
+            plaintiff: { full_name: '[Your Name]' },
+            defendant: { full_name: otherPartyName || 'Unknown Defendant' },
+            defendant_is_business: false,
+            property_address: propertyAddress || '(Not provided)',
+            property_type: propertyType === 'land' ? 'vacant_land' : propertyType,
+            dispute_type: 'other' as const,
+            dispute_description: disputeDescription || '(Not provided)',
+            damages_breakdown: damagesBreakdown,
+            damages_total: totalDamages > 0 ? totalDamages : 0.01,
+            county: propertyCounty || '(Not provided)',
             court_type: caseData?.court_type || 'district',
+            description: fullDescription || disputeDescription || '(Not provided)',
+            demand_letter_sent: false,
+            seeks_injunctive_relief: false,
           },
         }),
       })
@@ -598,8 +616,13 @@ export function PropertyWizard({
         return (
           <div className="space-y-4">
             {genError && (
-              <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
-                <p className="text-sm text-warm-text">{genError}</p>
+              <div className="rounded-lg border border-red-500 bg-red-50 p-3">
+                <div className="flex gap-2">
+                  <svg className="h-4 w-4 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                  </svg>
+                  <p className="text-sm text-red-800">{genError}</p>
+                </div>
               </div>
             )}
             {generating ? (

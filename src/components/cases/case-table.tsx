@@ -123,7 +123,9 @@ export function CaseTable({ cases }: CaseTableProps) {
                       </span>
                     )
                   })() : (
-                    <span className="text-xs text-warm-muted">{'\u2014'}</span>
+                    <span className="text-xs text-warm-muted italic">
+                      {pct < 50 ? 'After filing' : '\u2014'}
+                    </span>
                   )}
                 </td>
                 <td className="px-5 py-3.5 hidden md:table-cell">

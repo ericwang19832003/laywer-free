@@ -86,7 +86,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
       <CardContent>
         {visible.length === 0 ? (
           <p className="text-warm-muted text-sm">
-            No deadlines yet. Deadlines will appear automatically as you progress through your case steps. You can also add one manually.
+            Deadlines will appear after you file your case with the court. Key deadlines include a 90-day service deadline and a 20-day estimated answer deadline.
           </p>
         ) : (
           <div className="space-y-4">

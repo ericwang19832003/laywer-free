@@ -74,6 +74,12 @@ import { debtValidationLetterFactsSchema, buildDebtValidationLetterPrompt } from
 import { debtDefenseFactsSchema, buildDebtDefensePrompt } from '@/lib/rules/debt-defense-prompts'
 import { piDemandLetterFactsSchema, buildPiDemandLetterPrompt } from '@/lib/rules/pi-demand-letter-prompts'
 import { piPetitionFactsSchema, buildPiPetitionPrompt } from '@/lib/rules/pi-petition-prompts'
+import { propertyFilingFactsSchema, buildPropertyFilingPrompt } from '@/lib/rules/property-filing-prompts'
+import { contractFilingFactsSchema, buildContractFilingPrompt } from '@/lib/rules/contract-filing-prompts'
+import { contractDemandLetterFactsSchema, buildContractDemandLetterPrompt } from '@/lib/rules/contract-demand-letter-prompts'
+import { otherFilingFactsSchema, buildOtherFilingPrompt } from '@/lib/rules/other-filing-prompts'
+import { otherDemandLetterFactsSchema, buildOtherDemandLetterPrompt } from '@/lib/rules/other-demand-letter-prompts'
+import { propertyDemandLetterFactsSchema, buildPropertyDemandLetterPrompt } from '@/lib/rules/property-demand-letter-prompts'
 import { piSettlementFactsSchema, buildPiSettlementPrompt } from '@/lib/rules/pi-settlement-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
 import { safeError } from '@/lib/security/safe-log'
@@ -282,6 +288,33 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   pi_settlement_agreement: {
     schema: piSettlementFactsSchema,
     buildPrompt: buildPiSettlementPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Property dispute filing
+  property_petition: {
+    schema: propertyFilingFactsSchema,
+    buildPrompt: buildPropertyFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  property_demand_letter: {
+    schema: propertyDemandLetterFactsSchema,
+    buildPrompt: buildPropertyDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Contract dispute filing
+  contract_petition: {
+    schema: contractFilingFactsSchema,
+    buildPrompt: buildContractFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  contract_demand_letter: {
+    schema: contractDemandLetterFactsSchema,
+    buildPrompt: buildContractDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  // Other dispute filing
+  other_petition: {
+    schema: otherFilingFactsSchema,
+    buildPrompt: buildOtherFilingPrompt as unknown as RegistryEntry['buildPrompt'],
+  },
+  other_demand_letter: {
+    schema: otherDemandLetterFactsSchema,
+    buildPrompt: buildOtherDemandLetterPrompt as unknown as RegistryEntry['buildPrompt'],
   },
 }
 

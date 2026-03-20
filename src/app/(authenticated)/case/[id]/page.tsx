@@ -21,6 +21,9 @@ import { DeleteCaseCard } from '@/components/dashboard/delete-case-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
+import { SolBanner } from '@/components/dashboard/sol-banner'
+import { FilingInstructionsCard } from '@/components/dashboard/filing-instructions-card'
+import { calculateSol } from '@/lib/rules/statute-of-limitations'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { CaseFileCard } from '@/components/dashboard/case-file-card'
 import Link from 'next/link'
@@ -102,9 +105,43 @@ export default async function DashboardPage({
   // Case comparison data
   const { data: caseRow } = await supabase
     .from('cases')
-    .select('dispute_type, created_at')
+    .select('dispute_type, jurisdiction, court_type, county, created_at')
     .eq('id', id)
     .single()
+
+  // SOL: find incident_date from intake task metadata
+  const intakeKeys = [
+    'pi_intake', 'small_claims_intake', 'lt_intake', 'family_intake',
+    'contract_intake', 'property_dispute_intake', 'other_dispute_intake',
+    're_intake', 'business_intake', 'intake', 'debt_defense_intake',
+  ]
+  const { data: intakeTask } = await supabase
+    .from('tasks')
+    .select('metadata')
+    .eq('case_id', id)
+    .in('task_key', intakeKeys)
+    .eq('status', 'completed')
+    .limit(1)
+    .maybeSingle()
+
+  const intakeMeta = intakeTask?.metadata as Record<string, unknown> | null
+  const incidentDate = (intakeMeta?.incident_date as string)
+    ?? (intakeMeta?.contract_date as string)
+    ?? (intakeMeta?.lease_start_date as string)
+    ?? (intakeMeta?.separation_date as string)
+    ?? null
+
+  const rawSol = calculateSol(
+    caseRow?.jurisdiction ?? 'TX',
+    caseRow?.dispute_type ?? 'other',
+    null,
+    incidentDate,
+  )
+  // Serialize Date → ISO string for client component
+  const solResult = {
+    ...rawSol,
+    expiresAt: rawSol.expiresAt?.toISOString() ?? null,
+  }
 
   // Case insights
   const { data: insightsData } = await supabase
@@ -293,6 +330,12 @@ export default async function DashboardPage({
 
         <div className="space-y-6">
           <PriorityAlertsSection caseId={id} alerts={alerts} />
+          <SolBanner
+            caseId={id}
+            sol={solResult}
+            disputeType={caseRow?.dispute_type ?? 'other'}
+            state={caseRow?.jurisdiction ?? 'TX'}
+          />
           <NextStepCard caseId={id} nextTask={dashboard!.next_task} taskDescription={taskDescription} />
           <CaseHealthCard
             caseId={id}
@@ -318,6 +361,12 @@ export default async function DashboardPage({
             generatedAt={strategyResult.data?.generated_at ?? null}
           />
           <DeadlinesCard caseId={id} deadlines={dashboard!.upcoming_deadlines} />
+          <FilingInstructionsCard
+            state={caseRow?.jurisdiction ?? 'TX'}
+            courtType={caseRow?.court_type ?? 'unknown'}
+            county={caseRow?.county ?? null}
+            disputeType={caseRow?.dispute_type ?? 'other'}
+          />
           <DiscoveryCard
             caseId={id}
             discoveryTask={discoveryTaskRow}

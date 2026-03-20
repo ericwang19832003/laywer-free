@@ -18,6 +18,38 @@ interface UploadedDoc {
   file_size: number
 }
 
+interface AnalysisResult {
+  summary?: string
+  document_type?: string
+  claims_response?: {
+    admitted?: string[]
+    denied?: string[]
+    insufficient_knowledge?: string[]
+  }
+  defenses_raised?: Array<{
+    defense: string
+    explanation: string
+    strength_hint: 'strong' | 'moderate' | 'weak'
+  }>
+  counterclaim?: {
+    has_counterclaim: boolean
+    summary?: string | null
+    amount?: string | null
+  }
+  deadlines_triggered?: Array<{
+    action: string
+    typical_deadline: string
+    urgency: 'high' | 'medium' | 'low'
+  }>
+  recommended_next_steps?: Array<{
+    step: string
+    why: string
+    priority: 'immediate' | 'soon' | 'when_ready'
+  }>
+  red_flags?: string[]
+  opportunities?: string[]
+}
+
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -52,6 +84,11 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
   const [extractionId, setExtractionId] = useState<string | null>(null)
   const [extractionWarning, setExtractionWarning] = useState<string | null>(null)
 
+  // Analysis state
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+
   // Editable extracted fields
   const [isGeneralDenial, setIsGeneralDenial] = useState(false)
   const [affirmativeDefenses, setAffirmativeDefenses] = useState('')
@@ -79,6 +116,8 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
     setCounterclaimSummary('')
     setKeyAdmissions('')
     setKeyDenials('')
+    setAnalysis(null)
+    setAnalysisError(null)
   }
 
   function handleFileSelect(file: File) {
@@ -197,6 +236,30 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
       setExtractionWarning(
         'AI extraction encountered an error. Please fill in the fields manually.'
       )
+    }
+  }
+
+  async function handleAnalyze() {
+    if (!uploadedDoc) return
+    setAnalysisLoading(true)
+    setAnalysisError(null)
+    try {
+      const res = await fetch(`/api/cases/${caseId}/answer/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ court_document_id: uploadedDoc.id }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        setAnalysisError(err.error || 'Analysis failed. Please try again.')
+        return
+      }
+      const { analysis: result } = await res.json()
+      setAnalysis(result)
+    } catch {
+      setAnalysisError('Analysis encountered an error. Please try again.')
+    } finally {
+      setAnalysisLoading(false)
     }
   }
 
@@ -346,6 +409,191 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
           onChange={(e) => setKeyDenials(e.target.value)}
           className="w-full rounded-md border border-warm-border p-3 text-sm text-warm-text bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-warm-border pt-4">
+        <h3 className="text-sm font-semibold text-warm-text mb-2">
+          AI Analysis
+        </h3>
+        <p className="text-xs text-warm-muted mb-3">
+          Get a plain-English breakdown of what this answer means for your case, including defense strategies, deadlines, and recommended next steps.
+        </p>
+
+        {!analysis && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAnalyze}
+            disabled={analysisLoading}
+          >
+            {analysisLoading ? 'Analyzing...' : 'Analyze Response'}
+          </Button>
+        )}
+
+        {analysisError && (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 mt-3">
+            <p className="text-sm text-red-700">{analysisError}</p>
+          </div>
+        )}
+
+        {analysis && (
+          <div className="space-y-4 mt-3">
+            {/* Summary */}
+            {analysis.summary && (
+              <div className="rounded-md border border-calm-indigo/20 bg-calm-indigo/5 px-4 py-3">
+                <p className="text-xs font-medium text-calm-indigo mb-1">Summary</p>
+                <p className="text-sm text-warm-text">{analysis.summary}</p>
+              </div>
+            )}
+
+            {/* Defenses raised */}
+            {Array.isArray(analysis.defenses_raised) && analysis.defenses_raised.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-warm-text mb-2">Defenses Raised</p>
+                <div className="space-y-2">
+                  {analysis.defenses_raised.map((d, i) => (
+                    <div key={i} className="rounded-md border border-warm-border bg-white px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-warm-text">{d.defense}</p>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                          d.strength_hint === 'strong' ? 'bg-red-100 text-red-700' :
+                          d.strength_hint === 'moderate' ? 'bg-amber-100 text-amber-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {d.strength_hint}
+                        </span>
+                      </div>
+                      <p className="text-xs text-warm-muted mt-1">{d.explanation}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Claims response */}
+            {analysis.claims_response && (
+              <div>
+                <p className="text-xs font-medium text-warm-text mb-2">Claims Response</p>
+                <div className="grid grid-cols-1 gap-2">
+                  {analysis.claims_response.admitted && analysis.claims_response.admitted.length > 0 && (
+                    <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2">
+                      <p className="text-xs font-medium text-green-700 mb-1">Admitted</p>
+                      <ul className="text-xs text-green-800 space-y-0.5">
+                        {analysis.claims_response.admitted.map((item, i) => (
+                          <li key={i}>- {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {analysis.claims_response.denied && analysis.claims_response.denied.length > 0 && (
+                    <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+                      <p className="text-xs font-medium text-red-700 mb-1">Denied</p>
+                      <ul className="text-xs text-red-800 space-y-0.5">
+                        {analysis.claims_response.denied.map((item, i) => (
+                          <li key={i}>- {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Counterclaim */}
+            {analysis.counterclaim?.has_counterclaim && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
+                <p className="text-xs font-medium text-red-700 mb-1">Counterclaim Filed</p>
+                <p className="text-sm text-red-800">
+                  {analysis.counterclaim.summary}
+                </p>
+                {analysis.counterclaim.amount && (
+                  <p className="text-xs text-red-700 mt-1">
+                    Amount: {analysis.counterclaim.amount}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Deadlines triggered */}
+            {Array.isArray(analysis.deadlines_triggered) && analysis.deadlines_triggered.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-warm-text mb-2">Deadlines Triggered</p>
+                <div className="space-y-2">
+                  {analysis.deadlines_triggered.map((d, i) => (
+                    <div key={i} className="flex items-start gap-2 rounded-md border border-warm-border bg-white px-3 py-2">
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full mt-0.5 shrink-0 ${
+                        d.urgency === 'high' ? 'bg-red-100 text-red-700' :
+                        d.urgency === 'medium' ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {d.urgency}
+                      </span>
+                      <div>
+                        <p className="text-sm text-warm-text">{d.action}</p>
+                        <p className="text-xs text-warm-muted">{d.typical_deadline}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommended next steps */}
+            {Array.isArray(analysis.recommended_next_steps) && analysis.recommended_next_steps.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-warm-text mb-2">Recommended Next Steps</p>
+                <div className="space-y-2">
+                  {analysis.recommended_next_steps.map((s, i) => (
+                    <div key={i} className="rounded-md border border-warm-border bg-white px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                          s.priority === 'immediate' ? 'bg-red-100 text-red-700' :
+                          s.priority === 'soon' ? 'bg-amber-100 text-amber-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {s.priority}
+                        </span>
+                        <p className="text-sm font-medium text-warm-text">{s.step}</p>
+                      </div>
+                      <p className="text-xs text-warm-muted mt-1">{s.why}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Red flags & opportunities */}
+            {Array.isArray(analysis.red_flags) && analysis.red_flags.length > 0 && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
+                <p className="text-xs font-medium text-red-700 mb-1">Red Flags</p>
+                <ul className="text-xs text-red-800 space-y-0.5">
+                  {analysis.red_flags.map((f, i) => (
+                    <li key={i}>- {f}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {Array.isArray(analysis.opportunities) && analysis.opportunities.length > 0 && (
+              <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3">
+                <p className="text-xs font-medium text-green-700 mb-1">Opportunities</p>
+                <ul className="text-xs text-green-800 space-y-0.5">
+                  {analysis.opportunities.map((o, i) => (
+                    <li key={i}>- {o}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Disclaimer */}
+            <div className="rounded-md border border-warm-border bg-warm-bg px-3 py-2">
+              <p className="text-xs text-warm-muted italic">
+                This analysis is AI-generated and not legal advice. Review with an attorney if possible.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   ) : null
