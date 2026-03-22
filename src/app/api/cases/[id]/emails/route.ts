@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { isGmailMcpConfigured, searchMessages, readMessage } from '@/lib/mcp/gmail-client'
+import { getSubscription } from '@/lib/subscription/check'
 
 export async function GET(
   request: NextRequest,
@@ -8,8 +9,23 @@ export async function GET(
 ) {
   const auth = await getAuthenticatedClient()
   if (!auth.ok) return auth.error
-  const { supabase } = auth
+  const { supabase, user } = auth
   const { id: caseId } = await params
+
+  // Subscription gate: emailIntegration
+  const sub = await getSubscription(supabase, user.id)
+  if (!sub.canAccess('emailIntegration')) {
+    return NextResponse.json(
+      {
+        error: 'upgrade_required',
+        message: 'Email integration requires a Pro plan.',
+        feature: 'emailIntegration',
+        currentTier: sub.tier,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 }
+    )
+  }
 
   if (!isGmailMcpConfigured()) {
     return NextResponse.json({ error: 'Gmail MCP not configured' }, { status: 503 })

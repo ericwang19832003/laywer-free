@@ -56,6 +56,30 @@ export async function getSubscription(
   }
 }
 
+export async function hasOneTimePurchase(
+  supabase: SupabaseClient,
+  userId: string,
+  caseId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('one_time_purchases')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('case_id', caseId)
+    .maybeSingle()
+  return !!data
+}
+
+export function gateResponse(feature: string, tier: SubscriptionTier) {
+  return {
+    error: 'upgrade_required',
+    message: `This feature requires an ${tier === 'free' ? 'Essentials' : 'Pro'} plan.`,
+    feature,
+    currentTier: tier,
+    upgradeUrl: '/pricing',
+  }
+}
+
 export async function incrementAiUsage(
   supabase: SupabaseClient,
 ): Promise<void> {

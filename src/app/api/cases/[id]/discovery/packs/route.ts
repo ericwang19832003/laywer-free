@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { createPackSchema } from '@/lib/schemas/discovery'
+import { getSubscription } from '@/lib/subscription/check'
 
 export const runtime = 'nodejs'
 
@@ -14,6 +15,21 @@ export async function POST(
     const auth = await getAuthenticatedClient()
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
+
+    // Subscription gate: discovery
+    const sub = await getSubscription(supabase, user.id)
+    if (!sub.canAccess('discovery')) {
+      return NextResponse.json(
+        {
+          error: 'upgrade_required',
+          message: 'Discovery tools require a Pro plan.',
+          feature: 'discovery',
+          currentTier: sub.tier,
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 }
+      )
+    }
 
     const body = await request.json()
     const parsed = createPackSchema.safeParse(body)

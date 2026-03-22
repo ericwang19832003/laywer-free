@@ -9,8 +9,8 @@ import { useState } from 'react'
 
 const TIER_INFO = {
   free: { label: 'Free', color: 'bg-gray-100 text-gray-700' },
-  pro: { label: 'Pro', color: 'bg-calm-indigo/10 text-calm-indigo' },
-  premium: { label: 'Premium', color: 'bg-calm-amber/10 text-calm-amber' },
+  essentials: { label: 'Essentials — $19/mo', color: 'bg-calm-green/10 text-calm-green' },
+  pro: { label: 'Pro — $39/mo', color: 'bg-calm-indigo/10 text-calm-indigo' },
 }
 
 export function BillingSection() {
@@ -93,50 +93,50 @@ export function BillingSection() {
         {tier === 'free' && (
           <div className="grid gap-3">
             <button
+              onClick={() => handleUpgrade('essentials')}
+              disabled={upgrading}
+              className="flex items-center justify-between p-4 rounded-xl border-2 border-calm-green/20 hover:border-calm-green transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <Zap className="h-5 w-5 text-calm-green" />
+                <div>
+                  <p className="font-medium text-warm-text">Upgrade to Essentials</p>
+                  <p className="text-xs text-warm-muted">Unlimited cases + AI, email reminders</p>
+                </div>
+              </div>
+              <span className="text-sm font-semibold text-calm-green">$19/mo</span>
+            </button>
+            <button
               onClick={() => handleUpgrade('pro')}
               disabled={upgrading}
               className="flex items-center justify-between p-4 rounded-xl border-2 border-calm-indigo/20 hover:border-calm-indigo transition-colors text-left"
             >
               <div className="flex items-center gap-3">
-                <Zap className="h-5 w-5 text-calm-indigo" />
+                <Sparkles className="h-5 w-5 text-calm-indigo" />
                 <div>
                   <p className="font-medium text-warm-text">Upgrade to Pro</p>
-                  <p className="text-xs text-warm-muted">Unlimited AI, 3 cases, discovery tools</p>
+                  <p className="text-xs text-warm-muted">+ Discovery, trial binders, email integration, priority AI</p>
                 </div>
               </div>
-              <span className="text-sm font-semibold text-calm-indigo">$19/mo</span>
-            </button>
-            <button
-              onClick={() => handleUpgrade('premium')}
-              disabled={upgrading}
-              className="flex items-center justify-between p-4 rounded-xl border-2 border-calm-amber/20 hover:border-calm-amber transition-colors text-left"
-            >
-              <div className="flex items-center gap-3">
-                <Sparkles className="h-5 w-5 text-calm-amber" />
-                <div>
-                  <p className="font-medium text-warm-text">Upgrade to Premium</p>
-                  <p className="text-xs text-warm-muted">Unlimited everything + attorney review</p>
-                </div>
-              </div>
-              <span className="text-sm font-semibold text-calm-amber">$49/mo</span>
+              <span className="text-sm font-semibold text-calm-indigo">$39/mo</span>
             </button>
           </div>
         )}
 
-        {tier === 'pro' && (
+        {tier === 'essentials' && (
           <button
-            onClick={() => handleUpgrade('premium')}
+            onClick={() => handleUpgrade('pro')}
             disabled={upgrading}
-            className="flex items-center justify-between p-4 rounded-xl border-2 border-calm-amber/20 hover:border-calm-amber transition-colors text-left w-full"
+            className="flex items-center justify-between p-4 rounded-xl border-2 border-calm-indigo/20 hover:border-calm-indigo transition-colors text-left w-full"
           >
             <div className="flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-calm-amber" />
+              <Sparkles className="h-5 w-5 text-calm-indigo" />
               <div>
-                <p className="font-medium text-warm-text">Upgrade to Premium</p>
-                <p className="text-xs text-warm-muted">Unlimited cases + attorney review</p>
+                <p className="font-medium text-warm-text">Upgrade to Pro</p>
+                <p className="text-xs text-warm-muted">+ Discovery, trial binders, email integration, priority AI</p>
               </div>
             </div>
-            <span className="text-sm font-semibold text-calm-amber">$49/mo</span>
+            <span className="text-sm font-semibold text-calm-indigo">$39/mo</span>
           </button>
         )}
       </CardContent>

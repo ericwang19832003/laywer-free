@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { randomBytes } from 'crypto'
+import { getSubscription } from '@/lib/subscription/check'
 
 export async function GET(
   _request: NextRequest,
@@ -43,7 +44,22 @@ export async function POST(
     const { id: caseId } = await params
     const auth = await getAuthenticatedClient()
     if (!auth.ok) return auth.error
-    const { supabase } = auth
+    const { supabase, user } = auth
+
+    // Subscription gate: caseSharing
+    const sub = await getSubscription(supabase, user.id)
+    if (!sub.canAccess('caseSharing')) {
+      return NextResponse.json(
+        {
+          error: 'upgrade_required',
+          message: 'Case sharing requires an Essentials plan.',
+          feature: 'caseSharing',
+          currentTier: sub.tier,
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 }
+      )
+    }
 
     const body = await request.json()
     const enabled = Boolean(body.enabled)

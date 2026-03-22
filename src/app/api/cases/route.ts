@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { createCaseSchema } from '@/lib/schemas/case'
+import { getSubscription } from '@/lib/subscription/check'
 
 export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthenticatedClient()
     if (!auth.ok) return auth.error
-    const { supabase } = auth
+    const { supabase, user } = auth
+
+    // Subscription gate: maxCases
+    const sub = await getSubscription(supabase, user.id)
+    if (sub.casesRemaining <= 0) {
+      return NextResponse.json(
+        {
+          error: 'upgrade_required',
+          message: 'You\'ve reached the case limit on your current plan. Upgrade to create more cases.',
+          feature: 'maxCases',
+          currentTier: sub.tier,
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 }
+      )
+    }
 
     const body = await request.json()
     const parsed = createCaseSchema.safeParse(body)

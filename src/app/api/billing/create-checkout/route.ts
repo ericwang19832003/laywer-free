@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
 
     const { tier } = await request.json()
     const PRICE_IDS: Record<string, string> = {
+      essentials: process.env.STRIPE_ESSENTIALS_PRICE_ID ?? '',
       pro: process.env.STRIPE_PRO_PRICE_ID ?? '',
-      premium: process.env.STRIPE_PREMIUM_PRICE_ID ?? '',
     }
     const priceId = PRICE_IDS[tier]
     if (!priceId) return NextResponse.json({ error: 'Invalid tier' }, { status: 422 })

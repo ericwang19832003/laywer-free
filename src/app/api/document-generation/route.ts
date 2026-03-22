@@ -9,6 +9,8 @@ import {
   sanitizeDocument,
 } from '@/lib/ai/document-generation'
 import { INPUT_LIMITS, validateTextLength } from '@/lib/validation/input-limits'
+import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { getSubscription, incrementAiUsage } from '@/lib/subscription/check'
 
 const AI_MODEL = 'gpt-4o-mini'
 
@@ -56,6 +58,25 @@ interface DocumentGenerationRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    // Subscription gate: aiGenerationsPerMonth
+    const sub = await getSubscription(supabase, user.id)
+    if (sub.aiRemaining <= 0) {
+      return NextResponse.json(
+        {
+          error: 'upgrade_required',
+          message: 'You\'ve used all your AI generations this month. Upgrade for unlimited.',
+          feature: 'aiGenerationsPerMonth',
+          currentTier: sub.tier,
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 }
+      )
+    }
+
     const body: DocumentGenerationRequest = await request.json()
 
     if (!body.documentType || !body.caseDetails || !body.documentDetails) {
@@ -145,6 +166,9 @@ export async function POST(request: NextRequest) {
       if (!isDocumentSafe(document)) {
         document = sanitizeDocument(document)
       }
+
+      // Increment AI usage after successful generation
+      await incrementAiUsage(supabase)
 
       return NextResponse.json({
         success: true,
