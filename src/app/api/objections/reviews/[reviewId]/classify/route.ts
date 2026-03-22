@@ -218,9 +218,9 @@ export async function POST(
         .from('objection_reviews')
         .update({
           status: 'needs_review',
-          model: 'gpt-4o-mini',
-          prompt_version: PROMPT_VERSION,
-          error: 'AI output failed validation',
+        model: 'gpt-4o-mini',
+        prompt_version: PROMPT_VERSION,
+        error: 'AI output failed validation',
         })
         .eq('id', reviewId)
 

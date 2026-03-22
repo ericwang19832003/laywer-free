@@ -62,10 +62,10 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
   return (
     <div className="space-y-4">
       <form onSubmit={handleAsk} className="space-y-2">
-        <Label htmlFor="research-question" className="text-sm font-semibold" style={{ color: '#1C1917' }}>
+        <Label htmlFor="research-question" className="text-sm font-semibold text-warm-text">
           Ask a Legal Question
         </Label>
-        <p className="text-xs" style={{ color: '#78716C' }}>
+        <p className="text-xs text-warm-muted">
           Ask about your legal situation. The AI will answer based on your saved case law authorities.
         </p>
         <textarea
@@ -73,8 +73,7 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="e.g., What legal basis supports my claim that the landlord violated habitability standards?"
-          className="w-full rounded-md border px-3 py-2 text-sm min-h-[80px] resize-y"
-          style={{ borderColor: '#D6D3D1' }}
+          className="w-full rounded-md border border-warm-border px-3 py-2 text-sm min-h-[80px] resize-y"
         />
         <Button type="submit" disabled={loading || question.trim().length < 10}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
@@ -82,7 +81,7 @@ export function ResearchQuestion({ caseId }: ResearchQuestionProps) {
         </Button>
       </form>
 
-      {error && <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>}
+      {error && <p className="text-sm text-calm-amber">{error}</p>}
 
       {answer && <ResearchAnswer answer={answer} citations={citations} notice={notice} />}
     </div>

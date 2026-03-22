@@ -1,21 +1,32 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { NewCaseDialog } from '@/components/cases/new-case-dialog'
 import { ImportCaseDialog } from '@/components/cases/import-case-dialog'
-import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist'
 import { StatsCards } from '@/components/cases/stats-cards'
-import { CaseTable } from '@/components/cases/case-table'
-import { Briefcase, Clock, Shield, FileText } from 'lucide-react'
+import { CaseCards } from '@/components/cases/case-cards'
+import { PaginatedCaseList } from '@/components/cases/paginated-case-list'
+import { TodaysActionCard } from '@/components/cases/todays-action-card'
+import { Clock, Shield, FileText } from 'lucide-react'
 import Image from 'next/image'
 
 export default async function CasesPage() {
   const supabase = await createClient()
 
-  const { data: cases } = await supabase
+  const { data: { user } } = await supabase.auth.getUser()
+  const userDisplayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || null
+
+  const PAGE_SIZE = 12
+  const { data: allCasesFetched, count: totalCaseCount } = await supabase
     .from('cases')
-    .select('id, county, role, court_type, dispute_type, description, created_at')
+    .select('id, county, role, court_type, dispute_type, description, created_at', { count: 'exact' })
     .eq('status', 'active')
     .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE + 1)
+
+  const hasMoreCases = (allCasesFetched ?? []).length > PAGE_SIZE
+  const cases = hasMoreCases ? (allCasesFetched ?? []).slice(0, PAGE_SIZE) : (allCasesFetched ?? [])
+  const initialNextCursor = hasMoreCases ? cases[cases.length - 1]?.id ?? null : null
 
   // Fetch pi_sub_type for PI cases to show "Property Damage" when applicable
   const piCaseIds = (cases ?? []).filter(c => c.dispute_type === 'personal_injury').map(c => c.id)
@@ -34,7 +45,7 @@ export default async function CasesPage() {
   const caseIds = (cases ?? []).map((c) => c.id)
 
   // Fetch analytics data in parallel
-  const [tasksResult, deadlinesResult, healthResult, activityResult, userResult, docResult] = await Promise.all([
+  const [tasksResult, deadlinesResult, healthResult, activityResult] = await Promise.all([
     hasCases
       ? supabase.from('tasks').select('case_id, status').in('case_id', caseIds)
       : Promise.resolve({ data: [] }),
@@ -51,10 +62,6 @@ export default async function CasesPage() {
       ? supabase.from('task_events').select('case_id, created_at')
           .in('case_id', caseIds).order('created_at', { ascending: false })
       : Promise.resolve({ data: [] }),
-    supabase.auth.getUser(),
-    hasCases
-      ? supabase.from('court_documents').select('id', { count: 'exact', head: true }).in('case_id', caseIds)
-      : Promise.resolve({ count: 0 }),
   ])
 
   const allTasks = (tasksResult.data ?? []) as { case_id: string; status: string }[]
@@ -98,22 +105,6 @@ export default async function CasesPage() {
     if (!activityByCase.has(a.case_id)) activityByCase.set(a.case_id, a.created_at)
   }
 
-  // Onboarding
-  const user = userResult.data?.user
-  const onboarding = (user?.user_metadata?.onboarding as { dismissed?: boolean } | undefined) ?? {}
-  const isDismissed = onboarding.dismissed === true
-  const hasCase = Boolean(hasCases)
-  const hasDocument = ((docResult as { count?: number | null }).count ?? 0) > 0
-  const hasProfile = Boolean(user?.user_metadata?.display_name)
-
-  const checklistItems = [
-    { key: 'create_case', label: 'Create your first case', description: 'Set up your court and dispute type', href: '#new-case', completed: hasCase },
-    { key: 'upload_document', label: 'Upload a document', description: 'Add complaints, filings, or evidence', href: hasCases ? `/case/${cases![0].id}` : '/cases', completed: hasDocument },
-    { key: 'explore_evidence', label: 'Explore the evidence vault', description: 'Organize and tag your evidence', href: hasCases ? `/case/${cases![0].id}/evidence` : '/cases', completed: false },
-    { key: 'review_deadlines', label: 'Review your deadlines', description: 'Never miss a court date', href: hasCases ? `/case/${cases![0].id}/deadlines` : '/cases', completed: false },
-    { key: 'setup_profile', label: 'Set up your profile', description: 'Add your name and contact info', href: '/settings', completed: hasProfile },
-  ]
-
   // Build case table rows
   const caseRows = (cases ?? []).map((c) => {
     const taskData = tasksByCase.get(c.id) ?? { completed: 0, total: 0 }
@@ -152,67 +143,108 @@ export default async function CasesPage() {
         </div>
 
         {hasCases ? (
-          /* ── Has cases: stats + table ── */
+          /* ── Has cases: hero action + stats + cards ── */
           <>
+            <TodaysActionCard />
+
             <StatsCards
-              activeCases={cases.length}
+              activeCases={totalCaseCount ?? cases.length}
               tasksCompleted={totalCompleted}
               tasksTotal={totalTasks}
+              // eslint-disable-next-line react-hooks/purity
               upcomingDeadlines={allDeadlines.filter(d => new Date(d.due_at).getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000).length}
               averageHealth={avgHealth}
             />
 
-            <CaseTable cases={caseRows} />
+            <PaginatedCaseList
+              initialCases={caseRows.map(row => ({
+                id: row.id,
+                description: row.description || '',
+                county: row.county || '',
+                role: row.role,
+                court_type: row.courtType || '',
+                dispute_type: row.piSubType || row.disputeType || '',
+                created_at: row.createdAt,
+                progress: row.tasksTotal > 0 ? Math.round((row.tasksCompleted / row.tasksTotal) * 100) : 0,
+                nextAction: row.nextDeadline?.label || undefined,
+                deadline: row.nextDeadline ? {
+                  due_at: row.nextDeadline.due_at,
+                  label: row.nextDeadline.label || 'Deadline'
+                } : undefined,
+                lastActivity: row.lastActivity || undefined,
+                status: 'active' as const,
+                yourName: userDisplayName || undefined,
+              }))}
+              initialNextCursor={initialNextCursor}
+              initialHasMore={hasMoreCases}
+              totalCount={totalCaseCount ?? cases.length}
+            />
           </>
         ) : (
-          /* ── Empty state: two-column layout ── */
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Left: empty state panel */}
-            <div className="lg:col-span-3 rounded-lg border border-warm-border bg-white p-8">
-              <div className="flex items-start gap-5 mb-6">
+          /* ── Empty state: professional hero layout ── */
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Hero section */}
+            <div className="flex flex-col items-center text-center lg:items-start lg:text-left justify-center">
+              <div className="relative w-full max-w-sm mb-6">
                 <Image
-                  src="/images/hero-illustration.png"
-                  alt=""
-                  width={140}
-                  height={112}
-                  className="object-contain shrink-0 hidden sm:block"
+                  src="/images/ai-generated/hero-welcome.png"
+                  alt="Welcome to Lawyer Free"
+                  width={400}
+                  height={400}
+                  className="w-full h-auto rounded-2xl"
+                  priority
                 />
-                <div>
-                  <h2 className="text-base font-semibold text-warm-text">Create your first case</h2>
-                  <p className="text-sm text-warm-muted mt-1">Get organized in under 2 minutes. We&apos;ll guide you through every step of your legal matter.</p>
-                </div>
               </div>
+            </div>
 
-              <ul className="space-y-3 mb-6">
+            {/* Content section */}
+            <div className="flex flex-col justify-center">
+              <h2 className="text-2xl font-bold text-warm-text mb-3">
+                Start Your Legal Journey
+              </h2>
+              <p className="text-warm-muted mb-6">
+                Get organized in under 2 minutes. We&apos;ll guide you through every step of your legal matter.
+              </p>
+
+              <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
-                  <Clock className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+                  <div className="w-8 h-8 rounded-full bg-calm-indigo/10 flex items-center justify-center shrink-0">
+                    <Clock className="h-4 w-4 text-calm-indigo" />
+                  </div>
                   <div>
-                    <p className="text-sm text-warm-text font-medium">Track deadlines automatically</p>
+                    <p className="text-sm font-medium text-warm-text">Track deadlines automatically</p>
                     <p className="text-xs text-warm-muted">We calculate key dates based on your court rules.</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Shield className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+                  <div className="w-8 h-8 rounded-full bg-calm-green/10 flex items-center justify-center shrink-0">
+                    <Shield className="h-4 w-4 text-calm-green" />
+                  </div>
                   <div>
-                    <p className="text-sm text-warm-text font-medium">Organize evidence securely</p>
+                    <p className="text-sm font-medium text-warm-text">Organize evidence securely</p>
                     <p className="text-xs text-warm-muted">Upload, tag, and manage documents in one place.</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FileText className="h-4 w-4 text-warm-muted mt-0.5 shrink-0" />
+                  <div className="w-8 h-8 rounded-full bg-calm-amber/10 flex items-center justify-center shrink-0">
+                    <FileText className="h-4 w-4 text-calm-amber" />
+                  </div>
                   <div>
-                    <p className="text-sm text-warm-text font-medium">Generate filings with AI</p>
+                    <p className="text-sm font-medium text-warm-text">Generate filings with AI</p>
                     <p className="text-xs text-warm-muted">Draft motions, answers, and discovery in minutes.</p>
                   </div>
                 </li>
               </ul>
 
-              <NewCaseDialog />
-            </div>
-
-            {/* Right: onboarding checklist sidebar */}
-            <div className="lg:col-span-2">
-              <OnboardingChecklist items={checklistItems} dismissed={isDismissed} />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <NewCaseDialog />
+                <Link
+                  href="/assess"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-warm-border bg-white text-sm font-medium text-warm-text hover:bg-warm-bg transition-colors"
+                >
+                  Take Assessment
+                </Link>
+              </div>
             </div>
           </div>
         )}

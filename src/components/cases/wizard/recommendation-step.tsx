@@ -9,9 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ChevronRight, Scale, HelpCircle } from 'lucide-react'
 import type { CourtRecommendation } from '@/lib/rules/court-recommendation'
 import type { State } from '@/lib/schemas/case'
 import { getStateConfig } from '@/lib/states'
+import { CourtSelector } from '@/components/courts/court-selector'
 
 const TX_COURT_LABELS: Record<string, string> = {
   jp: 'JP Court (Small Claims)',
@@ -73,6 +75,7 @@ export function RecommendationStep({
 }: RecommendationStepProps) {
   const [showOverride, setShowOverride] = useState(false)
   const [override, setOverride] = useState('')
+  const [showCourtBrowser, setShowCourtBrowser] = useState(false)
 
   const courtLabels = getCourtLabels(selectedState)
   const config = getStateConfig(selectedState)
@@ -86,14 +89,27 @@ export function RecommendationStep({
           ? 'e.g. Los Angeles County'
           : 'e.g. Travis County'
 
+  const recommendedLabel = courtLabels[recommendation.recommended] ?? recommendation.recommended
+
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-warm-border bg-white p-4 space-y-2">
-        <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">
-          Our recommendation
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">
+            Our recommendation
+          </p>
+          {recommendation.confidence === 'high' ? (
+            <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
+              High confidence
+            </span>
+          ) : (
+            <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded">
+              Review suggested
+            </span>
+          )}
+        </div>
         <p className="text-base font-semibold text-warm-text">
-          {courtLabels[recommendation.recommended] ?? recommendation.recommended}
+          {recommendedLabel}
         </p>
         <p className="text-sm text-warm-text leading-relaxed">
           {recommendation.reasoning}
@@ -104,9 +120,10 @@ export function RecommendationStep({
           </p>
         )}
         {selectedState === 'NY' && recommendation.recommended === 'ny_supreme' && (
-          <p className="text-xs text-warm-muted mt-1">
-            In New York, Supreme Court is the main trial court — not the highest court.
-          </p>
+          <div className="flex items-start gap-2 p-2 bg-blue-50 rounded text-xs text-blue-700 mt-2">
+            <HelpCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>In New York, Supreme Court is the main trial court — not the highest court.</span>
+          </div>
         )}
       </div>
 
@@ -120,7 +137,7 @@ export function RecommendationStep({
         />
       </div>
 
-      {!showOverride ? (
+      {!showOverride && !showCourtBrowser ? (
         <div className="space-y-2">
           <Button
             type="button"
@@ -128,15 +145,40 @@ export function RecommendationStep({
             onClick={() => onAccept(null)}
             disabled={loading}
           >
-            {loading ? 'Creating...' : 'Accept & Get Started'}
+            {loading ? 'Creating...' : 'Get Started'}
           </Button>
-          <button
-            type="button"
-            onClick={() => setShowOverride(true)}
-            className="w-full text-center text-xs text-warm-muted hover:text-warm-text transition-colors py-1"
-          >
-            Choose a different court
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCourtBrowser(true)}
+              className="flex-1 text-center text-xs text-warm-muted hover:text-warm-text transition-colors py-1 flex items-center justify-center gap-1"
+            >
+              <Scale className="h-3 w-3" />
+              Browse Courts
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowOverride(true)}
+              className="flex-1 text-center text-xs text-warm-muted hover:text-warm-text transition-colors py-1 flex items-center justify-center gap-1"
+            >
+              Choose Different Court
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      ) : showCourtBrowser ? (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-warm-text">Browse all {selectedState} courts</p>
+            <button
+              type="button"
+              onClick={() => setShowCourtBrowser(false)}
+              className="text-xs text-calm-indigo hover:underline"
+            >
+              Back to recommendation
+            </button>
+          </div>
+          <CourtSelector state={selectedState} compact={true} showHeader={false} />
         </div>
       ) : (
         <div className="space-y-3">

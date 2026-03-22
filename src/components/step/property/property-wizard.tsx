@@ -4,7 +4,13 @@ import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { WizardShell } from '@/components/ui/wizard-shell'
 import type { WizardStep } from '@/components/ui/wizard-shell'
-import { Loader2 } from 'lucide-react'
+import {
+  AnnotatedDraftViewer,
+  type DraftAnnotation,
+} from '@/components/step/filing/annotated-draft-viewer'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 import { FilingMethodStep } from '@/components/step/filing-method-step'
 import { FILING_CONFIGS } from '@/lib/filing-configs'
 
@@ -15,7 +21,7 @@ import { FILING_CONFIGS } from '@/lib/filing-configs'
 interface PropertyWizardProps {
   caseId: string
   taskId: string
-  existingMetadata?: Record<string, unknown>
+  existingMetadata?: Record<string, unknown> | null
   propertyDetails?: {
     property_address: string | null
     property_type: string | null
@@ -31,58 +37,17 @@ interface PropertyWizardProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Step definitions                                                    */
+/*  Steps                                                              */
 /* ------------------------------------------------------------------ */
 
-const WIZARD_STEPS: WizardStep[] = [
-  {
-    id: 'preflight',
-    title: 'Before You Start',
-    subtitle: "Let's make sure you have everything you need.",
-    estimateMinutes: 2,
-  },
-  {
-    id: 'property_details',
-    title: 'Property Details',
-    subtitle: 'Tell us about the property at the center of this dispute.',
-    estimateMinutes: 3,
-  },
-  {
-    id: 'dispute',
-    title: 'The Dispute',
-    subtitle: "Describe what happened and the other party's actions.",
-    estimateMinutes: 5,
-  },
-  {
-    id: 'damages',
-    title: 'Your Damages',
-    subtitle: 'Property damage, diminished value, and repair costs.',
-    estimateMinutes: 4,
-  },
-  {
-    id: 'venue',
-    title: 'Where to File',
-    subtitle: "We'll help you pick the right court.",
-    estimateMinutes: 2,
-  },
-  {
-    id: 'how_to_file',
-    title: 'How to File',
-    subtitle: 'Choose how to submit your petition.',
-    estimateMinutes: 2,
-  },
-  {
-    id: 'review',
-    title: 'Review Everything',
-    subtitle: 'Check your information before generating your petition.',
-    estimateMinutes: 3,
-  },
-  {
-    id: 'generate',
-    title: 'Generate Draft',
-    subtitle: 'We will generate your property dispute petition.',
-    estimateMinutes: 2,
-  },
+const STEPS: WizardStep[] = [
+  { id: 'intake', title: 'Property Intake', subtitle: 'Tell us about your property and who is involved.' },
+  { id: 'damage_description', title: 'What Happened', subtitle: 'Describe the damage or issue with the property.' },
+  { id: 'damages', title: 'Your Losses', subtitle: 'Repair costs, replacement value, and other losses.' },
+  { id: 'evidence', title: 'Your Evidence', subtitle: 'Documents and proof that support your case.' },
+  { id: 'legal_basis', title: 'Legal Basis', subtitle: 'The legal grounds for your claim.' },
+  { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how to submit your document.' },
+  { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' },
 ]
 
 /* ------------------------------------------------------------------ */
@@ -98,105 +63,208 @@ export function PropertyWizard({
 }: PropertyWizardProps) {
   const router = useRouter()
   const meta = (existingMetadata ?? {}) as Record<string, unknown>
+  const totalEstimateMinutes = 25
 
-  /* ---- Property details ---- */
+  /* ---- Intake fields ---- */
+  const [propertyCategory, setPropertyCategory] = useState<string>(
+    (meta.property_category as string) ?? 'real'
+  )
   const [propertyAddress, setPropertyAddress] = useState<string>(
     (meta.property_address as string) ?? propertyDetails?.property_address ?? ''
   )
   const [propertyType, setPropertyType] = useState<string>(
     (meta.property_type as string) ?? propertyDetails?.property_type ?? 'residential'
   )
-  const [ownershipStatus, setOwnershipStatus] = useState<string>(
-    (meta.ownership_status as string) ?? ''
-  )
-
-  /* ---- Dispute info ---- */
-  const [disputeDescription, setDisputeDescription] = useState<string>(
-    (meta.dispute_description as string) ?? propertyDetails?.dispute_description ?? ''
+  const [county, setCounty] = useState<string>(
+    (meta.county as string) ?? caseData?.county ?? ''
   )
   const [otherPartyName, setOtherPartyName] = useState<string>(
     (meta.other_party_name as string) ?? propertyDetails?.other_party_name ?? ''
   )
-  const [otherPartyActions, setOtherPartyActions] = useState<string>(
-    (meta.other_party_actions as string) ?? ''
+  const [otherPartyRelationship, setOtherPartyRelationship] = useState<string>(
+    (meta.other_party_relationship as string) ?? propertyDetails?.other_party_relationship ?? 'neighbor'
+  )
+  const [incidentDate, setIncidentDate] = useState<string>(
+    (meta.incident_date as string) ?? ''
+  )
+
+  /* ---- Damage description ---- */
+  const [whatHappened, setWhatHappened] = useState<string>(
+    (meta.what_happened as string) ?? propertyDetails?.dispute_description ?? ''
+  )
+  const [extentOfDamage, setExtentOfDamage] = useState<string>(
+    (meta.extent_of_damage as string) ?? ''
+  )
+  const [whenDiscovered, setWhenDiscovered] = useState<string>(
+    (meta.when_discovered as string) ?? ''
   )
 
   /* ---- Damages ---- */
-  const [propertyDamageAmount, setPropertyDamageAmount] = useState<string>(
-    (meta.property_damage_amount as string) ?? ''
+  const [repairCosts, setRepairCosts] = useState<string>(
+    (meta.repair_costs as string) ?? ''
+  )
+  const [replacementValue, setReplacementValue] = useState<string>(
+    (meta.replacement_value as string) ?? ''
   )
   const [diminishedValue, setDiminishedValue] = useState<string>(
     (meta.diminished_value as string) ?? ''
   )
-  const [repairCosts, setRepairCosts] = useState<string>(
-    (meta.repair_costs as string) ?? ''
+  const [lostUse, setLostUse] = useState<string>(
+    (meta.lost_use as string) ?? ''
   )
 
-  /* ---- Venue ---- */
-  const [propertyCounty, setPropertyCounty] = useState<string>(
-    (meta.property_county as string) ?? caseData?.county ?? ''
+  /* ---- Evidence ---- */
+  const [hasPhotos, setHasPhotos] = useState<boolean>(
+    (meta.has_photos as boolean) ?? false
+  )
+  const [hasEstimates, setHasEstimates] = useState<boolean>(
+    (meta.has_estimates as boolean) ?? false
+  )
+  const [hasReceipts, setHasReceipts] = useState<boolean>(
+    (meta.has_receipts as boolean) ?? false
+  )
+  const [hasExpertReports, setHasExpertReports] = useState<boolean>(
+    (meta.has_expert_reports as boolean) ?? false
+  )
+  const [hasSurvey, setHasSurvey] = useState<boolean>(
+    (meta.has_survey as boolean) ?? propertyDetails?.has_survey ?? false
+  )
+  const [hasTitleInsurance, setHasTitleInsurance] = useState<boolean>(
+    (meta.has_title_insurance as boolean) ?? propertyDetails?.has_title_insurance ?? false
+  )
+  const [evidenceNotes, setEvidenceNotes] = useState<string>(
+    (meta.evidence_notes as string) ?? ''
   )
 
-  /* ---- Filing method ---- */
+  /* ---- Legal basis ---- */
+  const [selectedBases, setSelectedBases] = useState<string[]>(
+    (meta.selected_bases as string[]) ?? []
+  )
+
+  /* ---- Filing / draft state ---- */
   const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
-    (meta.filing_method as 'online' | 'in_person') ?? ''
+    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
   )
-
-  /* ---- Wizard state ---- */
+  const [documentType, setDocumentType] = useState<'demand_letter' | 'petition'>(
+    (meta.document_type as 'demand_letter' | 'petition') ?? 'demand_letter'
+  )
   const [currentStep, setCurrentStep] = useState(
     typeof meta._wizard_step === 'number' ? meta._wizard_step : 0
   )
+  const [draft, setDraft] = useState<string>((meta.draft_text as string) ?? '')
+  const [annotations, setAnnotations] = useState<DraftAnnotation[]>(
+    (meta.annotations as DraftAnnotation[]) ?? []
+  )
+  const [acknowledged, setAcknowledged] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
-  const [acknowledged, setAcknowledged] = useState(false)
+  const [draftPhase, setDraftPhase] = useState(false)
+  const [confirming, setConfirming] = useState(false)
 
-  /* ---- Helpers ---- */
-
-  function formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(value)
-  }
+  /* ---- Computed ---- */
 
   const totalDamages = useMemo(() => {
-    const pd = parseFloat(propertyDamageAmount) || 0
-    const dv = parseFloat(diminishedValue) || 0
-    const rc = parseFloat(repairCosts) || 0
-    return pd + dv + rc
-  }, [propertyDamageAmount, diminishedValue, repairCosts])
+    return (parseFloat(repairCosts) || 0) +
+      (parseFloat(replacementValue) || 0) +
+      (parseFloat(diminishedValue) || 0) +
+      (parseFloat(lostUse) || 0)
+  }, [repairCosts, replacementValue, diminishedValue, lostUse])
 
-  const buildMetadata = useCallback(() => {
+  function formatCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(value)
+  }
+
+  const LEGAL_BASES = [
+    { value: 'negligence', label: 'Negligence', desc: 'The other party failed to use reasonable care, causing damage to your property.' },
+    { value: 'trespass', label: 'Trespass', desc: 'The other party entered or used your property without permission.' },
+    { value: 'nuisance', label: 'Nuisance', desc: 'The other party interfered with your use and enjoyment of your property.' },
+    { value: 'conversion', label: 'Conversion', desc: 'The other party took or destroyed your personal property.' },
+  ]
+
+  /* ---- Build helpers ---- */
+
+  const buildFacts = useCallback(() => {
+    const damagesBreakdown: { category: string; amount: number }[] = []
+    const rc = parseFloat(repairCosts) || 0
+    const rv = parseFloat(replacementValue) || 0
+    const dv = parseFloat(diminishedValue) || 0
+    const lu = parseFloat(lostUse) || 0
+    if (rc > 0) damagesBreakdown.push({ category: 'Repair costs', amount: rc })
+    if (rv > 0) damagesBreakdown.push({ category: 'Replacement value', amount: rv })
+    if (dv > 0) damagesBreakdown.push({ category: 'Diminished value', amount: dv })
+    if (lu > 0) damagesBreakdown.push({ category: 'Lost use', amount: lu })
+    if (damagesBreakdown.length === 0) damagesBreakdown.push({ category: 'Property damage', amount: 0.01 })
+
+    const fullDescription = [
+      whatHappened,
+      extentOfDamage ? `Extent of damage: ${extentOfDamage}` : null,
+    ].filter(Boolean).join('\n\n')
+
     return {
-      property_address: propertyAddress || null,
-      property_type: propertyType,
-      ownership_status: ownershipStatus || null,
-      dispute_description: disputeDescription || null,
-      other_party_name: otherPartyName || null,
-      other_party_actions: otherPartyActions || null,
-      property_damage_amount: propertyDamageAmount || null,
-      diminished_value: diminishedValue || null,
-      repair_costs: repairCosts || null,
-      total_damages: totalDamages,
-      property_county: propertyCounty || null,
-      filing_method: filingMethod || null,
-      _wizard_step: currentStep,
+      plaintiff: { full_name: '[Your Name]' },
+      defendant: { full_name: otherPartyName || 'Unknown Defendant' },
+      defendant_is_business: false,
+      property_address: propertyAddress || '(Not provided)',
+      property_type: propertyType === 'land' ? 'vacant_land' : propertyType,
+      property_category: propertyCategory,
+      dispute_type: selectedBases[0] || 'negligence',
+      dispute_description: whatHappened || '(Not provided)',
+      legal_bases: selectedBases,
+      damages_breakdown: damagesBreakdown,
+      damages_total: totalDamages > 0 ? totalDamages : 0.01,
+      county: county || '(Not provided)',
+      court_type: caseData?.court_type || 'district',
+      description: fullDescription || '(Not provided)',
+      demand_letter_sent: documentType === 'petition',
+      seeks_injunctive_relief: selectedBases.includes('trespass') || selectedBases.includes('nuisance'),
+      incident_date: incidentDate || undefined,
+      when_discovered: whenDiscovered || undefined,
     }
   }, [
-    propertyAddress,
-    propertyType,
-    ownershipStatus,
-    disputeDescription,
-    otherPartyName,
-    otherPartyActions,
-    propertyDamageAmount,
-    diminishedValue,
-    repairCosts,
-    totalDamages,
-    propertyCounty,
-    filingMethod,
-    currentStep,
+    repairCosts, replacementValue, diminishedValue, lostUse,
+    whatHappened, extentOfDamage, otherPartyName, propertyAddress,
+    propertyType, propertyCategory, selectedBases, totalDamages,
+    county, caseData, documentType, incidentDate, whenDiscovered,
+  ])
+
+  const buildMetadata = useCallback(() => ({
+    property_category: propertyCategory,
+    property_address: propertyAddress || null,
+    property_type: propertyType,
+    county: county || null,
+    other_party_name: otherPartyName || null,
+    other_party_relationship: otherPartyRelationship,
+    incident_date: incidentDate || null,
+    what_happened: whatHappened || null,
+    extent_of_damage: extentOfDamage || null,
+    when_discovered: whenDiscovered || null,
+    repair_costs: repairCosts || null,
+    replacement_value: replacementValue || null,
+    diminished_value: diminishedValue || null,
+    lost_use: lostUse || null,
+    total_damages: totalDamages,
+    has_photos: hasPhotos,
+    has_estimates: hasEstimates,
+    has_receipts: hasReceipts,
+    has_expert_reports: hasExpertReports,
+    has_survey: hasSurvey,
+    has_title_insurance: hasTitleInsurance,
+    evidence_notes: evidenceNotes || null,
+    selected_bases: selectedBases,
+    document_type: documentType,
+    filing_method: filingMethod || null,
+    draft_text: draft || null,
+    final_text: draft || null,
+    annotations,
+    _wizard_step: currentStep,
+  }), [
+    propertyCategory, propertyAddress, propertyType, county,
+    otherPartyName, otherPartyRelationship, incidentDate,
+    whatHappened, extentOfDamage, whenDiscovered,
+    repairCosts, replacementValue, diminishedValue, lostUse, totalDamages,
+    hasPhotos, hasEstimates, hasReceipts, hasExpertReports, hasSurvey, hasTitleInsurance,
+    evidenceNotes, selectedBases, documentType, filingMethod,
+    draft, annotations, currentStep,
   ])
 
   /* ---- API helpers ---- */
@@ -217,56 +285,22 @@ export function PropertyWizard({
     setGenerating(true)
     setGenError(null)
     try {
-      // Build damages_breakdown array from the three damage fields
-      const damagesBreakdown: { category: string; amount: number }[] = []
-      const pd = parseFloat(propertyDamageAmount) || 0
-      const dv = parseFloat(diminishedValue) || 0
-      const rc = parseFloat(repairCosts) || 0
-      if (pd > 0) damagesBreakdown.push({ category: 'Property damage', amount: pd })
-      if (dv > 0) damagesBreakdown.push({ category: 'Diminished property value', amount: dv })
-      if (rc > 0) damagesBreakdown.push({ category: 'Repair costs', amount: rc })
-      // Ensure at least one entry
-      if (damagesBreakdown.length === 0) damagesBreakdown.push({ category: 'Property damage', amount: 0.01 })
-
-      const fullDescription = [
-        disputeDescription,
-        otherPartyActions ? `Other party's actions: ${otherPartyActions}` : null,
-      ].filter(Boolean).join('\n\n')
-
+      const docType = documentType === 'demand_letter' ? 'property_demand_letter' : 'property_petition'
       const res = await fetch(`/api/cases/${caseId}/generate-filing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          document_type: 'property_petition',
-          facts: {
-            plaintiff: { full_name: '[Your Name]' },
-            defendant: { full_name: otherPartyName || 'Unknown Defendant' },
-            defendant_is_business: false,
-            property_address: propertyAddress || '(Not provided)',
-            property_type: propertyType === 'land' ? 'vacant_land' : propertyType,
-            dispute_type: 'other' as const,
-            dispute_description: disputeDescription || '(Not provided)',
-            damages_breakdown: damagesBreakdown,
-            damages_total: totalDamages > 0 ? totalDamages : 0.01,
-            county: propertyCounty || '(Not provided)',
-            court_type: caseData?.court_type || 'district',
-            description: fullDescription || disputeDescription || '(Not provided)',
-            demand_letter_sent: false,
-            seeks_injunctive_relief: false,
-          },
-        }),
+        body: JSON.stringify({ document_type: docType, facts: buildFacts() }),
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to generate petition')
+        throw new Error(data.error || 'Failed to generate document')
       }
-      // Mark task as completed after successful generation
-      const metadata = buildMetadata()
-      await patchTask('in_progress', metadata)
-      await patchTask('completed')
-      router.push(`/case/${caseId}`)
+      const data = await res.json()
+      setDraft(data.draft)
+      setAnnotations(data.annotations ?? [])
+      setDraftPhase(true)
     } catch (err) {
-      setGenError(err instanceof Error ? err.message : 'Failed to generate petition')
+      setGenError(err instanceof Error ? err.message : 'Failed to generate document')
     } finally {
       setGenerating(false)
     }
@@ -281,176 +315,150 @@ export function PropertyWizard({
   const handleComplete = useCallback(async () => {
     await patchTask('in_progress', buildMetadata())
     await generateDraft()
-  }, [buildMetadata]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildMetadata, buildFacts]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFinalConfirm = useCallback(async () => {
+    setConfirming(true)
+    try {
+      const metadata = buildMetadata()
+      await patchTask('in_progress', metadata)
+      await patchTask('completed')
+      router.push(`/case/${caseId}`)
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : 'Failed to complete task')
+    } finally {
+      setConfirming(false)
+    }
+  }, [buildMetadata, caseId, router]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---- canAdvance per step ---- */
 
   const canAdvance = useMemo(() => {
-    const stepId = WIZARD_STEPS[currentStep]?.id
+    const stepId = STEPS[currentStep]?.id
     switch (stepId) {
-      case 'preflight':
-        return true
-      case 'property_details':
-        return propertyAddress.trim() !== ''
-      case 'dispute':
-        return disputeDescription.trim() !== ''
+      case 'intake':
+        return propertyAddress.trim() !== '' && otherPartyName.trim() !== ''
+      case 'damage_description':
+        return whatHappened.trim() !== ''
       case 'damages':
         return true
-      case 'venue':
+      case 'evidence':
         return true
+      case 'legal_basis':
+        return selectedBases.length > 0
       case 'how_to_file':
         return filingMethod !== ''
       case 'review':
         return true
-      case 'generate':
-        return !generating
       default:
         return true
     }
-  }, [currentStep, propertyAddress, disputeDescription, generating, filingMethod])
+  }, [currentStep, propertyAddress, otherPartyName, whatHappened, selectedBases, filingMethod])
+
+  /* ---- Document title ---- */
+
+  const documentTitle = documentType === 'demand_letter' ? 'Demand Letter' : 'Petition'
+  const draftTitle = `Your Property ${documentTitle} Draft`
 
   /* ---- Step rendering ---- */
 
   function renderStep() {
-    const stepId = WIZARD_STEPS[currentStep]?.id
+    const stepId = STEPS[currentStep]?.id
     switch (stepId) {
-      case 'preflight':
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-warm-text">
-              Before you begin, make sure you have the following available:
-            </p>
-            <ul className="space-y-2">
-              {[
-                'The property address and a description of the property',
-                'The other party\'s name and contact information',
-                'Any property surveys, deeds, or title documents',
-                'Photos or documentation of property damage',
-                'Receipts or estimates for repair costs',
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-warm-muted">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-calm-indigo" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs text-warm-muted mt-4">
-              Don&apos;t worry if you don&apos;t have everything. You can save your progress and come back.
-            </p>
-          </div>
-        )
-
-      case 'property_details':
+      case 'intake':
         return (
           <div className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="pw-address" className="text-sm font-medium text-warm-text">
-                Property address
-              </label>
-              <input
-                id="pw-address"
-                type="text"
-                placeholder="e.g. 1234 Main St, Austin, TX 78701"
-                value={propertyAddress}
-                onChange={(e) => setPropertyAddress(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-warm-text">Property type</label>
+              <label className="text-sm font-medium text-warm-text">Property category</label>
               <div className="space-y-2">
                 {[
-                  { value: 'residential', label: 'Residential' },
-                  { value: 'commercial', label: 'Commercial' },
-                  { value: 'land', label: 'Land / Vacant Lot' },
-                ].map((option) => (
-                  <label
-                    key={option.value}
-                    className={`flex items-center gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${
-                      propertyType === option.value
-                        ? 'border-calm-indigo bg-calm-indigo/5'
-                        : 'border-warm-border hover:bg-warm-bg/50'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="pw-property-type"
-                      value={option.value}
-                      checked={propertyType === option.value}
-                      onChange={() => setPropertyType(option.value)}
-                      className="h-4 w-4 shrink-0 border-warm-border text-calm-indigo focus:ring-calm-indigo"
-                    />
-                    <span className="text-sm text-warm-text">{option.label}</span>
+                  { value: 'real', label: 'Real property', desc: 'Land, house, building, or anything attached to land.' },
+                  { value: 'personal', label: 'Personal property', desc: 'Vehicles, equipment, belongings, or other movable items.' },
+                ].map((opt) => (
+                  <label key={opt.value} className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${propertyCategory === opt.value ? 'border-calm-indigo bg-calm-indigo/5' : 'border-warm-border hover:bg-warm-bg/50'}`}>
+                    <input type="radio" name="pw-category" value={opt.value} checked={propertyCategory === opt.value} onChange={() => setPropertyCategory(opt.value)} className="mt-0.5 h-4 w-4 shrink-0 border-warm-border text-calm-indigo focus:ring-calm-indigo" />
+                    <div>
+                      <span className="text-sm font-medium text-warm-text">{opt.label}</span>
+                      <p className="text-xs text-warm-muted mt-0.5">{opt.desc}</p>
+                    </div>
                   </label>
                 ))}
               </div>
             </div>
 
+            {propertyCategory === 'real' && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-warm-text">Property type</label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'residential', label: 'Residential' },
+                    { value: 'commercial', label: 'Commercial' },
+                    { value: 'land', label: 'Land / Vacant Lot' },
+                  ].map((opt) => (
+                    <label key={opt.value} className={`flex items-center gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${propertyType === opt.value ? 'border-calm-indigo bg-calm-indigo/5' : 'border-warm-border hover:bg-warm-bg/50'}`}>
+                      <input type="radio" name="pw-type" value={opt.value} checked={propertyType === opt.value} onChange={() => setPropertyType(opt.value)} className="h-4 w-4 shrink-0 border-warm-border text-calm-indigo focus:ring-calm-indigo" />
+                      <span className="text-sm text-warm-text">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <label htmlFor="pw-ownership" className="text-sm font-medium text-warm-text">
-                Your ownership status
-              </label>
-              <select
-                id="pw-ownership"
-                value={ownershipStatus}
-                onChange={(e) => setOwnershipStatus(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              >
-                <option value="">Select...</option>
-                <option value="owner">I own the property</option>
-                <option value="co_owner">I co-own the property</option>
-                <option value="buyer">I am buying the property</option>
-                <option value="heir">I inherited the property</option>
+              <label htmlFor="pw-address" className="text-sm font-medium text-warm-text">Property location or address</label>
+              <input id="pw-address" type="text" placeholder="e.g. 1234 Main St, Austin, TX 78701" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+              <p className="text-xs text-warm-muted">For personal property, describe where the incident happened.</p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="pw-county" className="text-sm font-medium text-warm-text">County</label>
+              <input id="pw-county" type="text" placeholder="e.g. Travis, Harris, Dallas" value={county} onChange={(e) => setCounty(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="pw-other-party" className="text-sm font-medium text-warm-text">Other party&apos;s name</label>
+              <input id="pw-other-party" type="text" placeholder="e.g. John Smith or Oakwood HOA" value={otherPartyName} onChange={(e) => setOtherPartyName(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-warm-text">Relationship to other party</label>
+              <select value={otherPartyRelationship} onChange={(e) => setOtherPartyRelationship(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo">
+                <option value="neighbor">Neighbor</option>
+                <option value="contractor">Contractor</option>
+                <option value="tenant">Tenant</option>
+                <option value="landlord">Landlord</option>
+                <option value="hoa">HOA</option>
+                <option value="stranger">Stranger</option>
                 <option value="other">Other</option>
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="pw-incident-date" className="text-sm font-medium text-warm-text">When did this happen?</label>
+              <input id="pw-incident-date" type="date" value={incidentDate} onChange={(e) => setIncidentDate(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+              <p className="text-xs text-warm-muted">An approximate date is fine if you are not sure of the exact day.</p>
             </div>
           </div>
         )
 
-      case 'dispute':
+      case 'damage_description':
         return (
           <div className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="pw-description" className="text-sm font-medium text-warm-text">
-                Describe the dispute
-              </label>
-              <textarea
-                id="pw-description"
-                placeholder="What is the core issue? How did it start? What property rights are at stake?"
-                value={disputeDescription}
-                onChange={(e) => setDisputeDescription(e.target.value)}
-                rows={4}
-                className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              />
+              <label htmlFor="pw-what-happened" className="text-sm font-medium text-warm-text">What happened?</label>
+              <textarea id="pw-what-happened" placeholder="Describe the incident or situation in your own words. Take your time." value={whatHappened} onChange={(e) => setWhatHappened(e.target.value)} rows={4} className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="pw-other-party" className="text-sm font-medium text-warm-text">
-                Other party&apos;s name
-              </label>
-              <input
-                id="pw-other-party"
-                type="text"
-                placeholder="e.g. John Smith or Oakwood HOA"
-                value={otherPartyName}
-                onChange={(e) => setOtherPartyName(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              />
+              <label htmlFor="pw-extent" className="text-sm font-medium text-warm-text">How bad is the damage?</label>
+              <textarea id="pw-extent" placeholder="e.g. Fence destroyed, foundation cracked, tree fallen on roof, car scratched..." value={extentOfDamage} onChange={(e) => setExtentOfDamage(e.target.value)} rows={3} className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+              <p className="text-xs text-warm-muted">Include details about what was damaged and how severely.</p>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="pw-actions" className="text-sm font-medium text-warm-text">
-                What did the other party do?
-              </label>
-              <textarea
-                id="pw-actions"
-                placeholder="e.g. Built a fence across my property line, allowed water runoff onto my land, etc."
-                value={otherPartyActions}
-                onChange={(e) => setOtherPartyActions(e.target.value)}
-                rows={3}
-                className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              />
+              <label htmlFor="pw-discovered" className="text-sm font-medium text-warm-text">When did you discover the damage?</label>
+              <input id="pw-discovered" type="date" value={whenDiscovered} onChange={(e) => setWhenDiscovered(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+              <p className="text-xs text-warm-muted">This can be different from when the damage actually occurred.</p>
             </div>
           </div>
         )
@@ -458,98 +466,95 @@ export function PropertyWizard({
       case 'damages':
         return (
           <div className="space-y-5">
-            <p className="text-sm text-warm-muted">
-              Enter any amounts that apply. Leave fields blank if they don&apos;t apply to your case.
-            </p>
+            <p className="text-sm text-warm-muted">Enter any amounts that apply. Leave fields blank if they don&apos;t apply to your case.</p>
 
-            <div className="space-y-2">
-              <label htmlFor="pw-property-damage" className="text-sm font-medium text-warm-text">
-                Property damage
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-warm-muted">$</span>
-                <input
-                  id="pw-property-damage"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={propertyDamageAmount}
-                  onChange={(e) => setPropertyDamageAmount(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-warm-border bg-transparent pl-7 pr-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-                />
+            {[
+              { id: 'pw-repair', label: 'Repair costs', value: repairCosts, setter: setRepairCosts, hint: 'Cost to fix or restore the damaged property.' },
+              { id: 'pw-replacement', label: 'Replacement value', value: replacementValue, setter: setReplacementValue, hint: 'Cost to replace what was damaged beyond repair.' },
+              { id: 'pw-diminished', label: 'Diminished value', value: diminishedValue, setter: setDiminishedValue, hint: 'Reduction in property value caused by the damage.' },
+              { id: 'pw-lost-use', label: 'Lost use', value: lostUse, setter: setLostUse, hint: 'Financial loss from not being able to use the property (e.g., rental income, business revenue).' },
+            ].map((field) => (
+              <div key={field.id} className="space-y-2">
+                <label htmlFor={field.id} className="text-sm font-medium text-warm-text">{field.label}</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-warm-muted">$</span>
+                  <input id={field.id} type="number" min="0" step="0.01" placeholder="0.00" value={field.value} onChange={(e) => field.setter(e.target.value)} className="flex h-9 w-full rounded-md border border-warm-border bg-transparent pl-7 pr-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+                </div>
+                <p className="text-xs text-warm-muted">{field.hint}</p>
               </div>
-              <p className="text-xs text-warm-muted">Damage to the property itself (structures, landscaping, etc.).</p>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="pw-diminished-value" className="text-sm font-medium text-warm-text">
-                Diminished property value
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-warm-muted">$</span>
-                <input
-                  id="pw-diminished-value"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={diminishedValue}
-                  onChange={(e) => setDiminishedValue(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-warm-border bg-transparent pl-7 pr-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-                />
-              </div>
-              <p className="text-xs text-warm-muted">Reduction in property value caused by the dispute (e.g., encroachment, nuisance).</p>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="pw-repair-costs" className="text-sm font-medium text-warm-text">
-                Repair costs
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-warm-muted">$</span>
-                <input
-                  id="pw-repair-costs"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={repairCosts}
-                  onChange={(e) => setRepairCosts(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-warm-border bg-transparent pl-7 pr-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-                />
-              </div>
-              <p className="text-xs text-warm-muted">Cost to repair or restore the property (estimates or invoices).</p>
-            </div>
+            ))}
 
             {totalDamages > 0 && (
               <div className="rounded-lg border border-warm-border bg-calm-indigo/5 p-4">
-                <p className="text-sm font-medium text-warm-text">
-                  Total damages: {formatCurrency(totalDamages)}
-                </p>
+                <p className="text-sm font-medium text-warm-text">Total damages: {formatCurrency(totalDamages)}</p>
               </div>
             )}
           </div>
         )
 
-      case 'venue':
+      case 'evidence':
         return (
           <div className="space-y-5">
-            <div className="space-y-2">
-              <label htmlFor="pw-county" className="text-sm font-medium text-warm-text">
-                Which county is the property located in?
+            <p className="text-sm text-warm-muted">Check the types of evidence you have. You can always gather more later.</p>
+
+            {[
+              { checked: hasPhotos, setter: setHasPhotos, label: 'Photos or videos', desc: 'Images showing the damage or property condition.' },
+              { checked: hasEstimates, setter: setHasEstimates, label: 'Repair estimates', desc: 'Written estimates from contractors or repair professionals.' },
+              { checked: hasReceipts, setter: setHasReceipts, label: 'Receipts or invoices', desc: 'Proof of costs already paid for repairs or cleanup.' },
+              { checked: hasExpertReports, setter: setHasExpertReports, label: 'Expert reports', desc: 'Appraisals, engineering reports, or other professional assessments.' },
+              { checked: hasSurvey, setter: setHasSurvey, label: 'Property survey', desc: 'A survey showing boundary lines and property dimensions.' },
+              { checked: hasTitleInsurance, setter: setHasTitleInsurance, label: 'Title insurance', desc: 'Title insurance may cover certain property disputes.' },
+            ].map((item, i) => (
+              <label key={i} className="flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
+                <input type="checkbox" checked={item.checked} onChange={(e) => item.setter(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo" />
+                <div>
+                  <span className="text-sm text-warm-text">{item.label}</span>
+                  <p className="text-xs text-warm-muted mt-0.5">{item.desc}</p>
+                </div>
               </label>
-              <input
-                id="pw-county"
-                type="text"
-                placeholder="e.g. Travis, Harris, Dallas"
-                value={propertyCounty}
-                onChange={(e) => setPropertyCounty(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-warm-border bg-transparent px-3 py-1 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo"
-              />
-              <p className="text-xs text-warm-muted">
-                Property disputes are typically filed in the county where the property is located.
-              </p>
+            ))}
+
+            <div className="space-y-2">
+              <label htmlFor="pw-evidence-notes" className="text-sm font-medium text-warm-text">Anything else about your evidence?</label>
+              <textarea id="pw-evidence-notes" placeholder="e.g. I have text messages where the neighbor admitted fault..." value={evidenceNotes} onChange={(e) => setEvidenceNotes(e.target.value)} rows={2} className="flex min-h-[60px] w-full rounded-md border border-warm-border bg-transparent px-3 py-2 text-sm text-warm-text shadow-xs placeholder:text-warm-muted/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-calm-indigo" />
+            </div>
+          </div>
+        )
+
+      case 'legal_basis':
+        return (
+          <div className="space-y-5">
+            <p className="text-sm text-warm-muted">Select the legal grounds that apply. You can choose more than one.</p>
+
+            {LEGAL_BASES.map((basis) => (
+              <label key={basis.value} className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${selectedBases.includes(basis.value) ? 'border-calm-indigo bg-calm-indigo/5' : 'border-warm-border hover:bg-warm-bg/50'}`}>
+                <input type="checkbox" checked={selectedBases.includes(basis.value)} onChange={(e) => {
+                  if (e.target.checked) setSelectedBases([...selectedBases, basis.value])
+                  else setSelectedBases(selectedBases.filter((b) => b !== basis.value))
+                }} className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo" />
+                <div>
+                  <span className="text-sm font-medium text-warm-text">{basis.label}</span>
+                  <p className="text-xs text-warm-muted mt-0.5">{basis.desc}</p>
+                </div>
+              </label>
+            ))}
+
+            <div className="space-y-2 pt-2">
+              <label className="text-sm font-medium text-warm-text">What document do you want to generate?</label>
+              <div className="space-y-2">
+                {[
+                  { value: 'demand_letter' as const, label: 'Demand letter', desc: 'A formal letter requesting the other party take action or pay damages. A good first step.' },
+                  { value: 'petition' as const, label: 'Court petition', desc: 'A formal filing with the court to start a lawsuit.' },
+                ].map((opt) => (
+                  <label key={opt.value} className={`flex items-start gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${documentType === opt.value ? 'border-calm-indigo bg-calm-indigo/5' : 'border-warm-border hover:bg-warm-bg/50'}`}>
+                    <input type="radio" name="pw-doc-type" value={opt.value} checked={documentType === opt.value} onChange={() => setDocumentType(opt.value)} className="mt-0.5 h-4 w-4 shrink-0 border-warm-border text-calm-indigo focus:ring-calm-indigo" />
+                    <div>
+                      <span className="text-sm font-medium text-warm-text">{opt.label}</span>
+                      <p className="text-xs text-warm-muted mt-0.5">{opt.desc}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         )
@@ -559,7 +564,7 @@ export function PropertyWizard({
           <FilingMethodStep
             filingMethod={filingMethod}
             onFilingMethodChange={setFilingMethod}
-            county={propertyCounty}
+            county={county}
             courtType={caseData?.court_type || 'district'}
             config={FILING_CONFIGS.property}
             state={caseData?.state}
@@ -571,85 +576,34 @@ export function PropertyWizard({
           <div className="space-y-4">
             <dl className="space-y-4">
               <div>
-                <dt className="text-sm font-medium text-warm-muted">Property address</dt>
-                <dd className="text-warm-text mt-0.5">{propertyAddress || 'Not provided'}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-warm-muted">Property type</dt>
-                <dd className="text-warm-text mt-0.5">
-                  {{ residential: 'Residential', commercial: 'Commercial', land: 'Land / Vacant Lot' }[propertyType] || propertyType}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-warm-muted">Ownership status</dt>
-                <dd className="text-warm-text mt-0.5">
-                  {{ owner: 'Owner', co_owner: 'Co-owner', buyer: 'Buyer', heir: 'Heir', other: 'Other' }[ownershipStatus] || 'Not provided'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-warm-muted">Dispute description</dt>
-                <dd className="text-warm-text mt-0.5">{disputeDescription || 'Not provided'}</dd>
+                <dt className="text-sm font-medium text-warm-muted">Property</dt>
+                <dd className="text-warm-text mt-0.5">{propertyCategory === 'real' ? 'Real property' : 'Personal property'} &mdash; {propertyAddress || 'Not provided'}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-warm-muted">Other party</dt>
-                <dd className="text-warm-text mt-0.5">{otherPartyName || 'Not provided'}</dd>
+                <dd className="text-warm-text mt-0.5">{otherPartyName || 'Not provided'} ({otherPartyRelationship})</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-warm-muted">Other party&apos;s actions</dt>
-                <dd className="text-warm-text mt-0.5">{otherPartyActions || 'Not provided'}</dd>
+                <dt className="text-sm font-medium text-warm-muted">What happened</dt>
+                <dd className="text-warm-text mt-0.5">{whatHappened || 'Not provided'}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-warm-muted">Total damages</dt>
-                <dd className="text-warm-text mt-0.5">
-                  {totalDamages > 0 ? formatCurrency(totalDamages) : 'Not provided'}
-                </dd>
+                <dd className="text-warm-text mt-0.5">{totalDamages > 0 ? formatCurrency(totalDamages) : 'Not provided'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-warm-muted">Legal basis</dt>
+                <dd className="text-warm-text mt-0.5">{selectedBases.length > 0 ? selectedBases.map((b) => LEGAL_BASES.find((lb) => lb.value === b)?.label ?? b).join(', ') : 'Not selected'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-medium text-warm-muted">Document type</dt>
+                <dd className="text-warm-text mt-0.5">{documentTitle}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-warm-muted">Filing county</dt>
-                <dd className="text-warm-text mt-0.5">{propertyCounty || 'Not provided'}</dd>
+                <dd className="text-warm-text mt-0.5">{county || 'Not provided'}</dd>
               </div>
             </dl>
-          </div>
-        )
-
-      case 'generate':
-        return (
-          <div className="space-y-4">
-            {genError && (
-              <div className="rounded-lg border border-red-500 bg-red-50 p-3">
-                <div className="flex gap-2">
-                  <svg className="h-4 w-4 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                  </svg>
-                  <p className="text-sm text-red-800">{genError}</p>
-                </div>
-              </div>
-            )}
-            {generating ? (
-              <div className="flex items-center gap-3 py-12 justify-center">
-                <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
-                <p className="text-sm text-warm-muted">
-                  Generating your property dispute petition... This may take a moment.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-warm-text">
-                  Ready to generate your property dispute petition. Click &quot;Generate My Petition&quot; to proceed.
-                </p>
-                <label className="flex items-start gap-3 cursor-pointer rounded-lg border border-warm-border p-3 transition-colors hover:bg-warm-bg/50">
-                  <input
-                    type="checkbox"
-                    checked={acknowledged}
-                    onChange={(e) => setAcknowledged(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-border text-calm-indigo focus:ring-calm-indigo"
-                  />
-                  <span className="text-sm text-warm-text">
-                    I understand this is a draft document that may need review and modification before filing.
-                  </span>
-                </label>
-              </div>
-            )}
           </div>
         )
 
@@ -658,22 +612,86 @@ export function PropertyWizard({
     }
   }
 
-  /* ---- Render ---- */
+  /* ---- Draft phase layout ---- */
+
+  if (draftPhase) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <Link href={`/case/${caseId}`} className="inline-flex items-center gap-1 text-sm text-warm-muted hover:text-warm-text mb-4">
+          <ChevronLeft className="h-4 w-4" />
+          Back to dashboard
+        </Link>
+
+        <h1 className="text-2xl font-semibold text-warm-text">{draftTitle}</h1>
+        <p className="text-sm text-warm-muted mt-1 mb-6">Review your draft below. You can edit it directly, regenerate it, or download a PDF.</p>
+
+        {genError && (
+          <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3 mb-4">
+            <p className="text-sm text-warm-text">{genError}</p>
+          </div>
+        )}
+
+        {draft ? (
+          <>
+            <AnnotatedDraftViewer
+              draft={draft}
+              annotations={annotations}
+              onDraftChange={setDraft}
+              onRegenerate={async () => { setDraftPhase(false); await generateDraft() }}
+              regenerating={generating}
+              acknowledged={acknowledged}
+              onAcknowledgeChange={setAcknowledged}
+              documentTitle={documentTitle}
+            />
+
+            {acknowledged && (
+              <div className="mt-6">
+                <Button onClick={handleFinalConfirm} disabled={confirming} className="w-full" size="lg">
+                  {confirming ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>) : 'Confirm & Submit'}
+                </Button>
+                <p className="text-xs text-warm-muted text-center mt-2">This saves your document and marks this step as complete.</p>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <button type="button" onClick={() => setDraftPhase(false)} className="text-sm text-warm-muted hover:text-warm-text transition-colors">
+                Go back and edit my information
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-3 py-12 justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
+            <p className="text-sm text-warm-muted">Generating your draft...</p>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  /* ---- Wizard phase layout ---- */
 
   return (
     <WizardShell
       caseId={caseId}
-      title="Prepare Your Property Dispute Petition"
-      steps={WIZARD_STEPS}
+      title={`Prepare Your Property ${documentTitle}`}
+      steps={STEPS}
       currentStep={currentStep}
       onStepChange={setCurrentStep}
       onSave={handleSave}
       onComplete={handleComplete}
       canAdvance={canAdvance}
-      totalEstimateMinutes={21}
-      completeButtonLabel={generating ? 'Generating...' : 'Generate My Petition'}
+      totalEstimateMinutes={totalEstimateMinutes}
+      completeButtonLabel={generating ? 'Generating...' : `Generate My ${documentTitle}`}
     >
-      {renderStep()}
+      {generating ? (
+        <div className="flex items-center gap-3 py-12 justify-center">
+          <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
+          <p className="text-sm text-warm-muted">Generating your {documentTitle.toLowerCase()}... This may take a moment.</p>
+        </div>
+      ) : (
+        renderStep()
+      )}
     </WizardShell>
   )
 }

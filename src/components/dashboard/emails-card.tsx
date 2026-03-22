@@ -14,10 +14,10 @@ export function EmailsCard({ caseId }: EmailsCardProps) {
     <Card>
       <CardContent className="pt-4 pb-3">
         <div className="flex items-center gap-2 mb-2">
-          <Mail className="h-4 w-4" style={{ color: '#78716C' }} />
-          <h3 className="text-sm font-semibold" style={{ color: '#1C1917' }}>Email Monitor</h3>
+          <Mail className="h-4 w-4 text-warm-muted" />
+          <h3 className="text-sm font-semibold text-warm-text">Email Monitor</h3>
         </div>
-        <p className="text-xs mb-3" style={{ color: '#78716C' }}>
+        <p className="text-xs mb-3 text-warm-muted">
           Monitor opposing counsel communications. Connect your Gmail to automatically track and organize case-related emails.
         </p>
         <Button variant="outline" size="sm" className="w-full" asChild>

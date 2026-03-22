@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SupportiveHeader } from '@/components/layout/supportive-header'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { DiscoveryListView } from '@/components/discovery/discovery-list-view'
+import { MeetingPrepCenter } from '@/components/discovery/meeting-prep-center'
 import { Button } from '@/components/ui/button'
 import type { DiscoveryPack } from '@/components/discovery/types'
 
@@ -14,11 +15,12 @@ export default async function DiscoveryPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: packs, error } = await supabase
-    .from('discovery_packs')
-    .select('*')
-    .eq('case_id', id)
-    .order('created_at', { ascending: false })
+  const [packsResult, caseResult] = await Promise.all([
+    supabase.from('discovery_packs').select('*').eq('case_id', id).order('created_at', { ascending: false }),
+    supabase.from('cases').select('id, description, case_number').eq('id', id).single(),
+  ])
+
+  const { data: packs, error } = packsResult
 
   if (error) {
     return (
@@ -49,10 +51,18 @@ export default async function DiscoveryPage({
           </Button>
         </div>
 
-        <DiscoveryListView
+        <MeetingPrepCenter
           caseId={id}
-          initialPacks={(packs ?? []) as DiscoveryPack[]}
+          caseName={caseResult.data?.description ?? 'Untitled Case'}
+          caseNumber={caseResult.data?.case_number ?? undefined}
         />
+
+        <div className="mt-6">
+          <DiscoveryListView
+            caseId={id}
+            initialPacks={(packs ?? []) as DiscoveryPack[]}
+          />
+        </div>
 
         <LegalDisclaimer />
       </main>

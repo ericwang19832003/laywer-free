@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface RateLimitEntry {
   timestamps: number[]
@@ -65,7 +66,46 @@ export function rateLimitResponse(retryAfterMs: number): NextResponse {
 
 // Pre-configured rate limit tiers
 export const RATE_LIMITS = {
-  ai: { maxRequests: 10, windowMs: 60 * 60 * 1000 },      // 10/hour
-  email: { maxRequests: 5, windowMs: 60 * 60 * 1000 },     // 5/hour
-  standard: { maxRequests: 60, windowMs: 60 * 1000 },      // 60/min
+  ai: { maxRequests: 10, windowMs: 60 * 60 * 1000, distributed: true },      // 10/hour
+  email: { maxRequests: 5, windowMs: 60 * 60 * 1000, distributed: true },     // 5/hour
+  standard: { maxRequests: 60, windowMs: 60 * 1000, distributed: false },     // 60/min
 } as const
+
+/**
+ * Distributed rate limiting backed by Supabase `rate_limits` table.
+ * Uses the `increment_rate_limit` RPC for atomic check-and-increment.
+ * Falls back to in-memory `checkRateLimit` if the DB call fails.
+ */
+export async function checkDistributedRateLimit(
+  supabase: SupabaseClient,
+  userId: string,
+  endpoint: string,
+  maxRequests: number,
+  windowMs: number
+): Promise<{ allowed: boolean; retryAfterMs: number }> {
+  try {
+    const windowStart = new Date(
+      Math.floor(Date.now() / windowMs) * windowMs
+    ).toISOString()
+
+    // Atomic upsert + increment via RPC
+    const { data: count, error } = await supabase.rpc('increment_rate_limit', {
+      p_user_id: userId,
+      p_endpoint: endpoint,
+      p_window_start: windowStart,
+    })
+
+    if (error) throw error
+
+    if (count > maxRequests) {
+      const windowEnd = Math.floor(Date.now() / windowMs) * windowMs + windowMs
+      const retryAfterMs = windowEnd - Date.now()
+      return { allowed: false, retryAfterMs: Math.max(retryAfterMs, 1000) }
+    }
+
+    return { allowed: true, retryAfterMs: 0 }
+  } catch {
+    // Fallback to in-memory rate limiting on any DB failure
+    return checkRateLimit(userId, endpoint, maxRequests, windowMs)
+  }
+}

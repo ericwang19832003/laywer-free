@@ -908,6 +908,60 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Note the appeal deadline',
     ],
   },
+  fdcpa_check: {
+    why: 'If a debt collector violated federal law, you may have additional defenses or even a counterclaim worth up to $1,000 in statutory damages.',
+    checklist: [
+      'Dates and times of collector calls',
+      'Notes about what the collector said',
+      'Any voicemails or written communications',
+    ],
+    tip: 'Even one violation can strengthen your defense significantly.',
+  },
+  debt_sol_check: {
+    why: 'In Texas, creditors have a limited time to sue. If the statute of limitations has expired, they cannot legally collect through the courts.',
+    checklist: [
+      'Date of last payment on the account',
+      'Date the account went into default',
+      'Type of debt (credit card, medical, loan, etc.)',
+    ],
+    tip: 'The clock typically starts from your last payment or the default date — whichever is later.',
+  },
+  debt_answer_prep: {
+    why: 'A well-prepared answer is your most important defense. It prevents default judgment and puts the burden on the creditor to prove their case.',
+    checklist: [
+      'The plaintiff\'s petition or complaint',
+      'Your FDCPA check results',
+      'Your statute of limitations calculation',
+      'Any validation response from the collector',
+    ],
+  },
+  lt_repair_request: {
+    why: 'Under Texas Property Code § 92.052, your landlord must make a diligent effort to repair conditions that materially affect your health or safety.',
+    checklist: [
+      'Photos or video of the repair issue',
+      'Dates when the issue started',
+      'Any prior communication with your landlord',
+    ],
+    tip: 'Written notice is required before your landlord\'s duty to repair kicks in.',
+  },
+  lt_eviction_response: {
+    why: 'You have legal rights when facing eviction. Many evictions can be contested, delayed, or resolved through negotiation.',
+    checklist: [
+      'The eviction notice or court citation',
+      'Your lease agreement',
+      'Rent payment records',
+      'Any evidence of landlord retaliation or habitability issues',
+    ],
+    tip: 'Never ignore an eviction notice. Responding on time preserves all your rights.',
+  },
+  lt_habitability_checklist: {
+    why: 'Documenting habitability issues strengthens your case and may give you leverage in negotiations or court.',
+    checklist: [
+      'Photos of each habitability issue with timestamps',
+      'A written log of when issues started',
+      'Copies of any repair requests sent to your landlord',
+    ],
+  },
 
   // --- Family: Divorce ---
   divorce_intake: {

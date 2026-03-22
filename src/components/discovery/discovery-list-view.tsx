@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import { PlusIcon, FolderOpenIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DiscoveryPack } from './types'
@@ -168,11 +169,16 @@ export function DiscoveryListView({ caseId, initialPacks }: DiscoveryListViewPro
       {/* Pack list */}
       {packs.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center">
-            <FolderOpenIcon className="size-8 text-warm-muted mx-auto mb-3" />
-            <p className="text-warm-muted">
-              No discovery packs yet. Create one to get started.
-            </p>
+          <CardContent className="py-8">
+            <EmptyState
+              illustration="folder"
+              title="No discovery packs yet"
+              description="Create a discovery pack to organize your interrogatories, requests for production, and other discovery documents."
+              action={{
+                label: 'Create Discovery Pack',
+                onClick: () => setShowCreate(true),
+              }}
+            />
           </CardContent>
         </Card>
       ) : (

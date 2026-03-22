@@ -8,6 +8,7 @@ import { WaitForAnswerStep } from '@/components/step/wait-for-answer-step'
 import { CheckDocketForAnswerStep } from '@/components/step/check-docket-for-answer-step'
 import { PrepareFilingStep } from '@/components/step/prepare-filing-step'
 import { PetitionWizard } from '@/components/step/petition-wizard'
+import { PetitionWizardEnhanced } from '@/components/step/petition-wizard-enhanced'
 import { FileWithCourtStep } from '@/components/step/file-with-court-step'
 import { DiscoveryStarterPackStep } from '@/components/step/discovery-starter-pack-step'
 import { UnderstandRemovalStep } from '@/components/step/understand-removal-step'
@@ -65,6 +66,15 @@ import { ServePlaintiffStep } from '@/components/step/debt-defense/serve-plainti
 import { DebtHearingPrepStep } from '@/components/step/debt-defense/debt-hearing-prep-step'
 import { DebtHearingDayStep } from '@/components/step/debt-defense/debt-hearing-day-step'
 import { DebtPostJudgmentStep } from '@/components/step/debt-defense/debt-post-judgment-step'
+// Debt defense depth guided-step configs
+import { fdcpaCheckConfig } from '@/lib/guided-steps/debt-defense/fdcpa-check'
+import { debtSolCheckConfig } from '@/lib/guided-steps/debt-defense/debt-sol-check'
+import { debtAnswerPrepConfig } from '@/lib/guided-steps/debt-defense/debt-answer-prep'
+import { debtHearingPrepDeepConfig } from '@/lib/guided-steps/debt-defense/debt-hearing-prep-deep'
+// Landlord-tenant depth guided-step configs
+import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
+import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
+import { ltHabitabilityChecklistConfig } from '@/lib/guided-steps/landlord-tenant/lt-habitability-checklist'
 import { PIIntakeStep } from '@/components/step/personal-injury/pi-intake-step'
 import { PIDemandLetterStep } from '@/components/step/personal-injury/pi-demand-letter-step'
 import { PersonalInjuryWizard } from '@/components/step/personal-injury-wizard'
@@ -107,6 +117,7 @@ import { propertyReviewAnswerConfig } from '@/lib/guided-steps/property/property
 import { propertyDiscoveryConfig } from '@/lib/guided-steps/property/property-discovery'
 import { propertyPostResolutionConfig } from '@/lib/guided-steps/property/property-post-resolution'
 import { REIntakeStep } from '@/components/step/real-estate/re-intake-step'
+import { RealEstateWizard } from '@/components/step/real-estate/real-estate-wizard'
 import { reEvidenceVaultConfig } from '@/lib/guided-steps/real-estate/re-evidence-vault'
 import { reDemandLetterConfig } from '@/lib/guided-steps/real-estate/re-demand-letter'
 import { reNegotiationConfig } from '@/lib/guided-steps/real-estate/re-negotiation'
@@ -116,6 +127,9 @@ import { reWaitForAnswerConfig } from '@/lib/guided-steps/real-estate/re-wait-fo
 import { reReviewAnswerConfig } from '@/lib/guided-steps/real-estate/re-review-answer'
 import { reDiscoveryConfig } from '@/lib/guided-steps/real-estate/re-discovery'
 import { rePostResolutionConfig } from '@/lib/guided-steps/real-estate/re-post-resolution'
+
+// Business: shared wizard
+import { BusinessWizard } from '@/components/step/business/business-wizard'
 
 // Business: Partnership
 import { BizPartnershipIntakeStep } from '@/components/step/business/biz-partnership-intake-step'
@@ -315,7 +329,7 @@ export default async function StepPage({
       }
 
       return (
-        <PetitionWizard
+        <PetitionWizardEnhanced
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
@@ -904,6 +918,13 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Landlord-tenant depth steps
+    case 'lt_repair_request':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltRepairRequestConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_eviction_response':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltEvictionResponseConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_habitability_checklist':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltHabitabilityChecklistConfig} existingAnswers={task.metadata?.guided_answers} skippable />
 
     // Debt defense task chain steps
     case 'debt_defense_intake':
@@ -948,6 +969,13 @@ export default async function StepPage({
       return <DebtFileWithCourtStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'serve_plaintiff':
       return <ServePlaintiffStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    // Debt defense depth steps
+    case 'fdcpa_check':
+      return <GuidedStep caseId={id} taskId={taskId} config={fdcpaCheckConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_sol_check':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtSolCheckConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_answer_prep':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtAnswerPrepConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'debt_hearing_prep':
       return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':
@@ -1154,33 +1182,30 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={reNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 're_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
+        .from('cases').select('court_type, county, state').eq('id', id).single()
       const { data: reIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 're_intake').maybeSingle()
       const reIntakeMeta = reIntakeTask?.metadata as Record<string, unknown> | null
-      const governmentEntity = (reIntakeMeta?.government_entity as boolean) ?? false
-
-      if (!caseRow || caseRow.court_type === 'unknown') {
-        return (
-          <div className="max-w-2xl mx-auto px-4 py-8">
-            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
-            <Card><CardContent className="pt-6 text-center py-12">
-              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
-              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
-            </CardContent></Card>
-          </div>
-        )
-      }
 
       return (
-        <PetitionWizard
+        <RealEstateWizard
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
-          caseData={{
-            ...caseRow,
-            government_entity: governmentEntity,
-          }}
+          reDetails={reIntakeMeta ? {
+            property_address: (reIntakeMeta.property_address as string) ?? null,
+            property_type: (reIntakeMeta.property_type as string) ?? null,
+            purchase_price: (reIntakeMeta.purchase_price as number) ?? null,
+            other_party_name: (reIntakeMeta.other_party_name as string) ?? null,
+            other_party_role: (reIntakeMeta.other_party_role as string) ?? null,
+            dispute_description: (reIntakeMeta.dispute_description as string) ?? null,
+            damages_sought: (reIntakeMeta.damages_sought as number) ?? null,
+            transaction_date: (reIntakeMeta.transaction_date as string) ?? null,
+            has_purchase_agreement: (reIntakeMeta.has_purchase_agreement as boolean) ?? false,
+            has_title_insurance: (reIntakeMeta.has_title_insurance as boolean) ?? false,
+            has_inspection_report: (reIntakeMeta.has_inspection_report as boolean) ?? false,
+          } : null}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'district', state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -1214,33 +1239,24 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipAdrConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'biz_partnership_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: bizIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_partnership_intake').maybeSingle()
       const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
-      const governmentEntity = (bizIntakeMeta?.government_entity as boolean) ?? false
-
-      if (!caseRow || caseRow.court_type === 'unknown') {
-        return (
-          <div className="max-w-2xl mx-auto px-4 py-8">
-            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
-            <Card><CardContent className="pt-6 text-center py-12">
-              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
-              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
-            </CardContent></Card>
-          </div>
-        )
-      }
-
       return (
-        <PetitionWizard
+        <BusinessWizard
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
-          caseData={{
-            ...caseRow,
-            government_entity: governmentEntity,
+          businessDetails={{
+            business_sub_type: 'partnership',
+            specific_dispute_type: bizIntakeMeta?.specific_dispute_type as string | undefined,
+            business_name: bizIntakeMeta?.business_name as string | undefined,
+            other_party_name: bizIntakeMeta?.partner_names as string | undefined,
+            dispute_description: bizIntakeMeta?.dispute_description as string | undefined,
+            damages_sought: bizIntakeMeta?.damages_sought as number | undefined,
           }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? null, state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -1277,33 +1293,23 @@ export default async function StepPage({
     }
     case 'biz_employment_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: bizIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_employment_intake').maybeSingle()
       const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
-      const governmentEntity = (bizIntakeMeta?.government_entity as boolean) ?? false
-
-      if (!caseRow || caseRow.court_type === 'unknown') {
-        return (
-          <div className="max-w-2xl mx-auto px-4 py-8">
-            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
-            <Card><CardContent className="pt-6 text-center py-12">
-              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
-              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
-            </CardContent></Card>
-          </div>
-        )
-      }
-
       return (
-        <PetitionWizard
+        <BusinessWizard
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
-          caseData={{
-            ...caseRow,
-            government_entity: governmentEntity,
+          businessDetails={{
+            business_sub_type: 'employment',
+            specific_dispute_type: bizIntakeMeta?.specific_dispute_type as string | undefined,
+            other_party_name: bizIntakeMeta?.employer_name as string | undefined,
+            dispute_description: bizIntakeMeta?.dispute_description as string | undefined,
+            damages_sought: bizIntakeMeta?.damages_sought as number | undefined,
           }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? null, state: caseRow?.state ?? undefined }}
         />
       )
     }
@@ -1335,33 +1341,24 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={bizB2bNegotiationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'biz_b2b_prepare_filing': {
       const { data: caseRow } = await supabase
-        .from('cases').select('role, court_type, county, dispute_type, state').eq('id', id).single()
+        .from('cases').select('county, court_type, state').eq('id', id).single()
       const { data: bizIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_b2b_intake').maybeSingle()
       const bizIntakeMeta = bizIntakeTask?.metadata as Record<string, unknown> | null
-      const governmentEntity = (bizIntakeMeta?.government_entity as boolean) ?? false
-
-      if (!caseRow || caseRow.court_type === 'unknown') {
-        return (
-          <div className="max-w-2xl mx-auto px-4 py-8">
-            <Link href={`/case/${id}`} className="text-sm text-warm-muted hover:text-warm-text mb-6 inline-block">&larr; Back to dashboard</Link>
-            <Card><CardContent className="pt-6 text-center py-12">
-              <h2 className="text-lg font-semibold text-warm-text mb-2">Court type needed</h2>
-              <p className="text-sm text-warm-muted">Complete the intake step first so we know which court you are filing in.</p>
-            </CardContent></Card>
-          </div>
-        )
-      }
-
       return (
-        <PetitionWizard
+        <BusinessWizard
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
-          caseData={{
-            ...caseRow,
-            government_entity: governmentEntity,
+          businessDetails={{
+            business_sub_type: 'b2b_commercial',
+            specific_dispute_type: bizIntakeMeta?.specific_dispute_type as string | undefined,
+            other_party_name: bizIntakeMeta?.other_business_name as string | undefined,
+            business_name: bizIntakeMeta?.other_business_name as string | undefined,
+            dispute_description: bizIntakeMeta?.dispute_description as string | undefined,
+            damages_sought: bizIntakeMeta?.damages_sought as number | undefined,
           }}
+          caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? null, state: caseRow?.state ?? undefined }}
         />
       )
     }

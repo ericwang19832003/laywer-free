@@ -41,7 +41,10 @@ export async function middleware(request: NextRequest) {
   if (!isWebhook && (method === 'POST' || method === 'PATCH' || method === 'PUT' || method === 'DELETE')) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
-    if (origin && origin !== 'null' && host) {
+    if (origin === 'null') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (origin && host) {
       try {
         const originHost = new URL(origin).host
         if (originHost !== host) {

@@ -3,6 +3,7 @@ import { WorkflowSidebar } from '@/components/case/workflow-sidebar'
 import { MobileSidebarDrawer } from '@/components/case/mobile-sidebar-drawer'
 import { ContextSidebar } from '@/components/case/context-sidebar'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { BottomNav } from '@/components/layout/bottom-nav'
 import { WORKFLOW_PHASES } from '@/lib/workflow-phases'
 import type { SidebarTask } from '@/components/case/workflow-sidebar'
 
@@ -68,7 +69,6 @@ export default async function CaseLayout({
   }))
 
   const disputeType = caseRow?.dispute_type ?? 'civil'
-  // Family and business cases use sub-type-specific phases
   const phaseKey = disputeType === 'business' && businessDetails?.business_sub_type
     ? businessDetails.business_sub_type
     : disputeType === 'family' && familyDetails?.family_sub_type
@@ -76,7 +76,6 @@ export default async function CaseLayout({
       : disputeType
   const phases = WORKFLOW_PHASES[phaseKey] ?? WORKFLOW_PHASES['civil']
 
-  // Determine current task_key (first actionable task)
   const currentTaskKey =
     taskList.find(
       (t) => t.status === 'in_progress' || t.status === 'needs_review'
@@ -86,12 +85,12 @@ export default async function CaseLayout({
 
   return (
     <>
-      <div className="flex min-h-[calc(100vh-3.5rem)] pb-20 md:pb-0">
+      <div className="flex min-h-[calc(100vh-3.5rem)] pb-24 lg:pb-0">
         <aside className="hidden lg:block w-64 shrink-0 bg-warm-bg shadow-[1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
           <WorkflowSidebar caseId={id} tasks={taskList} phases={phases} />
         </aside>
 
-        <main className="flex-1 min-w-0 bg-warm-bg">
+        <main className="flex-1 min-w-0 bg-warm-bg" id="main-content">
           {children}
         </main>
 
@@ -110,6 +109,7 @@ export default async function CaseLayout({
         <MobileSidebarDrawer caseId={id} tasks={taskList} phases={phases} />
       </div>
       <MobileNav caseId={id} />
+      <BottomNav caseId={id} />
     </>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { PetitionWizard } from '../petition-wizard'
+import { PetitionWizardEnhanced } from '../petition-wizard-enhanced'
 
 interface REWizardProps {
   caseId: string
@@ -22,7 +22,7 @@ export function REWizard({
   caseData,
 }: REWizardProps) {
   return (
-    <PetitionWizard
+    <PetitionWizardEnhanced
       caseId={caseId}
       taskId={taskId}
       existingMetadata={existingMetadata}

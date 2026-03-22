@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { computeAndStoreCaseHealth } from '@/lib/rules/compute-case-health'
 import { evaluateHealthAlert, insertHealthAlertIfNeeded } from '@/lib/rules/health-alert'
 import { safeError } from '@/lib/security/safe-log'
+import { safeEquals } from '@/lib/security/timing-safe'
+import { logger, metrics, METRIC } from '@/lib/observability'
 
 const BATCH_SIZE = 5
 const PAGE_SIZE = 1000
@@ -13,9 +15,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
   }
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (!safeEquals(authHeader ?? '', `Bearer ${cronSecret}`)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const startTime = Date.now()
+  logger.info('cron.health started')
 
   const supabase = createAdminClient()
   const now = new Date()
@@ -94,6 +99,15 @@ export async function GET(request: NextRequest) {
         safeError('cron/health', err)
       }
     }
+  }
+
+  const durationMs = Date.now() - startTime
+  logger.info('cron.health completed', { processed: allCases.length, succeeded, failed, healthAlertsTriggered, durationMs })
+  metrics.timing(METRIC.AI_GENERATION_DURATION, durationMs, { cron: 'health' })
+  if (failed > 0) {
+    metrics.increment(METRIC.CRON_RUN_ERROR, { cron: 'health' })
+  } else {
+    metrics.increment(METRIC.CRON_RUN_SUCCESS, { cron: 'health' })
   }
 
   return NextResponse.json({

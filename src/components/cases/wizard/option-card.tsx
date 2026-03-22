@@ -3,17 +3,21 @@ interface OptionCardProps {
   description?: string
   selected: boolean
   onClick: () => void
+  disabled?: boolean
 }
 
-export function OptionCard({ label, description, selected, onClick }: OptionCardProps) {
+export function OptionCard({ label, description, selected, onClick, disabled }: OptionCardProps) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={`w-full rounded-md border px-4 py-3 text-left transition-colors ${
-        selected
-          ? 'border-primary bg-primary/5 text-primary'
-          : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+        disabled
+          ? 'border-warm-border text-warm-muted/50 cursor-not-allowed'
+          : selected
+            ? 'border-primary bg-primary/5 text-primary'
+            : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
       }`}
     >
       <span className="text-sm font-medium">{label}</span>

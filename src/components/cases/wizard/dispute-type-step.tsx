@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { DisputeType } from '@/lib/rules/court-recommendation'
 import type { State } from '@/lib/schemas/case'
 import { getSmallClaimsMax } from '@/lib/states'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import { OptionCard } from './option-card'
 
 interface DisputeOption {
@@ -9,13 +10,23 @@ interface DisputeOption {
   value: DisputeType
   label: string
   description: string
+  comingSoon?: boolean
+}
+
+/** Maps dispute option ids to their feature flags (only gated types) */
+const GATED_TYPES: Record<string, Parameters<typeof isFeatureEnabled>[0]> = {
+  contract: 'wizard_contract',
+  property: 'wizard_property',
+  real_estate: 'wizard_real_estate',
+  business: 'wizard_business',
+  other: 'wizard_other',
 }
 
 function getDisputeOptions(selectedState: State): DisputeOption[] {
   const limit = getSmallClaimsMax(selectedState)
   const limitFormatted = `$${limit.toLocaleString()}`
 
-  return [
+  const options: DisputeOption[] = [
     { id: 'debt_collection', value: 'debt_collection', label: 'Debt dispute', description: 'Debt collection, credit card lawsuit, or money owed to you' },
     { id: 'landlord_tenant', value: 'landlord_tenant', label: 'Landlord-tenant issue', description: 'Lease, eviction, repairs, or deposit dispute' },
     { id: 'personal_injury', value: 'personal_injury', label: 'Personal injury', description: 'Accident, negligence, or injury claims' },
@@ -28,6 +39,13 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
     { id: 'small_claims', value: 'small_claims', label: 'Small claim', description: `General dispute under ${limitFormatted} that doesn\u2019t fit above` },
     { id: 'other', value: 'other', label: 'Something else', description: "Doesn't fit the categories above" },
   ]
+  return options.map((opt) => {
+    const flag = GATED_TYPES[opt.id]
+    return {
+      ...opt,
+      comingSoon: flag ? !isFeatureEnabled(flag) : false,
+    }
+  })
 }
 
 interface DisputeTypeStepProps {
@@ -55,13 +73,20 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
       <p className="text-xs text-warm-muted">Choose the category that best describes your situation. We&apos;ll ask follow-up questions to narrow it down.</p>
       <div className="space-y-2">
         {options.map((opt) => (
-          <OptionCard
-            key={opt.id}
-            label={opt.label}
-            description={opt.description}
-            selected={selectedId === opt.id}
-            onClick={() => handleSelect(opt)}
-          />
+          <div key={opt.id} className="relative">
+            <OptionCard
+              label={opt.label}
+              description={opt.description}
+              selected={selectedId === opt.id}
+              onClick={() => !opt.comingSoon && handleSelect(opt)}
+              disabled={opt.comingSoon}
+            />
+            {opt.comingSoon && (
+              <span className="absolute top-3 right-3 text-[11px] font-medium text-calm-indigo bg-calm-indigo/10 px-2 py-0.5 rounded-full">
+                Coming soon
+              </span>
+            )}
+          </div>
         ))}
       </div>
     </div>

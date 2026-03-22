@@ -23,6 +23,12 @@ const SKIPPABLE_TASKS = new Set([
   'contract_demand_letter',
   'contract_negotiation',
   'contract_mediation',
+  'fdcpa_check',
+  'debt_sol_check',
+  'debt_answer_prep',
+  'lt_repair_request',
+  'lt_eviction_response',
+  'lt_habitability_checklist',
 ])
 
 interface NextStepCardProps {

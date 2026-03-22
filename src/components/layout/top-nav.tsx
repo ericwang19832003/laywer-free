@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Scale } from 'lucide-react'
+import { Search, Scale, BookOpen } from 'lucide-react'
 import { Breadcrumbs } from './breadcrumbs'
 import { NotificationCenter } from './notification-center'
 import { UserMenu } from './user-menu'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useState, useEffect } from 'react'
 import { CommandPalette } from '@/components/search/command-palette'
 
@@ -35,6 +36,14 @@ export function TopNav() {
             <span className="hidden sm:inline">Lawyer Free</span>
           </Link>
 
+          <Link
+            href="/learn"
+            className="mr-4 flex items-center gap-1.5 text-sm text-warm-muted hover:text-warm-text whitespace-nowrap transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            <span className="hidden md:inline">Learn</span>
+          </Link>
+
           <div className="flex-1 min-w-0">
             <Breadcrumbs />
           </div>
@@ -47,6 +56,7 @@ export function TopNav() {
             >
               <Search className="h-4 w-4" />
             </button>
+            <ThemeToggle />
             <NotificationCenter />
             <UserMenu />
           </div>

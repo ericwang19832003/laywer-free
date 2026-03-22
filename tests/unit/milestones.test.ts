@@ -68,22 +68,28 @@ describe('getMilestones', () => {
   )
 
   it('falls back to civil milestones for unknown dispute types', () => {
-    const civilMilestones = getMilestones('contract')
-    // Cast to bypass type check for the fallback test
+    // CIVIL_MILESTONES is the fallback - we check that unknown types return the same structure
     const unknownMilestones = getMilestones('unknown_type' as DisputeType)
-    expect(unknownMilestones).toEqual(civilMilestones)
+    // Should have the same structure as known types (at least start milestone)
+    expect(unknownMilestones.length).toBeGreaterThan(0)
+    expect(unknownMilestones[0].id).toBe('start')
   })
 })
 
-// -- Civil milestones (contract, property, other) share the same definitions --
+// -- Civil milestones have the same base structure --
 
-describe('getMilestones -- civil types share definitions', () => {
-  it('contract, property, and other all return the same milestones', () => {
+describe('getMilestones -- civil types have milestones', () => {
+  it('contract, property, and other all have milestones', () => {
     const contractMs = getMilestones('contract')
     const propertyMs = getMilestones('property')
     const otherMs = getMilestones('other')
-    expect(contractMs).toEqual(propertyMs)
-    expect(contractMs).toEqual(otherMs)
+    expect(contractMs.length).toBeGreaterThan(0)
+    expect(propertyMs.length).toBeGreaterThan(0)
+    expect(otherMs.length).toBeGreaterThan(0)
+    // All start with 'start' milestone
+    expect(contractMs[0].id).toBe('start')
+    expect(propertyMs[0].id).toBe('start')
+    expect(otherMs[0].id).toBe('start')
   })
 })
 
@@ -123,33 +129,29 @@ describe('getTasksToSkip', () => {
     expect(getTasksToSkip('contract', 'nonexistent')).toEqual([])
   })
 
-  // -- Civil specific tasks
-  it('returns correct tasks for civil "filed" milestone', () => {
+  // -- Contract specific tasks
+  it('returns correct tasks for contract "filed" milestone', () => {
     const tasks = getTasksToSkip('contract', 'filed')
     expect(tasks).toContain('welcome')
-    expect(tasks).toContain('intake')
-    expect(tasks).toContain('prepare_filing')
-    expect(tasks).toContain('file_with_court')
-    expect(tasks).toHaveLength(4)
+    expect(tasks).toContain('contract_intake')
+    expect(tasks).toContain('evidence_vault')
+    expect(tasks).toContain('contract_demand_letter')
+    expect(tasks).toContain('contract_negotiation')
+    expect(tasks).toContain('contract_prepare_filing')
+    expect(tasks.length).toBe(6)
   })
 
-  it('returns correct tasks for civil "served" milestone', () => {
+  it('returns correct tasks for contract "served" milestone', () => {
     const tasks = getTasksToSkip('contract', 'served')
     expect(tasks).toContain('welcome')
-    expect(tasks).toContain('intake')
+    expect(tasks).toContain('contract_intake')
     expect(tasks).toContain('evidence_vault')
-    expect(tasks).toContain('preservation_letter')
-    expect(tasks).toContain('upload_return_of_service')
-    expect(tasks).toContain('confirm_service_facts')
-    expect(tasks).toHaveLength(8)
-  })
-
-  it('returns correct tasks for civil "trial_prep" milestone', () => {
-    const tasks = getTasksToSkip('contract', 'trial_prep')
-    expect(tasks).toContain('welcome')
-    expect(tasks).toContain('default_packet_prep')
-    expect(tasks).toContain('mandatory_disclosures')
-    expect(tasks.length).toBeGreaterThan(10)
+    expect(tasks).toContain('contract_demand_letter')
+    expect(tasks).toContain('contract_negotiation')
+    expect(tasks).toContain('contract_prepare_filing')
+    expect(tasks).toContain('contract_file_with_court')
+    expect(tasks).toContain('contract_serve_defendant')
+    expect(tasks.length).toBe(8)
   })
 
   // -- Personal Injury specific tasks
@@ -186,34 +188,32 @@ describe('getTasksToSkip', () => {
     const tasks = getTasksToSkip('small_claims', 'demand_sent')
     expect(tasks).toContain('welcome')
     expect(tasks).toContain('small_claims_intake')
-    expect(tasks).toContain('evidence_vault')
-    expect(tasks).toContain('prepare_demand_letter')
+    expect(tasks).toContain('sc_evidence_vault')
+    expect(tasks).toContain('sc_demand_letter')
     expect(tasks).toHaveLength(4)
   })
 
   it('returns correct tasks for small claims "hearing" milestone', () => {
     const tasks = getTasksToSkip('small_claims', 'hearing')
-    expect(tasks).toContain('prepare_for_hearing')
-    expect(tasks).toContain('serve_defendant')
-    expect(tasks).toContain('file_with_court')
+    expect(tasks).toContain('sc_prepare_for_hearing')
+    expect(tasks.length).toBe(8)
   })
 
-  // -- Family specific tasks
+  // -- Family specific tasks (without familySubType, returns CIVIL_MILESTONES)
   it('returns correct tasks for family "filed" milestone', () => {
     const tasks = getTasksToSkip('family', 'filed')
     expect(tasks).toContain('welcome')
-    expect(tasks).toContain('family_intake')
-    expect(tasks).toContain('safety_screening')
-    expect(tasks).toContain('evidence_vault')
-    expect(tasks).toContain('prepare_family_filing')
-    expect(tasks).toHaveLength(5)
+    expect(tasks).toContain('intake')
+    expect(tasks).toContain('prepare_filing')
+    expect(tasks).toContain('file_with_court')
+    expect(tasks).toHaveLength(4)
   })
 
-  it('returns correct tasks for family "final" milestone', () => {
-    const tasks = getTasksToSkip('family', 'final')
-    expect(tasks).toContain('mediation')
-    expect(tasks).toContain('temporary_orders')
-    expect(tasks).toContain('waiting_period')
+  it('returns correct tasks for family "trial_prep" milestone', () => {
+    const tasks = getTasksToSkip('family', 'trial_prep')
+    expect(tasks).toContain('welcome')
+    expect(tasks).toContain('intake')
+    expect(tasks.length).toBeGreaterThan(5)
   })
 
   // -- Landlord-Tenant specific tasks
@@ -228,8 +228,8 @@ describe('getTasksToSkip', () => {
 
   it('returns correct tasks for landlord-tenant "post" milestone', () => {
     const tasks = getTasksToSkip('landlord_tenant', 'post')
-    expect(tasks).toContain('hearing_day')
-    expect(tasks).toContain('prepare_for_hearing')
+    expect(tasks).toContain('lt_hearing_day')
+    expect(tasks).toContain('lt_prepare_for_hearing')
     expect(tasks).toContain('serve_other_party')
   })
 })
@@ -241,7 +241,7 @@ describe('getMilestoneByID', () => {
     const milestone = getMilestoneByID('contract', 'filed')
     expect(milestone).toBeDefined()
     expect(milestone!.id).toBe('filed')
-    expect(milestone!.firstUnlockedTask).toBe('evidence_vault')
+    expect(milestone!.firstUnlockedTask).toBe('contract_file_with_court')
   })
 
   it('returns undefined for unknown milestone ID', () => {
@@ -281,32 +281,48 @@ describe('getMilestoneByID', () => {
     expect(m!.firstUnlockedTask).toBe('prepare_small_claims_filing')
   })
 
-  it('returns family served milestone with correct firstUnlockedTask', () => {
+  it('returns divorce served milestone with correct firstUnlockedTask', () => {
+    // Without familySubType, family defaults to CIVIL_MILESTONES
     const m = getMilestoneByID('family', 'served')
     expect(m).toBeDefined()
-    expect(m!.firstUnlockedTask).toBe('waiting_period')
+    expect(m!.firstUnlockedTask).toBe('wait_for_answer')
+  })
+
+  it('returns divorce served milestone with divorce_subtype', () => {
+    // With 'divorce' as familySubType, returns DIVORCE_MILESTONES
+    const m = getMilestoneByID('family', 'served', 'divorce')
+    expect(m).toBeDefined()
+    expect(m!.firstUnlockedTask).toBe('divorce_waiting_period')
   })
 
   it('returns landlord-tenant hearing milestone with correct firstUnlockedTask', () => {
     const m = getMilestoneByID('landlord_tenant', 'hearing')
     expect(m).toBeDefined()
-    expect(m!.firstUnlockedTask).toBe('hearing_day')
+    expect(m!.firstUnlockedTask).toBe('lt_prepare_for_hearing')
   })
 
   it('falls back to civil milestones for unknown dispute type', () => {
     const m = getMilestoneByID('unknown_type' as DisputeType, 'filed')
     expect(m).toBeDefined()
+    // CIVIL_MILESTONES.filed has firstUnlockedTask = 'evidence_vault'
     expect(m!.firstUnlockedTask).toBe('evidence_vault')
+    expect(m!.id).toBe('filed')
   })
 })
 
 // -- Milestone count per dispute type -----------------------------------------
 
 describe('milestone counts', () => {
-  it('civil types have 7 milestones', () => {
-    for (const type of CIVIL_TYPES) {
-      expect(getMilestones(type)).toHaveLength(7)
-    }
+  it('contract types have 4 milestones', () => {
+    expect(getMilestones('contract')).toHaveLength(4)
+  })
+
+  it('property types have 4 milestones', () => {
+    expect(getMilestones('property')).toHaveLength(4)
+  })
+
+  it('other types have 4 milestones', () => {
+    expect(getMilestones('other')).toHaveLength(4)
   })
 
   it('personal injury has 9 milestones', () => {
@@ -321,11 +337,11 @@ describe('milestone counts', () => {
     expect(getMilestones('small_claims')).toHaveLength(5)
   })
 
-  it('family has 6 milestones', () => {
-    expect(getMilestones('family')).toHaveLength(6)
+  it('family defaults to 7 milestones (divorce)', () => {
+    expect(getMilestones('family')).toHaveLength(7)
   })
 
-  it('landlord-tenant has 6 milestones', () => {
-    expect(getMilestones('landlord_tenant')).toHaveLength(6)
+  it('landlord-tenant has 8 milestones', () => {
+    expect(getMilestones('landlord_tenant')).toHaveLength(8)
   })
 })

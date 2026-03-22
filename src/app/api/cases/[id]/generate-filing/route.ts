@@ -82,8 +82,11 @@ import { otherDemandLetterFactsSchema, buildOtherDemandLetterPrompt } from '@/li
 import { propertyDemandLetterFactsSchema, buildPropertyDemandLetterPrompt } from '@/lib/rules/property-demand-letter-prompts'
 import { piSettlementFactsSchema, buildPiSettlementPrompt } from '@/lib/rules/pi-settlement-prompts'
 import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
+import { validateFactsObject } from '@/lib/ai/input-validation'
+import { validateAIOutput } from '@/lib/ai/output-validation'
 import { safeError } from '@/lib/security/safe-log'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { logger, metrics, METRIC } from '@/lib/observability'
 
 /* ------------------------------------------------------------------ */
 /*  Motion registry — add new motion types here instead of if/else    */
@@ -325,8 +328,11 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const startTime = Date.now()
   try {
     const { id: caseId } = await params
+    metrics.increment(METRIC.AI_GENERATION_REQUEST)
+    logger.info('ai.generate-filing started', { caseId })
     const auth = await getAuthenticatedClient()
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
@@ -399,6 +405,16 @@ export async function POST(
           { status: 422 }
         )
       }
+
+      // Prompt injection check on user-provided facts
+      const inputCheck = validateFactsObject(parsed.data as Record<string, unknown>)
+      if (!inputCheck.safe) {
+        return NextResponse.json(
+          { error: "Some of your input couldn't be processed. Please review and try again." },
+          { status: 422 }
+        )
+      }
+
       prompt = handler.buildPrompt(parsed.data as Record<string, unknown>)
       auditDocType = documentType
     } else {
@@ -412,6 +428,16 @@ export async function POST(
         )
       }
       const { facts } = parsed.data
+
+      // Prompt injection check on user-provided facts
+      const inputCheck = validateFactsObject(facts as unknown as Record<string, unknown>)
+      if (!inputCheck.safe) {
+        return NextResponse.json(
+          { error: "Some of your input couldn't be processed. Please review and try again." },
+          { status: 422 }
+        )
+      }
+
       prompt = buildFilingPrompt(facts)
     }
 
@@ -466,6 +492,18 @@ export async function POST(
       )
     }
 
+    // AI output validation — reject dangerous content, flag citations for review
+    const outputCheck = validateAIOutput(draft)
+    if (!outputCheck.safe) {
+      return NextResponse.json(
+        { error: 'Generated document did not pass safety review. Please try again.' },
+        { status: 422 }
+      )
+    }
+    if (outputCheck.sanitized) {
+      draft = outputCheck.sanitized
+    }
+
     // Audit event
     await supabase.from('task_events').insert({
       case_id: caseId,
@@ -476,8 +514,16 @@ export async function POST(
       },
     })
 
+    const durationMs = Date.now() - startTime
+    metrics.increment(METRIC.AI_GENERATION_SUCCESS)
+    metrics.timing(METRIC.AI_GENERATION_DURATION, durationMs, { document_type: auditDocType })
+    logger.info('ai.generate-filing succeeded', { caseId, auditDocType, durationMs })
+
     return NextResponse.json({ draft, annotations })
   } catch (err) {
+    const durationMs = Date.now() - startTime
+    metrics.increment(METRIC.AI_GENERATION_ERROR)
+    logger.error('ai.generate-filing failed', err instanceof Error ? err : undefined, { durationMs })
     safeError('generate-filing', err)
     return NextResponse.json(
       { error: 'Failed to generate document. Please try again.' },

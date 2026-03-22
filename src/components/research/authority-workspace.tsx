@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { EmptyState } from '@/components/ui/empty-state'
 import { AuthorityList } from '@/components/research/authority-list'
 import { addAuthorityTag, removeAuthorityTag, splitPinnedAuthorities } from '@/components/research/authority-utils'
 
@@ -147,8 +148,12 @@ export function AuthorityWorkspace({ caseId, initialAuthorities, initialFolders 
 
   if (authorities.length === 0) {
     return (
-      <div className="rounded-xl border border-warm-border bg-warm-bg/60 p-5 text-sm text-warm-muted">
-        No authorities saved yet. Use Search to add your first cases.
+      <div className="rounded-xl border border-warm-border bg-warm-bg/60 p-5">
+        <EmptyState
+          illustration="search"
+          title="No authorities saved yet"
+          description="Use Search to add your first cases and build your legal research library."
+        />
       </div>
     )
   }

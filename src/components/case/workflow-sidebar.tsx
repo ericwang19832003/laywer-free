@@ -42,6 +42,12 @@ const SKIPPABLE_TASKS = new Set([
   'child_support_temporary_orders',
   'spousal_support_temporary_orders',
   'mod_mediation',
+  'fdcpa_check',
+  'debt_sol_check',
+  'debt_answer_prep',
+  'lt_repair_request',
+  'lt_eviction_response',
+  'lt_habitability_checklist',
 ])
 
 export interface SidebarTask {

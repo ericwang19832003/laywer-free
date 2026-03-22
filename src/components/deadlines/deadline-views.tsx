@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { DeadlineTimeline } from './deadline-timeline'
 import { DeadlineCalendar } from './deadline-calendar'
+import { EmptyState } from '@/components/ui/empty-state'
 import { Calendar, Clock, List } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -154,15 +155,12 @@ export function DeadlineViews({ deadlines }: DeadlineViewsProps) {
   if (deadlines.length === 0) {
     return (
       <Card>
-        <CardContent className="py-10 text-center">
-          <p className="text-lg font-medium text-warm-text mb-2">
-            No deadlines yet
-          </p>
-          <p className="text-warm-muted">
-            Deadlines are created automatically when you complete key steps like
-            filing with the court or serving the other party. You can also add
-            one manually.
-          </p>
+        <CardContent className="py-8">
+          <EmptyState
+            illustration="calendar"
+            title="No deadlines yet"
+            description="Deadlines are created automatically when you complete key steps like filing with the court or serving the other party."
+          />
         </CardContent>
       </Card>
     )

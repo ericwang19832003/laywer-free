@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email/provider'
 import { buildReminderEmail } from '@/lib/email/reminder-templates'
+import { safeEquals } from '@/lib/security/timing-safe'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
   }
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (!safeEquals(authHeader ?? '', `Bearer ${cronSecret}`)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

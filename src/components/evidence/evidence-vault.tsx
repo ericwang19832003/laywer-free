@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   Select,
   SelectContent,
@@ -516,13 +517,12 @@ export function EvidenceVault({ caseId, initialEvidence, exhibitedIds = [] }: Ev
 
         {filteredEvidence.length === 0 ? (
           <Card>
-            <CardContent className="py-10 text-center">
-              <FileIcon className="size-8 text-warm-muted mx-auto mb-3" />
-              <p className="text-warm-muted">
-                {evidence.length === 0
-                  ? 'No documents yet. Upload your first file.'
-                  : 'No documents match this filter.'}
-              </p>
+            <CardContent className="py-8">
+              <EmptyState
+                illustration={evidence.length === 0 ? 'documents' : 'search'}
+                title={evidence.length === 0 ? 'No documents yet' : 'No documents match this filter'}
+                description={evidence.length === 0 ? 'Upload your first file to get started.' : 'Try adjusting your search or filters.'}
+              />
             </CardContent>
           </Card>
         ) : (

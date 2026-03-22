@@ -18,6 +18,7 @@ import { EmailsCard } from '@/components/dashboard/emails-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
 import { DeleteCaseCard } from '@/components/dashboard/delete-case-card'
+import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
@@ -105,7 +106,7 @@ export default async function DashboardPage({
   // Case comparison data
   const { data: caseRow } = await supabase
     .from('cases')
-    .select('dispute_type, jurisdiction, court_type, county, created_at')
+    .select('dispute_type, jurisdiction, court_type, county, created_at, outcome')
     .eq('id', id)
     .single()
 
@@ -411,6 +412,11 @@ export default async function DashboardPage({
             </Card>
           )}
           <ProgressCard tasksSummary={dashboard!.tasks_summary} />
+          <OutcomePrompt
+            caseId={id}
+            currentOutcome={caseRow?.outcome ?? null}
+            allTasksDone={totalTasks > 0 && completedTasks === totalTasks}
+          />
           <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
           <TimelineCard caseId={id} events={dashboard!.recent_events} summary={timelineSummary} />
           <ShareCaseCard
