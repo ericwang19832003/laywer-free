@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { randomUUID } from 'crypto'
+import { randomBytes } from 'crypto'
 
 export async function GET(
   _request: NextRequest,
@@ -14,7 +14,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('cases')
-      .select('share_token, share_enabled')
+      .select('share_token, share_enabled, share_expires_at')
       .eq('id', caseId)
       .single()
 
@@ -22,9 +22,13 @@ export async function GET(
       return NextResponse.json({ error: 'Case not found' }, { status: 404 })
     }
 
+    const expired = data.share_expires_at && new Date(data.share_expires_at) < new Date()
+    const effectiveEnabled = data.share_enabled && !expired
+
     return NextResponse.json({
-      share_enabled: data.share_enabled,
-      share_token: data.share_enabled ? data.share_token : null,
+      share_enabled: effectiveEnabled,
+      share_token: effectiveEnabled ? data.share_token : null,
+      share_expires_at: effectiveEnabled ? data.share_expires_at : null,
     })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -55,15 +59,16 @@ export async function POST(
         .single()
 
       if (!existing?.share_token) {
-        updates.share_token = randomUUID()
+        updates.share_token = randomBytes(32).toString('base64url')
       }
+      updates.share_expires_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     }
 
     const { data, error } = await supabase
       .from('cases')
       .update(updates)
       .eq('id', caseId)
-      .select('share_token, share_enabled')
+      .select('share_token, share_enabled, share_expires_at')
       .single()
 
     if (error || !data) {
@@ -73,6 +78,7 @@ export async function POST(
     return NextResponse.json({
       share_enabled: data.share_enabled,
       share_token: data.share_enabled ? data.share_token : null,
+      share_expires_at: data.share_enabled ? data.share_expires_at : null,
     })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

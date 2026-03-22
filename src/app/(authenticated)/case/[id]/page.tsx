@@ -26,6 +26,7 @@ import ProSeBanner from '@/components/dashboard/pro-se-banner'
 import { SolBanner } from '@/components/dashboard/sol-banner'
 import { FilingInstructionsCard } from '@/components/dashboard/filing-instructions-card'
 import { calculateSol } from '@/lib/rules/statute-of-limitations'
+import { getPriorityCards } from '@/lib/dashboard-card-priority'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { CaseFileCard } from '@/components/dashboard/case-file-card'
 import Link from 'next/link'
@@ -311,9 +312,9 @@ export default async function DashboardPage({
     ? Math.ceil((Date.now() - new Date(caseRow.created_at).getTime()) / 86400000)
     : 0
 
-  // Focus Mode: PI, Debt Defense, and Landlord-Tenant get a streamlined 5-card dashboard
-  const FOCUS_TYPES = ['personal_injury', 'debt_collection', 'landlord_tenant']
-  const isFocusType = FOCUS_TYPES.includes(caseRow?.dispute_type ?? '')
+  // Focus Mode: all dispute types get a streamlined priority dashboard with "More" section
+  const disputeType = caseRow?.dispute_type ?? 'other'
+  const priorityCards = getPriorityCards(disputeType)
 
   return (
     <div className="bg-warm-bg min-h-full">
@@ -337,12 +338,14 @@ export default async function DashboardPage({
         <div className="space-y-6">
           {/* Priority cards — always visible */}
           <PriorityAlertsSection caseId={id} alerts={alerts} />
-          <SolBanner
-            caseId={id}
-            sol={solResult}
-            disputeType={caseRow?.dispute_type ?? 'other'}
-            state={caseRow?.jurisdiction ?? 'TX'}
-          />
+          {priorityCards.includes('sol_banner') && (
+            <SolBanner
+              caseId={id}
+              sol={solResult}
+              disputeType={disputeType}
+              state={caseRow?.jurisdiction ?? 'TX'}
+            />
+          )}
           <NextStepCard caseId={id} nextTask={dashboard!.next_task} taskDescription={taskDescription} />
           <DeadlinesCard caseId={id} deadlines={dashboard!.upcoming_deadlines} />
           <ProgressCard tasksSummary={dashboard!.tasks_summary} />
@@ -353,161 +356,103 @@ export default async function DashboardPage({
             score30DaysAgo={score30dData}
             aiTips={aiTips}
           />
+          {priorityCards.includes('filing_instructions') && (
+            <FilingInstructionsCard
+              state={caseRow?.jurisdiction ?? 'TX'}
+              courtType={caseRow?.court_type ?? 'unknown'}
+              county={caseRow?.county ?? null}
+              disputeType={disputeType}
+            />
+          )}
           <OutcomePrompt
             caseId={id}
             currentOutcome={caseRow?.outcome ?? null}
             allTasksDone={totalTasks > 0 && completedTasks === totalTasks}
           />
 
-          {/* Secondary cards — in "More" section for focus types, always visible for others */}
-          {isFocusType ? (
-            <MoreSection>
-              <ConfidenceScoreCard
-                score={confidenceResult.score}
-                breakdown={confidenceResult.breakdown}
-              />
-              <CaseComparisonCard
-                taskCompletionRate={taskCompletionRate}
-                evidenceCount={evidenceCount ?? 0}
-                daysSinceCreation={daysSinceCreation}
-                disputeType={caseRow?.dispute_type ?? 'other'}
-              />
-              <InsightsCard caseId={id} initialInsights={insightsData ?? []} />
-              <StrategyCard
+          {/* Secondary cards — in "More" section for all dispute types */}
+          <MoreSection>
+            <ConfidenceScoreCard
+              score={confidenceResult.score}
+              breakdown={confidenceResult.breakdown}
+            />
+            <CaseComparisonCard
+              taskCompletionRate={taskCompletionRate}
+              evidenceCount={evidenceCount ?? 0}
+              daysSinceCreation={daysSinceCreation}
+              disputeType={disputeType}
+            />
+            <InsightsCard caseId={id} initialInsights={insightsData ?? []} />
+            <StrategyCard
+              caseId={id}
+              recommendations={strategyRecs}
+              generatedAt={strategyResult.data?.generated_at ?? null}
+            />
+            {!priorityCards.includes('sol_banner') && (
+              <SolBanner
                 caseId={id}
-                recommendations={strategyRecs}
-                generatedAt={strategyResult.data?.generated_at ?? null}
+                sol={solResult}
+                disputeType={disputeType}
+                state={caseRow?.jurisdiction ?? 'TX'}
               />
+            )}
+            {!priorityCards.includes('filing_instructions') && (
               <FilingInstructionsCard
                 state={caseRow?.jurisdiction ?? 'TX'}
                 courtType={caseRow?.court_type ?? 'unknown'}
                 county={caseRow?.county ?? null}
-                disputeType={caseRow?.dispute_type ?? 'other'}
+                disputeType={disputeType}
               />
-              <DiscoveryCard
-                caseId={id}
-                discoveryTask={discoveryTaskRow}
-                packCount={discoveryPackCount}
-                servedCount={discoveryServedCount}
-                itemCount={discoveryItemCount}
-              />
-              <ResearchCard caseId={id} authorityCount={authorityCount ?? 0} />
-              <EmailsCard caseId={id} />
-              {hasMotionActivity && (
-                <Card>
-                  <CardContent className="pt-5 pb-4 px-5">
-                    <h3 className="text-sm font-semibold text-warm-text mb-3">Motions</h3>
-                    {motionTasks
-                      .filter(t => t.status === 'todo')
-                      .map(t => (
-                        <div key={t.id} className="flex items-center justify-between py-2 border-b border-warm-border last:border-0">
-                          <div>
-                            <span className="text-sm text-warm-text">{t.title}</span>
-                            <span className="text-xs bg-calm-indigo/10 text-calm-indigo px-2 py-0.5 rounded-full ml-2">
-                              Suggested
-                            </span>
-                          </div>
-                          <Button size="sm" asChild>
-                            <Link href={`/case/${id}/step/${t.id}`}>Start</Link>
-                          </Button>
+            )}
+            <DiscoveryCard
+              caseId={id}
+              discoveryTask={discoveryTaskRow}
+              packCount={discoveryPackCount}
+              servedCount={discoveryServedCount}
+              itemCount={discoveryItemCount}
+            />
+            <ResearchCard caseId={id} authorityCount={authorityCount ?? 0} />
+            <EmailsCard caseId={id} />
+            {hasMotionActivity && (
+              <Card>
+                <CardContent className="pt-5 pb-4 px-5">
+                  <h3 className="text-sm font-semibold text-warm-text mb-3">Motions</h3>
+                  {motionTasks
+                    .filter(t => t.status === 'todo')
+                    .map(t => (
+                      <div key={t.id} className="flex items-center justify-between py-2 border-b border-warm-border last:border-0">
+                        <div>
+                          <span className="text-sm text-warm-text">{t.title}</span>
+                          <span className="text-xs bg-calm-indigo/10 text-calm-indigo px-2 py-0.5 rounded-full ml-2">
+                            Suggested
+                          </span>
                         </div>
-                      ))
-                    }
-                    {(motionsCount ?? 0) > 0 && (
-                      <p className="text-xs text-warm-muted mt-2">
-                        {motionsCount} motion{motionsCount !== 1 ? 's' : ''} created
-                      </p>
-                    )}
-                    <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
-                      <Link href={`/case/${id}/motions`}>View Motions Hub &rarr;</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-              <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
-              <TimelineCard caseId={id} events={dashboard!.recent_events} summary={timelineSummary} />
-              <ShareCaseCard
-                caseId={id}
-                initialEnabled={shareData?.share_enabled ?? false}
-                initialToken={shareData?.share_token ?? null}
-              />
-              <DeleteCaseCard caseId={id} />
-            </MoreSection>
-          ) : (
-            <>
-              <ConfidenceScoreCard
-                score={confidenceResult.score}
-                breakdown={confidenceResult.breakdown}
-              />
-              <CaseComparisonCard
-                taskCompletionRate={taskCompletionRate}
-                evidenceCount={evidenceCount ?? 0}
-                daysSinceCreation={daysSinceCreation}
-                disputeType={caseRow?.dispute_type ?? 'other'}
-              />
-              <InsightsCard caseId={id} initialInsights={insightsData ?? []} />
-              <StrategyCard
-                caseId={id}
-                recommendations={strategyRecs}
-                generatedAt={strategyResult.data?.generated_at ?? null}
-              />
-              <DeadlinesCard caseId={id} deadlines={dashboard!.upcoming_deadlines} />
-              <FilingInstructionsCard
-                state={caseRow?.jurisdiction ?? 'TX'}
-                courtType={caseRow?.court_type ?? 'unknown'}
-                county={caseRow?.county ?? null}
-                disputeType={caseRow?.dispute_type ?? 'other'}
-              />
-              <DiscoveryCard
-                caseId={id}
-                discoveryTask={discoveryTaskRow}
-                packCount={discoveryPackCount}
-                servedCount={discoveryServedCount}
-                itemCount={discoveryItemCount}
-              />
-              <ResearchCard caseId={id} authorityCount={authorityCount ?? 0} />
-              <EmailsCard caseId={id} />
-              {hasMotionActivity && (
-                <Card>
-                  <CardContent className="pt-5 pb-4 px-5">
-                    <h3 className="text-sm font-semibold text-warm-text mb-3">Motions</h3>
-                    {motionTasks
-                      .filter(t => t.status === 'todo')
-                      .map(t => (
-                        <div key={t.id} className="flex items-center justify-between py-2 border-b border-warm-border last:border-0">
-                          <div>
-                            <span className="text-sm text-warm-text">{t.title}</span>
-                            <span className="text-xs bg-calm-indigo/10 text-calm-indigo px-2 py-0.5 rounded-full ml-2">
-                              Suggested
-                            </span>
-                          </div>
-                          <Button size="sm" asChild>
-                            <Link href={`/case/${id}/step/${t.id}`}>Start</Link>
-                          </Button>
-                        </div>
-                      ))
-                    }
-                    {(motionsCount ?? 0) > 0 && (
-                      <p className="text-xs text-warm-muted mt-2">
-                        {motionsCount} motion{motionsCount !== 1 ? 's' : ''} created
-                      </p>
-                    )}
-                    <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
-                      <Link href={`/case/${id}/motions`}>View Motions Hub &rarr;</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-              <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
-              <TimelineCard caseId={id} events={dashboard!.recent_events} summary={timelineSummary} />
-              <ShareCaseCard
-                caseId={id}
-                initialEnabled={shareData?.share_enabled ?? false}
-                initialToken={shareData?.share_token ?? null}
-              />
-              <DeleteCaseCard caseId={id} />
-            </>
-          )}
+                        <Button size="sm" asChild>
+                          <Link href={`/case/${id}/step/${t.id}`}>Start</Link>
+                        </Button>
+                      </div>
+                    ))
+                  }
+                  {(motionsCount ?? 0) > 0 && (
+                    <p className="text-xs text-warm-muted mt-2">
+                      {motionsCount} motion{motionsCount !== 1 ? 's' : ''} created
+                    </p>
+                  )}
+                  <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
+                    <Link href={`/case/${id}/motions`}>View Motions Hub &rarr;</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            <NotesCard caseId={id} initialNotes={caseNotes ?? []} />
+            <TimelineCard caseId={id} events={dashboard!.recent_events} summary={timelineSummary} />
+            <ShareCaseCard
+              caseId={id}
+              initialEnabled={shareData?.share_enabled ?? false}
+              initialToken={shareData?.share_token ?? null}
+            />
+            <DeleteCaseCard caseId={id} />
+          </MoreSection>
         </div>
 
         <LegalDisclaimer />

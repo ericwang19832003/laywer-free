@@ -104,8 +104,17 @@ export async function checkDistributedRateLimit(
     }
 
     return { allowed: true, retryAfterMs: 0 }
-  } catch {
-    // Fallback to in-memory rate limiting on any DB failure
+  } catch (err) {
+    // Graceful degradation: when Supabase is unreachable or the RPC fails,
+    // fall back to in-memory rate limiting so requests aren't blocked entirely.
+    // This trades cross-instance accuracy for availability — a single server's
+    // in-memory store won't know about requests handled by other instances,
+    // but it's better than either letting all traffic through unthrottled
+    // or rejecting every request due to a transient DB outage.
+    console.warn(
+      `[rate-limit] Supabase rate limit check failed for ${endpoint}, falling back to in-memory:`,
+      err instanceof Error ? err.message : err
+    )
     return checkRateLimit(userId, endpoint, maxRequests, windowMs)
   }
 }

@@ -84,11 +84,34 @@ export async function POST(
       .single()
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to save version' }, { status: 500 })
+      console.error('[draft-versions] Save failed', {
+        caseId,
+        taskId,
+        versionNumber: nextVersion,
+        source: validSource,
+        dbError: error.message,
+        dbCode: error.code,
+      })
+      return NextResponse.json(
+        {
+          saved: false,
+          error: 'Your draft could not be saved. Please try again before regenerating.',
+        },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json({ version: inserted })
-  } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ saved: true, version: inserted })
+  } catch (err) {
+    console.error('[draft-versions] Unexpected error during save', {
+      error: err instanceof Error ? err.message : String(err),
+    })
+    return NextResponse.json(
+      {
+        saved: false,
+        error: 'Your draft could not be saved. Please try again before regenerating.',
+      },
+      { status: 500 }
+    )
   }
 }

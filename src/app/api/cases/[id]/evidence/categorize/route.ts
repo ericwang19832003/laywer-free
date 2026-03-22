@@ -10,6 +10,7 @@ import {
 } from '@/lib/ai/evidence-categorization'
 import { safeError } from '@/lib/security/safe-log'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { INPUT_LIMITS, validateTextLength } from '@/lib/validation/input-limits'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -39,6 +40,13 @@ export async function POST(
 
     if (!file_name) {
       return NextResponse.json({ error: 'file_name is required' }, { status: 400 })
+    }
+
+    if (typeof text_snippet === 'string') {
+      const snippetError = validateTextLength(text_snippet, INPUT_LIMITS.TEXT_SNIPPET, 'text_snippet')
+      if (snippetError) {
+        return NextResponse.json({ error: snippetError }, { status: 422 })
+      }
     }
 
     // Try heuristic first
