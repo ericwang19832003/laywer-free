@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { BillingSection } from '@/components/settings/billing-section'
+import { ReferralSection } from '@/components/settings/referral-section'
 import { NotificationPreferences, type NotificationPreferencesData } from '@/components/settings/notification-preferences'
 
 type NotificationPrefs = {
@@ -371,6 +372,9 @@ export default function SettingsPage() {
 
           {/* Billing & Subscription */}
           <BillingSection />
+
+          {/* Referral Program */}
+          <ReferralSection />
 
           {/* Data Export */}
           <Card>
