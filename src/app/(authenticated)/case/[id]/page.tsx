@@ -19,6 +19,7 @@ import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
 import { DeleteCaseCard } from '@/components/dashboard/delete-case-card'
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
+import { SavingsCard } from '@/components/dashboard/savings-card'
 import { MoreSection } from '@/components/dashboard/more-section'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -368,6 +369,11 @@ export default async function DashboardPage({
             caseId={id}
             currentOutcome={caseRow?.outcome ?? null}
             allTasksDone={totalTasks > 0 && completedTasks === totalTasks}
+          />
+          <SavingsCard
+            disputeType={disputeType}
+            outcome={caseRow?.outcome ?? null}
+            userTier="free"
           />
 
           {/* Secondary cards — in "More" section for all dispute types */}
