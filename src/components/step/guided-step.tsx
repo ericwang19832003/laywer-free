@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { SkipForward } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { GuidedStepConfig, SummaryItem } from '@/lib/guided-steps/types'
@@ -32,6 +33,8 @@ export function GuidedStep({
 
   async function handleSkip() {
     if (skipping) return
+    const confirmed = window.confirm('Skip this step? You can come back to it later from your dashboard.')
+    if (!confirmed) return
     setSkipping(true)
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
@@ -42,10 +45,11 @@ export function GuidedStep({
           metadata: { skip_reason: 'user_skipped_from_step_page' },
         }),
       })
-      if (!res.ok) throw new Error('Failed to skip')
+      if (!res.ok) throw new Error('skip failed')
       router.push(`/case/${caseId}`)
       router.refresh()
     } catch {
+      toast.error('Something went wrong. Please try again.')
       setSkipping(false)
     }
   }
@@ -107,8 +111,9 @@ export function GuidedStep({
             metadata: { guided_answers: updatedAnswers },
           }),
         })
-      } catch {
+      } catch (err) {
         // Non-fatal: continue even if save fails
+        console.warn('Auto-save failed:', err)
       }
     },
     [taskId]
@@ -178,13 +183,15 @@ export function GuidedStep({
           metadata: { guided_answers: answers },
         }),
       })
-      if (!res.ok) throw new Error('Failed to complete task')
+      if (!res.ok) throw new Error('complete failed')
       if (onAfterComplete) {
         await onAfterComplete()
       }
+      toast.success('Step completed! Check your dashboard for what\'s next.')
       router.push(`/case/${caseId}`)
       router.refresh()
     } catch {
+      toast.error('We couldn\'t save your progress. Please try again.')
       setLoading(false)
     }
   }

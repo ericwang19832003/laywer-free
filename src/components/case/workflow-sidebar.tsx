@@ -80,7 +80,7 @@ function getStatusIcon(status: string, isCurrent: boolean) {
     case 'locked':
       return (
         <span className="flex items-center justify-center size-5 shrink-0">
-          <Lock className="size-3.5 text-warm-muted/40" />
+          <Lock className="size-3.5 text-warm-muted/60" />
         </span>
       )
     default:
@@ -267,14 +267,14 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
                             ? 'bg-calm-indigo/[0.04]'
                             : clickable
                             ? 'hover:bg-warm-border/20'
-                            : 'opacity-40'
+                            : 'opacity-60'
                         }`}
                       >
                         {getStatusIcon(task.status, isCurrent)}
                         <span
                           className={`truncate leading-snug ${
                             task.status === 'locked'
-                              ? 'text-warm-muted/40'
+                              ? 'text-warm-muted/60'
                               : task.status === 'skipped'
                               ? 'text-warm-muted/60'
                               : isActive

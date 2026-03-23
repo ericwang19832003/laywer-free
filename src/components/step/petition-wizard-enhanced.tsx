@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { WizardShell } from '@/components/ui/wizard-shell'
 import type { WizardStep } from '@/components/ui/wizard-shell'
 import { PreflightChecklist } from '@/components/step/filing/preflight-checklist'
@@ -200,7 +201,7 @@ export function PetitionWizardEnhanced({
     })
     if (!res.ok) {
       const err = await res.json()
-      throw new Error(err.error || 'Failed to update task')
+      throw new Error(err.error || 'We couldn\'t save your progress right now. Please try again.')
     }
   }
 
@@ -215,13 +216,13 @@ export function PetitionWizardEnhanced({
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to generate document')
+        throw new Error(data.error || 'We couldn\'t generate your document right now. Please try again.')
       }
       const data = await res.json()
       setDraft(data.draft)
       setDraftPhase(true)
     } catch (err) {
-      setGenError(err instanceof Error ? err.message : 'Failed to generate document')
+      setGenError(err instanceof Error ? err.message : 'We couldn\'t generate your document right now. Please try again.')
     } finally {
       setGenerating(false)
     }
@@ -249,12 +250,13 @@ export function PetitionWizardEnhanced({
       await patchTask('completed')
       setShowConfetti(true)
       setShowCompletionCelebration(true)
+      toast.success('Step completed! Check your dashboard for what\'s next.')
       setTimeout(() => {
         setShowConfetti(false)
         router.push(`/case/${caseId}`)
       }, 3000)
     } catch (err) {
-      setGenError(err instanceof Error ? err.message : 'Failed to complete task')
+      setGenError(err instanceof Error ? err.message : 'We couldn\'t save your progress right now. Please try again.')
     } finally {
       setConfirming(false)
     }
@@ -563,12 +565,15 @@ export function PetitionWizardEnhanced({
                   {showCelebration && lastCompletedSection && (
                     <CelebrationBanner sectionId={lastCompletedSection} className="mb-6" />
                   )}
+                  {genError && !draftPhase && (
+                    <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3 mb-4">
+                      <p className="text-sm text-warm-text">{genError}</p>
+                    </div>
+                  )}
                   {generating ? (
-                    <div className="flex items-center gap-3 py-12 justify-center">
-                      <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
-                      <p className="text-sm text-warm-muted">
-                        Generating your {isDefendant ? 'answer' : 'petition'}...
-                      </p>
+                    <div className="flex items-center gap-3 py-4">
+                      <div className="animate-spin h-5 w-5 border-2 border-calm-indigo border-t-transparent rounded-full" />
+                      <p className="text-sm text-warm-muted">Generating your document... This usually takes 10-15 seconds.</p>
                     </div>
                   ) : renderStep()}
                 </WizardShell>
@@ -659,12 +664,15 @@ export function PetitionWizardEnhanced({
             </Button>
           </div>
         </div>
+        {genError && !draftPhase && (
+          <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3 mb-4">
+            <p className="text-sm text-warm-text">{genError}</p>
+          </div>
+        )}
         {generating ? (
-          <div className="flex items-center gap-3 py-12 justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
-            <p className="text-sm text-warm-muted">
-              Generating your {isDefendant ? 'answer' : 'petition'}... This may take a moment.
-            </p>
+          <div className="flex items-center gap-3 py-4">
+            <div className="animate-spin h-5 w-5 border-2 border-calm-indigo border-t-transparent rounded-full" />
+            <p className="text-sm text-warm-muted">Generating your document... This usually takes 10-15 seconds.</p>
           </div>
         ) : renderStep()}
       </WizardShell>

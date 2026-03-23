@@ -82,9 +82,14 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
               disabled={opt.comingSoon}
             />
             {opt.comingSoon && (
-              <span className="absolute top-3 right-3 text-[11px] font-medium text-calm-indigo bg-calm-indigo/10 px-2 py-0.5 rounded-full">
-                Coming soon
-              </span>
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                <span className="text-[11px] font-medium text-calm-indigo bg-calm-indigo/10 px-2 py-0.5 rounded-full">
+                  Coming soon
+                </span>
+                <span className="text-[10px] text-warm-muted max-w-[200px] text-right">
+                  Full wizard coming soon — you can still use guided steps for this type.
+                </span>
+              </div>
             )}
           </div>
         ))}

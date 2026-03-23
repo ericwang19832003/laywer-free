@@ -97,7 +97,7 @@ export function WizardShell({
       setLoading(true)
       try {
         await onComplete()
-        toast.success('Step completed!')
+        toast.success('Step completed! Check your dashboard for what\'s next.')
       } catch (error) {
         toast.error('Failed to complete step')
       } finally {

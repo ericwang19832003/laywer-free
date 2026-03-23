@@ -4,6 +4,7 @@ import { useReducer, useState, useRef, useCallback, useEffect } from 'react'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useSubscription } from '@/hooks/use-subscription'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { useUpgradeGateContext } from '@/components/subscription/upgrade-gate-provider'
 import {
   recommendCourt,
   type DisputeType,
@@ -178,6 +180,8 @@ export function NewCaseDialog() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { gatedFetch } = useUpgradeGateContext()
+  const { casesRemaining, tier, loading: subLoading } = useSubscription()
 
   const isFamily = state.disputeType === 'family'
   const isBusiness = state.disputeType === 'business'
@@ -232,7 +236,7 @@ export function NewCaseDialog() {
         data: { session },
       } = await supabase.auth.getSession()
 
-      const res = await fetch('/api/cases', {
+      const res = await gatedFetch('/api/cases', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -265,8 +269,22 @@ export function NewCaseDialog() {
         }),
       })
 
+      if (!res) {
+        // Upgrade gate was hit — modal is showing
+        setLoading(false)
+        return
+      }
+
       if (!res.ok) {
-        const data = await res.json()
+        if (res.status === 403) {
+          const body = await res.json()
+          if (body.error === 'upgrade_required') {
+            setError('You\'ve reached the case limit on your free plan. Upgrade to create more cases.')
+            setLoading(false)
+            return
+          }
+        }
+        const data = await res.json().catch(() => ({}))
         setError(data.error || 'Something went wrong. Please try again.')
         setLoading(false)
         return
@@ -506,13 +524,23 @@ export function NewCaseDialog() {
           + New Case
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] flex flex-col">
+      <DialogContent className="max-h-[95vh] sm:max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Start a new case</DialogTitle>
           <DialogDescription>
             We&apos;ll help you figure out the right court.
           </DialogDescription>
         </DialogHeader>
+
+        {!subLoading && casesRemaining <= 0 && tier === 'free' && (
+          <div className="p-3 rounded-lg bg-calm-amber/10 text-sm text-warm-text">
+            You&apos;ve used your free case.{' '}
+            <a href="/settings#billing" className="text-calm-indigo underline">
+              Upgrade
+            </a>{' '}
+            to create more.
+          </div>
+        )}
 
         <WizardProgress
           currentStep={state.step}
@@ -529,7 +557,7 @@ export function NewCaseDialog() {
             ref={scrollRef}
             onScroll={updateScrollState}
             className="overflow-y-auto max-h-full pr-1"
-            style={{ maxHeight: 'calc(85vh - 180px)' }}
+            style={{ maxHeight: 'calc(95vh - 180px)' }}
           >
 
         {state.step === 1 && (
@@ -799,7 +827,7 @@ export function NewCaseDialog() {
             <button
               type="button"
               onClick={() => scrollBy(-200)}
-              className="absolute top-1 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 border border-warm-border shadow-sm hover:bg-background transition-colors"
+              className="absolute top-1 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 border border-warm-border shadow-sm hover:bg-background transition-colors"
               aria-label="Scroll up"
             >
               <ChevronUp className="h-4 w-4 text-warm-muted" />
@@ -810,7 +838,7 @@ export function NewCaseDialog() {
             <button
               type="button"
               onClick={() => scrollBy(200)}
-              className="absolute bottom-1 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 border border-warm-border shadow-sm hover:bg-background transition-colors"
+              className="absolute bottom-1 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 border border-warm-border shadow-sm hover:bg-background transition-colors"
               aria-label="Scroll down"
             >
               <ChevronDown className="h-4 w-4 text-warm-muted" />
