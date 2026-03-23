@@ -1074,6 +1074,52 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Landlord-Tenant Depth ---
+  lt_security_deposit_demand: {
+    why: 'Texas law gives landlords 30 days to return your deposit — or face triple damages plus $100 plus attorney fees.',
+    checklist: ['Move-out date', 'Written forwarding address (sent to landlord)', 'Original deposit amount', 'Any itemized deduction list received'],
+    tip: 'If your landlord hasn\'t returned your deposit in 30 days, you can recover up to 3x the amount.',
+  },
+  lt_repair_and_deduct: {
+    why: 'If your landlord won\'t fix health/safety issues, Texas law lets you repair it yourself and deduct the cost from rent.',
+    checklist: ['Written repair notice (with proof of delivery)', 'Photos of the issue', 'Contractor estimates'],
+    tip: 'You MUST give written notice and wait a reasonable time (7+ days) before repairing.',
+  },
+  lt_illegal_lockout: {
+    why: 'Illegal lockouts are one of the clearest violations in Texas law. The court can order immediate access plus damages.',
+    checklist: ['Photos/video of the lockout', 'Witness names', 'Police report (if filed)'],
+    tip: 'Call the police first. Then go to JP Court for an emergency order — same day relief is possible.',
+  },
+  lt_eviction_notice_analysis: {
+    why: 'Many eviction notices have technical defects that invalidate the eviction. A flawed notice is a strong defense.',
+    checklist: ['The eviction notice itself', 'Envelope or delivery proof', 'Your lease agreement'],
+    tip: 'If the notice doesn\'t give you the required number of days, it may be void.',
+  },
+  lt_jp_court_procedures: {
+    why: 'JP Court handles most evictions. It\'s informal and fast — hearings are 15-30 minutes. Knowing the rules helps.',
+    checklist: ['Court citation with hearing date', 'Your written answer (recommended)', 'All evidence'],
+    tip: 'You have the right to request a jury trial — but you must ask in writing before the hearing.',
+  },
+  lt_appeal_guide: {
+    why: 'Losing in JP Court is NOT the end. An appeal gives you a completely new trial in County Court.',
+    checklist: ['JP Court judgment (with date signed)', 'Appeal filing fee or inability-to-pay affidavit', 'Appeal bond (one month\'s rent) or inability-to-pay'],
+    tip: 'You have ONLY 5 DAYS to appeal an eviction — act immediately.',
+  },
+  lt_courtroom_guide: {
+    why: 'JP Court hearings are short but consequential. Knowing the structure and having a script gives you confidence.',
+    checklist: ['Lease agreement', 'Rent payment records', 'Repair request copies', 'Photos of conditions', '3 copies of everything'],
+    tip: 'The landlord goes first and must prove their case. Listen carefully — then present your defense.',
+  },
+  lt_lease_termination: {
+    why: 'Texas law provides specific protections for military members and DV survivors who need to end their lease early.',
+    checklist: ['Military orders or protective order (if applicable)', 'Written termination notice', 'Forwarding address for deposit'],
+  },
+  lt_writ_of_possession: {
+    why: 'Even after losing, you have time. Texas gives you at least 6 days before physical removal.',
+    checklist: ['Appeal deadline (5 days from judgment)', 'Important documents and belongings secured'],
+    tip: 'Filing an appeal STOPS the eviction while the appeal is pending.',
+  },
+
   // --- Property Damage Depth ---
   property_damage_assessment: {
     why: 'Well-documented damage is your strongest evidence. Judges need to SEE what happened.',

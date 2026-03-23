@@ -116,6 +116,16 @@ import { propertyMediationGuideConfig } from '@/lib/guided-steps/property/proper
 import { propertyPretrialMotionsConfig } from '@/lib/guided-steps/property/property-pretrial-motions'
 import { propertyDamagesGuideConfig } from '@/lib/guided-steps/property/property-damages-guide'
 import { propertyPostJudgmentGuideConfig } from '@/lib/guided-steps/property/property-post-judgment-guide'
+// Landlord-tenant depth guided-step configs (new)
+import { ltSecurityDepositDemandConfig } from '@/lib/guided-steps/landlord-tenant/lt-security-deposit-demand'
+import { ltRepairAndDeductConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-and-deduct'
+import { ltIllegalLockoutDefenseConfig } from '@/lib/guided-steps/landlord-tenant/lt-illegal-lockout-defense'
+import { ltEvictionNoticeAnalysisConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-notice-analysis'
+import { ltJpCourtProceduresConfig } from '@/lib/guided-steps/landlord-tenant/lt-jp-court-procedures'
+import { ltAppealGuideConfig } from '@/lib/guided-steps/landlord-tenant/lt-appeal-guide'
+import { ltCourtroomGuideConfig as ltCourtroomGuideDeepConfig } from '@/lib/guided-steps/landlord-tenant/lt-courtroom-guide'
+import { ltLeaseTerminationGuideConfig } from '@/lib/guided-steps/landlord-tenant/lt-lease-termination-guide'
+import { ltWritOfPossessionConfig } from '@/lib/guided-steps/landlord-tenant/lt-writ-of-possession'
 import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
 import { ltHabitabilityChecklistConfig } from '@/lib/guided-steps/landlord-tenant/lt-habitability-checklist'
@@ -1009,6 +1019,24 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltEvictionResponseConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'lt_habitability_checklist':
       return <GuidedStep caseId={id} taskId={taskId} config={ltHabitabilityChecklistConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_security_deposit_demand':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltSecurityDepositDemandConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_repair_and_deduct':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltRepairAndDeductConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_illegal_lockout':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltIllegalLockoutDefenseConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_eviction_notice_analysis':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltEvictionNoticeAnalysisConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_jp_court_procedures':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltJpCourtProceduresConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_appeal_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltAppealGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltCourtroomGuideDeepConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_lease_termination':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltLeaseTerminationGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_writ_of_possession':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltWritOfPossessionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
 
     // Family law depth steps
     case 'family_filing_guide':
