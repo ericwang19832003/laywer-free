@@ -1074,6 +1074,52 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Personal Injury Depth ---
+  pi_pip_claim: {
+    why: 'PIP pays YOUR medical bills regardless of fault. It\'s coverage you already paid for — don\'t leave it unused.',
+    checklist: ['Your auto insurance card', 'Police report', 'Medical bills', 'Proof of lost wages'],
+    tip: 'File within 30 days of the accident for fastest processing.',
+  },
+  pi_medical_improvement: {
+    why: 'Settling before your treatment is complete means guessing at your total costs. Wait until your doctor confirms you\'ve recovered as much as you will.',
+    checklist: ['Doctor\'s latest treatment notes', 'Prognosis report', 'Any disability rating'],
+    tip: 'Tell the adjuster: "I\'m still treating. I\'ll make a demand when treatment is complete."',
+  },
+  pi_damages_calculation: {
+    why: 'Knowing your case value prevents you from accepting a lowball offer. Insurance companies count on your not knowing.',
+    checklist: ['All medical bills', 'Lost wage documentation', 'Property damage estimates'],
+    tip: 'The "multiplier method" (medical bills × 2-5 for pain/suffering) is how most cases are valued.',
+  },
+  pi_comparative_fault: {
+    why: 'In Texas, if you\'re 51% or more at fault, you recover NOTHING. Understanding this shapes your entire case strategy.',
+    checklist: ['Police report', 'Witness statements', 'Photos/video of the scene'],
+  },
+  pi_filing_guide: {
+    why: 'Filing your lawsuit starts the clock on the legal process. Getting it right the first time saves weeks.',
+    checklist: ['Original Petition', 'Filing fee ($300-400)', 'Cover sheet', 'Government ID'],
+    tip: 'File in the county where the accident happened or where the defendant lives.',
+  },
+  pi_service_guide: {
+    why: 'The defendant must be officially notified of the lawsuit before the case can proceed.',
+    checklist: ['Defendant\'s name and address', 'Service fee ($50-100)', 'Filed petition with court stamp'],
+    tip: 'You CANNOT serve the papers yourself. Use a process server or the sheriff.',
+  },
+  pi_expert_witness_guide: {
+    why: 'Without a medical expert, the defense can argue your injuries weren\'t caused by the accident. Expert testimony is often essential.',
+    checklist: ['Medical records', 'Accident report', 'List of disputed issues'],
+    tip: 'University professors and retired doctors are often the most affordable experts.',
+  },
+  pi_courtroom_guide: {
+    why: 'PI trials have a specific structure. Knowing what to expect — from jury selection to closing arguments — is your preparation advantage.',
+    checklist: ['3 copies of all exhibits', 'Medical records organized chronologically', 'Damages summary', 'Witness list'],
+    tip: 'Present your story chronologically: what happened, how you were hurt, how it changed your life.',
+  },
+  pi_lien_resolution: {
+    why: 'Medical liens can eat 30-50% of your settlement if you don\'t negotiate them. Understanding liens protects your recovery.',
+    checklist: ['List of all medical providers', 'Lien letters from each', 'Health insurance EOBs'],
+    tip: 'Most providers will reduce their lien by 30-50% if you negotiate. Always ask.',
+  },
+
   // --- Family Law Depth ---
   family_filing_guide: {
     why: 'Filing correctly is critical — mistakes can delay your case by weeks. We\'ll walk you through exactly how.',

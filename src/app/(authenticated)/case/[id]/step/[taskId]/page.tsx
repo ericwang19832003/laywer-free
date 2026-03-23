@@ -96,6 +96,16 @@ import { familyTempOrdersPrepConfig } from '@/lib/guided-steps/family/family-tem
 import { familyPropertyDivisionGuideConfig } from '@/lib/guided-steps/family/family-property-division-guide'
 import { familyCustodyFactorsConfig } from '@/lib/guided-steps/family/family-custody-factors'
 import { familyUncontestedPathConfig } from '@/lib/guided-steps/family/family-uncontested-path'
+// Personal injury depth guided-step configs
+import { piDamagesCalculationConfig } from '@/lib/guided-steps/personal-injury/pi-damages-calculation'
+import { piPipClaimConfig } from '@/lib/guided-steps/personal-injury/pi-pip-claim'
+import { piMedicalImprovementConfig } from '@/lib/guided-steps/personal-injury/pi-medical-improvement'
+import { piFilingGuideConfig } from '@/lib/guided-steps/personal-injury/pi-filing-guide'
+import { piServiceGuideConfig } from '@/lib/guided-steps/personal-injury/pi-service-guide'
+import { piCourtroomGuideConfig } from '@/lib/guided-steps/personal-injury/pi-courtroom-guide'
+import { piComparativeFaultConfig } from '@/lib/guided-steps/personal-injury/pi-comparative-fault'
+import { piLienResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-lien-resolution'
+import { piExpertWitnessGuideConfig } from '@/lib/guided-steps/personal-injury/pi-expert-witness-guide'
 import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
 import { ltHabitabilityChecklistConfig } from '@/lib/guided-steps/landlord-tenant/lt-habitability-checklist'
@@ -942,6 +952,26 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Personal injury depth steps
+    case 'pi_damages_calculation':
+      return <GuidedStep caseId={id} taskId={taskId} config={piDamagesCalculationConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_pip_claim':
+      return <GuidedStep caseId={id} taskId={taskId} config={piPipClaimConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_medical_improvement':
+      return <GuidedStep caseId={id} taskId={taskId} config={piMedicalImprovementConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={piFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={piServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={piCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_comparative_fault':
+      return <GuidedStep caseId={id} taskId={taskId} config={piComparativeFaultConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_lien_resolution':
+      return <GuidedStep caseId={id} taskId={taskId} config={piLienResolutionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_expert_witness_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={piExpertWitnessGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+
     // Landlord-tenant depth steps
     case 'lt_repair_request':
       return <GuidedStep caseId={id} taskId={taskId} config={ltRepairRequestConfig} existingAnswers={task.metadata?.guided_answers} skippable />
