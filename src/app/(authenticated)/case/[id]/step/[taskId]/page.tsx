@@ -75,6 +75,15 @@ import { debtFilingGuideConfig } from '@/lib/guided-steps/debt-defense/debt-fili
 import { debtServiceGuideConfig } from '@/lib/guided-steps/debt-defense/debt-service-guide'
 import { debtCourtroomGuideConfig } from '@/lib/guided-steps/debt-defense/debt-courtroom-guide'
 import { debtPostJudgmentGuideConfig } from '@/lib/guided-steps/debt-defense/debt-post-judgment-guide'
+import { fdcpaCounterclaimGuideConfig } from '@/lib/guided-steps/debt-defense/fdcpa-counterclaim-guide'
+import { debtMotionToDismissConfig } from '@/lib/guided-steps/debt-defense/debt-motion-to-dismiss'
+import { debtDefaultJudgmentRecoveryConfig } from '@/lib/guided-steps/debt-defense/debt-default-judgment-recovery'
+import { debtSettlementGuideConfig } from '@/lib/guided-steps/debt-defense/debt-settlement-guide'
+import { debtValidationResponseGuideConfig } from '@/lib/guided-steps/debt-defense/debt-validation-response-guide'
+import { debtEvidenceRulesConfig } from '@/lib/guided-steps/debt-defense/debt-evidence-rules'
+import { debtContinuanceRequestConfig } from '@/lib/guided-steps/debt-defense/debt-continuance-request'
+import { debtWitnessPrepConfig } from '@/lib/guided-steps/debt-defense/debt-witness-prep'
+import { debtCreditDisputeGuideConfig } from '@/lib/guided-steps/debt-defense/debt-credit-dispute-guide'
 // Landlord-tenant depth guided-step configs
 import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
@@ -988,6 +997,24 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={debtCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_post_judgment_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={debtPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'fdcpa_counterclaim_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={fdcpaCounterclaimGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_motion_to_dismiss':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtMotionToDismissConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_default_recovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtDefaultJudgmentRecoveryConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_settlement_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtSettlementGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_validation_response':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtValidationResponseGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_evidence_rules':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtEvidenceRulesConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_continuance_request':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtContinuanceRequestConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_witness_prep':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtWitnessPrepConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_credit_dispute':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtCreditDisputeGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'debt_hearing_prep':
       return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':

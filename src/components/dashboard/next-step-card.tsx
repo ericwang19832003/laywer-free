@@ -29,6 +29,15 @@ const SKIPPABLE_TASKS = new Set([
   'lt_repair_request',
   'lt_eviction_response',
   'lt_habitability_checklist',
+  'fdcpa_counterclaim_guide',
+  'debt_motion_to_dismiss',
+  'debt_default_recovery',
+  'debt_settlement_guide',
+  'debt_validation_response',
+  'debt_evidence_rules',
+  'debt_continuance_request',
+  'debt_witness_prep',
+  'debt_credit_dispute',
 ])
 
 interface NextStepCardProps {

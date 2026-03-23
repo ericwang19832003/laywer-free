@@ -1001,6 +1001,78 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     ],
     tip: 'Texas protects your wages, home, car, and retirement from debt collection — even if you lose.',
   },
+  fdcpa_counterclaim_guide: {
+    why: 'If the collector broke federal law, you can file a counterclaim for up to $1,000 in statutory damages — turning their lawsuit into YOUR payday.',
+    checklist: [
+      'Your FDCPA violation findings',
+      'Evidence of each violation (dates, call logs, letters)',
+    ],
+    tip: 'Include your counterclaim IN your Answer — it\'s filed as one document.',
+  },
+  debt_motion_to_dismiss: {
+    why: 'If the statute of limitations expired or the collector can\'t prove they own the debt, you can ask the judge to throw out the case before trial.',
+    checklist: [
+      'Your SOL calculation showing expiration',
+      'Any validation letter response (or proof of non-response)',
+    ],
+    tip: 'File this AFTER your Answer but BEFORE the trial date.',
+  },
+  debt_default_recovery: {
+    why: 'Missing a deadline isn\'t the end. Texas law gives you a second chance if you act quickly.',
+    checklist: [
+      'Date the default judgment was entered',
+      'Reason you missed the deadline',
+      'Your defenses (to show the case has merit)',
+    ],
+    tip: 'The sooner you act, the better your chances. Under 30 days is ideal.',
+  },
+  debt_settlement_guide: {
+    why: 'About 80% of debt cases settle. Knowing what to demand gives you leverage that most defendants don\'t have.',
+    checklist: [
+      'The claimed debt amount',
+      'How much you can realistically pay',
+    ],
+    tip: 'Never pay before getting the agreement IN WRITING. And always demand credit report deletion.',
+  },
+  debt_validation_response: {
+    why: 'What the collector sent back (or didn\'t) is powerful evidence. Non-response means they can\'t prove the debt.',
+    checklist: [
+      'Your certified mail receipt',
+      'Any response from the collector',
+      'Date you sent the validation letter',
+    ],
+  },
+  debt_evidence_rules: {
+    why: 'You don\'t need a law degree — just 5 basic rules that will make your evidence count in court.',
+    checklist: [
+      'Your organized evidence folder',
+      '3 copies of each document',
+    ],
+    tip: 'In JP court, judges are more relaxed about rules. In county/district court, they\'re strict.',
+  },
+  debt_continuance_request: {
+    why: 'Courts understand pro se litigants need extra time. Continuances are granted regularly.',
+    checklist: [
+      'Your hearing date',
+      'Reason you need more time',
+    ],
+  },
+  debt_witness_prep: {
+    why: 'A witness who saw or heard what happened can be your strongest evidence — especially for FDCPA violations.',
+    checklist: [
+      'Witness name and contact info',
+      'What they can testify about',
+    ],
+    tip: 'You can review facts with witnesses, but never tell them what to say.',
+  },
+  debt_credit_dispute: {
+    why: 'Even after winning, the debt may still show on your credit report. You have the right to correct it.',
+    checklist: [
+      'Copy of the court order (dismissal or satisfaction)',
+      'Your credit reports from all 3 bureaus',
+    ],
+    tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
+  },
 
   // --- Family: Divorce ---
   divorce_intake: {
