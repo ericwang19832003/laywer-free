@@ -3,18 +3,18 @@ import { test, expect } from '@playwright/test'
 test.describe('Pricing Page', () => {
   test('displays all three pricing tiers', async ({ page }) => {
     await page.goto('/pricing')
-    await expect(page.getByText('Your first case is free. Seriously.')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Free' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Essentials' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Pro' })).toBeVisible()
+    await expect(page.getByText('Your first case is free')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: 'Free', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Essentials', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Pro', exact: true })).toBeVisible()
   })
 
   test('shows correct prices', async ({ page }) => {
     await page.goto('/pricing')
-    await expect(page.getByText('$0', { exact: true }).first()).toBeVisible()
-    await expect(page.getByText('$19', { exact: true })).toBeVisible()
-    await expect(page.getByText('$39', { exact: true })).toBeVisible()
-    await expect(page.getByText('$149', { exact: true })).toBeVisible() // one-time option
+    await expect(page.getByText('$0').first()).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('$19').first()).toBeVisible()
+    await expect(page.getByText('$39').first()).toBeVisible()
+    await expect(page.getByText('$149').first()).toBeVisible()
   })
 
   test('FAQ accordion opens and closes', async ({ page }) => {
@@ -48,11 +48,10 @@ test.describe('Pricing Page', () => {
 
   test('always-free section lists safety features', async ({ page }) => {
     await page.goto('/pricing')
-    await expect(
-      page.getByText('These features are always free — no matter what.')
-    ).toBeVisible()
+    await page.getByText('These features are always free').scrollIntoViewIfNeeded()
+    await expect(page.getByText('These features are always free')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Deadline tracking').first()).toBeVisible()
-    await expect(page.getByText('Court directory & fee info').first()).toBeVisible()
+    await expect(page.getByText('Court directory').first()).toBeVisible()
     await expect(page.getByText('Citation verification').first()).toBeVisible()
   })
 

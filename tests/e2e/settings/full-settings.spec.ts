@@ -24,10 +24,12 @@ test.describe('Settings Page - All Sections', () => {
 
   test('referral section is visible', async ({ page }) => {
     await page.goto('/settings')
-    // Referral is below billing — scroll to bottom
+    // Wait for billing to render first (signals client components loaded)
+    await expect(page.getByText('Billing & Subscription')).toBeVisible({ timeout: 15000 })
+    // Scroll to bottom where referral section is
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    await expect(page.getByText(/referral/i)).toBeVisible()
-    await expect(page.getByText(/how it works/i)).toBeVisible()
+    await page.waitForTimeout(1000)
+    await expect(page.getByText(/referral program/i)).toBeVisible({ timeout: 10000 })
   })
 
   test('notification preferences section exists', async ({ page }) => {

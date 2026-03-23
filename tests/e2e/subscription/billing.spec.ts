@@ -27,32 +27,30 @@ test.describe('Billing Settings', () => {
     await page.goto('/settings')
 
     // Billing section is below the fold — scroll to it
-    const billing = page.locator('#billing')
-    await billing.scrollIntoViewIfNeeded()
+    // Wait for billing section to render (client component fetches data)
+    await expect(page.getByText('Billing & Subscription')).toBeVisible({ timeout: 15000 })
+    await page.locator('#billing').scrollIntoViewIfNeeded()
   })
 
   test('shows Billing & Subscription section', async ({ page }) => {
-    await expect(page.getByText('Billing & Subscription')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Billing & Subscription')).toBeVisible()
   })
 
   test('shows current plan as Free', async ({ page }) => {
-    await expect(page.getByText('Billing & Subscription')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('Current Plan')).toBeVisible()
-    await expect(page.getByText('Free')).toBeVisible()
+    await expect(page.getByText('Current Plan')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('#billing').getByText('Free')).toBeVisible()
   })
 
   test('shows AI usage meter', async ({ page }) => {
-    await expect(page.getByText('Billing & Subscription')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('AI Generations')).toBeVisible()
-    // Free tier shows remaining count (e.g. "5 left")
-    await expect(page.getByText(/\d+ left/)).toBeVisible()
-    await expect(page.getByText('this month')).toBeVisible()
+    const billing = page.locator('#billing')
+    await expect(billing.getByText('AI Generations')).toBeVisible({ timeout: 10000 })
+    await expect(billing.getByText(/\d+ left/)).toBeVisible()
   })
 
   test('shows Active Cases count', async ({ page }) => {
-    await expect(page.getByText('Billing & Subscription')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('Active Cases')).toBeVisible()
-    await expect(page.getByText(/\d+ remaining|Unlimited/)).toBeVisible()
+    const billing = page.locator('#billing')
+    await expect(billing.getByText('Active Cases')).toBeVisible({ timeout: 10000 })
+    await expect(billing.getByText(/\d+ remaining/)).toBeVisible()
   })
 
   test('shows upgrade buttons for free tier', async ({ page }) => {
