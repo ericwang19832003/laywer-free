@@ -1074,6 +1074,56 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Real Estate Depth ---
+  re_filing_guide: {
+    why: 'Real estate lawsuits MUST be filed in the county where the property is located. Getting venue wrong means dismissal.',
+    checklist: ['Full legal description of property', 'Petition', 'Filing fee', 'Government ID'],
+    tip: 'Consider filing a lis pendens to cloud the title — prevents the property from being sold during litigation.',
+  },
+  re_service_guide: {
+    why: 'RE cases often involve multiple parties (seller, buyer, agents, title company, builder). Each must be properly served.',
+    checklist: ['Names of all parties', 'Registered agent info for businesses', 'Filed petition with court stamp'],
+  },
+  re_courtroom_guide: {
+    why: 'RE trials revolve around documents — title records, surveys, inspection reports. Organized evidence wins.',
+    checklist: ['Title documents', 'Survey/plat', 'Inspection reports', 'Communications', '3 copies of everything'],
+  },
+  re_title_defect_analysis: {
+    why: 'Understanding what makes your title "defective" determines whether you claim against the seller, the title company, or both.',
+    checklist: ['Title insurance policy', 'Title commitment', 'Deed records', 'Any lien or encumbrance documents'],
+  },
+  re_seller_disclosure: {
+    why: 'Texas sellers must disclose known defects. Non-disclosure can result in treble damages under the DTPA.',
+    checklist: ['Seller\'s disclosure form', 'Inspection report', 'Repair estimates', 'Evidence seller knew about defects'],
+    tip: 'DTPA allows up to 3x your actual damages if the seller knowingly concealed defects.',
+  },
+  re_earnest_money: {
+    why: 'Earnest money disputes are common and often resolved quickly in JP court. Know your release conditions.',
+    checklist: ['Purchase contract (earnest money paragraph)', 'Escrow receipt', 'Communications about the deal'],
+  },
+  re_construction_defect: {
+    why: 'RCLA requires 60 days notice to the builder BEFORE you can file suit. Missing this step can dismiss your case.',
+    checklist: ['RCLA notice (sent 60+ days ago)', 'Expert inspection report', 'Repair estimates', 'Builder\'s response (if any)'],
+    tip: 'An expert affidavit is required for construction defect claims. Budget $1,500-3,000.',
+  },
+  re_failed_closing: {
+    why: 'When a closing falls through, the remedy depends on WHO caused it — buyer, seller, or lender.',
+    checklist: ['Purchase contract', 'Closing timeline communications', 'Earnest money receipt', 'Lender denial letter (if applicable)'],
+  },
+  re_adverse_possession: {
+    why: 'Adverse possession lets you claim ownership of land you\'ve openly used for years. Texas has 3-year and 10-year rules.',
+    checklist: ['Survey showing disputed area', 'Photos of your use over time', 'Tax payment records', 'Witness statements'],
+  },
+  re_discovery_guide: {
+    why: 'RE cases are document-heavy. Title records, inspection reports, and communications are your strongest evidence.',
+    checklist: ['List of documents to request', 'Deposition targets', 'Expert report needs'],
+  },
+  re_post_judgment_guide: {
+    why: 'RE judgments must be recorded with the County Clerk to affect title. Don\'t skip this step.',
+    checklist: ['Court judgment', 'County Clerk recording fee', 'Lis pendens release (if filed)'],
+    tip: 'Recording your judgment creates a public record that protects your property rights.',
+  },
+
   // --- Business Dispute Depth ---
   biz_courtroom_guide: {
     why: 'Business trials are document-heavy. Organized financial evidence and clear testimony win cases.',

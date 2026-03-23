@@ -106,6 +106,18 @@ import { piCourtroomGuideConfig } from '@/lib/guided-steps/personal-injury/pi-co
 import { piComparativeFaultConfig } from '@/lib/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-lien-resolution'
 import { piExpertWitnessGuideConfig } from '@/lib/guided-steps/personal-injury/pi-expert-witness-guide'
+// Real estate depth guided-step configs
+import { reFilingGuideConfig } from '@/lib/guided-steps/real-estate/re-filing-guide'
+import { reServiceGuideConfig } from '@/lib/guided-steps/real-estate/re-service-guide'
+import { reCourtroomGuideConfig } from '@/lib/guided-steps/real-estate/re-courtroom-guide'
+import { reTitleDefectAnalysisConfig } from '@/lib/guided-steps/real-estate/re-title-defect-analysis'
+import { reSellerDisclosureGuideConfig } from '@/lib/guided-steps/real-estate/re-seller-disclosure-guide'
+import { reEarnestMoneyGuideConfig } from '@/lib/guided-steps/real-estate/re-earnest-money-guide'
+import { reConstructionDefectGuideConfig } from '@/lib/guided-steps/real-estate/re-construction-defect-guide'
+import { reFailedClosingGuideConfig } from '@/lib/guided-steps/real-estate/re-failed-closing-guide'
+import { reAdversePossessionGuideConfig } from '@/lib/guided-steps/real-estate/re-adverse-possession-guide'
+import { reDiscoveryGuideConfig } from '@/lib/guided-steps/real-estate/re-discovery-guide'
+import { rePostJudgmentGuideConfig } from '@/lib/guided-steps/real-estate/re-post-judgment-guide'
 // Business dispute depth guided-step configs
 import { bizCourtroomGuideConfig } from '@/lib/guided-steps/business/biz-courtroom-guide'
 import { bizServiceGuideConfig } from '@/lib/guided-steps/business/biz-service-guide'
@@ -994,6 +1006,30 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Real estate depth steps
+    case 're_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={reFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={reServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={reCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_title_defect_analysis':
+      return <GuidedStep caseId={id} taskId={taskId} config={reTitleDefectAnalysisConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_seller_disclosure':
+      return <GuidedStep caseId={id} taskId={taskId} config={reSellerDisclosureGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_earnest_money':
+      return <GuidedStep caseId={id} taskId={taskId} config={reEarnestMoneyGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_construction_defect':
+      return <GuidedStep caseId={id} taskId={taskId} config={reConstructionDefectGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_failed_closing':
+      return <GuidedStep caseId={id} taskId={taskId} config={reFailedClosingGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_adverse_possession':
+      return <GuidedStep caseId={id} taskId={taskId} config={reAdversePossessionGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 're_discovery_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={reDiscoveryGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 're_post_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={rePostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+
     // Business dispute depth steps
     case 'biz_courtroom_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={bizCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
