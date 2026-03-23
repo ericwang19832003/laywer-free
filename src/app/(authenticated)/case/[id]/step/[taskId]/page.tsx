@@ -106,6 +106,16 @@ import { piCourtroomGuideConfig } from '@/lib/guided-steps/personal-injury/pi-co
 import { piComparativeFaultConfig } from '@/lib/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-lien-resolution'
 import { piExpertWitnessGuideConfig } from '@/lib/guided-steps/personal-injury/pi-expert-witness-guide'
+// Property damage depth guided-step configs
+import { propertyDamageAssessmentConfig } from '@/lib/guided-steps/property/property-damage-assessment'
+import { propertyInsuranceGuideConfig } from '@/lib/guided-steps/property/property-insurance-guide'
+import { propertyFilingGuideConfig } from '@/lib/guided-steps/property/property-filing-guide'
+import { propertyServiceGuideConfig } from '@/lib/guided-steps/property/property-service-guide'
+import { propertyCourtroomGuideConfig } from '@/lib/guided-steps/property/property-courtroom-guide'
+import { propertyMediationGuideConfig } from '@/lib/guided-steps/property/property-mediation-guide'
+import { propertyPretrialMotionsConfig } from '@/lib/guided-steps/property/property-pretrial-motions'
+import { propertyDamagesGuideConfig } from '@/lib/guided-steps/property/property-damages-guide'
+import { propertyPostJudgmentGuideConfig } from '@/lib/guided-steps/property/property-post-judgment-guide'
 import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
 import { ltHabitabilityChecklistConfig } from '@/lib/guided-steps/landlord-tenant/lt-habitability-checklist'
@@ -952,6 +962,26 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Property damage depth steps
+    case 'property_damage_assessment':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyDamageAssessmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_insurance_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyInsuranceGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'property_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_mediation_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyMediationGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'property_pretrial_motions':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyPretrialMotionsConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'property_damages_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyDamagesGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'property_post_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={propertyPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+
     // Personal injury depth steps
     case 'pi_damages_calculation':
       return <GuidedStep caseId={id} taskId={taskId} config={piDamagesCalculationConfig} existingAnswers={task.metadata?.guided_answers} />

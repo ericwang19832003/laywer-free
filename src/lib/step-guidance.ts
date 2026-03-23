@@ -1074,6 +1074,50 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Property Damage Depth ---
+  property_damage_assessment: {
+    why: 'Well-documented damage is your strongest evidence. Judges need to SEE what happened.',
+    checklist: ['Photos from multiple angles (with timestamps)', 'Video walkthrough', 'At least 3 written contractor estimates', 'Before photos (if available)'],
+    tip: 'Don\'t repair until you\'ve documented everything AND the other party has had a chance to inspect.',
+  },
+  property_insurance_guide: {
+    why: 'Insurance can fund your repairs immediately — but you need to navigate the claims process correctly.',
+    checklist: ['Insurance policy information', 'Police report (if applicable)', 'Damage photos', 'Repair estimates'],
+    tip: 'Always get your OWN repair estimates — don\'t rely solely on the adjuster\'s.',
+  },
+  property_damages_guide: {
+    why: 'Most people undervalue property claims. Damages include repair costs PLUS diminished value, loss of use, and consequential costs.',
+    checklist: ['Repair estimates', 'Property appraisal (before/after)', 'Receipts for related costs (hotel, storage, etc.)'],
+  },
+  property_filing_guide: {
+    why: 'The right court depends on your damages amount. Under $20K goes to JP Court (simpler). Over $20K goes to County or District Court.',
+    checklist: ['Original Petition', 'Filing fee', 'Evidence exhibits', 'Government ID'],
+    tip: 'File in the county where the property is located.',
+  },
+  property_service_guide: {
+    why: 'The defendant must be officially notified. For businesses and HOAs, you serve their registered agent.',
+    checklist: ['Defendant\'s name and address', 'Filed petition with court stamp', 'Service fee ($50-100)'],
+    tip: 'Find a business\'s registered agent at sos.state.tx.us.',
+  },
+  property_pretrial_motions: {
+    why: 'Property cases with clear documentary evidence (surveys, deeds) can sometimes be won before trial via summary judgment.',
+    checklist: ['Survey/deed showing your position', 'Photos and estimates', 'Timeline of events'],
+  },
+  property_mediation_guide: {
+    why: 'Most property disputes settle in mediation. Know your total damages and walk-away point before you walk in.',
+    checklist: ['Total damages calculation', 'All evidence organized', 'Proposed resolution terms'],
+  },
+  property_courtroom_guide: {
+    why: 'Property trials are evidence-heavy. Organized photos, estimates, and a clear timeline win cases.',
+    checklist: ['3 copies of all exhibits', 'Photos organized chronologically', 'Contractor estimates', 'Government ID'],
+    tip: 'Present your story chronologically: what happened, the damage, the cost to fix.',
+  },
+  property_post_judgment_guide: {
+    why: 'If your judgment involves property rights, record it with the County Clerk so it appears in property records.',
+    checklist: ['Copy of the court\'s judgment', 'Appeal deadline (30 days)'],
+    tip: 'If the defendant doesn\'t pay, you can place a lien on THEIR property.',
+  },
+
   // --- Personal Injury Depth ---
   pi_pip_claim: {
     why: 'PIP pays YOUR medical bills regardless of fault. It\'s coverage you already paid for — don\'t leave it unused.',
