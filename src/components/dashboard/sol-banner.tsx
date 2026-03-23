@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Clock, ShieldAlert, Info } from 'lucide-react'
+import { AlertTriangle, Clock, ShieldAlert, Info, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 /** Serializable version of SolResult (Date → ISO string) */
@@ -106,7 +106,15 @@ export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
         <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${config.iconColor}`} />
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-semibold ${config.titleColor}`}>
-            {config.title}
+            <span className="inline-flex items-center gap-1">
+              {config.title}
+              <span className="relative group">
+                <HelpCircle className="h-4 w-4 text-warm-muted cursor-help" />
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-warm-text text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-64 text-center z-10">
+                  The deadline to file your case in court. If this passes, you may lose your right to sue. This date is based on Texas law and your case type.
+                </span>
+              </span>
+            </span>
             {sol.years !== null && (
               <span className="font-normal text-warm-muted ml-1">
                 ({sol.years}-year limit in {state})

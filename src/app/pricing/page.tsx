@@ -1,68 +1,10 @@
 import Link from 'next/link'
-import { TIER_PRICING } from '@/lib/subscription/limits'
+import { PricingCards } from '@/components/pricing/pricing-cards'
 
 export const metadata = {
   title: 'Pricing | Lawyer Free',
   description: 'Affordable legal help for self-represented litigants in Texas. First case free.',
 }
-
-const tiers = [
-  {
-    name: 'Free',
-    price: TIER_PRICING.free.monthly,
-    period: '/month',
-    badge: 'No credit card',
-    badgeColor: 'bg-calm-green/10 text-calm-green',
-    borderColor: 'border-warm-muted/20',
-    cta: 'Start Free',
-    href: '/signup',
-    features: [
-      '1 active case',
-      '5 AI generations/month',
-      'All guided steps',
-      'Deadline tracking',
-      'Court directory',
-      'Case health score',
-      'Citation verification',
-    ],
-  },
-  {
-    name: 'Essentials',
-    price: TIER_PRICING.essentials.monthly,
-    period: '/month',
-    oneTime: TIER_PRICING.essentials.oneTime,
-    badge: 'Most Popular',
-    badgeColor: 'bg-calm-indigo/10 text-calm-indigo',
-    borderColor: 'border-calm-indigo',
-    highlighted: true,
-    cta: 'Get Essentials',
-    href: '/signup?plan=essentials',
-    includesFrom: 'Free',
-    features: [
-      'Unlimited cases',
-      'Unlimited AI generations',
-      'Email deadline reminders',
-      'Case sharing',
-    ],
-  },
-  {
-    name: 'Pro',
-    price: TIER_PRICING.pro.monthly,
-    period: '/month',
-    badge: 'Power User',
-    badgeColor: 'bg-calm-amber/10 text-calm-amber',
-    borderColor: 'border-warm-muted/20',
-    cta: 'Get Pro',
-    href: '/signup?plan=pro',
-    includesFrom: 'Essentials',
-    features: [
-      'Discovery tools',
-      'Trial binders',
-      'Email integration',
-      'Priority AI (GPT-4o)',
-    ],
-  },
-]
 
 const alwaysFreeFeatures = [
   'Deadline tracking',
@@ -111,70 +53,8 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-20">
-        {tiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={`relative rounded-2xl border-2 ${tier.borderColor} bg-warm-bg p-6 flex flex-col ${
-              tier.highlighted ? 'ring-2 ring-calm-indigo/30 shadow-lg' : ''
-            }`}
-          >
-            {/* Badge */}
-            <span
-              className={`inline-block self-start text-xs font-semibold px-2.5 py-1 rounded-full mb-4 ${tier.badgeColor}`}
-            >
-              {tier.badge}
-            </span>
-
-            {/* Name & Price */}
-            <h2 className="text-xl font-bold text-warm-text mb-1">{tier.name}</h2>
-            <div className="mb-1">
-              <span className="text-3xl font-bold text-warm-text">${tier.price}</span>
-              <span className="text-warm-muted">{tier.period}</span>
-            </div>
-            {tier.oneTime && (
-              <p className="text-sm text-warm-muted mb-4">
-                or <span className="font-semibold text-warm-text">${tier.oneTime}</span> one-time
-              </p>
-            )}
-            {!tier.oneTime && <div className="mb-4" />}
-
-            {/* CTA */}
-            <Link
-              href={tier.href}
-              className={`block text-center rounded-lg py-2.5 font-semibold mb-6 transition-colors ${
-                tier.highlighted
-                  ? 'bg-calm-indigo text-white hover:bg-calm-indigo/90'
-                  : 'bg-warm-text/10 text-warm-text hover:bg-warm-text/20'
-              }`}
-            >
-              {tier.cta}
-            </Link>
-
-            {/* Features */}
-            <ul className="space-y-2.5 flex-1">
-              {tier.includesFrom && (
-                <li className="text-sm text-warm-muted font-medium mb-1">
-                  Everything in {tier.includesFrom}, plus:
-                </li>
-              )}
-              {tier.features.map((feature) => (
-                <li key={feature} className="flex items-start gap-2 text-sm text-warm-text">
-                  <svg
-                    className="w-4 h-4 mt-0.5 text-calm-green shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <section className="mb-20">
+        <PricingCards />
       </section>
 
       {/* Always Free */}

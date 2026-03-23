@@ -80,12 +80,20 @@ export function BillingSection() {
               {aiRemaining === Infinity ? 'Unlimited' : `${aiRemaining} left`}
             </p>
             <p className="text-xs text-warm-muted">this month</p>
+            {tier === 'free' && aiRemaining <= 1 && aiRemaining > 0 && (
+              <p className="text-xs text-calm-amber mt-1">Almost out — upgrade for unlimited AI</p>
+            )}
           </div>
           <div className="p-3 rounded-lg bg-warm-bg">
             <p className="text-xs text-warm-muted">Active Cases</p>
             <p className="text-lg font-semibold text-warm-text">
               {casesRemaining === Infinity ? 'Unlimited' : `${casesRemaining} remaining`}
             </p>
+            {tier === 'free' && casesRemaining <= 0 && (
+              <p className="text-xs text-calm-amber mt-1">
+                No cases remaining — <a href="/pricing" className="underline">upgrade</a> for more
+              </p>
+            )}
           </div>
         </div>
 

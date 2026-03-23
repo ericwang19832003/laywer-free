@@ -85,19 +85,39 @@ export function ReferralSection() {
         <div className="grid grid-cols-4 gap-3">
           <div className="p-3 rounded-lg bg-warm-bg text-center">
             <p className="text-lg font-semibold text-warm-text">{stats.totalReferred}</p>
-            <p className="text-xs text-warm-muted">Referred</p>
+            <span className="relative group cursor-help">
+              <span className="text-xs text-warm-muted">Referred</span>
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-warm-text text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                People who clicked your referral link
+              </span>
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-warm-bg text-center">
             <p className="text-lg font-semibold text-warm-text">{stats.signedUp}</p>
-            <p className="text-xs text-warm-muted">Signed Up</p>
+            <span className="relative group cursor-help">
+              <span className="text-xs text-warm-muted">Signed Up</span>
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-warm-text text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                People who created an account through your link
+              </span>
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-warm-bg text-center">
             <p className="text-lg font-semibold text-warm-text">{stats.converted}</p>
-            <p className="text-xs text-warm-muted">Converted</p>
+            <span className="relative group cursor-help">
+              <span className="text-xs text-warm-muted">Converted</span>
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-warm-text text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                People who upgraded to a paid plan
+              </span>
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-warm-bg text-center">
             <p className="text-lg font-semibold text-warm-text">${earnedDollars}</p>
-            <p className="text-xs text-warm-muted">Earned</p>
+            <span className="relative group cursor-help">
+              <span className="text-xs text-warm-muted">Earned</span>
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-warm-text text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                Credits applied to your account ($10 per conversion)
+              </span>
+            </span>
           </div>
         </div>
 

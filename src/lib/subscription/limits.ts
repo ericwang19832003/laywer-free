@@ -54,7 +54,7 @@ export const NEVER_GATED: string[] = [
 
 // Pricing display info
 export const TIER_PRICING = {
-  free: { monthly: 0, label: 'Free' },
-  essentials: { monthly: 19, oneTime: 149, label: 'Essentials' },
-  pro: { monthly: 39, label: 'Pro' },
+  free: { monthly: 0, annual: 0, label: 'Free' },
+  essentials: { monthly: 19, annual: 190, oneTime: 149, label: 'Essentials' },
+  pro: { monthly: 39, annual: 390, label: 'Pro' },
 } as const

@@ -3,6 +3,7 @@
 import { useReducer, useState, useRef, useCallback, useEffect } from 'react'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useSubscription } from '@/hooks/use-subscription'
 import { Button } from '@/components/ui/button'
@@ -294,6 +295,13 @@ export function NewCaseDialog() {
       setOpen(false)
       router.push(`/case/${data.case.id}`)
       router.refresh()
+
+      setTimeout(() => {
+        toast('Welcome to your case dashboard!', {
+          description: 'Start with the first step — we\'ll guide you through everything.',
+          duration: 6000,
+        })
+      }, 1500)
     } catch {
       setError('Something went wrong. Please try again.')
       setLoading(false)
