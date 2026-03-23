@@ -106,6 +106,17 @@ import { piCourtroomGuideConfig } from '@/lib/guided-steps/personal-injury/pi-co
 import { piComparativeFaultConfig } from '@/lib/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-lien-resolution'
 import { piExpertWitnessGuideConfig } from '@/lib/guided-steps/personal-injury/pi-expert-witness-guide'
+// Business dispute depth guided-step configs
+import { bizCourtroomGuideConfig } from '@/lib/guided-steps/business/biz-courtroom-guide'
+import { bizServiceGuideConfig } from '@/lib/guided-steps/business/biz-service-guide'
+import { bizDiscoveryGuideConfig } from '@/lib/guided-steps/business/biz-discovery-guide'
+import { bizEmploymentWrongfulTerminationConfig } from '@/lib/guided-steps/business/biz-employment-wrongful-termination'
+import { bizEmploymentWageTheftConfig } from '@/lib/guided-steps/business/biz-employment-wage-theft'
+import { bizEmploymentNonCompeteConfig } from '@/lib/guided-steps/business/biz-employment-non-compete'
+import { bizB2bContractBreachConfig } from '@/lib/guided-steps/business/biz-b2b-contract-breach'
+import { bizB2bTradeSecretsConfig } from '@/lib/guided-steps/business/biz-b2b-trade-secrets'
+import { bizPartnershipFiduciaryDutyConfig } from '@/lib/guided-steps/business/biz-partnership-fiduciary-duty'
+import { bizPartnershipAccountingConfig } from '@/lib/guided-steps/business/biz-partnership-accounting'
 // Contract dispute depth guided-step configs
 import { contractBreachAnalysisConfig } from '@/lib/guided-steps/contract/contract-breach-analysis'
 import { contractStatuteOfFraudsConfig } from '@/lib/guided-steps/contract/contract-statute-of-frauds'
@@ -983,6 +994,28 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Business dispute depth steps
+    case 'biz_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_discovery_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizDiscoveryGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'biz_wrongful_termination':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentWrongfulTerminationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_wage_theft':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentWageTheftConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_non_compete':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizEmploymentNonCompeteConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_b2b_contract_breach':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bContractBreachConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_b2b_trade_secrets':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizB2bTradeSecretsConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_partnership_fiduciary':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipFiduciaryDutyConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'biz_partnership_accounting':
+      return <GuidedStep caseId={id} taskId={taskId} config={bizPartnershipAccountingConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+
     // Contract dispute depth steps
     case 'contract_breach_analysis':
       return <GuidedStep caseId={id} taskId={taskId} config={contractBreachAnalysisConfig} existingAnswers={task.metadata?.guided_answers} />

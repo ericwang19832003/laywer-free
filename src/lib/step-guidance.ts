@@ -1074,6 +1074,57 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Business Dispute Depth ---
+  biz_courtroom_guide: {
+    why: 'Business trials are document-heavy. Organized financial evidence and clear testimony win cases.',
+    checklist: ['3 copies of all financial documents', 'Contract/partnership agreement', 'Communications evidence', 'Damages calculation'],
+    tip: 'Present your story chronologically with documents backing each point.',
+  },
+  biz_service_guide: {
+    why: 'Serving a business requires finding their registered agent — different from serving an individual.',
+    checklist: ['Entity name and type (LLC, Corp, etc.)', 'Registered agent info from sos.state.tx.us', 'Filed petition with court stamp'],
+    tip: 'Search the TX Secretary of State website for any business\'s registered agent.',
+  },
+  biz_discovery_guide: {
+    why: 'Business disputes are won in discovery. Getting financial records and communications is your strongest weapon.',
+    checklist: ['List of documents you need', 'Names of people to depose', 'Questions for interrogatories'],
+    tip: 'Request bank records, tax returns, and internal emails — they tell the real story.',
+  },
+  biz_wrongful_termination: {
+    why: 'Texas is at-will, but firing based on discrimination, retaliation, or contract violation is illegal.',
+    checklist: ['Termination letter/notice', 'Performance reviews', 'Evidence of discrimination or retaliation', 'Employment contract (if any)'],
+    tip: 'You must file an EEOC/TWC complaint BEFORE you can sue for discrimination.',
+  },
+  biz_wage_theft: {
+    why: 'Texas Payday Law requires employers to pay on time. Failure can result in triple damages.',
+    checklist: ['Pay stubs showing missed wages', 'Employment contract or offer letter', 'Time records', 'Written demands for payment'],
+    tip: 'File a TWC wage claim at twc.texas.gov — it\'s free and they investigate for you.',
+  },
+  biz_non_compete: {
+    why: 'Many non-competes are unenforceable in Texas. Courts can narrow or void unreasonable restrictions.',
+    checklist: ['Non-compete agreement', 'Employment contract', 'Description of what you want to do'],
+    tip: 'Texas courts use the "blue pencil doctrine" — they rewrite unreasonable terms rather than voiding the whole agreement.',
+  },
+  biz_b2b_contract_breach: {
+    why: 'B2B contract claims have specific rules — especially when the UCC applies to goods transactions.',
+    checklist: ['The contract', 'Invoices and payment records', 'Communications about the breach', 'Damages calculation'],
+  },
+  biz_b2b_trade_secrets: {
+    why: 'Texas law provides strong protections for trade secrets — including injunctions, damages, and attorney fees.',
+    checklist: ['Description of the trade secret', 'Evidence of misappropriation', 'Measures you took to protect it'],
+    tip: 'You can get a TRO (emergency court order) the SAME DAY to stop ongoing misappropriation.',
+  },
+  biz_partnership_fiduciary: {
+    why: 'Partners owe each other the highest legal duty — loyalty, honesty, and good faith. Breach carries serious damages.',
+    checklist: ['Partnership agreement', 'Financial records', 'Evidence of self-dealing or secret profits'],
+    tip: 'Punitive damages may be available if the breach involved intentional fraud.',
+  },
+  biz_partnership_accounting: {
+    why: 'Every partner has the right to a full accounting. If money is missing, the law gives you tools to find it.',
+    checklist: ['Partnership financial statements', 'Bank records', 'Tax returns (business and personal)'],
+    tip: 'A forensic accountant can find hidden income and unauthorized expenses.',
+  },
+
   // --- Contract Dispute Depth ---
   contract_breach_analysis: {
     why: 'Material vs minor breach determines your remedies. A material breach lets you cancel the contract AND sue for damages.',
