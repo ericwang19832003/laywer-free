@@ -71,6 +71,10 @@ import { fdcpaCheckConfig } from '@/lib/guided-steps/debt-defense/fdcpa-check'
 import { debtSolCheckConfig } from '@/lib/guided-steps/debt-defense/debt-sol-check'
 import { debtAnswerPrepConfig } from '@/lib/guided-steps/debt-defense/debt-answer-prep'
 import { debtHearingPrepDeepConfig } from '@/lib/guided-steps/debt-defense/debt-hearing-prep-deep'
+import { debtFilingGuideConfig } from '@/lib/guided-steps/debt-defense/debt-filing-guide'
+import { debtServiceGuideConfig } from '@/lib/guided-steps/debt-defense/debt-service-guide'
+import { debtCourtroomGuideConfig } from '@/lib/guided-steps/debt-defense/debt-courtroom-guide'
+import { debtPostJudgmentGuideConfig } from '@/lib/guided-steps/debt-defense/debt-post-judgment-guide'
 // Landlord-tenant depth guided-step configs
 import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
@@ -976,6 +980,14 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={debtSolCheckConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'debt_answer_prep':
       return <GuidedStep caseId={id} taskId={taskId} config={debtAnswerPrepConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_post_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_prep':
       return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':

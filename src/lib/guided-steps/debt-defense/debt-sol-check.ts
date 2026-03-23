@@ -22,6 +22,12 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       ],
     },
     {
+      id: 'sol_restart_warning',
+      type: 'info',
+      prompt:
+        'IMPORTANT: Do NOT call the collector or make any payment before checking your statute of limitations. In Texas, making a payment or written acknowledgment of the debt restarts the clock — giving the collector 4 more years to sue you. Check your records instead of calling.',
+    },
+    {
       id: 'last_activity_date',
       type: 'text',
       prompt:
@@ -29,6 +35,19 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       placeholder: 'MM/DD/YYYY',
       helpText:
         'This is the date the statute of limitations clock started. If you made a partial payment after default, the clock may have restarted from that date.',
+    },
+    {
+      id: 'recent_payment',
+      type: 'yes_no',
+      prompt: 'Have you made any payment on this debt in the last 4 years, even a small one?',
+      helpText: 'Any payment — even $1 — restarts the statute of limitations in Texas.',
+    },
+    {
+      id: 'sol_restart_info',
+      type: 'info',
+      prompt:
+        'Since you made a payment, the statute of limitations may have restarted from that payment date. Use the date of your most recent payment as the start date instead of the original default date.',
+      showIf: (answers) => answers.recent_payment === 'yes',
     },
     {
       id: 'sol_credit_card_info',

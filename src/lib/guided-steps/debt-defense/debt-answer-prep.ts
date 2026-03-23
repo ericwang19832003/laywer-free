@@ -7,6 +7,18 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
 
   questions: [
     {
+      id: 'what_is_answer',
+      type: 'info',
+      prompt:
+        'AN ANSWER IS YOUR RESPONSE TO THE LAWSUIT.\n\nThe plaintiff filed a petition saying you owe money. Your Answer is your official response to the court. If you don\'t file one by your deadline, the court automatically rules against you (called a "default judgment") — and the collector can start taking money from your bank account.\n\nFiling an Answer forces the plaintiff to PROVE their case. They must show evidence that you owe the money, that the amount is correct, and that they have the right to collect.',
+    },
+    {
+      id: 'general_vs_specific',
+      type: 'info',
+      prompt:
+        'TWO TYPES OF ANSWERS:\n\n1. GENERAL DENIAL (recommended for most people)\nYou deny EVERYTHING the plaintiff claims. This is one sentence: "Defendant generally denies each and every allegation." The plaintiff must then prove every single element of their case. This is the safest option.\n\n2. SPECIFIC ANSWER\nYou respond to each allegation individually — "I admit this, I deny that." This is riskier because anything you admit can\'t be disputed later.\n\nWe recommend General Denial unless you have specific facts you want to raise.',
+    },
+    {
       id: 'have_petition',
       type: 'yes_no',
       prompt: "Have you received the plaintiff's petition or complaint?",
@@ -26,6 +38,12 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       prompt: 'Do you know your deadline to file an answer?',
       helpText:
         'In Texas: Justice of the Peace (JP) court — 14 days from service. County or District court — the first Monday after 20 days from service (the "answer date"). Missing this deadline can result in a default judgment against you.',
+    },
+    {
+      id: 'what_are_defenses',
+      type: 'info',
+      prompt:
+        'DEFENSES ARE YOUR REASONS WHY YOU SHOULD WIN.\n\nEven with a general denial, you should list specific defenses. Think of it like this:\n- General denial = "I deny everything" (plaintiff must prove their case)\n- Defenses = "And even if I owed it, here\'s why I still shouldn\'t pay" (you have specific legal reasons)\n\nCommon defenses for debt cases:\n- Statute of limitations expired (they waited too long to sue)\n- They can\'t prove they own the debt (no chain of assignment)\n- The amount is wrong (fees, interest, or principal errors)\n- FDCPA violations (they broke the law while collecting)',
     },
     {
       id: 'which_defense',

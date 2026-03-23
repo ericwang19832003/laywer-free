@@ -962,6 +962,45 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Copies of any repair requests sent to your landlord',
     ],
   },
+  debt_filing_guide: {
+    why: 'Filing your answer correctly is just as important as writing it. This guide walks you through exactly how to submit it to the court.',
+    checklist: [
+      'Your completed Answer (signed)',
+      'Filing fee payment or fee waiver form',
+      'Your case number from the citation',
+      'Government-issued ID',
+    ],
+    tip: 'eFileTexas.gov is the easiest way to file — you can do it from home.',
+  },
+  debt_service_guide: {
+    why: 'Texas law requires you to give the other side a copy of everything you file. Without proper service, your answer may be rejected.',
+    checklist: [
+      'A copy of your Answer for the plaintiff\'s attorney',
+      'Certificate of Service (attached to your Answer)',
+      'Plaintiff attorney\'s name and address (from court papers)',
+    ],
+    tip: 'If you e-file, service often happens automatically — check your e-filing receipt.',
+  },
+  debt_courtroom_guide: {
+    why: 'Knowing what to expect removes the fear. Most defendants who prepare are more effective than those with attorneys who don\'t.',
+    checklist: [
+      '3 copies of all documents',
+      'Your filed Answer with court stamp',
+      'Proof of service',
+      'Evidence supporting your defenses',
+      'Government-issued ID',
+      'Notebook and pen',
+    ],
+    tip: 'Arrive 30 minutes early. If the plaintiff doesn\'t show up, you can ask for dismissal.',
+  },
+  debt_post_judgment_guide: {
+    why: 'Whether you won or lost, there are important next steps to protect yourself and your rights.',
+    checklist: [
+      'Copy of the court\'s judgment or order',
+      'Note your appeal deadline (5 days JP, 21 days county/district)',
+    ],
+    tip: 'Texas protects your wages, home, car, and retirement from debt collection — even if you lose.',
+  },
 
   // --- Family: Divorce ---
   divorce_intake: {
