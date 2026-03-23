@@ -5,6 +5,7 @@ test.describe('Discovery Hub', () => {
   test('discovery page loads', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/discovery`)
+    await page.waitForLoadState('networkidle')
 
     await expect(page.getByRole('heading', { name: 'Discovery' })).toBeVisible({ timeout: 10000 })
     await expect(
@@ -15,6 +16,7 @@ test.describe('Discovery Hub', () => {
   test('back to dashboard link works', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/discovery`)
+    await page.waitForLoadState('networkidle')
 
     await page.getByRole('link', { name: /Back to dashboard/i }).click()
     await expect(page).toHaveURL(new RegExp(`/case/${testCase.id}`), { timeout: 10000 })
@@ -23,6 +25,7 @@ test.describe('Discovery Hub', () => {
   test('create discovery pack button toggles form', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/discovery`)
+    await page.waitForLoadState('networkidle')
 
     await expect(page.getByRole('heading', { name: 'Discovery' })).toBeVisible({ timeout: 10000 })
 

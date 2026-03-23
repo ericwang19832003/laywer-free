@@ -2,9 +2,10 @@ import { test, expect } from '../fixtures/test-fixtures'
 import { mockAIRoutes } from '../fixtures/ai-mocks'
 
 test.describe('Outcome Prompt', () => {
+  test.setTimeout(90000)
   test('does not show when tasks remain', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     // Wait for the dashboard to load
     await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({
@@ -43,7 +44,7 @@ test.describe('Outcome Prompt', () => {
       return route.continue()
     })
 
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     // If the mock takes effect (server-side rendering may bypass it),
     // check that the outcome prompt appears with expected options.

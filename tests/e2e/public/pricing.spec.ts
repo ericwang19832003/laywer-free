@@ -4,17 +4,17 @@ test.describe('Pricing Page', () => {
   test('displays all three pricing tiers', async ({ page }) => {
     await page.goto('/pricing')
     await expect(page.getByText('Your first case is free. Seriously.')).toBeVisible()
-    await expect(page.getByText('Free')).toBeVisible()
-    await expect(page.getByText('Essentials')).toBeVisible()
-    await expect(page.getByText('Pro')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Free' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Essentials' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Pro' })).toBeVisible()
   })
 
   test('shows correct prices', async ({ page }) => {
     await page.goto('/pricing')
-    await expect(page.getByText('$0')).toBeVisible()
-    await expect(page.getByText('$19')).toBeVisible()
-    await expect(page.getByText('$39')).toBeVisible()
-    await expect(page.getByText('$149')).toBeVisible() // one-time option
+    await expect(page.getByText('$0', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('$19', { exact: true })).toBeVisible()
+    await expect(page.getByText('$39', { exact: true })).toBeVisible()
+    await expect(page.getByText('$149', { exact: true })).toBeVisible() // one-time option
   })
 
   test('FAQ accordion opens and closes', async ({ page }) => {
@@ -51,9 +51,9 @@ test.describe('Pricing Page', () => {
     await expect(
       page.getByText('These features are always free — no matter what.')
     ).toBeVisible()
-    await expect(page.getByText('Deadline tracking')).toBeVisible()
-    await expect(page.getByText('Court directory & fee info')).toBeVisible()
-    await expect(page.getByText('Citation verification')).toBeVisible()
+    await expect(page.getByText('Deadline tracking').first()).toBeVisible()
+    await expect(page.getByText('Court directory & fee info').first()).toBeVisible()
+    await expect(page.getByText('Citation verification').first()).toBeVisible()
   })
 
   test('bottom CTA links to signup', async ({ page }) => {

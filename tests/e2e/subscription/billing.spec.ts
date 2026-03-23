@@ -25,6 +25,10 @@ test.describe('Billing Settings', () => {
     )
 
     await page.goto('/settings')
+
+    // Billing section is below the fold — scroll to it
+    const billing = page.locator('#billing')
+    await billing.scrollIntoViewIfNeeded()
   })
 
   test('shows Billing & Subscription section', async ({ page }) => {
@@ -60,22 +64,27 @@ test.describe('Billing Settings', () => {
   })
 
   test('referral section shows referral link', async ({ page }) => {
+    // Scroll further down to referral section
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await expect(page.getByText('Referral Program')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Your referral link')).toBeVisible()
     await expect(page.getByText('https://lawyerfree.com/r/TEST123')).toBeVisible()
   })
 
   test('referral section shows Copy Link button', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await expect(page.getByText('Referral Program')).toBeVisible({ timeout: 10000 })
     await expect(page.getByRole('button', { name: /Copy Link/i })).toBeVisible()
   })
 
   test('referral section shows Share via Email button', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await expect(page.getByText('Referral Program')).toBeVisible({ timeout: 10000 })
     await expect(page.getByRole('button', { name: /Share via Email/i })).toBeVisible()
   })
 
   test('referral section explains how it works', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await expect(page.getByText('Referral Program')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('How it works')).toBeVisible()
     await expect(page.getByText(/Share your link with a friend/)).toBeVisible()

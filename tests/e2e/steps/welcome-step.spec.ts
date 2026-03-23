@@ -15,11 +15,13 @@ test.describe('Welcome Step', () => {
     expect(welcomeTask).toBeTruthy()
 
     await page.goto(`/case/${testCase.id}/step/${welcomeTask!.id}`)
+    await page.waitForLoadState('networkidle')
 
+    // StepRunner renders title as <h1>; welcome title is "Welcome — Get Started"
     await expect(page.getByRole('heading', { name: /Welcome/i })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Welcome to your case organizer.')).toBeVisible()
 
-    // Complete the step
+    // Complete the step — StepRunner renders "I'm ready" when skipReview is true
     await page.getByRole('button', { name: "I'm ready" }).click()
 
     // After completing, the page may show a success state or redirect
@@ -40,6 +42,7 @@ test.describe('Welcome Step', () => {
       .single()
 
     await page.goto(`/case/${testCase.id}/step/${welcomeTask!.id}`)
+    await page.waitForLoadState('networkidle')
 
     await page.getByRole('link', { name: /Back to dashboard/i }).click()
     await expect(page).toHaveURL(new RegExp(`/case/${testCase.id}`), { timeout: 10000 })

@@ -29,8 +29,9 @@ test.describe('Intake Step', () => {
     }
 
     await page.goto(`/case/${testCase.id}/step/${intakeTask.id}`)
+    await page.waitForLoadState('networkidle')
 
-    // Intake step heading should be visible
+    // Intake step heading should be visible (StepRunner renders <h1>)
     await expect(
       page.getByRole('heading', { level: 1 })
     ).toBeVisible({ timeout: 10000 })
@@ -61,6 +62,7 @@ test.describe('Intake Step', () => {
     }
 
     await page.goto(`/case/${testCase.id}/step/${intakeTask.id}`)
+    await page.waitForLoadState('networkidle')
 
     // The intake form should have common elements like text inputs or textareas
     // Exact fields depend on the dispute type, but all intake forms have something

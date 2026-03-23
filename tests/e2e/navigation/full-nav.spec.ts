@@ -4,8 +4,8 @@ test.describe('Full Navigation', () => {
   test('top nav has all main links', async ({ page }) => {
     await page.goto('/cases')
     // Check main nav items exist
-    await expect(page.getByRole('link', { name: /cases/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /courts/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /lawyer free/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /learn/i }).first()).toBeVisible()
   })
 
   test('cases page loads', async ({ page }) => {
@@ -15,7 +15,7 @@ test.describe('Full Navigation', () => {
 
   test('settings page loads', async ({ page }) => {
     await page.goto('/settings')
-    await expect(page.getByText(/settings/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible({ timeout: 10000 })
   })
 
   test('pricing page is accessible from any page', async ({ page }) => {

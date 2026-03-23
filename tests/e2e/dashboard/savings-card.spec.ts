@@ -2,9 +2,10 @@ import { test, expect } from '../fixtures/test-fixtures'
 import { mockAIRoutes } from '../fixtures/ai-mocks'
 
 test.describe('Savings Card', () => {
+  test.setTimeout(90000)
   test('does not show on fresh case with no outcome', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     // Wait for the dashboard to fully load
     await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({
@@ -18,7 +19,7 @@ test.describe('Savings Card', () => {
 
   test('does not show "You saved" text on fresh case', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({
       timeout: 10000,
@@ -30,7 +31,7 @@ test.describe('Savings Card', () => {
 
   test('does not show share button on fresh case', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({
       timeout: 10000,

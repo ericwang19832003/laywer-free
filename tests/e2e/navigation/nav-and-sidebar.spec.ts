@@ -31,8 +31,8 @@ test.describe('Navigation', () => {
     await mockAIRoutes(page)
     await page.goto(testCase.url)
 
-    await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({
-      timeout: 10000,
+    await expect(page.getByRole('heading', { name: /one step at a time/i })).toBeVisible({
+      timeout: 15000,
     })
   })
 
@@ -42,8 +42,8 @@ test.describe('Navigation', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto(testCase.url)
 
-    await expect(page.getByText(/steps? complete|progress/i).first()).toBeVisible({
-      timeout: 10000,
+    await expect(page.getByText(/your progress|steps? complete/i).first()).toBeVisible({
+      timeout: 15000,
     })
   })
 

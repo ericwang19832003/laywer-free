@@ -5,6 +5,7 @@ test.describe('Deadlines Page', () => {
   test('deadlines page loads with heading', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/deadlines`)
+    await page.waitForLoadState('networkidle')
 
     await expect(page.getByRole('heading', { name: 'Your Deadlines' })).toBeVisible({
       timeout: 10000,
@@ -14,11 +15,12 @@ test.describe('Deadlines Page', () => {
   test('add deadline button opens form dialog', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/deadlines`)
+    await page.waitForLoadState('networkidle')
 
     await page.getByRole('button', { name: 'Add a Deadline' }).click()
 
     // Dialog heading
-    await expect(page.getByRole('heading', { name: 'Add a deadline' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Add a deadline/i })).toBeVisible()
     // Due date input should be visible
     await expect(page.locator('#due-date')).toBeVisible()
   })
@@ -26,6 +28,7 @@ test.describe('Deadlines Page', () => {
   test('add manual deadline via form', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/deadlines`)
+    await page.waitForLoadState('networkidle')
 
     await page.getByRole('button', { name: 'Add a Deadline' }).click()
 
@@ -52,6 +55,7 @@ test.describe('Deadlines Page', () => {
   test('back to dashboard link works', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(`/case/${testCase.id}/deadlines`)
+    await page.waitForLoadState('networkidle')
 
     await page.getByRole('link', { name: /Back to dashboard/i }).click()
     await expect(page).toHaveURL(new RegExp(`/case/${testCase.id}`), { timeout: 10000 })

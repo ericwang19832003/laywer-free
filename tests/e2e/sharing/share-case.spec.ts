@@ -5,9 +5,11 @@ test.describe('Share Case', () => {
   test('share card is visible on dashboard', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(testCase.url)
+    await page.waitForLoadState('networkidle')
 
-    // Scroll down to find the share card
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    // ShareCaseCard is inside the collapsed "More" section — expand it first
+    const moreButton = page.getByRole('button', { name: /More tools & details/i })
+    await moreButton.click()
 
     // ShareCaseCard should be visible
     await expect(page.getByText(/Share|Sharing/i).first()).toBeVisible({ timeout: 10000 })
@@ -16,9 +18,11 @@ test.describe('Share Case', () => {
   test('enable sharing generates a link', async ({ page, testCase }) => {
     await mockAIRoutes(page)
     await page.goto(testCase.url)
+    await page.waitForLoadState('networkidle')
 
-    // Scroll down
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    // Expand the "More" section to reveal the share card
+    const moreButton = page.getByRole('button', { name: /More tools & details/i })
+    await moreButton.click()
 
     // Look for the share toggle/button
     const enableButton = page.getByRole('button', { name: /Enable|Share/i }).last()

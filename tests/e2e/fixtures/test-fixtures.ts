@@ -25,27 +25,40 @@ export const test = base.extend<TestFixtures>({
    * Creates a test case via the real API and cleans it up after the test.
    */
   testCase: async ({ page }, use) => {
-    // Create a case via the API (storageState provides auth cookies)
-    const response = await page.request.post('/api/cases', {
-      data: {
-        role: 'plaintiff',
-        state: 'TX',
-        court_type: 'jp',
-        dispute_type: 'small_claims',
-      },
-    })
-
-    expect(response.ok()).toBeTruthy()
-    const body = await response.json()
-    const caseId = body.case.id
-
-    await use({ id: caseId, url: `/case/${caseId}` })
-
-    // Teardown: delete via admin client
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+
+    // Look up the test user
+    const { data: users } = await admin.auth.admin.listUsers()
+    const testUser = users?.users?.find((u) => u.email === TEST_EMAIL)
+    if (!testUser) throw new Error('Test user not found')
+
+    // Create the case directly via admin client to bypass subscription gate.
+    // The seed_case_tasks trigger will auto-create tasks.
+    const { data: newCase, error: insertError } = await admin
+      .from('cases')
+      .insert({
+        user_id: testUser.id,
+        role: 'plaintiff',
+        jurisdiction: 'TX',
+        court_type: 'jp',
+        dispute_type: 'small_claims',
+        status: 'active',
+      })
+      .select('id')
+      .single()
+
+    if (insertError || !newCase) {
+      throw new Error(`Failed to create test case: ${insertError?.message}`)
+    }
+
+    const caseId = newCase.id
+
+    await use({ id: caseId, url: `/case/${caseId}` })
+
+    // Teardown: delete via admin client
     await admin.from('cases').delete().eq('id', caseId)
   },
 

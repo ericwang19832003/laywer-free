@@ -13,9 +13,9 @@ test.describe('Citation Verification API', () => {
           'Under Tex. Civ. Prac. & Rem. Code \u00A7 16.004, the statute of limitations is four years.',
       },
     })
-    // The testCase fixture creates a small_claims case, which is not a focus type,
-    // so this will return 422. A focus-type case (personal_injury, debt_collection,
-    // landlord_tenant) would return 200 with citations.
+    // The testCase fixture creates a small_claims case, which is NOT a focus type
+    // (personal_injury, debt_collection, landlord_tenant). The API returns 422 for
+    // non-focus types. Accept either 200 (if fixture changes) or 422.
     expect([200, 422]).toContain(response.status())
     if (response.status() === 200) {
       const body = await response.json()
@@ -30,6 +30,8 @@ test.describe('Citation Verification API', () => {
         documentText: 'This is a simple sentence with no legal citations.',
       },
     })
+    // Same as above — small_claims is not a focus type, so 422 is expected
+    expect([200, 422]).toContain(response.status())
     if (response.status() === 200) {
       const body = await response.json()
       expect(body.citations).toBeDefined()

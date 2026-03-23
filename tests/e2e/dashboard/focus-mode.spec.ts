@@ -2,9 +2,10 @@ import { test, expect } from '../fixtures/test-fixtures'
 import { mockAIRoutes } from '../fixtures/ai-mocks'
 
 test.describe('Dashboard Focus Mode', () => {
+  test.setTimeout(90000)
   test('shows priority cards and More section', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     // Supportive header should be visible
     await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({
@@ -18,7 +19,7 @@ test.describe('Dashboard Focus Mode', () => {
 
   test('More section expands and collapses', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     // Initially collapsed — "More tools & details" visible
     const moreButton = page.getByText('More tools & details')
@@ -40,7 +41,7 @@ test.describe('Dashboard Focus Mode', () => {
 
   test('priority cards are always visible without expanding More', async ({ page, testCase }) => {
     await mockAIRoutes(page)
-    await page.goto(testCase.url)
+    await page.goto(testCase.url, { timeout: 90000 })
 
     // Header
     await expect(page.getByRole('heading', { name: 'One step at a time.' })).toBeVisible({

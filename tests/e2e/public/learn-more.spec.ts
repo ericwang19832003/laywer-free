@@ -14,7 +14,7 @@ test.describe('SEO Landing Pages', () => {
 
     test('has legal disclaimer', async ({ page }) => {
       await page.goto('/learn-more/debt-collection')
-      await expect(page.getByText(/not legal advice/i)).toBeVisible()
+      await expect(page.getByText(/does not provide legal advice/i)).toBeVisible()
     })
   })
 
