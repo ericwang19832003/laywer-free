@@ -1074,6 +1074,57 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Family Law Depth ---
+  family_filing_guide: {
+    why: 'Filing correctly is critical — mistakes can delay your case by weeks. We\'ll walk you through exactly how.',
+    checklist: ['Original Petition', 'Filing fee or fee waiver form', 'Cover sheet', 'Government-issued ID'],
+    tip: 'eFileTexas.gov lets you file from home — no trip to the courthouse needed.',
+  },
+  family_service_guide: {
+    why: 'The other party must receive official notice of the case. Texas law requires a third party to deliver the papers.',
+    checklist: ['Copy of filed petition with court stamp', 'Other party\'s address', 'Service fee ($50-100 for process server)'],
+    tip: 'If your spouse agrees, they can sign a Waiver of Service — no delivery needed.',
+  },
+  family_courtroom_guide: {
+    why: 'Knowing what to expect removes the fear. Judges appreciate prepared pro se litigants.',
+    checklist: ['3 copies of all documents', 'Evidence organized by issue', 'Proposed orders', 'Government-issued ID'],
+    tip: 'Address the judge as "Your Honor." Stay calm. Don\'t bad-mouth your spouse — judges watch for this.',
+  },
+  family_mediation_prep: {
+    why: 'Mediation is mandatory in most Texas custody cases. Good preparation often leads to settlement — saving you a trial.',
+    checklist: ['Financial documents', 'Proposed parenting schedule', 'List of priorities (must-haves vs. nice-to-haves)'],
+    tip: 'Know your walk-away point before you walk in. If you agree, the mediator drafts a binding agreement.',
+  },
+  family_post_judgment_guide: {
+    why: 'The court order is just the beginning. Knowing how to enforce it — or modify it — protects you long-term.',
+    checklist: ['Copy of the final order', 'Appeal deadline (30 days)'],
+    tip: 'If the other party doesn\'t comply, call the TX Attorney General: 1-800-252-8014.',
+  },
+  family_discovery_guide: {
+    why: 'Discovery forces the other party to share financial records, communications, and other evidence you need.',
+    checklist: ['List of information you need', 'Specific documents to request'],
+    tip: 'File discovery requests EARLY — most courts set a deadline 30-60 days before trial.',
+  },
+  family_temp_orders_prep: {
+    why: 'Temporary orders protect you and your children while the case is pending — often for months.',
+    checklist: ['Proposed temporary orders (written)', 'Evidence supporting your requests', 'Financial information'],
+  },
+  family_property_division_guide: {
+    why: 'Texas is a community property state. Understanding what\'s yours, what\'s shared, and what\'s owed is essential.',
+    checklist: ['List of all assets with estimated values', 'List of all debts', 'Separate property documentation'],
+    tip: 'The court divides debts too — but creditors aren\'t bound by the decree if your name is on the account.',
+  },
+  family_custody_factors: {
+    why: 'Texas judges decide custody based on 8 specific "best interest" factors. Knowing them shapes your entire strategy.',
+    checklist: ['Evidence of your parenting involvement', 'Child\'s current routine and schedule', 'Safety concerns (if any)'],
+    tip: 'The primary caretaker often has an advantage — document your daily involvement.',
+  },
+  family_uncontested_path: {
+    why: 'If you and your spouse agree on everything, an uncontested divorce can cost as little as $300 and take 60 days.',
+    checklist: ['Agreement on property, custody, support, and debts', 'Filing fee ($300-350)'],
+    tip: 'Both parties sign the decree, submit to the judge — often no hearing required.',
+  },
+
   // --- Family: Divorce ---
   divorce_intake: {
     why: 'Divorce details — marriage dates, children, property — shape every document and deadline in your case.',

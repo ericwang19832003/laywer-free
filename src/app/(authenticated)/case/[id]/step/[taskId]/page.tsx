@@ -85,6 +85,17 @@ import { debtContinuanceRequestConfig } from '@/lib/guided-steps/debt-defense/de
 import { debtWitnessPrepConfig } from '@/lib/guided-steps/debt-defense/debt-witness-prep'
 import { debtCreditDisputeGuideConfig } from '@/lib/guided-steps/debt-defense/debt-credit-dispute-guide'
 // Landlord-tenant depth guided-step configs
+// Family law depth guided-step configs
+import { familyFilingGuideConfig } from '@/lib/guided-steps/family/family-filing-guide'
+import { familyServiceGuideConfig } from '@/lib/guided-steps/family/family-service-guide'
+import { familyCourtroomGuideConfig } from '@/lib/guided-steps/family/family-courtroom-guide'
+import { familyMediationPrepConfig } from '@/lib/guided-steps/family/family-mediation-prep'
+import { familyPostJudgmentGuideConfig } from '@/lib/guided-steps/family/family-post-judgment-guide'
+import { familyDiscoveryGuideConfig } from '@/lib/guided-steps/family/family-discovery-guide'
+import { familyTempOrdersPrepConfig } from '@/lib/guided-steps/family/family-temp-orders-prep'
+import { familyPropertyDivisionGuideConfig } from '@/lib/guided-steps/family/family-property-division-guide'
+import { familyCustodyFactorsConfig } from '@/lib/guided-steps/family/family-custody-factors'
+import { familyUncontestedPathConfig } from '@/lib/guided-steps/family/family-uncontested-path'
 import { ltRepairRequestConfig } from '@/lib/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@/lib/guided-steps/landlord-tenant/lt-eviction-response'
 import { ltHabitabilityChecklistConfig } from '@/lib/guided-steps/landlord-tenant/lt-habitability-checklist'
@@ -938,6 +949,28 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltEvictionResponseConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'lt_habitability_checklist':
       return <GuidedStep caseId={id} taskId={taskId} config={ltHabitabilityChecklistConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+
+    // Family law depth steps
+    case 'family_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'family_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'family_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'family_mediation_prep':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyMediationPrepConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'family_post_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'family_discovery_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyDiscoveryGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'family_temp_orders_prep':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyTempOrdersPrepConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'family_property_division_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyPropertyDivisionGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'family_custody_factors':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyCustodyFactorsConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'family_uncontested_path':
+      return <GuidedStep caseId={id} taskId={taskId} config={familyUncontestedPathConfig} existingAnswers={task.metadata?.guided_answers} skippable />
 
     // Debt defense task chain steps
     case 'debt_defense_intake':

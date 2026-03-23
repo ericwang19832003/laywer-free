@@ -38,6 +38,11 @@ const SKIPPABLE_TASKS = new Set([
   'debt_continuance_request',
   'debt_witness_prep',
   'debt_credit_dispute',
+  'family_discovery_guide',
+  'family_temp_orders_prep',
+  'family_property_division_guide',
+  'family_custody_factors',
+  'family_uncontested_path',
 ])
 
 interface NextStepCardProps {
