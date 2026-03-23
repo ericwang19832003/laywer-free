@@ -8,9 +8,16 @@ export function CasesPageClient() {
 
   return (
     <OnboardingFlow
-      onComplete={() => {
-        // Refresh the page — onboarding is now complete, so the server
-        // will show either the empty state (with New Case button) or cases list
+      onComplete={(disputeType) => {
+        // Store selected dispute type so the new case dialog can pre-fill it
+        if (disputeType) {
+          try {
+            sessionStorage.setItem('onboarding_dispute_type', disputeType)
+          } catch {
+            // sessionStorage unavailable
+          }
+        }
+        // Refresh to show the empty state with New Case button
         router.refresh()
       }}
     />

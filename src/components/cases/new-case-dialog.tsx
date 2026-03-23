@@ -178,6 +178,19 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
 export function NewCaseDialog() {
   const [open, setOpen] = useState(false)
   const [state, dispatch] = useReducer(reducer, initialState)
+
+  // Pick up pre-filled dispute type from onboarding flow
+  useEffect(() => {
+    try {
+      const prefill = sessionStorage.getItem('onboarding_dispute_type')
+      if (prefill && !open) {
+        sessionStorage.removeItem('onboarding_dispute_type')
+        setOpen(true)
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, [open])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
