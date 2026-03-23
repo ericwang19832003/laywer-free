@@ -46,16 +46,28 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
       taskKeys: ['welcome', 'small_claims_intake'],
     },
     {
+      label: 'Know Your Court',
+      taskKeys: ['sc_jp_court_guide', 'sc_filing_guide'],
+    },
+    {
       label: 'Building Your Case',
-      taskKeys: ['sc_evidence_vault', 'sc_demand_letter'],
+      taskKeys: ['sc_evidence_vault', 'sc_demand_letter', 'sc_damages_by_type', 'sc_evidence_rules'],
     },
     {
       label: 'Filing & Service',
-      taskKeys: ['prepare_small_claims_filing', 'sc_file_with_court', 'sc_serve_defendant'],
+      taskKeys: ['prepare_small_claims_filing', 'sc_file_with_court', 'sc_serve_defendant', 'sc_service_guide'],
+    },
+    {
+      label: 'Pre-Hearing',
+      taskKeys: ['sc_settlement_guide', 'sc_counterclaim_defense'],
     },
     {
       label: 'Hearing',
-      taskKeys: ['sc_prepare_for_hearing', 'sc_hearing_day'],
+      taskKeys: ['sc_prepare_for_hearing', 'sc_hearing_day', 'sc_courtroom_guide'],
+    },
+    {
+      label: 'After the Verdict',
+      taskKeys: ['sc_post_judgment_guide', 'sc_default_judgment', 'sc_appeal_guide'],
     },
   ],
 

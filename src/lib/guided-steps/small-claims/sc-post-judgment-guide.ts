@@ -45,7 +45,7 @@ export const scPostJudgmentGuideConfig: GuidedStepConfig = {
       id: 'collection_tools',
       type: 'info',
       prompt:
-        "IF THEY DON'T PAY — YOUR COLLECTION TOOLS:\n\n1. Abstract of Judgment — File with the county clerk to create a lien on their property. They can't sell or refinance without paying you first.\n\n2. Writ of Execution — Ask the court to issue a writ. A constable can seize the debtor's non-exempt assets (bank accounts, vehicles, etc.).\n\n3. Bank Account Garnishment — If you know their bank, you can garnish funds directly from their account.\n\n4. Wage Garnishment — Garnish up to 25% of their disposable earnings (with some exceptions).\n\n5. Post-Judgment Interest — Your judgment accrues interest at 5% per year until paid.\n\n6. Judgment Debtor Examination — Force them to appear in court and disclose their assets, income, and bank accounts under oath.",
+        "IF THEY DON'T PAY — YOUR COLLECTION TOOLS:\n\n1. Abstract of Judgment — File with the county clerk to create a lien on their property. They can't sell or refinance without paying you first.\n\n2. Writ of Execution — Ask the court to issue a writ. A constable can seize the debtor's non-exempt assets (bank accounts, vehicles, etc.).\n\n3. Bank Account Garnishment — If you know their bank, you can garnish funds directly from their account.\n\n4. Post-Judgment Interest — Your judgment accrues interest at 5% per year until paid.\n\n5. Judgment Debtor Examination — Force them to appear in court and disclose their assets, income, and bank accounts under oath.\n\nNOTE: Texas generally does NOT allow wage garnishment for routine civil judgments. Focus on asset seizure, bank garnishment, and property liens instead.",
       showIf: (answers) =>
         answers.outcome === 'won' && answers.received_payment === 'no',
     },
@@ -58,7 +58,6 @@ export const scPostJudgmentGuideConfig: GuidedStepConfig = {
         { value: 'abstract', label: 'Abstract of Judgment (property lien)' },
         { value: 'writ', label: 'Writ of Execution (asset seizure)' },
         { value: 'bank', label: 'Bank account garnishment' },
-        { value: 'wage', label: 'Wage garnishment' },
         { value: 'exam', label: 'Judgment debtor examination (discover assets)' },
         { value: 'not_sure', label: 'Not sure yet' },
       ],
