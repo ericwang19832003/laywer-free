@@ -1074,6 +1074,61 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Small Claims Depth ---
+  sc_jp_court_guide: {
+    why: 'JP Court is the most informal court in Texas — relaxed rules, quick hearings, no lawyers required. Knowing the process is your advantage.',
+    checklist: ['Court citation with hearing date', 'Your claim amount (under $20K)', 'All evidence organized'],
+    tip: 'JP judges are often non-lawyers. They value clear facts and organized evidence over legal jargon.',
+  },
+  sc_filing_guide: {
+    why: 'JP Court has simplified forms and lower fees ($35-75). Many clerks will help you fill out the paperwork.',
+    checklist: ['Petition or complaint form', 'Filing fee ($35-75)', 'Defendant\'s name and address', 'Government ID'],
+    tip: 'Ask the clerk if they have fill-in-the-blank petition forms — most JP courts do.',
+  },
+  sc_service_guide: {
+    why: 'In many JP courts, the clerk handles service for you — just provide the defendant\'s address.',
+    checklist: ['Defendant\'s current address', 'Service fee ($50-100 for constable)'],
+    tip: 'When you file, ask the clerk: "Will you issue citation and arrange constable service?"',
+  },
+  sc_courtroom_guide: {
+    why: 'JP Court hearings last 15-30 minutes. Tell your story clearly, show your evidence, and let the judge decide.',
+    checklist: ['3 copies of all evidence', 'Your story organized chronologically', 'Receipts/contracts/photos', 'Government ID'],
+    tip: 'The plaintiff goes first. Tell your story simply: what happened, what you lost, what you want.',
+  },
+  sc_evidence_rules: {
+    why: 'JP Court has the most relaxed evidence rules in Texas. Written statements and business records are easier to admit.',
+    checklist: ['Evidence organized by topic', 'Numbered exhibits', '3 copies of everything'],
+    tip: 'Even written witness statements (affidavits) are accepted in JP Court if the witness can\'t attend.',
+  },
+  sc_damages_by_type: {
+    why: 'Different claim types have different damage formulas. Security deposits can get 3x penalties; consumer claims can get treble damages.',
+    checklist: ['Receipts and invoices', 'Repair estimates', 'Contract or agreement'],
+  },
+  sc_settlement_guide: {
+    why: 'About 60% of small claims settle before the hearing. A fair settlement saves everyone time and money.',
+    checklist: ['Your total damages amount', 'Minimum amount you\'d accept', 'Written settlement agreement template'],
+    tip: 'Always get the settlement IN WRITING before dismissing your case.',
+  },
+  sc_default_judgment: {
+    why: 'If the other side doesn\'t respond or show up, you may win automatically. Know the procedure.',
+    checklist: ['Proof of service (showing defendant was notified)', 'Your damages evidence (still needed)'],
+    tip: 'Even for default judgment, you must prove your damages. Bring your evidence.',
+  },
+  sc_counterclaim_defense: {
+    why: 'If the defendant filed a counterclaim, you\'re now defending too. Prepare for both sides of the case.',
+    checklist: ['The counterclaim document', 'Evidence disproving their claims', 'Your original claim evidence'],
+  },
+  sc_post_judgment_guide: {
+    why: 'Winning is step one. Collecting is step two. Texas gives you powerful tools to enforce your judgment.',
+    checklist: ['Copy of the judgment', 'Defendant\'s known address/employer/bank'],
+    tip: 'Judgments accrue 5% interest per year. File an Abstract of Judgment to create a lien on their property.',
+  },
+  sc_appeal_guide: {
+    why: 'An appeal from JP Court gives you a completely new trial in County Court — everything starts fresh.',
+    checklist: ['JP Court judgment (with date signed)', 'Appeal filing fee', 'Appeal bond (or inability-to-pay affidavit)'],
+    tip: 'You have 21 days to appeal (5 days for eviction). Act quickly.',
+  },
+
   // --- Real Estate Depth ---
   re_filing_guide: {
     why: 'Real estate lawsuits MUST be filed in the county where the property is located. Getting venue wrong means dismissal.',

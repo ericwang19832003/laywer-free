@@ -106,6 +106,18 @@ import { piCourtroomGuideConfig } from '@/lib/guided-steps/personal-injury/pi-co
 import { piComparativeFaultConfig } from '@/lib/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-lien-resolution'
 import { piExpertWitnessGuideConfig } from '@/lib/guided-steps/personal-injury/pi-expert-witness-guide'
+// Small claims depth guided-step configs
+import { scJpCourtGuideConfig } from '@/lib/guided-steps/small-claims/sc-jp-court-guide'
+import { scFilingGuideConfig } from '@/lib/guided-steps/small-claims/sc-filing-guide'
+import { scServiceGuideConfig } from '@/lib/guided-steps/small-claims/sc-service-guide'
+import { scCourtroomGuideConfig } from '@/lib/guided-steps/small-claims/sc-courtroom-guide'
+import { scEvidenceRulesConfig } from '@/lib/guided-steps/small-claims/sc-evidence-rules'
+import { scDamagesByTypeConfig } from '@/lib/guided-steps/small-claims/sc-damages-by-type'
+import { scSettlementGuideConfig } from '@/lib/guided-steps/small-claims/sc-settlement-guide'
+import { scDefaultJudgmentConfig } from '@/lib/guided-steps/small-claims/sc-default-judgment'
+import { scPostJudgmentGuideConfig } from '@/lib/guided-steps/small-claims/sc-post-judgment-guide'
+import { scAppealGuideConfig } from '@/lib/guided-steps/small-claims/sc-appeal-guide'
+import { scCounterclaimDefenseConfig } from '@/lib/guided-steps/small-claims/sc-counterclaim-defense'
 // Real estate depth guided-step configs
 import { reFilingGuideConfig } from '@/lib/guided-steps/real-estate/re-filing-guide'
 import { reServiceGuideConfig } from '@/lib/guided-steps/real-estate/re-service-guide'
@@ -1006,6 +1018,30 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Small claims depth steps
+    case 'sc_jp_court_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scJpCourtGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_evidence_rules':
+      return <GuidedStep caseId={id} taskId={taskId} config={scEvidenceRulesConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_damages_by_type':
+      return <GuidedStep caseId={id} taskId={taskId} config={scDamagesByTypeConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_settlement_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scSettlementGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'sc_default_judgment':
+      return <GuidedStep caseId={id} taskId={taskId} config={scDefaultJudgmentConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'sc_post_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_appeal_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={scAppealGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'sc_counterclaim_defense':
+      return <GuidedStep caseId={id} taskId={taskId} config={scCounterclaimDefenseConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+
     // Real estate depth steps
     case 're_filing_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={reFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
