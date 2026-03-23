@@ -106,6 +106,17 @@ import { piCourtroomGuideConfig } from '@/lib/guided-steps/personal-injury/pi-co
 import { piComparativeFaultConfig } from '@/lib/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-lien-resolution'
 import { piExpertWitnessGuideConfig } from '@/lib/guided-steps/personal-injury/pi-expert-witness-guide'
+// Contract dispute depth guided-step configs
+import { contractBreachAnalysisConfig } from '@/lib/guided-steps/contract/contract-breach-analysis'
+import { contractStatuteOfFraudsConfig } from '@/lib/guided-steps/contract/contract-statute-of-frauds'
+import { contractDamagesMethodsConfig } from '@/lib/guided-steps/contract/contract-damages-methods'
+import { contractProvisionsCheckConfig } from '@/lib/guided-steps/contract/contract-provisions-check'
+import { contractDefensesGuideConfig } from '@/lib/guided-steps/contract/contract-defenses-guide'
+import { contractFilingGuideConfig } from '@/lib/guided-steps/contract/contract-filing-guide'
+import { contractServiceGuideConfig } from '@/lib/guided-steps/contract/contract-service-guide'
+import { contractCourtroomGuideConfig } from '@/lib/guided-steps/contract/contract-courtroom-guide'
+import { contractSettlementGuideConfig } from '@/lib/guided-steps/contract/contract-settlement-guide'
+import { contractPostJudgmentGuideConfig } from '@/lib/guided-steps/contract/contract-post-judgment-guide'
 // Property damage depth guided-step configs
 import { propertyDamageAssessmentConfig } from '@/lib/guided-steps/property/property-damage-assessment'
 import { propertyInsuranceGuideConfig } from '@/lib/guided-steps/property/property-insurance-guide'
@@ -972,6 +983,28 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltHearingDayConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_post_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    // Contract dispute depth steps
+    case 'contract_breach_analysis':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractBreachAnalysisConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_statute_of_frauds':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractStatuteOfFraudsConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_damages_methods':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractDamagesMethodsConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_provisions_check':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractProvisionsCheckConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_defenses_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractDefensesGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'contract_filing_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_service_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_courtroom_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_settlement_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractSettlementGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'contract_post_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={contractPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+
     // Property damage depth steps
     case 'property_damage_assessment':
       return <GuidedStep caseId={id} taskId={taskId} config={propertyDamageAssessmentConfig} existingAnswers={task.metadata?.guided_answers} />

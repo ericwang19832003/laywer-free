@@ -1074,6 +1074,54 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
   },
 
+  // --- Contract Dispute Depth ---
+  contract_breach_analysis: {
+    why: 'Material vs minor breach determines your remedies. A material breach lets you cancel the contract AND sue for damages.',
+    checklist: ['Description of what was promised', 'What was actually delivered', 'Any benefit you received'],
+  },
+  contract_statute_of_frauds: {
+    why: 'Some contracts MUST be written to be enforceable. Knowing the rules protects your claim from dismissal.',
+    checklist: ['The contract (if written)', 'Emails/texts discussing terms', 'Evidence of partial performance'],
+  },
+  contract_damages_methods: {
+    why: 'Three different calculation methods exist. Using the right one maximizes your recovery.',
+    checklist: ['All receipts and invoices', 'Lost income documentation', 'Cost of replacement/cover'],
+  },
+  contract_provisions_check: {
+    why: 'Arbitration clauses, liability caps, and fee-shifting provisions can change everything about your case.',
+    checklist: ['Your full contract (read every page)', 'Any amendments or addendums'],
+    tip: 'An attorney fees clause is good news — the loser pays the winner\'s costs.',
+  },
+  contract_defenses_guide: {
+    why: 'Knowing what the other side will argue lets you prepare your rebuttal before they even raise it.',
+    checklist: ['Evidence you performed your obligations', 'Timeline showing you filed within 4 years', 'Documentation disproving their claims'],
+  },
+  contract_filing_guide: {
+    why: 'The right court depends on your damages amount and any venue clause in the contract.',
+    checklist: ['Petition', 'Copy of the contract', 'Filing fee', 'Government ID'],
+    tip: 'Check your contract for a forum selection clause — it may specify where to file.',
+  },
+  contract_service_guide: {
+    why: 'The defendant must receive official notice. For businesses, serve their registered agent.',
+    checklist: ['Defendant\'s name and address', 'Filed petition with court stamp', 'Service fee'],
+    tip: 'Find a business\'s registered agent at sos.state.tx.us.',
+  },
+  contract_courtroom_guide: {
+    why: 'Contract cases are won with the contract itself and proof of breach. Clear storytelling beats legal jargon.',
+    checklist: ['3 copies of the contract', 'Breach evidence (emails, invoices)', 'Damages calculation', 'Government ID'],
+    tip: 'Present your story chronologically: contract → performance → breach → damages.',
+  },
+  contract_settlement_guide: {
+    why: 'Most contract cases settle. A written settlement agreement is often more reliable than a judgment.',
+    checklist: ['Total damages calculation', 'Minimum acceptable amount', 'Payment terms you\'d accept'],
+    tip: 'Always get the settlement in writing BEFORE accepting payment.',
+  },
+  contract_post_judgment_guide: {
+    why: 'Winning a judgment is step one. Collecting is step two — and Texas gives you powerful tools.',
+    checklist: ['Copy of judgment', 'Defendant\'s known assets/employer', 'Appeal deadline (30 days)'],
+    tip: 'Judgments accrue 5% interest per year. Every day they don\'t pay, they owe more.',
+  },
+
   // --- Landlord-Tenant Depth ---
   lt_security_deposit_demand: {
     why: 'Texas law gives landlords 30 days to return your deposit — or face triple damages plus $100 plus attorney fees.',

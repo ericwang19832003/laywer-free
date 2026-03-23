@@ -62,6 +62,8 @@ const SKIPPABLE_TASKS = new Set([
   'debt_continuance_request',
   'debt_witness_prep',
   'debt_credit_dispute',
+  'contract_defenses_guide',
+  'contract_settlement_guide',
   'property_insurance_guide',
   'property_mediation_guide',
   'property_pretrial_motions',
