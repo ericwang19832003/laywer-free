@@ -44,7 +44,7 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.increment_ai_usage TO authenticated;
+GRANT EXECUTE ON FUNCTION public.increment_ai_usage(text) TO authenticated;
 
 -- User subscriptions table (may already exist — use IF NOT EXISTS)
 CREATE TABLE IF NOT EXISTS public.user_subscriptions (
