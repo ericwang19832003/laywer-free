@@ -22,19 +22,19 @@ interface SolBannerProps {
 const LEVEL_CONFIG = {
   expired: {
     icon: ShieldAlert,
-    border: 'border-l-red-600',
-    bg: 'bg-red-50',
-    iconColor: 'text-red-600',
-    titleColor: 'text-red-800',
+    border: 'border-l-amber-600',
+    bg: 'bg-amber-50',
+    iconColor: 'text-calm-amber',
+    titleColor: 'text-amber-800',
     title: 'Statute of Limitations Has Expired',
     description: 'The deadline to file this type of claim has passed. You should consult with an attorney immediately to discuss your options.',
   },
   critical: {
     icon: AlertTriangle,
-    border: 'border-l-red-500',
-    bg: 'bg-red-50',
-    iconColor: 'text-red-500',
-    titleColor: 'text-red-700',
+    border: 'border-l-amber-500',
+    bg: 'bg-amber-50',
+    iconColor: 'text-calm-amber',
+    titleColor: 'text-amber-700',
     title: 'Statute of Limitations Expiring Soon',
     description: 'You must file your case before the statute of limitations expires. Missing this deadline means you lose the right to sue.',
   },
@@ -131,7 +131,7 @@ export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
                   {' '}— expires {formatDate(new Date(sol.expiresAt))}
                 </p>
               ) : (
-                <p className="text-sm text-red-700 font-medium">
+                <p className="text-sm text-amber-700 font-medium">
                   Expired on {formatDate(new Date(sol.expiresAt))}
                 </p>
               )}

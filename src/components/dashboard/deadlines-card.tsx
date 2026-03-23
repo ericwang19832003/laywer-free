@@ -38,8 +38,8 @@ function filterDeadlines(deadlines: Deadline[]): Deadline[] {
 function CountdownBox({ deadline }: { deadline: Deadline }) {
   const days = daysUntil(deadline.due_at)
   const isOverdue = days < 0
-  const borderColor = isOverdue || days === 0 ? 'border-red-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
-  const textColor = isOverdue || days === 0 ? 'text-red-600' : days <= 7 ? 'text-amber-600' : 'text-emerald-600'
+  const borderColor = isOverdue || days === 0 ? 'border-amber-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
+  const textColor = isOverdue || days === 0 ? 'text-calm-amber' : days <= 7 ? 'text-amber-600' : 'text-emerald-600'
 
   return (
     <div className="flex items-start gap-4">
@@ -54,6 +54,9 @@ function CountdownBox({ deadline }: { deadline: Deadline }) {
           {formatDeadlineLabel(deadline.key, deadline.label)}
         </p>
         <p className="text-xs text-warm-muted">{formatDateShort(deadline.due_at)}</p>
+        {isOverdue && (
+          <p className="text-xs font-medium text-calm-amber">This deadline has passed.</p>
+        )}
         {deadline.consequence && (
           <p className="text-xs text-warm-muted line-clamp-2">{deadline.consequence}</p>
         )}

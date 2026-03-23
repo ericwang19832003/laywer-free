@@ -23,7 +23,7 @@ interface InsightsCardProps {
 const PRIORITY_STYLES = {
   info: 'bg-calm-indigo/10 text-calm-indigo',
   warning: 'bg-calm-amber/10 text-calm-amber',
-  urgent: 'bg-red-100 text-red-700',
+  urgent: 'bg-amber-100 text-amber-700',
 }
 
 export function InsightsCard({ caseId, initialInsights }: InsightsCardProps) {

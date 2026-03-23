@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,8 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
   const [loading, setLoading] = useState(false)
   const [signupSuccess, setSignupSuccess] = useState(false)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [resendMessage, setResendMessage] = useState<string | null>(null)
   const router = useRouter()
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
@@ -36,6 +38,30 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
     }
     return supabaseRef.current
   }
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = setTimeout(() => setResendCooldown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [resendCooldown])
+
+  const handleResendConfirmation = useCallback(async () => {
+    if (resendCooldown > 0) return
+    setResendMessage(null)
+
+    const { error } = await getSupabase().auth.resend({
+      type: 'signup',
+      email,
+    })
+
+    if (error) {
+      setResendMessage(friendlyError(error.message))
+    } else {
+      setResendMessage('Confirmation email sent')
+      setResendCooldown(30)
+    }
+  }, [email, resendCooldown])
 
   function handleModeChange(newMode: AuthMode) {
     setMode(newMode)
@@ -89,10 +115,10 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center pb-2">
-        <CardTitle className="text-2xl font-semibold" style={{ color: '#1C1917' }}>
+        <CardTitle className="text-2xl font-semibold text-warm-text">
           {title}
         </CardTitle>
-        <CardDescription style={{ color: '#78716C' }}>
+        <CardDescription className="text-warm-muted">
           {subtitle}
         </CardDescription>
       </CardHeader>
@@ -101,17 +127,55 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
 
         {signupSuccess ? (
           <div className="text-center space-y-4">
-            <p className="text-sm" style={{ color: '#1C1917' }}>
+            <p className="text-sm text-warm-text">
               Check your email to confirm your account.
             </p>
-            <p className="text-sm" style={{ color: '#78716C' }}>
+            <p className="text-sm text-warm-muted">
               We sent a confirmation link to <strong>{email}</strong>.
             </p>
+            <p className="text-xs text-warm-muted">
+              Check your spam folder if you don&apos;t see it.
+            </p>
+
+            {resendMessage && (
+              <p
+                className={`text-sm ${
+                  resendMessage === 'Confirmation email sent'
+                    ? 'text-calm-indigo'
+                    : 'text-warm-muted'
+                }`}
+                style={
+                  resendMessage !== 'Confirmation email sent'
+                    ? { color: '#D97706' }
+                    : undefined
+                }
+              >
+                {resendMessage}
+              </p>
+            )}
+
+            <button
+              type="button"
+              disabled={resendCooldown > 0}
+              onClick={handleResendConfirmation}
+              className={`text-sm ${
+                resendCooldown > 0
+                  ? 'text-warm-muted cursor-not-allowed'
+                  : 'text-calm-indigo hover:underline cursor-pointer'
+              }`}
+            >
+              {resendCooldown > 0
+                ? `Resend available in ${resendCooldown}s`
+                : "Didn\u2019t get the email? Resend"}
+            </button>
+
             <Button
               variant="outline"
               className="w-full mt-2"
               onClick={() => {
                 setSignupSuccess(false)
+                setResendCooldown(0)
+                setResendMessage(null)
                 handleModeChange('login')
               }}
             >

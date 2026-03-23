@@ -13,7 +13,7 @@ interface PriorityAlertsSectionProps {
 }
 
 const LEVEL_STYLES: Record<number, string> = {
-  3: 'border-l-red-500 bg-red-50',
+  3: 'border-l-amber-500 bg-amber-50',
   2: 'border-l-calm-amber bg-calm-amber/5',
   1: 'border-l-warm-border bg-warm-bg',
 }

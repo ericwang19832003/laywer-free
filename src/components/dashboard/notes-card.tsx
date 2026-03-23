@@ -151,7 +151,7 @@ export function NotesCard({ caseId, initialNotes }: NotesCardProps) {
                     </button>
                     <button
                       onClick={() => handleDelete(note.id)}
-                      className="p-1 rounded text-warm-muted hover:bg-red-50 hover:text-red-500"
+                      className="p-1 rounded text-warm-muted hover:bg-amber-50 hover:text-amber-500"
                       title="Delete"
                     >
                       <Trash2Icon className="h-3 w-3" />

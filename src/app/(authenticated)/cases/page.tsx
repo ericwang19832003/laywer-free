@@ -9,12 +9,20 @@ import { PaginatedCaseList } from '@/components/cases/paginated-case-list'
 import { TodaysActionCard } from '@/components/cases/todays-action-card'
 import { Clock, Shield, FileText } from 'lucide-react'
 import Image from 'next/image'
+import { CasesPageClient } from './cases-page-client'
 
 export default async function CasesPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   const userDisplayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || null
+
+  // Check onboarding status
+  const { data: prefs } = await supabase
+    .from('user_preferences')
+    .select('onboarding_completed')
+    .eq('user_id', user!.id)
+    .maybeSingle()
 
   const PAGE_SIZE = 12
   const { data: allCasesFetched, count: totalCaseCount } = await supabase
@@ -180,6 +188,9 @@ export default async function CasesPage() {
               totalCount={totalCaseCount ?? cases.length}
             />
           </>
+        ) : !prefs?.onboarding_completed ? (
+          /* ── First-time user: onboarding flow ── */
+          <CasesPageClient />
         ) : (
           /* ── Empty state: professional hero layout ── */
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">

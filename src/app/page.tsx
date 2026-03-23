@@ -19,7 +19,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const initialMode = params.mode === 'signup' ? 'signup' : 'login'
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" style={{ backgroundColor: '#FAFAF8' }}>
+    <div className="min-h-screen flex flex-col lg:flex-row bg-warm-bg">
       {/* Left panel — value proposition */}
       <div
         className="lg:w-[55%] w-full"

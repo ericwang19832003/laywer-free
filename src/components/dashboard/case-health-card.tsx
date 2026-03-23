@@ -48,14 +48,14 @@ function getHealthStyle(score: number) {
   if (score >= 85) return { label: 'Great', badgeCls: 'bg-calm-green/10 text-calm-green', scoreCls: 'text-calm-green' }
   if (score >= 70) return { label: 'Good', badgeCls: 'bg-calm-indigo/10 text-calm-indigo', scoreCls: 'text-calm-indigo' }
   if (score >= 50) return { label: 'Needs Attention', badgeCls: 'bg-calm-amber/10 text-calm-amber', scoreCls: 'text-calm-amber' }
-  return { label: 'Critical', badgeCls: 'bg-red-500/10 text-red-500', scoreCls: 'text-red-500' }
+  return { label: 'Critical', badgeCls: 'bg-calm-amber/10 text-calm-amber', scoreCls: 'text-calm-amber' }
 }
 
 function getBarColor(value: number) {
   if (value >= 85) return 'bg-calm-green'
   if (value >= 70) return 'bg-calm-indigo'
   if (value >= 50) return 'bg-calm-amber'
-  return 'bg-red-500'
+  return 'bg-calm-amber'
 }
 
 function formatUpdatedAt(dateStr: string): string {
