@@ -549,7 +549,7 @@ export function NewCaseDialog() {
           + New Case
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[95vh] sm:max-h-[85vh] flex flex-col">
+      <DialogContent className="max-h-[95vh] sm:max-h-[85vh] flex flex-col max-sm:fixed max-sm:inset-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:top-0 max-sm:left-0 max-sm:min-h-screen max-sm:h-screen max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:m-0 max-sm:border-0 max-sm:max-h-screen">
         <DialogHeader>
           <DialogTitle>Start a new case</DialogTitle>
           <DialogDescription>
@@ -581,7 +581,7 @@ export function NewCaseDialog() {
           <div
             ref={scrollRef}
             onScroll={updateScrollState}
-            className="overflow-y-auto max-h-full pr-1"
+            className="overflow-y-auto max-h-full pr-1 max-sm:flex-1"
             style={{ maxHeight: 'calc(95vh - 180px)' }}
           >
 
