@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { randomUUID } from 'crypto'
 import { getSubscription } from '@/lib/subscription/check'
+import { generateShareToken, shareExpiresAt } from '@/lib/share-token'
 
 export async function GET(
   _request: NextRequest,
@@ -75,9 +75,9 @@ export async function POST(
         .single()
 
       if (!existing?.share_token) {
-        updates.share_token = randomUUID()
+        updates.share_token = generateShareToken()
       }
-      updates.share_expires_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      updates.share_expires_at = shareExpiresAt()
     }
 
     const { data, error } = await supabase
