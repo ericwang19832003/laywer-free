@@ -206,9 +206,10 @@ export function QuickResolveFlow() {
             </p>
           </div>
           <div
-            className="rounded-lg border border-warm-border bg-white p-8 prose prose-sm max-w-none mb-6"
-            dangerouslySetInnerHTML={{ __html: letterHtml }}
-          />
+            className="rounded-lg border border-warm-border bg-white p-8 prose prose-sm max-w-none mb-6 whitespace-pre-wrap"
+          >
+            {letterHtml}
+          </div>
           <button
             type="button"
             onClick={() => setStep('deliver')}
