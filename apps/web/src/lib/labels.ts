@@ -1,4 +1,4 @@
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 
 export const DISPUTE_LABELS: Record<string, string> = {
   debt_collection: 'Debt Collection',

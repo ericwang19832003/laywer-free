@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from './guided-step'
-import { trialPrepChecklistConfig } from '@/lib/guided-steps/trial-prep-checklist'
+import { trialPrepChecklistConfig } from '@lawyer-free/shared/guided-steps/trial-prep-checklist'
 
 interface TrialPrepChecklistStepProps {
   caseId: string

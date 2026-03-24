@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piReviewAnswerConfig } from '@/lib/guided-steps/personal-injury/pi-review-answer'
+import { piReviewAnswerConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-review-answer'
 
 interface Props {
   caseId: string

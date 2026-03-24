@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { debtHearingDayConfig } from '@/lib/guided-steps/debt-defense/debt-hearing-day'
+import { debtHearingDayConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-hearing-day'
 
 interface DebtHearingDayStepProps {
   caseId: string

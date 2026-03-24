@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from './guided-step'
-import { evidenceVaultConfig } from '@/lib/guided-steps/evidence-vault'
+import { evidenceVaultConfig } from '@lawyer-free/shared/guided-steps/evidence-vault'
 
 interface EvidenceVaultStepProps {
   caseId: string

@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { waitingPeriodConfig } from '@/lib/guided-steps/family/waiting-period'
+import { waitingPeriodConfig } from '@lawyer-free/shared/guided-steps/family/waiting-period'
 
 interface WaitingPeriodStepProps {
   caseId: string

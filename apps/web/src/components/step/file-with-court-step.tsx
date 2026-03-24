@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from './guided-step'
-import { fileWithCourtConfig } from '@/lib/guided-steps/file-with-court'
+import { fileWithCourtConfig } from '@lawyer-free/shared/guided-steps/file-with-court'
 
 interface FileWithCourtStepProps {
   caseId: string

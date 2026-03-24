@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piPretrialMotionsConfig } from '@/lib/guided-steps/personal-injury/pi-pretrial-motions'
+import { piPretrialMotionsConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pretrial-motions'
 
 interface Props {
   caseId: string

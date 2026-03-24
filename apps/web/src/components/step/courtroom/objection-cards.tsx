@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { OBJECTION_CARDS } from '@/lib/guided-steps/courtroom/objection-reference'
+import { OBJECTION_CARDS } from '@lawyer-free/shared/guided-steps/courtroom/objection-reference'
 
 export function ObjectionCards() {
   const [currentIndex, setCurrentIndex] = useState(0)

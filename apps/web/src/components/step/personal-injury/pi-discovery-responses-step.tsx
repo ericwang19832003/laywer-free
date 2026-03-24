@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piDiscoveryResponsesConfig } from '@/lib/guided-steps/personal-injury/pi-discovery-responses'
+import { piDiscoveryResponsesConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-discovery-responses'
 
 interface Props {
   caseId: string

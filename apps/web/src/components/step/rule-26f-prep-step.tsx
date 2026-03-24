@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from './guided-step'
-import { rule26fPrepConfig } from '@/lib/guided-steps/rule-26f-prep'
+import { rule26fPrepConfig } from '@lawyer-free/shared/guided-steps/rule-26f-prep'
 
 interface Rule26fPrepStepProps {
   caseId: string

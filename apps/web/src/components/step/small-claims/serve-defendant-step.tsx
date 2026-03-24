@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { serveDefendantConfig } from '@/lib/guided-steps/small-claims/serve-defendant'
+import { serveDefendantConfig } from '@lawyer-free/shared/guided-steps/small-claims/serve-defendant'
 
 interface ServeDefendantStepProps {
   caseId: string

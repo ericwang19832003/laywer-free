@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from './guided-step'
-import { discoveryStarterPackConfig } from '@/lib/guided-steps/discovery-starter-pack'
+import { discoveryStarterPackConfig } from '@lawyer-free/shared/guided-steps/discovery-starter-pack'
 
 interface DiscoveryStarterPackStepProps {
   caseId: string

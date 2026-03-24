@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piMediationConfig } from '@/lib/guided-steps/personal-injury/pi-mediation'
+import { piMediationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-mediation'
 
 interface Props {
   caseId: string

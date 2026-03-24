@@ -1,4 +1,4 @@
-import { STATE_FILING_INFO } from '@/lib/guided-steps/personal-injury/state-filing-info'
+import { STATE_FILING_INFO } from '@lawyer-free/shared/guided-steps/personal-injury/state-filing-info'
 
 export interface FilingConfig {
   /** Guide-and-File legalProcessKey for deep-linking (TX only), null if not supported */

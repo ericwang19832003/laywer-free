@@ -1,9 +1,9 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piMedicalRecordsConfig } from '@/lib/guided-steps/personal-injury/pi-medical-records'
-import { piDamageDocumentationConfig } from '@/lib/guided-steps/personal-injury/pi-damage-documentation'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { piMedicalRecordsConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-medical-records'
+import { piDamageDocumentationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-damage-documentation'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 
 interface PIMedicalRecordsStepProps {
   caseId: string

@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { serveOtherPartyConfig } from '@/lib/guided-steps/landlord-tenant/serve-other-party'
+import { serveOtherPartyConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/serve-other-party'
 
 interface ServeOtherPartyStepProps {
   caseId: string

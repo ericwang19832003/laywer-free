@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { servePlaintiffConfig } from '@/lib/guided-steps/debt-defense/serve-plaintiff'
+import { servePlaintiffConfig } from '@lawyer-free/shared/guided-steps/debt-defense/serve-plaintiff'
 
 interface Props {
   caseId: string

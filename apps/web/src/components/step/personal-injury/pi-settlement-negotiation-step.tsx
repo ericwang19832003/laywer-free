@@ -1,9 +1,9 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piSettlementNegotiationConfig } from '@/lib/guided-steps/personal-injury/pi-settlement-negotiation'
-import { piSettlementNegotiationPropertyConfig } from '@/lib/guided-steps/personal-injury/pi-settlement-negotiation-property'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { piSettlementNegotiationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-settlement-negotiation'
+import { piSettlementNegotiationPropertyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-settlement-negotiation-property'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 
 interface Props {
   caseId: string

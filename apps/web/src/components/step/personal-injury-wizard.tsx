@@ -23,7 +23,7 @@ import {
 import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Shield, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import { StepAuthoritySidebar } from './step-authority-sidebar'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 import { FilingMethodStep } from '@/components/step/filing-method-step'
 import { FILING_CONFIGS } from '@/lib/filing-configs'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { ltHearingPrepConfig } from '@/lib/guided-steps/landlord-tenant/lt-hearing-prep'
+import { ltHearingPrepConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-hearing-prep'
 
 interface LtHearingPrepStepProps {
   caseId: string

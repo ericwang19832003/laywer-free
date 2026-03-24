@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { prepareForHearingConfig } from '@/lib/guided-steps/small-claims/prepare-for-hearing'
+import { prepareForHearingConfig } from '@lawyer-free/shared/guided-steps/small-claims/prepare-for-hearing'
 
 interface PrepareForHearingStepProps {
   caseId: string

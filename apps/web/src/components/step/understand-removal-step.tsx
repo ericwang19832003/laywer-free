@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from './guided-step'
-import { understandRemovalConfig } from '@/lib/guided-steps/understand-removal'
+import { understandRemovalConfig } from '@lawyer-free/shared/guided-steps/understand-removal'
 
 interface UnderstandRemovalStepProps {
   caseId: string

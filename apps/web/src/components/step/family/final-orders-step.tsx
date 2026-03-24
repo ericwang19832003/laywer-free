@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { finalOrdersConfig } from '@/lib/guided-steps/family/final-orders'
+import { finalOrdersConfig } from '@lawyer-free/shared/guided-steps/family/final-orders'
 
 interface FinalOrdersStepProps {
   caseId: string

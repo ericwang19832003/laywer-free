@@ -6,7 +6,7 @@ import { AnnotatedDraftViewer } from '../filing/annotated-draft-viewer'
 import type { DraftAnnotation } from '../filing/annotated-draft-viewer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 import { StepAuthoritySidebar } from '../step-authority-sidebar'
 
 interface MedicalProvider {

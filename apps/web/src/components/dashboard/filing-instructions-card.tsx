@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { FileText, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import {
   STATE_FILING_INFO,
-} from '@/lib/guided-steps/personal-injury/state-filing-info'
+} from '@lawyer-free/shared/guided-steps/personal-injury/state-filing-info'
 import {
   FILING_CONFIGS,
   getEFilingUrl,

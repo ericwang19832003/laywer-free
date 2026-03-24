@@ -7,7 +7,7 @@ import {
   Lightbulb,
 } from 'lucide-react'
 import { STEP_GUIDANCE } from '@/lib/step-guidance'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 
 interface ContextSidebarProps {
   caseId: string

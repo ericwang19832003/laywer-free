@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { GuidedStep } from '../guided-step'
-import { createPiFileWithCourtConfig } from '@/lib/guided-steps/personal-injury/pi-file-with-court-factory'
+import { createPiFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-file-with-court-factory'
 
 interface PIFileWithCourtStepProps {
   caseId: string

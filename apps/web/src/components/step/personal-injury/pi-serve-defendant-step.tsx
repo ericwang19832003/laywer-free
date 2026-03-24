@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piServeDefendantConfig } from '@/lib/guided-steps/personal-injury/pi-serve-defendant'
+import { piServeDefendantConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-serve-defendant'
 
 interface Props {
   caseId: string

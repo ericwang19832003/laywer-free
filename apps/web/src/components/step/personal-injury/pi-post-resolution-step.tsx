@@ -1,9 +1,9 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piPostResolutionConfig } from '@/lib/guided-steps/personal-injury/pi-post-resolution'
-import { piPostResolutionPropertyConfig } from '@/lib/guided-steps/personal-injury/pi-post-resolution-property'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { piPostResolutionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-post-resolution'
+import { piPostResolutionPropertyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-post-resolution-property'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 
 interface Props {
   caseId: string

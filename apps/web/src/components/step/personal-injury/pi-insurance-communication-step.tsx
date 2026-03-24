@@ -1,9 +1,9 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piInsuranceCommunicationConfig } from '@/lib/guided-steps/personal-injury/pi-insurance-communication'
-import { piInsuranceCommunicationPropertyConfig } from '@/lib/guided-steps/personal-injury/pi-insurance-communication-property'
-import { isPropertyDamageSubType } from '@/lib/guided-steps/personal-injury/constants'
+import { piInsuranceCommunicationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-insurance-communication'
+import { piInsuranceCommunicationPropertyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-insurance-communication-property'
+import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 
 interface PIInsuranceCommunicationStepProps {
   caseId: string

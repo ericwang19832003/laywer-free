@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { postJudgmentConfig } from '@/lib/guided-steps/landlord-tenant/post-judgment'
+import { postJudgmentConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/post-judgment'
 
 interface PostJudgmentStepProps {
   caseId: string

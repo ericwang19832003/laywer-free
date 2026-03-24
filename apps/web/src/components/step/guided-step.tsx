@@ -7,7 +7,7 @@ import { SkipForward } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { GuidedStepConfig, SummaryItem } from '@/lib/guided-steps/types'
+import type { GuidedStepConfig, SummaryItem } from '@lawyer-free/shared/guided-steps/types'
 
 interface GuidedStepProps {
   caseId: string

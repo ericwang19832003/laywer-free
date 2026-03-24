@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { ltHearingDayConfig } from '@/lib/guided-steps/landlord-tenant/lt-hearing-day'
+import { ltHearingDayConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-hearing-day'
 
 interface LtHearingDayStepProps {
   caseId: string

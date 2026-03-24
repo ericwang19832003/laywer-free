@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piSchedulingConferenceConfig } from '@/lib/guided-steps/personal-injury/pi-scheduling-conference'
+import { piSchedulingConferenceConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-scheduling-conference'
 
 interface Props {
   caseId: string

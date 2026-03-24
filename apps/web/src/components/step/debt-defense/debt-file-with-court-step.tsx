@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { debtFileWithCourtConfig } from '@/lib/guided-steps/debt-defense/debt-file-with-court'
+import { debtFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-file-with-court'
 
 interface Props {
   caseId: string

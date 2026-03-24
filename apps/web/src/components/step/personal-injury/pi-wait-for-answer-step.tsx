@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piWaitForAnswerConfig } from '@/lib/guided-steps/personal-injury/pi-wait-for-answer'
+import { piWaitForAnswerConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-wait-for-answer'
 
 interface Props {
   caseId: string

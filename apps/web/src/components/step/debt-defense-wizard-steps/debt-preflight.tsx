@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { debtPreflightConfig } from '@/lib/guided-steps/debt-defense/debt-preflight'
+import { debtPreflightConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-preflight'
 
 interface DebtPreflightProps {
   caseId: string

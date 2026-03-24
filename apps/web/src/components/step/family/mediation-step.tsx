@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { mediationConfig } from '@/lib/guided-steps/family/mediation'
+import { mediationConfig } from '@lawyer-free/shared/guided-steps/family/mediation'
 
 interface MediationStepProps {
   caseId: string

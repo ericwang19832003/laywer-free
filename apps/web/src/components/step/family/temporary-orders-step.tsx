@@ -1,7 +1,7 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { temporaryOrdersConfig } from '@/lib/guided-steps/family/temporary-orders'
+import { temporaryOrdersConfig } from '@lawyer-free/shared/guided-steps/family/temporary-orders'
 
 interface TemporaryOrdersStepProps {
   caseId: string
