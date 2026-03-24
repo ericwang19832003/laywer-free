@@ -1,8 +1,11 @@
 'use client'
 
-import { AlertTriangle, Clock, ShieldAlert, Info, HelpCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { AlertTriangle, Clock, ShieldAlert, Info, HelpCircle, X } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+
+const MAX_VIEWS = 3
 /** Serializable version of SolResult (Date → ISO string) */
 interface SerializedSolResult {
   years: number | null
@@ -95,8 +98,26 @@ function formatCountdown(days: number): string {
 }
 
 export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
+  const [dismissed, setDismissed] = useState(true) // default hidden to avoid flash
+
+  useEffect(() => {
+    const key = `banner_sol_views_${caseId}`
+    const views = parseInt(localStorage.getItem(key) || '0', 10)
+    if (views >= MAX_VIEWS) {
+      setDismissed(true)
+      return
+    }
+    localStorage.setItem(key, String(views + 1))
+    setDismissed(false)
+  }, [caseId])
+
   const config = LEVEL_CONFIG[sol.level]
-  if (!config) return null
+  if (!config || dismissed) return null
+
+  function handleDismiss() {
+    localStorage.setItem(`banner_sol_views_${caseId}`, String(MAX_VIEWS))
+    setDismissed(true)
+  }
 
   const Icon = config.icon
 
@@ -164,6 +185,13 @@ export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
             </div>
           )}
         </div>
+        <button
+          onClick={handleDismiss}
+          className="shrink-0 rounded p-1 hover:bg-black/5 transition-colors"
+          aria-label="Dismiss SOL banner"
+        >
+          <X className="h-3.5 w-3.5 text-warm-muted" />
+        </button>
       </div>
     </div>
   )

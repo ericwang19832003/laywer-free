@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Info, X } from 'lucide-react'
 
+const MAX_VIEWS = 3
+
 interface BackfillBannerProps {
   caseId: string
   skippedCount: number
@@ -12,14 +14,20 @@ export function BackfillBanner({ caseId, skippedCount }: BackfillBannerProps) {
   const [dismissed, setDismissed] = useState(true) // default hidden to avoid flash
 
   useEffect(() => {
-    const stored = localStorage.getItem(`backfill-banner-dismissed-${caseId}`)
-    setDismissed(stored === 'true')
+    const key = `banner_backfill_views_${caseId}`
+    const views = parseInt(localStorage.getItem(key) || '0', 10)
+    if (views >= MAX_VIEWS) {
+      setDismissed(true)
+      return
+    }
+    localStorage.setItem(key, String(views + 1))
+    setDismissed(false)
   }, [caseId])
 
   if (skippedCount <= 0 || dismissed) return null
 
   function handleDismiss() {
-    localStorage.setItem(`backfill-banner-dismissed-${caseId}`, 'true')
+    localStorage.setItem(`banner_backfill_views_${caseId}`, String(MAX_VIEWS))
     setDismissed(true)
   }
 
