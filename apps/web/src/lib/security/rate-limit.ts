@@ -97,7 +97,7 @@ export async function checkDistributedRateLimit(
 
     if (error) throw error
 
-    if (count > maxRequests) {
+    if (count >= maxRequests) {
       const windowEnd = Math.floor(Date.now() / windowMs) * windowMs + windowMs
       const retryAfterMs = windowEnd - Date.now()
       return { allowed: false, retryAfterMs: Math.max(retryAfterMs, 1000) }
