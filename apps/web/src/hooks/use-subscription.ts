@@ -43,7 +43,7 @@ export function useSubscription(): ClientSubscription {
         .neq('status', 'archived')
 
       const tier = (subData?.tier as SubscriptionTier) ?? 'free'
-      const { TIER_LIMITS } = await import('@/lib/subscription/limits')
+      const { TIER_LIMITS } = await import('@lawyer-free/shared/subscription/limits')
       const limits = TIER_LIMITS[tier]
 
       setSub({
