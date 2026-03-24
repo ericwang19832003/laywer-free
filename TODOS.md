@@ -134,3 +134,63 @@
 **Context:** Posthog or Plausible. Minimum events: page views, tab switches, onboarding completion rate, celebration interactions, signup conversion, time-to-next-action on dashboard. Capture baselines BEFORE shipping design changes.
 **Effort:** S (human: ~4 hours / CC: ~15 min)
 **Depends on:** Nothing (but should ship before design changes to capture baselines)
+
+## Design Review TODOs (2026-03-24)
+
+### P1 — Reorder Focus Tab hierarchy
+**What:** Move NextStepCard to position #1 on Focus tab. Push informational banners (ProSeBanner, BackfillBanner) below ProgressCard.
+**Why:** NextStepCard is the core value prop but is buried at position #5 behind 4 informational banners. Claude subagent independently flagged this as the #1 design problem. Users in legal crisis need to see their next action within 2 seconds.
+**Context:** New order: NextStepCard → PriorityAlerts → SOL Banner → DeadlinesCard → ProgressCard → CaseHealthCard → ProSeBanner/BackfillBanner → FilingInstructions → OutcomePrompt → SavingsCard. Edit `focus-tab.tsx` render order.
+**Effort:** S (human: ~4 hours / CC: ~15 min)
+**Depends on:** Nothing (but should ship before dashboard workbench restructure)
+
+### P1 — Distinct overdue deadline styling
+**What:** Use destructive token (bg-destructive/10 + destructive text + icon) for overdue deadlines instead of same amber as "due today."
+**Why:** Overdue and "due today" deadlines currently look identical (both amber). A user can miss that a critical court deadline already passed. Trust-destroying.
+**Context:** In DeadlinesCard, change overdue border from `border-amber-500` to `border-destructive`. Add background `bg-destructive/10`. Text: "This deadline passed on [date]. Here's what you can do:" with action link. Respects DESIGN.md spirit (destructive token, not raw red-500).
+**Effort:** S (human: ~2 hours / CC: ~10 min)
+**Depends on:** Nothing
+
+### P2 — Health score human-readable labels
+**What:** Add labels to health score ranges: 0-39 "Needs attention" (destructive), 40-69 "On track" (amber), 70-100 "Strong position" (green). Document thresholds in DESIGN.md.
+**Why:** Bare number "68" means nothing to a non-technical user in legal crisis. Labels provide instant understanding.
+**Context:** Update CaseHealthCard + case-card.tsx to show label next to score. Add score range documentation to DESIGN.md. Handle null state: "Health · Pending" with muted styling.
+**Effort:** S (human: ~2 hours / CC: ~5 min)
+**Depends on:** Nothing
+
+### P2 — Consolidate priority banner logic
+**What:** Create a shared `<PriorityBanners>` server component encapsulating `getPriorityCards()` + banner rendering. Both FocusTab and OverviewTab import it.
+**Why:** Currently `getPriorityCards()` logic and banner rendering is duplicated between FocusTab and OverviewTab. Adding a new dispute type's filing instructions requires updating both files or one tab will be wrong.
+**Context:** Extract SOL Banner + Filing Instructions banner logic into one component. Both tabs pass case data props; component decides which banners to show and renders them.
+**Effort:** S (human: ~2 hours / CC: ~5 min)
+**Depends on:** Nothing
+
+### P2 — Deadline source labels (confirmed vs estimated)
+**What:** Display "Confirmed" vs "Estimated" labels on deadline cards. When confirmed deadline exists alongside estimated, show both with confirmed prominent and estimated in smaller text below.
+**Why:** Currently DeadlinesCard silently filters out estimated deadlines when confirmed exists. User never sees which version was used, potentially planning around the wrong date.
+**Context:** Update DeadlinesCard to show source label inline: "Answer deadline · July 15 · Confirmed". If both exist: show confirmed prominently + "Originally estimated: July 12" in smaller muted text below.
+**Effort:** S (human: ~2 hours / CC: ~5 min)
+**Depends on:** Nothing
+
+## Eng Review TODOs (2026-03-24)
+
+### P1 — Banner self-dismiss after first view
+**What:** Add dismiss logic to ProSeBanner, BackfillBanner, and SolBanner so they show once (or a few times), not on every dashboard visit.
+**Why:** Outside voice caught that informational banners render on EVERY dashboard visit. Users see "Pro se means representing yourself" on their 50th visit. This is stale content noise that buries the core value prop even after reordering.
+**Context:** ProSeBanner already has localStorage dismiss. Apply same pattern to BackfillBanner and SolBanner. Alternatively, track banner dismissal in user_preferences table for cross-device persistence. Show banners max 3 times, then auto-dismiss.
+**Effort:** S (human: ~4 hours / CC: ~10 min)
+**Depends on:** Focus tab reorder (should ship together)
+
+### P1 — Onboarding dispute type pre-fill wiring
+**What:** Wire the onboarding flow's dispute type selection through to the new case wizard so users don't re-select their situation.
+**Why:** Outside voice caught that handleSelect() stores dispute type in sessionStorage but the new case wizard doesn't read it. Users pick "Being sued" in onboarding, then land in wizard with no pre-fill — friction at highest-anxiety moment.
+**Context:** OnboardingFlow stores `sessionStorage.setItem('onboarding_dispute_type', disputeType)`. NewCaseDialog needs to read this on mount and pre-select the dispute type step. Clear sessionStorage after use.
+**Effort:** S (human: ~2 hours / CC: ~5 min)
+**Depends on:** Nothing
+
+### P2 — Eliminate duplicate queries between layout and dashboard
+**What:** Remove redundant Supabase queries in case layout.tsx that are also fetched by FocusTab/OverviewTab RPCs.
+**Why:** Outside voice found layout.tsx makes 7 parallel queries (tasks, deadlines, risk_score) that duplicate what the tab-level RPCs also fetch. Double-fetching on every dashboard visit.
+**Context:** Audit layout.tsx queries vs get_case_dashboard RPC return data. Remove layout queries for data already in RPC. Pass RPC data down via props or React context instead.
+**Effort:** S (human: ~4 hours / CC: ~15 min)
+**Depends on:** N+1 RPC fix (include task metadata in RPC)
