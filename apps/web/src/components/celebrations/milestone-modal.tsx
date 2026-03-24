@@ -130,13 +130,13 @@ function ResolvedContent({
             key={i}
             className="absolute rounded-full opacity-60"
             style={{
-              width: 6 + Math.random() * 6,
-              height: 6 + Math.random() * 6,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              width: 6 + (i % 3) * 3,
+              height: 6 + ((i + 1) % 3) * 3,
+              left: `${(i * 37 + 13) % 100}%`,
+              top: `${(i * 53 + 7) % 100}%`,
               backgroundColor: ['#6366F1', '#F59E0B', '#10B981', '#EC4899', '#3B82F6'][i % 5],
-              animation: `pulse ${1.5 + Math.random()}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 2}s`,
+              animation: `pulse ${1.5 + (i % 3) * 0.5}s ease-in-out infinite`,
+              animationDelay: `${i * 0.3}s`,
             }}
           />
         ))}

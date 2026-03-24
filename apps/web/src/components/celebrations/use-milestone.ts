@@ -1,3 +1,4 @@
+// TODO: Wire this hook into the dashboard to trigger milestone celebrations on case progress.
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
