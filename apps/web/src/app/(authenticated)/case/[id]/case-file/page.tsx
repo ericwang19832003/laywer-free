@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CaseFileHub } from '@/components/case-file/case-file-hub'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
-import type { PipelineStage } from '@/lib/schemas/case-file'
+import type { PipelineStage } from '@lawyer-free/shared/schemas/case-file'
 
 export default async function CaseFilePage({
   params,

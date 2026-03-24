@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createObjectionReviewSchema } from '@/lib/schemas/objection-reviews'
+import { createObjectionReviewSchema } from '@lawyer-free/shared/schemas/objection-reviews'
 
 export const runtime = 'nodejs'
 

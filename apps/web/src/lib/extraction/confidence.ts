@@ -1,4 +1,4 @@
-import type { RosFields } from '@/lib/schemas/document-extraction'
+import type { RosFields } from '@lawyer-free/shared/schemas/document-extraction'
 
 const FIELD_WEIGHTS: Record<keyof RosFields, number> = {
   served_at: 0.30,

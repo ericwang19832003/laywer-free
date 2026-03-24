@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   documentMetadataSchema,
   createDocumentSchema,
-} from '@/lib/schemas/document'
+} from '@lawyer-free/shared/schemas/document'
 
 describe('documentMetadataSchema', () => {
   it('accepts template generator', () => {

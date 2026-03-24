@@ -3,8 +3,8 @@ import {
   buildLandlordTenantFilingPrompt,
   getDocumentTitle,
 } from '@/lib/rules/landlord-tenant-filing-prompts'
-import { landlordTenantFilingFactsSchema } from '@/lib/schemas/landlord-tenant-filing'
-import type { LandlordTenantFilingFacts } from '@/lib/schemas/landlord-tenant-filing'
+import { landlordTenantFilingFactsSchema } from '@lawyer-free/shared/schemas/landlord-tenant-filing'
+import type { LandlordTenantFilingFacts } from '@lawyer-free/shared/schemas/landlord-tenant-filing'
 
 function makeFacts(overrides: Partial<LandlordTenantFilingFacts> = {}): LandlordTenantFilingFacts {
   return landlordTenantFilingFactsSchema.parse({

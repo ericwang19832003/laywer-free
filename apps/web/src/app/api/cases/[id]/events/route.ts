@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createEventSchema } from '@/lib/schemas/event'
+import { createEventSchema } from '@lawyer-free/shared/schemas/event'
 
 export async function POST(
   request: NextRequest,

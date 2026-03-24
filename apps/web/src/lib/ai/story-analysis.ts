@@ -1,4 +1,4 @@
-import { type AnalysisResult, analysisResultSchema } from '@/lib/schemas/quick-resolve'
+import { type AnalysisResult, analysisResultSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 
 const DISPUTE_TYPES = [
   'small_claims', 'personal_injury', 'landlord_tenant', 'family',

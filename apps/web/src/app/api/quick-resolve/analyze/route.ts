@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { storyInputSchema } from '@/lib/schemas/quick-resolve'
+import { storyInputSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt, parseAnalysisResult } from '@/lib/ai/story-analysis'
 import { lookupBusinessEntity } from '@/lib/entity-lookup/opencorporates'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'

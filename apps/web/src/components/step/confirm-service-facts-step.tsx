@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SERVICE_METHODS } from '@/lib/schemas/document-extraction'
+import { SERVICE_METHODS } from '@lawyer-free/shared/schemas/document-extraction'
 
 interface ConfirmServiceFactsStepProps {
   caseId: string

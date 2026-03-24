@@ -8,7 +8,7 @@ import { ClaimsSection } from './filing/claims-section'
 import { ReliefSection } from './filing/relief-section'
 import { DefendantSection } from './filing/defendant-section'
 import { DraftViewer } from './filing/draft-viewer'
-import type { FilingFacts } from '@/lib/schemas/filing'
+import type { FilingFacts } from '@lawyer-free/shared/schemas/filing'
 
 interface PrepareFilingStepProps {
   caseId: string

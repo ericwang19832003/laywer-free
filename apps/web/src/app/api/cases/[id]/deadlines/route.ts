@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createDeadlineSchema } from '@/lib/schemas/deadline'
+import { createDeadlineSchema } from '@lawyer-free/shared/schemas/deadline'
 
 export async function POST(
   request: NextRequest,

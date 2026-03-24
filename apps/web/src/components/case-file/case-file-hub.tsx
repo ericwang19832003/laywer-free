@@ -13,7 +13,7 @@ import {
 } from './ai-assistant-panel'
 import { BeginnerWalkthrough } from './beginner-walkthrough'
 import { SupportiveHeader } from '@/components/layout/supportive-header'
-import type { PipelineStage } from '@/lib/schemas/case-file'
+import type { PipelineStage } from '@lawyer-free/shared/schemas/case-file'
 
 // Lazy-load stage components
 const EvidenceVault = dynamic(

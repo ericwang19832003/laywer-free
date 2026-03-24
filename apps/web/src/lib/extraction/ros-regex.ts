@@ -1,4 +1,4 @@
-import type { RosFields } from '@/lib/schemas/document-extraction'
+import type { RosFields } from '@lawyer-free/shared/schemas/document-extraction'
 
 const MONTHS =
   'January|February|March|April|May|June|July|August|September|October|November|December'

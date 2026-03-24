@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createDeadlineSchema } from '@/lib/schemas/deadline'
+import { createDeadlineSchema } from '@lawyer-free/shared/schemas/deadline'
 
 describe('createDeadlineSchema', () => {
   it('accepts valid deadline with ISO datetime', () => {

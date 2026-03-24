@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { type DisputeType } from '@/lib/rules/court-recommendation'
-import type { State, PiSubType } from '@/lib/schemas/case'
+import type { State, PiSubType } from '@lawyer-free/shared/schemas/case'
 import { getMilestones } from '@/lib/rules/milestones'
 import { WizardProgress } from './wizard/wizard-progress'
 import { StateStep } from './wizard/state-step'
@@ -41,7 +41,7 @@ import { PISubTypeStep } from './wizard/pi-sub-type-step'
 import {
   BusinessSubTypeStep,
 } from './wizard/business-sub-type-step'
-import type { BusinessSubType } from '@/lib/schemas/case'
+import type { BusinessSubType } from '@lawyer-free/shared/schemas/case'
 
 // -- Helpers ------------------------------------------------------------------
 

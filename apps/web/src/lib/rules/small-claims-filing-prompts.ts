@@ -1,4 +1,4 @@
-import type { SmallClaimsFilingFacts } from '@/lib/schemas/small-claims-filing'
+import type { SmallClaimsFilingFacts } from '@lawyer-free/shared/schemas/small-claims-filing'
 
 interface FilingPrompt {
   system: string

@@ -8,7 +8,7 @@ import {
   SUGGESTION_TYPES,
   SUGGESTION_PRIORITIES,
   SUGGESTION_ACTION_TYPES,
-} from '@/lib/schemas/case-file'
+} from '@lawyer-free/shared/schemas/case-file'
 
 describe('case-file schemas', () => {
   it('validates a valid checklist item', () => {

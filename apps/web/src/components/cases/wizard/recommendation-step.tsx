@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select'
 import { ChevronRight, Scale, HelpCircle } from 'lucide-react'
 import type { CourtRecommendation } from '@/lib/rules/court-recommendation'
-import type { State } from '@/lib/schemas/case'
+import type { State } from '@lawyer-free/shared/schemas/case'
 import { getStateConfig } from '@/lib/states'
 import { CourtSelector } from '@/components/courts/court-selector'
 

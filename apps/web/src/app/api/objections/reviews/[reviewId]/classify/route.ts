@@ -7,8 +7,8 @@ import {
   OBJECTION_LABELS,
   ITEM_TYPES,
   classificationOutputSchema,
-} from '@/lib/schemas/objection-classification'
-import type { ClassificationItem } from '@/lib/schemas/objection-classification'
+} from '@lawyer-free/shared/schemas/objection-classification'
+import type { ClassificationItem } from '@lawyer-free/shared/schemas/objection-classification'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'

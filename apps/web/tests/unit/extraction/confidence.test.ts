@@ -1,5 +1,5 @@
 import { computeConfidence, deriveStatus } from '@/lib/extraction/confidence'
-import type { RosFields } from '@/lib/schemas/document-extraction'
+import type { RosFields } from '@lawyer-free/shared/schemas/document-extraction'
 
 describe('computeConfidence', () => {
   it('returns 1.0 when all fields present', () => {

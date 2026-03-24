@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { aiRiskExplanationSchema } from '@/lib/schemas/ai-risk-explanation'
+import { aiRiskExplanationSchema } from '@lawyer-free/shared/schemas/ai-risk-explanation'
 import {
   isExplanationSafe,
   buildStaticExplanation,

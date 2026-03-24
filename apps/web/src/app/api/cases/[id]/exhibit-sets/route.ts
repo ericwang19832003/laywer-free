@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createExhibitSetSchema } from '@/lib/schemas/exhibits'
+import { createExhibitSetSchema } from '@lawyer-free/shared/schemas/exhibits'
 
 export const runtime = 'nodejs'
 

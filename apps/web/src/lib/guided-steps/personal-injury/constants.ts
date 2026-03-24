@@ -1,4 +1,4 @@
-import type { PiSubType } from '@/lib/schemas/case'
+import type { PiSubType } from '@lawyer-free/shared/schemas/case'
 
 export const PROPERTY_DAMAGE_SUB_TYPES: PiSubType[] = [
   'vehicle_damage',

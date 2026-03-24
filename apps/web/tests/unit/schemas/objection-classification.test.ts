@@ -6,7 +6,7 @@ import {
   classificationOutputSchema,
   confirmItemSchema,
   confirmReviewSchema,
-} from '@/lib/schemas/objection-classification'
+} from '@lawyer-free/shared/schemas/objection-classification'
 
 // ── Constants ────────────────────────────────────
 

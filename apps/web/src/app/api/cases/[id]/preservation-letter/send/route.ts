@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { sendPreservationLetterSchema } from '@/lib/schemas/preservation-letter-send'
+import { sendPreservationLetterSchema } from '@lawyer-free/shared/schemas/preservation-letter-send'
 import { sendEmail } from '@/lib/email/provider'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { State } from '@/lib/schemas/case'
+import type { State } from '@lawyer-free/shared/schemas/case'
 
 const STATES: { value: State; label: string }[] = [
   { value: 'TX', label: 'Texas' },

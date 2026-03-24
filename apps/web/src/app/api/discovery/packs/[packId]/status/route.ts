@@ -4,7 +4,7 @@ import {
   updatePackStatusSchema,
   VALID_STATUS_TRANSITIONS,
   type DiscoveryPackStatus,
-} from '@/lib/schemas/discovery'
+} from '@lawyer-free/shared/schemas/discovery'
 
 export const runtime = 'nodejs'
 

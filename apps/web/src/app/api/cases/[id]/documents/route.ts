@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createDocumentSchema } from '@/lib/schemas/document'
+import { createDocumentSchema } from '@lawyer-free/shared/schemas/document'
 
 export async function POST(
   request: NextRequest,

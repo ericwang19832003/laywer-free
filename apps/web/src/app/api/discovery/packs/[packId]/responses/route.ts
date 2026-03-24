@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { uploadResponseSchema } from '@/lib/schemas/discovery'
+import { uploadResponseSchema } from '@lawyer-free/shared/schemas/discovery'
 
 export const runtime = 'nodejs'
 

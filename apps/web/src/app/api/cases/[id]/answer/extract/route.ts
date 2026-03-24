@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { extractRequestSchema } from '@/lib/schemas/document-extraction'
+import { extractRequestSchema } from '@lawyer-free/shared/schemas/document-extraction'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
 import { extractTextFromImage } from '@/lib/extraction/ocr'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'

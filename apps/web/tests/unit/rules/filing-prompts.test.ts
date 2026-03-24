@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildFilingPrompt } from '@/lib/rules/filing-prompts'
-import type { FilingFacts } from '@/lib/schemas/filing'
+import type { FilingFacts } from '@lawyer-free/shared/schemas/filing'
 
 function makeFacts(overrides: Partial<FilingFacts> = {}): FilingFacts {
   return {

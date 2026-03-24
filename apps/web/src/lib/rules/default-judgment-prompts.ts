@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { partySchema } from '@/lib/schemas/filing'
+import { partySchema } from '@lawyer-free/shared/schemas/filing'
 
 export const defaultJudgmentFactsSchema = z.object({
   your_info: partySchema,

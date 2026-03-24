@@ -4,7 +4,7 @@ import {
   SUGGESTION_ACTION_TYPES,
   type SuggestionPriority,
   type SuggestionActionType,
-} from '@/lib/schemas/case-file'
+} from '@lawyer-free/shared/schemas/case-file'
 
 export interface PipelineState {
   dispute_type: string

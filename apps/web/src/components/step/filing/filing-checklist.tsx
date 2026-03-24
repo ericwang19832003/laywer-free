@@ -1,5 +1,5 @@
 import { ChecklistItem } from './checklist-item'
-import type { FilingChecklist as ChecklistType } from '@/lib/schemas/filing'
+import type { FilingChecklist as ChecklistType } from '@lawyer-free/shared/schemas/filing'
 
 interface FilingChecklistProps {
   courtType: string

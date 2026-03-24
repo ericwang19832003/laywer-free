@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { StepRunner } from './step-runner'
 import { Button } from '@/components/ui/button'
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '@/lib/schemas/court-document'
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '@lawyer-free/shared/schemas/court-document'
 
 interface UploadReturnOfServiceStepProps {
   caseId: string

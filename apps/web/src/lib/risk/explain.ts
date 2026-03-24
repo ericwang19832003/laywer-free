@@ -6,7 +6,7 @@
  */
 
 import type { RiskBreakdownItem, RiskLevel } from '@/lib/rules/case-risk-engine'
-import type { AiRiskExplanation } from '@/lib/schemas/ai-risk-explanation'
+import type { AiRiskExplanation } from '@lawyer-free/shared/schemas/ai-risk-explanation'
 
 // ── Safety ───────────────────────────────────────────────────────
 

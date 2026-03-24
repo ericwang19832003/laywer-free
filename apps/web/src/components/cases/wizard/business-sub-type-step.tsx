@@ -6,7 +6,7 @@ import {
   Handshake,
   type LucideIcon,
 } from 'lucide-react'
-import type { BusinessSubType } from '@/lib/schemas/case'
+import type { BusinessSubType } from '@lawyer-free/shared/schemas/case'
 
 interface BusinessSubTypeOption {
   value: BusinessSubType

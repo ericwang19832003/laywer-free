@@ -9,7 +9,7 @@ import {
   ChevronRight,
   type LucideIcon,
 } from 'lucide-react'
-import type { PipelineStage } from '@/lib/schemas/case-file'
+import type { PipelineStage } from '@lawyer-free/shared/schemas/case-file'
 
 export interface StageInfo {
   key: PipelineStage

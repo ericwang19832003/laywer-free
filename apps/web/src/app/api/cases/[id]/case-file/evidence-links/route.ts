@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createEvidenceLinkSchema } from '@/lib/schemas/case-file'
+import { createEvidenceLinkSchema } from '@lawyer-free/shared/schemas/case-file'
 
 export async function POST(
   request: NextRequest,

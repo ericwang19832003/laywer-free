@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { updateTaskSchema, VALID_TRANSITIONS } from '@/lib/schemas/task'
+import { updateTaskSchema, VALID_TRANSITIONS } from '@lawyer-free/shared/schemas/task'
 
 describe('updateTaskSchema', () => {
   it('accepts valid status completed', () => {

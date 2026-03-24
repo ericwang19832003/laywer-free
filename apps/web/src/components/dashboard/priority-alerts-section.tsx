@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
+import type { ReminderEscalation } from '@lawyer-free/shared/schemas/reminder-escalation'
 
 interface PriorityAlertsSectionProps {
   caseId: string

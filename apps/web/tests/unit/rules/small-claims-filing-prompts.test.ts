@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildSmallClaimsFilingPrompt, getDocumentTitle } from '@/lib/rules/small-claims-filing-prompts'
-import { smallClaimsFilingFactsSchema } from '@/lib/schemas/small-claims-filing'
-import type { SmallClaimsFilingFacts } from '@/lib/schemas/small-claims-filing'
+import { smallClaimsFilingFactsSchema } from '@lawyer-free/shared/schemas/small-claims-filing'
+import type { SmallClaimsFilingFacts } from '@lawyer-free/shared/schemas/small-claims-filing'
 
 const baseFacts: SmallClaimsFilingFacts = {
   plaintiff: { full_name: 'Maria Garcia' },

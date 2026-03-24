@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { runGatekeeperSchema } from '@/lib/schemas/gatekeeper'
+import { runGatekeeperSchema } from '@lawyer-free/shared/schemas/gatekeeper'
 import { runAndApplyGatekeeper } from '@/lib/rules/apply-gatekeeper'
 
 export async function POST(

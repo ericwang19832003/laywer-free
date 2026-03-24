@@ -1,5 +1,5 @@
 import { MapPin } from 'lucide-react'
-import type { State } from '@/lib/schemas/case'
+import type { State } from '@lawyer-free/shared/schemas/case'
 
 const STATE_OPTIONS: { value: State; label: string; description: string }[] = [
   { value: 'TX', label: 'Texas', description: 'JP, County, and District courts' },

@@ -12,7 +12,7 @@ import { SavingsCard } from '@/components/dashboard/savings-card'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { calculateSol } from '@/lib/rules/statute-of-limitations'
 import { getPriorityCards } from '@/lib/dashboard-card-priority'
-import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
+import type { ReminderEscalation } from '@lawyer-free/shared/schemas/reminder-escalation'
 import type { DashboardData, SharedCaseData } from './types'
 
 export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, county, outcome, createdAt }: SharedCaseData) {

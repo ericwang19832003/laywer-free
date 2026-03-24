@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { StepRunner } from '../step-runner'
 import { InlineFileUpload, type UploadedFile } from '@/components/ui/inline-file-upload'
-import type { PiSubType } from '@/lib/schemas/case'
+import type { PiSubType } from '@lawyer-free/shared/schemas/case'
 import { PROPERTY_DAMAGE_SUB_TYPES } from '@/lib/guided-steps/personal-injury/constants'
 
 interface PIIntakeStepProps {

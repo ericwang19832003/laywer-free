@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildFamilyFilingPrompt } from '@/lib/rules/family-filing-prompts'
-import { familyFilingFactsSchema } from '@/lib/schemas/family-filing'
-import type { FamilyFilingFacts } from '@/lib/schemas/family-filing'
+import { familyFilingFactsSchema } from '@lawyer-free/shared/schemas/family-filing'
+import type { FamilyFilingFacts } from '@lawyer-free/shared/schemas/family-filing'
 
 const baseFacts: FamilyFilingFacts = {
   petitioner: { full_name: 'Jane Smith' },

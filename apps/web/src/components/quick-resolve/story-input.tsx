@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, Upload } from 'lucide-react'
-import type { AnalysisResult } from '@/lib/schemas/quick-resolve'
+import type { AnalysisResult } from '@lawyer-free/shared/schemas/quick-resolve'
 
 interface StoryInputProps {
   onAnalysisComplete: (result: AnalysisResult) => void

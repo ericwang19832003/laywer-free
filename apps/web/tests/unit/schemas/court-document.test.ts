@@ -4,7 +4,7 @@ import {
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE,
   DOC_TYPES,
-} from '@/lib/schemas/court-document'
+} from '@lawyer-free/shared/schemas/court-document'
 
 const validInput = {
   doc_type: 'return_of_service',

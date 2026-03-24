@@ -5,7 +5,7 @@ import archiver from 'archiver'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSummaryPdf } from '@/lib/binder/generate-summary-pdf'
 import { exhibitFileName, safeFileName } from '@/lib/binder/safe-filename'
-import type { BinderOptions } from '@/lib/schemas/trial-binders'
+import type { BinderOptions } from '@lawyer-free/shared/schemas/trial-binders'
 
 export const runtime = 'nodejs'
 

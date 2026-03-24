@@ -22,7 +22,7 @@ import {
   type AmountRange,
   type CircumstanceFlags,
 } from '@/lib/rules/court-recommendation'
-import type { State } from '@/lib/schemas/case'
+import type { State } from '@lawyer-free/shared/schemas/case'
 import { WizardProgress } from './wizard/wizard-progress'
 import { StateStep } from './wizard/state-step'
 import { RoleStep } from './wizard/role-step'
@@ -46,7 +46,7 @@ import { DebtSideStep, type DebtSide } from './wizard/debt-side-step'
 import { DebtSubTypeStep, type DebtSubType } from './wizard/debt-sub-type-step'
 import { PISubTypeStep } from './wizard/pi-sub-type-step'
 import { BusinessSubTypeStep } from './wizard/business-sub-type-step'
-import type { PiSubType, BusinessSubType } from '@/lib/schemas/case'
+import type { PiSubType, BusinessSubType } from '@lawyer-free/shared/schemas/case'
 
 function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: string, debtSide?: string): number {
   if (disputeType === 'family') return 5

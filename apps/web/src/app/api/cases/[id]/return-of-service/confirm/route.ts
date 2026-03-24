@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { confirmServiceFactsSchema } from '@/lib/schemas/service-facts'
+import { confirmServiceFactsSchema } from '@lawyer-free/shared/schemas/service-facts'
 import { computeDeadlinesFromServiceFacts } from '@/lib/rules/tx-v1'
 import { calculateReminderDates } from '@/lib/rules/reminders'
 

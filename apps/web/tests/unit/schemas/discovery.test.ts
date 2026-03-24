@@ -7,7 +7,7 @@ import {
   uploadResponseSchema,
   VALID_STATUS_TRANSITIONS,
   type DiscoveryPackStatus,
-} from '@/lib/schemas/discovery'
+} from '@lawyer-free/shared/schemas/discovery'
 
 describe('createPackSchema', () => {
   it('accepts empty object (title optional)', () => {

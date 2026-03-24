@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   aiPreservationLetterRequestSchema,
   aiPreservationLetterResponseSchema,
-} from '@/lib/schemas/ai-preservation-letter'
+} from '@lawyer-free/shared/schemas/ai-preservation-letter'
 
 describe('aiPreservationLetterRequestSchema', () => {
   it('accepts valid minimal request', () => {

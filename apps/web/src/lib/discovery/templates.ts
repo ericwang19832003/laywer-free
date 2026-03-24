@@ -1,4 +1,4 @@
-import type { DiscoveryItemType } from '@/lib/schemas/discovery'
+import type { DiscoveryItemType } from '@lawyer-free/shared/schemas/discovery'
 
 /**
  * Deterministic template generators for discovery items.

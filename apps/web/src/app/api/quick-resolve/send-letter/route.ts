@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { sendLetterSchema } from '@/lib/schemas/quick-resolve'
+import { sendLetterSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 import { sendCertifiedLetter } from '@/lib/mail/lob-client'
 
 export async function POST(request: NextRequest) {

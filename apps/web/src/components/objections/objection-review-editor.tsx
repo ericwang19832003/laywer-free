@@ -23,8 +23,8 @@ import {
   FileTextIcon,
   MailIcon,
 } from 'lucide-react'
-import { OBJECTION_LABELS } from '@/lib/schemas/objection-classification'
-import type { ObjectionLabel } from '@/lib/schemas/objection-classification'
+import { OBJECTION_LABELS } from '@lawyer-free/shared/schemas/objection-classification'
+import type { ObjectionLabel } from '@lawyer-free/shared/schemas/objection-classification'
 
 // ── Types ────────────────────────────────────────
 

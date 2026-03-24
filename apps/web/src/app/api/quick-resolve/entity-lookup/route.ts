@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { entityLookupSchema } from '@/lib/schemas/quick-resolve'
+import { entityLookupSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 import { lookupBusinessEntity } from '@/lib/entity-lookup/opencorporates'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 

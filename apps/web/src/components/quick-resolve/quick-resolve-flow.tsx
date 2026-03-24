@@ -5,7 +5,7 @@ import { StoryInput } from './story-input'
 import { AnalysisReview } from './analysis-review'
 import { DeliveryOptions } from './delivery-options'
 import { CheckCircle } from 'lucide-react'
-import type { AnalysisResult } from '@/lib/schemas/quick-resolve'
+import type { AnalysisResult } from '@lawyer-free/shared/schemas/quick-resolve'
 
 type Step = 'story' | 'review' | 'letter' | 'deliver'
 

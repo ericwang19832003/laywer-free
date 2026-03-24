@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { confirmDiscoveryDeadlineSchema } from '@/lib/schemas/discovery'
+import { confirmDiscoveryDeadlineSchema } from '@lawyer-free/shared/schemas/discovery'
 import { calculateReminderDates } from '@/lib/rules/reminders'
 
 export const runtime = 'nodejs'

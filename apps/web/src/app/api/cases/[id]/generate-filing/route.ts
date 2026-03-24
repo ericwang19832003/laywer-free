@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { ZodType } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { generateFilingRequestSchema } from '@/lib/schemas/filing'
+import { generateFilingRequestSchema } from '@lawyer-free/shared/schemas/filing'
 import { buildFilingPrompt } from '@/lib/rules/filing-prompts'
 import {
   buildAmendedComplaintPrompt,
@@ -43,7 +43,7 @@ import {
   buildAppellateBriefPrompt,
 } from '@/lib/motions/configs/appellate-brief'
 import { buildFamilyFilingPrompt } from '@/lib/rules/family-filing-prompts'
-import { familyFilingFactsSchema } from '@/lib/schemas/family-filing'
+import { familyFilingFactsSchema } from '@lawyer-free/shared/schemas/family-filing'
 import {
   temporaryOrdersFactsSchema,
   buildTemporaryOrdersPrompt,
@@ -65,10 +65,10 @@ import {
   buildMotionForMediationPrompt,
 } from '@/lib/motions/configs/motion-for-mediation'
 import { buildSmallClaimsFilingPrompt } from '@/lib/rules/small-claims-filing-prompts'
-import { smallClaimsFilingFactsSchema } from '@/lib/schemas/small-claims-filing'
+import { smallClaimsFilingFactsSchema } from '@lawyer-free/shared/schemas/small-claims-filing'
 import { demandLetterFactsSchema, buildDemandLetterPrompt } from '@/lib/rules/demand-letter-prompts'
 import { buildLandlordTenantFilingPrompt } from '@/lib/rules/landlord-tenant-filing-prompts'
-import { landlordTenantFilingFactsSchema } from '@/lib/schemas/landlord-tenant-filing'
+import { landlordTenantFilingFactsSchema } from '@lawyer-free/shared/schemas/landlord-tenant-filing'
 import { ltDemandLetterFactsSchema, buildLtDemandLetterPrompt } from '@/lib/rules/landlord-tenant-demand-letter-prompts'
 import { debtValidationLetterFactsSchema, buildDebtValidationLetterPrompt } from '@/lib/rules/debt-validation-letter-prompts'
 import { debtDefenseFactsSchema, buildDebtDefensePrompt } from '@/lib/rules/debt-defense-prompts'

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { updateChecklistItemSchema } from '@/lib/schemas/case-file'
+import { updateChecklistItemSchema } from '@lawyer-free/shared/schemas/case-file'
 
 export async function PATCH(
   request: NextRequest,

@@ -1,4 +1,4 @@
-import type { FamilyFilingFacts } from '@/lib/schemas/family-filing'
+import type { FamilyFilingFacts } from '@lawyer-free/shared/schemas/family-filing'
 
 interface FilingPrompt {
   system: string

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { addItemSchema } from '@/lib/schemas/discovery'
+import { addItemSchema } from '@lawyer-free/shared/schemas/discovery'
 import { generateDiscoveryText, PromptLintError } from '@/lib/discovery/templates'
 
 export const runtime = 'nodejs'

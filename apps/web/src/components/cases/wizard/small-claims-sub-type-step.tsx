@@ -10,7 +10,7 @@ import {
   HelpCircle,
   type LucideIcon,
 } from 'lucide-react'
-import type { State } from '@/lib/schemas/case'
+import type { State } from '@lawyer-free/shared/schemas/case'
 import { getSmallClaimsMax } from '@/lib/states'
 
 export type SmallClaimsSubType =

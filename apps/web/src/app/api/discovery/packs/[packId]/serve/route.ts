@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { servePackSchema } from '@/lib/schemas/discovery'
+import { servePackSchema } from '@lawyer-free/shared/schemas/discovery'
 
 export const runtime = 'nodejs'
 

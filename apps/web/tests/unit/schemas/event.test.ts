@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createEventSchema } from '@/lib/schemas/event'
+import { createEventSchema } from '@lawyer-free/shared/schemas/event'
 
 describe('createEventSchema', () => {
   it('accepts valid event with kind', () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import type { PiSubType } from '@/lib/schemas/case'
+import type { PiSubType } from '@lawyer-free/shared/schemas/case'
 import { OptionCard } from './option-card'
 
 const INJURY_OPTIONS: { value: PiSubType; label: string; description: string }[] = [

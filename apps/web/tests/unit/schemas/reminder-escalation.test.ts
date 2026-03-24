@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { reminderEscalationSchema } from '@/lib/schemas/reminder-escalation'
+import { reminderEscalationSchema } from '@lawyer-free/shared/schemas/reminder-escalation'
 
 describe('reminderEscalationSchema', () => {
   const valid = {

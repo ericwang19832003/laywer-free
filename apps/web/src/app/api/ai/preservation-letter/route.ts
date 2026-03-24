@@ -4,7 +4,7 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   aiPreservationLetterRequestSchema,
   aiPreservationLetterResponseSchema,
-} from '@/lib/schemas/ai-preservation-letter'
+} from '@lawyer-free/shared/schemas/ai-preservation-letter'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 const PROMPT_VERSION = '1.0.0'

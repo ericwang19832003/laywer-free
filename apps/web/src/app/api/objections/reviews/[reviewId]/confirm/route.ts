@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { confirmReviewSchema } from '@/lib/schemas/objection-classification'
+import { confirmReviewSchema } from '@lawyer-free/shared/schemas/objection-classification'
 
 // POST /api/objections/reviews/:reviewId/confirm — confirm reviewed items and complete the review
 export async function POST(

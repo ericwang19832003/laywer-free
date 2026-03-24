@@ -5,7 +5,7 @@ import { Paperclip, X, Loader2 } from 'lucide-react'
 import {
   ALLOWED_EVIDENCE_MIME_TYPES,
   MAX_EVIDENCE_FILE_SIZE,
-} from '@/lib/schemas/evidence'
+} from '@lawyer-free/shared/schemas/evidence'
 
 // ── Types ──────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { createBinderSchema } from '@/lib/schemas/trial-binders'
+import { createBinderSchema } from '@lawyer-free/shared/schemas/trial-binders'
 
 export async function POST(
   request: NextRequest,

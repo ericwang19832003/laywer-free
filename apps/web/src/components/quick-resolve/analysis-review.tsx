@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { CheckCircle, AlertTriangle, Pencil, X } from 'lucide-react'
-import type { AnalysisResult } from '@/lib/schemas/quick-resolve'
+import type { AnalysisResult } from '@lawyer-free/shared/schemas/quick-resolve'
 
 interface AnalysisReviewProps {
   analysis: AnalysisResult

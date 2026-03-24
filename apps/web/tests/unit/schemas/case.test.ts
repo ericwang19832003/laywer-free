@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createCaseSchema } from '@/lib/schemas/case'
+import { createCaseSchema } from '@lawyer-free/shared/schemas/case'
 
 describe('createCaseSchema', () => {
   it('accepts valid plaintiff case', () => {

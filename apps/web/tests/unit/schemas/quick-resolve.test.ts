@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { storyInputSchema, analysisResultSchema, sendLetterSchema } from '@/lib/schemas/quick-resolve'
+import { storyInputSchema, analysisResultSchema, sendLetterSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 
 describe('storyInputSchema', () => {
   it('accepts valid input', () => {

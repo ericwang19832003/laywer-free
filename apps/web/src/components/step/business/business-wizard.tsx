@@ -28,7 +28,7 @@ import {
   BUSINESS_PARTNERSHIP_TYPES,
   BUSINESS_EMPLOYMENT_TYPES,
   BUSINESS_B2B_TYPES,
-} from '@/lib/schemas/case'
+} from '@lawyer-free/shared/schemas/case'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */

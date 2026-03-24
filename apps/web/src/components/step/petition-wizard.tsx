@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { validateJurisdiction } from '@/lib/rules/venue-helper'
 import { ChevronLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import type { FilingFacts } from '@/lib/schemas/filing'
+import type { FilingFacts } from '@lawyer-free/shared/schemas/filing'
 import { FilingMethodStep } from '@/components/step/filing-method-step'
 import { FILING_CONFIGS } from '@/lib/filing-configs'
 
