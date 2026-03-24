@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
-import { recommendVenue } from '@/lib/rules/venue-helper'
+import { recommendVenue } from '@lawyer-free/shared/rules/venue-helper'
 import { CheckCircle2 } from 'lucide-react'
 
 interface FamilyVenueStepProps {

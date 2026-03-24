@@ -10,7 +10,7 @@
  * current stage of litigation.
  */
 
-import type { DisputeType } from '@/lib/rules/court-recommendation'
+import type { DisputeType } from './court-recommendation'
 
 // -- Types --------------------------------------------------------------------
 

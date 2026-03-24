@@ -3,7 +3,7 @@ import {
   buildDebtDefensePrompt,
   debtDefenseFactsSchema,
   type DebtDefenseFacts,
-} from '@/lib/rules/debt-defense-prompts'
+} from '@lawyer-free/shared/rules/debt-defense-prompts'
 
 function makeFacts(overrides: Partial<DebtDefenseFacts> = {}): DebtDefenseFacts {
   return debtDefenseFactsSchema.parse({

@@ -3,7 +3,7 @@ import {
   generateDeadlines,
   type GenerateDeadlinesInput,
   type GeneratedDeadline,
-} from '@/lib/rules/deadline-generator'
+} from '@lawyer-free/shared/rules/deadline-generator'
 
 // ---------------------------------------------------------------------------
 // Helpers

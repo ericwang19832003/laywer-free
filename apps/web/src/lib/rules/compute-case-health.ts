@@ -7,8 +7,8 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { calculateCaseRisk, type RiskResult } from './case-risk-engine'
-import { daysUntil } from './escalation-engine'
+import { calculateCaseRisk, type RiskResult } from '@lawyer-free/shared/rules/case-risk-engine'
+import { daysUntil } from '@lawyer-free/shared/rules/escalation-engine'
 
 // ── Types ────────────────────────────────────────────────────────
 

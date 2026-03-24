@@ -6,8 +6,8 @@ import { CourtCardList } from './court-card'
 import { CourtFilters } from './court-filters'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { CourtFilters as CourtFiltersInterface, Court } from '@/lib/courts/court-types'
-import { getCourtsByState, searchCourts } from '@/lib/courts/court-database'
+import type { CourtFilters as CourtFiltersInterface, Court } from '@lawyer-free/shared/courts/court-types'
+import { getCourtsByState, searchCourts } from '@lawyer-free/shared/courts/court-database'
 import type { State } from '@lawyer-free/shared/schemas/case'
 
 interface CourtSelectorProps {

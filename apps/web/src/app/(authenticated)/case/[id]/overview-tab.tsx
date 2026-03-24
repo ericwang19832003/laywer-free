@@ -7,7 +7,7 @@ import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { SolBanner } from '@/components/dashboard/sol-banner'
 import { FilingInstructionsCard } from '@/components/dashboard/filing-instructions-card'
-import { calculateSol } from '@/lib/rules/statute-of-limitations'
+import { calculateSol } from '@lawyer-free/shared/rules/statute-of-limitations'
 import { getPriorityCards } from '@/lib/dashboard-card-priority'
 import type { SharedCaseData } from './types'
 

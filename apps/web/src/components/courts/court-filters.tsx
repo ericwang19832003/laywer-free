@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
-import { STATE_COURT_TYPES, type CourtTypeCode } from '@/lib/courts/court-types'
+import { STATE_COURT_TYPES, type CourtTypeCode } from '@lawyer-free/shared/courts/court-types'
 
 interface CourtFiltersProps {
   state: string

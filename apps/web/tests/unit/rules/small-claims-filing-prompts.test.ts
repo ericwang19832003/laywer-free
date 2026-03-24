@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildSmallClaimsFilingPrompt, getDocumentTitle } from '@/lib/rules/small-claims-filing-prompts'
+import { buildSmallClaimsFilingPrompt, getDocumentTitle } from '@lawyer-free/shared/rules/small-claims-filing-prompts'
 import { smallClaimsFilingFactsSchema } from '@lawyer-free/shared/schemas/small-claims-filing'
 import type { SmallClaimsFilingFacts } from '@lawyer-free/shared/schemas/small-claims-filing'
 

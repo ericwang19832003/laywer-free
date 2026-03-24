@@ -3,7 +3,7 @@ import {
   buildDebtValidationLetterPrompt,
   debtValidationLetterFactsSchema,
   type DebtValidationLetterFacts,
-} from '@/lib/rules/debt-validation-letter-prompts'
+} from '@lawyer-free/shared/rules/debt-validation-letter-prompts'
 
 function makeFacts(overrides: Partial<DebtValidationLetterFacts> = {}): DebtValidationLetterFacts {
   return debtValidationLetterFactsSchema.parse({

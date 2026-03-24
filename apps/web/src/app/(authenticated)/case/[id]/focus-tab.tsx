@@ -10,7 +10,7 @@ import { FilingInstructionsCard } from '@/components/dashboard/filing-instructio
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
 import { SavingsCard } from '@/components/dashboard/savings-card'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
-import { calculateSol } from '@/lib/rules/statute-of-limitations'
+import { calculateSol } from '@lawyer-free/shared/rules/statute-of-limitations'
 import { getPriorityCards } from '@/lib/dashboard-card-priority'
 import type { ReminderEscalation } from '@lawyer-free/shared/schemas/reminder-escalation'
 import type { DashboardData, SharedCaseData } from './types'

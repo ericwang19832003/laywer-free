@@ -7,7 +7,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { evaluateGatekeeperRules } from './gatekeeper'
+import { evaluateGatekeeperRules } from '@lawyer-free/shared/rules/gatekeeper'
 
 export async function runAndApplyGatekeeper(
   supabase: SupabaseClient,

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { DisputeType } from '@/lib/rules/court-recommendation'
+import type { DisputeType } from '@lawyer-free/shared/rules/court-recommendation'
 import type { State } from '@lawyer-free/shared/schemas/case'
 import { getSmallClaimsMax } from '@/lib/states'
 import { isFeatureEnabled } from '@/lib/feature-flags'

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
-import { MOTION_CONFIGS } from '@/lib/motions/registry'
+import { MOTION_CONFIGS } from '@lawyer-free/shared/motions/registry'
 import { MotionBuilder } from '@/components/step/motion-builder'
 
 export default async function MotionPage({

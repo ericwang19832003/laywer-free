@@ -5,7 +5,7 @@ import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Download, Scale } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { generateMediationAgendaText } from '@/lib/discovery/mediation-agenda'
+import { generateMediationAgendaText } from '@lawyer-free/shared/discovery/mediation-agenda'
 
 interface PageProps {
   params: Promise<{ id: string }>

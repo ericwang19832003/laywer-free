@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   buildLandlordTenantFilingPrompt,
   getDocumentTitle,
-} from '@/lib/rules/landlord-tenant-filing-prompts'
+} from '@lawyer-free/shared/rules/landlord-tenant-filing-prompts'
 import { landlordTenantFilingFactsSchema } from '@lawyer-free/shared/schemas/landlord-tenant-filing'
 import type { LandlordTenantFilingFacts } from '@lawyer-free/shared/schemas/landlord-tenant-filing'
 

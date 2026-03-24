@@ -9,7 +9,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js'
-import type { GeneratedDeadline } from './deadline-generator'
+import type { GeneratedDeadline } from '@lawyer-free/shared/rules/deadline-generator'
 
 // ---------------------------------------------------------------------------
 // Public API

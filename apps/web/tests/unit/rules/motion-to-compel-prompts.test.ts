@@ -4,7 +4,7 @@ import {
   motionToCompelFactsSchema,
   motionToCompelConfig,
   type MotionToCompelFacts,
-} from '@/lib/motions/configs/motion-to-compel'
+} from '@lawyer-free/shared/motions/configs/motion-to-compel'
 
 describe('buildMotionToCompelPrompt', () => {
   const baseFacts: MotionToCompelFacts = {

@@ -7,7 +7,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { isMessageSafe } from './escalation-engine'
+import { isMessageSafe } from '@lawyer-free/shared/rules/escalation-engine'
 
 // ── Types ────────────────────────────────────────────────────────
 

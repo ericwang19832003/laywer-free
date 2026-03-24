@@ -3,7 +3,7 @@ import {
   buildPiDemandLetterPrompt,
   piDemandLetterFactsSchema,
   type PiDemandLetterFacts,
-} from '@/lib/rules/pi-demand-letter-prompts'
+} from '@lawyer-free/shared/rules/pi-demand-letter-prompts'
 
 function makeFacts(overrides: Partial<PiDemandLetterFacts> = {}): PiDemandLetterFacts {
   return piDemandLetterFactsSchema.parse({

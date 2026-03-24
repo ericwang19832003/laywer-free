@@ -5,7 +5,7 @@ import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, FileText, Download, MessageSquare, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { generateMeetAndConferLetter, type MeetAndConferData } from '@/lib/discovery/meet-and-confer'
+import { generateMeetAndConferLetter, type MeetAndConferData } from '@lawyer-free/shared/discovery/meet-and-confer'
 
 interface PageProps {
   params: Promise<{ id: string }>

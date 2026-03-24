@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { getMilestoneByID, getTasksToSkip } from '@/lib/rules/milestones'
-import type { DisputeType } from '@/lib/rules/court-recommendation'
-import { seedDeadlinesFromDates } from '@/lib/rules/deadline-generator'
+import { getMilestoneByID, getTasksToSkip } from '@lawyer-free/shared/rules/milestones'
+import type { DisputeType } from '@lawyer-free/shared/rules/court-recommendation'
+import { seedDeadlinesFromDates } from '@lawyer-free/shared/rules/deadline-generator'
 import { insertDeadlineWithReminders } from '@/lib/rules/insert-deadlines'
 
 const importSchema = z.object({

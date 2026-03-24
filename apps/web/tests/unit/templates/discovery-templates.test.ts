@@ -7,7 +7,7 @@ import {
   lintPromptText,
   hasLintErrors,
   PromptLintError,
-} from '@/lib/discovery/templates'
+} from '@lawyer-free/shared/discovery/templates'
 
 // ============================================
 // Individual generators

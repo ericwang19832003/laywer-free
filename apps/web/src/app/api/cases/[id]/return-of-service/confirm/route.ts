@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { confirmServiceFactsSchema } from '@lawyer-free/shared/schemas/service-facts'
-import { computeDeadlinesFromServiceFacts } from '@/lib/rules/tx-v1'
-import { calculateReminderDates } from '@/lib/rules/reminders'
+import { computeDeadlinesFromServiceFacts } from '@lawyer-free/shared/rules/tx-v1'
+import { calculateReminderDates } from '@lawyer-free/shared/rules/reminders'
 
 export async function POST(
   request: NextRequest,

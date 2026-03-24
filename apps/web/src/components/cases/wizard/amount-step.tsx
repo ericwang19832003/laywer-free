@@ -1,4 +1,4 @@
-import type { AmountRange } from '@/lib/rules/court-recommendation'
+import type { AmountRange } from '@lawyer-free/shared/rules/court-recommendation'
 import type { State } from '@lawyer-free/shared/schemas/case'
 import { getStateConfig } from '@/lib/states'
 import { OptionCard } from './option-card'

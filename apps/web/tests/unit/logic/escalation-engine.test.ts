@@ -4,13 +4,13 @@ import {
   daysUntil,
   isMessageSafe,
   BLOCKED_PHRASES,
-} from '@/lib/rules/escalation-engine'
+} from '@lawyer-free/shared/rules/escalation-engine'
 import type {
   Deadline,
   EscalationRule,
   ExistingEscalation,
   TaskEvent,
-} from '@/lib/rules/escalation-engine'
+} from '@lawyer-free/shared/rules/escalation-engine'
 
 // ── Seed rules (mirrors migration seed data) ──────────────────────
 

@@ -1,4 +1,4 @@
-import type { CircumstanceFlags } from '@/lib/rules/court-recommendation'
+import type { CircumstanceFlags } from '@lawyer-free/shared/rules/court-recommendation'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'

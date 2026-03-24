@@ -3,7 +3,7 @@ import {
   buildLtDemandLetterPrompt,
   ltDemandLetterFactsSchema,
   type LtDemandLetterFacts,
-} from '@/lib/rules/landlord-tenant-demand-letter-prompts'
+} from '@lawyer-free/shared/rules/landlord-tenant-demand-letter-prompts'
 
 function makeFacts(overrides: Partial<LtDemandLetterFacts> = {}): LtDemandLetterFacts {
   return ltDemandLetterFactsSchema.parse({

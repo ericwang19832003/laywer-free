@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { evaluateEscalations } from '@/lib/rules/escalation-engine'
+import { evaluateEscalations } from '@lawyer-free/shared/rules/escalation-engine'
 import { safeEquals } from '@/lib/security/timing-safe'
 
 export async function GET(request: NextRequest) {

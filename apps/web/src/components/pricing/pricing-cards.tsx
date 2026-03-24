@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { TIER_PRICING } from '@/lib/subscription/limits'
+import { TIER_PRICING } from '@lawyer-free/shared/subscription/limits'
 
 const tiers = [
   {

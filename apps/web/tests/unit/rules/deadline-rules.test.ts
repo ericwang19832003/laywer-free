@@ -3,7 +3,7 @@ import {
   DEADLINE_RULES,
   getDeadlineRulesForTask,
   type DeadlineRule,
-} from '@/lib/rules/deadline-rules'
+} from '@lawyer-free/shared/rules/deadline-rules'
 
 describe('DEADLINE_RULES', () => {
   it('is a non-empty array', () => {

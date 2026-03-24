@@ -3,85 +3,85 @@ import Anthropic from '@anthropic-ai/sdk'
 import { ZodType } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateFilingRequestSchema } from '@lawyer-free/shared/schemas/filing'
-import { buildFilingPrompt } from '@/lib/rules/filing-prompts'
+import { buildFilingPrompt } from '@lawyer-free/shared/rules/filing-prompts'
 import {
   buildAmendedComplaintPrompt,
   buildRemandMotionPrompt,
   amendedComplaintFactsSchema,
   remandMotionFactsSchema,
-} from '@/lib/rules/removal-prompts'
+} from '@lawyer-free/shared/rules/removal-prompts'
 import {
   buildDefaultJudgmentPrompt,
   defaultJudgmentFactsSchema,
-} from '@/lib/rules/default-judgment-prompts'
+} from '@lawyer-free/shared/rules/default-judgment-prompts'
 import {
   motionToCompelFactsSchema,
   buildMotionToCompelPrompt,
-} from '@/lib/motions/configs/motion-to-compel'
+} from '@lawyer-free/shared/motions/configs/motion-to-compel'
 import {
   summaryJudgmentFactsSchema,
   buildSummaryJudgmentPrompt,
-} from '@/lib/motions/configs/motion-summary-judgment'
+} from '@lawyer-free/shared/motions/configs/motion-summary-judgment'
 import {
   settlementDemandFactsSchema,
   buildSettlementDemandPrompt,
-} from '@/lib/motions/configs/settlement-demand'
+} from '@lawyer-free/shared/motions/configs/settlement-demand'
 import {
   continuanceFactsSchema,
   buildContinuancePrompt,
-} from '@/lib/motions/configs/motion-continuance'
+} from '@lawyer-free/shared/motions/configs/motion-continuance'
 import {
   mtdResponseFactsSchema,
   buildMtdResponsePrompt,
-} from '@/lib/motions/configs/mtd-response'
+} from '@lawyer-free/shared/motions/configs/mtd-response'
 import {
   noticeOfAppealFactsSchema,
   buildNoticeOfAppealPrompt,
-} from '@/lib/motions/configs/notice-of-appeal'
+} from '@lawyer-free/shared/motions/configs/notice-of-appeal'
 import {
   appellateBriefFactsSchema,
   buildAppellateBriefPrompt,
-} from '@/lib/motions/configs/appellate-brief'
-import { buildFamilyFilingPrompt } from '@/lib/rules/family-filing-prompts'
+} from '@lawyer-free/shared/motions/configs/appellate-brief'
+import { buildFamilyFilingPrompt } from '@lawyer-free/shared/rules/family-filing-prompts'
 import { familyFilingFactsSchema } from '@lawyer-free/shared/schemas/family-filing'
 import {
   temporaryOrdersFactsSchema,
   buildTemporaryOrdersPrompt,
-} from '@/lib/motions/configs/temporary-orders'
+} from '@lawyer-free/shared/motions/configs/temporary-orders'
 import {
   protectiveOrderFactsSchema,
   buildProtectiveOrderPrompt,
-} from '@/lib/motions/configs/protective-order'
+} from '@lawyer-free/shared/motions/configs/protective-order'
 import {
   motionToModifyFactsSchema,
   buildMotionToModifyPrompt,
-} from '@/lib/motions/configs/motion-to-modify'
+} from '@lawyer-free/shared/motions/configs/motion-to-modify'
 import {
   motionForEnforcementFactsSchema,
   buildMotionForEnforcementPrompt,
-} from '@/lib/motions/configs/motion-for-enforcement'
+} from '@lawyer-free/shared/motions/configs/motion-for-enforcement'
 import {
   motionForMediationFactsSchema,
   buildMotionForMediationPrompt,
-} from '@/lib/motions/configs/motion-for-mediation'
-import { buildSmallClaimsFilingPrompt } from '@/lib/rules/small-claims-filing-prompts'
+} from '@lawyer-free/shared/motions/configs/motion-for-mediation'
+import { buildSmallClaimsFilingPrompt } from '@lawyer-free/shared/rules/small-claims-filing-prompts'
 import { smallClaimsFilingFactsSchema } from '@lawyer-free/shared/schemas/small-claims-filing'
-import { demandLetterFactsSchema, buildDemandLetterPrompt } from '@/lib/rules/demand-letter-prompts'
-import { buildLandlordTenantFilingPrompt } from '@/lib/rules/landlord-tenant-filing-prompts'
+import { demandLetterFactsSchema, buildDemandLetterPrompt } from '@lawyer-free/shared/rules/demand-letter-prompts'
+import { buildLandlordTenantFilingPrompt } from '@lawyer-free/shared/rules/landlord-tenant-filing-prompts'
 import { landlordTenantFilingFactsSchema } from '@lawyer-free/shared/schemas/landlord-tenant-filing'
-import { ltDemandLetterFactsSchema, buildLtDemandLetterPrompt } from '@/lib/rules/landlord-tenant-demand-letter-prompts'
-import { debtValidationLetterFactsSchema, buildDebtValidationLetterPrompt } from '@/lib/rules/debt-validation-letter-prompts'
-import { debtDefenseFactsSchema, buildDebtDefensePrompt } from '@/lib/rules/debt-defense-prompts'
-import { piDemandLetterFactsSchema, buildPiDemandLetterPrompt } from '@/lib/rules/pi-demand-letter-prompts'
-import { piPetitionFactsSchema, buildPiPetitionPrompt } from '@/lib/rules/pi-petition-prompts'
-import { propertyFilingFactsSchema, buildPropertyFilingPrompt } from '@/lib/rules/property-filing-prompts'
-import { contractFilingFactsSchema, buildContractFilingPrompt } from '@/lib/rules/contract-filing-prompts'
-import { contractDemandLetterFactsSchema, buildContractDemandLetterPrompt } from '@/lib/rules/contract-demand-letter-prompts'
-import { otherFilingFactsSchema, buildOtherFilingPrompt } from '@/lib/rules/other-filing-prompts'
-import { otherDemandLetterFactsSchema, buildOtherDemandLetterPrompt } from '@/lib/rules/other-demand-letter-prompts'
-import { propertyDemandLetterFactsSchema, buildPropertyDemandLetterPrompt } from '@/lib/rules/property-demand-letter-prompts'
-import { piSettlementFactsSchema, buildPiSettlementPrompt } from '@/lib/rules/pi-settlement-prompts'
-import { isFilingOutputSafe } from '@/lib/rules/filing-safety'
+import { ltDemandLetterFactsSchema, buildLtDemandLetterPrompt } from '@lawyer-free/shared/rules/landlord-tenant-demand-letter-prompts'
+import { debtValidationLetterFactsSchema, buildDebtValidationLetterPrompt } from '@lawyer-free/shared/rules/debt-validation-letter-prompts'
+import { debtDefenseFactsSchema, buildDebtDefensePrompt } from '@lawyer-free/shared/rules/debt-defense-prompts'
+import { piDemandLetterFactsSchema, buildPiDemandLetterPrompt } from '@lawyer-free/shared/rules/pi-demand-letter-prompts'
+import { piPetitionFactsSchema, buildPiPetitionPrompt } from '@lawyer-free/shared/rules/pi-petition-prompts'
+import { propertyFilingFactsSchema, buildPropertyFilingPrompt } from '@lawyer-free/shared/rules/property-filing-prompts'
+import { contractFilingFactsSchema, buildContractFilingPrompt } from '@lawyer-free/shared/rules/contract-filing-prompts'
+import { contractDemandLetterFactsSchema, buildContractDemandLetterPrompt } from '@lawyer-free/shared/rules/contract-demand-letter-prompts'
+import { otherFilingFactsSchema, buildOtherFilingPrompt } from '@lawyer-free/shared/rules/other-filing-prompts'
+import { otherDemandLetterFactsSchema, buildOtherDemandLetterPrompt } from '@lawyer-free/shared/rules/other-demand-letter-prompts'
+import { propertyDemandLetterFactsSchema, buildPropertyDemandLetterPrompt } from '@lawyer-free/shared/rules/property-demand-letter-prompts'
+import { piSettlementFactsSchema, buildPiSettlementPrompt } from '@lawyer-free/shared/rules/pi-settlement-prompts'
+import { isFilingOutputSafe } from '@lawyer-free/shared/rules/filing-safety'
 import { validateFactsObject } from '@/lib/ai/input-validation'
 import { validateAIOutput } from '@/lib/ai/output-validation'
 import { safeError } from '@/lib/security/safe-log'

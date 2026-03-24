@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { TIER_LIMITS, type SubscriptionTier, type Feature } from './limits'
+import { TIER_LIMITS, type SubscriptionTier, type Feature } from '@lawyer-free/shared/subscription/limits'
 
 export interface SubscriptionInfo {
   tier: SubscriptionTier

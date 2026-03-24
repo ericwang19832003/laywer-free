@@ -4,7 +4,7 @@ import {
   type GatekeeperTask,
   type GatekeeperDeadline,
   type GatekeeperInput,
-} from '@/lib/rules/gatekeeper'
+} from '@lawyer-free/shared/rules/gatekeeper'
 
 function makeTask(
   key: string,

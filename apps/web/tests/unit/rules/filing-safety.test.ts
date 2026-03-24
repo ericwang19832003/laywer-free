@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isFilingOutputSafe, FILING_BLOCKED_PHRASES } from '@/lib/rules/filing-safety'
+import { isFilingOutputSafe, FILING_BLOCKED_PHRASES } from '@lawyer-free/shared/rules/filing-safety'
 
 describe('isFilingOutputSafe', () => {
   it('accepts normal petition text', () => {

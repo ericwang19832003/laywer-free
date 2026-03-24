@@ -5,7 +5,7 @@ import { Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { getAttorneyFeeEstimate } from '@/lib/rules/attorney-fee-estimates'
+import { getAttorneyFeeEstimate } from '@lawyer-free/shared/rules/attorney-fee-estimates'
 
 interface CaseWonCelebrationProps {
   disputeType: string

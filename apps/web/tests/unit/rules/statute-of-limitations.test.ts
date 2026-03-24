@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateSol, getSolYears } from '@/lib/rules/statute-of-limitations'
+import { calculateSol, getSolYears } from '@lawyer-free/shared/rules/statute-of-limitations'
 
 describe('calculateSol', () => {
   const now = new Date('2026-03-19')

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   buildAmendedComplaintPrompt,
   buildRemandMotionPrompt,
-} from '@/lib/rules/removal-prompts'
+} from '@lawyer-free/shared/rules/removal-prompts'
 
 describe('buildAmendedComplaintPrompt', () => {
   const baseFacts = {

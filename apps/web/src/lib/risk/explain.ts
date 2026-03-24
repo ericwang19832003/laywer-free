@@ -5,7 +5,7 @@
  * AI risk explanation endpoint. All functions are pure and testable.
  */
 
-import type { RiskBreakdownItem, RiskLevel } from '@/lib/rules/case-risk-engine'
+import type { RiskBreakdownItem, RiskLevel } from '@lawyer-free/shared/rules/case-risk-engine'
 import type { AiRiskExplanation } from '@lawyer-free/shared/schemas/ai-risk-explanation'
 
 // ── Safety ───────────────────────────────────────────────────────

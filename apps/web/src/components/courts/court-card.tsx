@@ -1,8 +1,8 @@
 'use client'
 
 import { MapPin, Phone, Globe, DollarSign, FileText, ChevronRight, ExternalLink } from 'lucide-react'
-import type { Court } from '@/lib/courts/court-types'
-import { getCourtTypeLabel, getCourtLevelLabel, formatPhone } from '@/lib/courts/court-database'
+import type { Court } from '@lawyer-free/shared/courts/court-types'
+import { getCourtTypeLabel, getCourtLevelLabel, formatPhone } from '@lawyer-free/shared/courts/court-database'
 import { cn } from '@/lib/utils'
 
 interface CourtCardProps {

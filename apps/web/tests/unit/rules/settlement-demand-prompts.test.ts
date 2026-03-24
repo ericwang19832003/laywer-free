@@ -4,7 +4,7 @@ import {
   settlementDemandFactsSchema,
   settlementDemandConfig,
   type SettlementDemandFacts,
-} from '@/lib/motions/configs/settlement-demand'
+} from '@lawyer-free/shared/motions/configs/settlement-demand'
 
 describe('buildSettlementDemandPrompt', () => {
   const baseFacts: SettlementDemandFacts = {

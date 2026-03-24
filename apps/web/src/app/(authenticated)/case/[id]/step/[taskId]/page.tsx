@@ -271,7 +271,7 @@ import { otherWaitForAnswerConfig } from '@lawyer-free/shared/guided-steps/other
 import { otherReviewAnswerConfig } from '@lawyer-free/shared/guided-steps/other/other-review-answer'
 import { otherDiscoveryConfig } from '@lawyer-free/shared/guided-steps/other/other-discovery'
 import { otherPostResolutionConfig } from '@lawyer-free/shared/guided-steps/other/other-post-resolution'
-import { MOTION_CONFIGS } from '@/lib/motions/registry'
+import { MOTION_CONFIGS } from '@lawyer-free/shared/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 

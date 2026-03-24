@@ -3,7 +3,7 @@ import {
   applyTexasRule4,
   isTexasHoliday,
   getTexasHolidays,
-} from '@/lib/rules/texas-rule-4'
+} from '@lawyer-free/shared/rules/texas-rule-4'
 
 // Helper: create a local date (no UTC surprises)
 function localDate(year: number, month: number, day: number): Date {

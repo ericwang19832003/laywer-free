@@ -3,7 +3,7 @@ import {
   recommendCourt,
   type CourtRecommendationInput,
   type CircumstanceFlags,
-} from '@/lib/rules/court-recommendation'
+} from '@lawyer-free/shared/rules/court-recommendation'
 
 // -- Helpers ------------------------------------------------------------------
 

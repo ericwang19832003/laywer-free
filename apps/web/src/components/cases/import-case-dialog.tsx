@@ -13,9 +13,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { type DisputeType } from '@/lib/rules/court-recommendation'
+import { type DisputeType } from '@lawyer-free/shared/rules/court-recommendation'
 import type { State, PiSubType } from '@lawyer-free/shared/schemas/case'
-import { getMilestones } from '@/lib/rules/milestones'
+import { getMilestones } from '@lawyer-free/shared/rules/milestones'
 import { WizardProgress } from './wizard/wizard-progress'
 import { StateStep } from './wizard/state-step'
 import { RoleStep } from './wizard/role-step'

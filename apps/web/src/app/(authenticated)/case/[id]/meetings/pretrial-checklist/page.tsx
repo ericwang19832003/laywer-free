@@ -5,7 +5,7 @@ import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Download, ClipboardList } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { generatePreTrialChecklistText, DEFAULT_PRETRIAL_CHECKLIST } from '@/lib/discovery/pretrial-checklist'
+import { generatePreTrialChecklistText, DEFAULT_PRETRIAL_CHECKLIST } from '@lawyer-free/shared/discovery/pretrial-checklist'
 
 interface PageProps {
   params: Promise<{ id: string }>

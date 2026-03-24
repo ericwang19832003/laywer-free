@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { SubscriptionTier } from '@/lib/subscription/limits'
+import type { SubscriptionTier } from '@lawyer-free/shared/subscription/limits'
 
 interface ClientSubscription {
   tier: SubscriptionTier

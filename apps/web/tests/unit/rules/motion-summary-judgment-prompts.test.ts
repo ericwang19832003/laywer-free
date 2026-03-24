@@ -4,7 +4,7 @@ import {
   summaryJudgmentFactsSchema,
   summaryJudgmentConfig,
   type SummaryJudgmentFacts,
-} from '@/lib/motions/configs/motion-summary-judgment'
+} from '@lawyer-free/shared/motions/configs/motion-summary-judgment'
 
 describe('buildSummaryJudgmentPrompt', () => {
   const baseFacts: SummaryJudgmentFacts = {

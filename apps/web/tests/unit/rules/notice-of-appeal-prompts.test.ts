@@ -4,7 +4,7 @@ import {
   noticeOfAppealFactsSchema,
   noticeOfAppealConfig,
   type NoticeOfAppealFacts,
-} from '@/lib/motions/configs/notice-of-appeal'
+} from '@lawyer-free/shared/motions/configs/notice-of-appeal'
 
 describe('buildNoticeOfAppealPrompt', () => {
   const baseFacts: NoticeOfAppealFacts = {

@@ -5,7 +5,7 @@ import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Download, Calendar, Clock } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { generateDiscoveryPlanText, generateDiscoveryPlan, type DiscoveryPlanData } from '@/lib/discovery/discovery-plan'
+import { generateDiscoveryPlanText, generateDiscoveryPlan, type DiscoveryPlanData } from '@lawyer-free/shared/discovery/discovery-plan'
 
 interface PageProps {
   params: Promise<{ id: string }>

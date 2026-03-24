@@ -1,4 +1,4 @@
-import { computeDeadlinesFromServiceFacts } from '@/lib/rules/tx-v1'
+import { computeDeadlinesFromServiceFacts } from '@lawyer-free/shared/rules/tx-v1'
 
 describe('computeDeadlinesFromServiceFacts', () => {
   it('returns empty array when served_at is null', () => {

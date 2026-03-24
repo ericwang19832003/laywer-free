@@ -4,7 +4,7 @@ import {
   mtdResponseFactsSchema,
   mtdResponseConfig,
   type MtdResponseFacts,
-} from '@/lib/motions/configs/mtd-response'
+} from '@lawyer-free/shared/motions/configs/mtd-response'
 
 describe('buildMtdResponsePrompt', () => {
   const baseFacts: MtdResponseFacts = {

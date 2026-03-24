@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { buildDemandLetterPrompt, demandLetterFactsSchema } from '@/lib/rules/demand-letter-prompts'
-import type { DemandLetterFacts } from '@/lib/rules/demand-letter-prompts'
+import { buildDemandLetterPrompt, demandLetterFactsSchema } from '@lawyer-free/shared/rules/demand-letter-prompts'
+import type { DemandLetterFacts } from '@lawyer-free/shared/rules/demand-letter-prompts'
 
 const baseFacts: DemandLetterFacts = {
   plaintiff: { full_name: 'Maria Garcia', address: '123 Main St', city: 'Houston', state: 'TX', zip: '77001' },

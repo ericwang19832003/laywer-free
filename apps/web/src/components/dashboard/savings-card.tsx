@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Trophy } from 'lucide-react'
 import { toast } from 'sonner'
-import { getAttorneyFeeEstimate, formatSavingsMessage } from '@/lib/rules/attorney-fee-estimates'
+import { getAttorneyFeeEstimate, formatSavingsMessage } from '@lawyer-free/shared/rules/attorney-fee-estimates'
 
 interface SavingsCardProps {
   disputeType: string

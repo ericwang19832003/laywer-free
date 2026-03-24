@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import type { MotionConfig, FieldConfig } from '@/lib/motions/types'
+import type { MotionConfig, FieldConfig } from '@lawyer-free/shared/motions/types'
 
 // ---------------------------------------------------------------------------
 // Props

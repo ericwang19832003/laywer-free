@@ -3,7 +3,7 @@ import {
   buildPiPetitionPrompt,
   piPetitionFactsSchema,
   type PiPetitionFacts,
-} from '@/lib/rules/pi-petition-prompts'
+} from '@lawyer-free/shared/rules/pi-petition-prompts'
 
 function makeFacts(overrides: Partial<PiPetitionFacts> = {}): PiPetitionFacts {
   return piPetitionFactsSchema.parse({

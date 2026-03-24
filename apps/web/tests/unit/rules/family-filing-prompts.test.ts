@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildFamilyFilingPrompt } from '@/lib/rules/family-filing-prompts'
+import { buildFamilyFilingPrompt } from '@lawyer-free/shared/rules/family-filing-prompts'
 import { familyFilingFactsSchema } from '@lawyer-free/shared/schemas/family-filing'
 import type { FamilyFilingFacts } from '@lawyer-free/shared/schemas/family-filing'
 

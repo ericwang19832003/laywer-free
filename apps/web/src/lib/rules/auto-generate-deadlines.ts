@@ -10,7 +10,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js'
-import { generateDeadlines } from './deadline-generator'
+import { generateDeadlines } from '@lawyer-free/shared/rules/deadline-generator'
 import { insertDeadlineWithReminders } from './insert-deadlines'
 
 // ---------------------------------------------------------------------------

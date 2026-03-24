@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Download, Save, Check, Clock, FileText, Users, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { generateRule26fAgendaText, type Rule26fAgenda } from '@/lib/discovery/rule-26f-agenda'
+import { generateRule26fAgendaText, type Rule26fAgenda } from '@lawyer-free/shared/discovery/rule-26f-agenda'
 
 interface AgendaTopic {
   id: string

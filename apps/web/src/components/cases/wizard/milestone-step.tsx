@@ -1,7 +1,7 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import type { Milestone } from '@/lib/rules/milestones'
+import type { Milestone } from '@lawyer-free/shared/rules/milestones'
 
 interface MilestoneStepProps {
   milestones: Milestone[]

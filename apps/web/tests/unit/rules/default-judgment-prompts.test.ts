@@ -3,7 +3,7 @@ import {
   buildDefaultJudgmentPrompt,
   defaultJudgmentFactsSchema,
   type DefaultJudgmentFacts,
-} from '@/lib/rules/default-judgment-prompts'
+} from '@lawyer-free/shared/rules/default-judgment-prompts'
 
 describe('buildDefaultJudgmentPrompt', () => {
   const baseFacts: DefaultJudgmentFacts = {

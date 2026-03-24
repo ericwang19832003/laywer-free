@@ -4,7 +4,7 @@ import {
   appellateBriefFactsSchema,
   appellateBriefConfig,
   type AppellateBriefFacts,
-} from '@/lib/motions/configs/appellate-brief'
+} from '@lawyer-free/shared/motions/configs/appellate-brief'
 
 describe('buildAppellateBriefPrompt', () => {
   const baseFacts: AppellateBriefFacts = {

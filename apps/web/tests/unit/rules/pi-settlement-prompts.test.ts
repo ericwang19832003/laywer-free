@@ -3,7 +3,7 @@ import {
   buildPiSettlementPrompt,
   piSettlementFactsSchema,
   type PiSettlementFacts,
-} from '@/lib/rules/pi-settlement-prompts'
+} from '@lawyer-free/shared/rules/pi-settlement-prompts'
 
 function makeFacts(overrides: Partial<PiSettlementFacts> = {}): PiSettlementFacts {
   return piSettlementFactsSchema.parse({

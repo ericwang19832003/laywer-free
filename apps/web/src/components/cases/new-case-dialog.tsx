@@ -21,7 +21,7 @@ import {
   type DisputeType,
   type AmountRange,
   type CircumstanceFlags,
-} from '@/lib/rules/court-recommendation'
+} from '@lawyer-free/shared/rules/court-recommendation'
 import type { State } from '@lawyer-free/shared/schemas/case'
 import { WizardProgress } from './wizard/wizard-progress'
 import { StateStep } from './wizard/state-step'

@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import type { DisputeType } from '@/lib/rules/court-recommendation'
+import type { DisputeType } from '@lawyer-free/shared/rules/court-recommendation'
 import {
   getMilestones,
   getTasksToSkip,
   getMilestoneByID,
   type Milestone,
-} from '@/lib/rules/milestones'
+} from '@lawyer-free/shared/rules/milestones'
 
 // -- Helpers ------------------------------------------------------------------
 

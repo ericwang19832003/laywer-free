@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { recommendVenue, validateJurisdiction } from '@/lib/rules/venue-helper'
+import { recommendVenue, validateJurisdiction } from '@lawyer-free/shared/rules/venue-helper'
 
 // ---------------------------------------------------------------------------
 // recommendVenue

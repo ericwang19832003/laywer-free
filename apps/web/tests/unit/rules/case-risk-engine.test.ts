@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   calculateCaseRisk,
   type RiskInput,
-} from '@/lib/rules/case-risk-engine'
+} from '@lawyer-free/shared/rules/case-risk-engine'
 
 // ── Helpers ──────────────────────────────────────────────────────
 

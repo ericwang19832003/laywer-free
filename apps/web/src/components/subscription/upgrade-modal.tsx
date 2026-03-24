@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Lock, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { TIER_PRICING } from '@/lib/subscription/limits'
+import { TIER_PRICING } from '@lawyer-free/shared/subscription/limits'
 
 const FEATURE_TO_TIER: Record<string, 'essentials' | 'pro'> = {
   maxCases: 'essentials',

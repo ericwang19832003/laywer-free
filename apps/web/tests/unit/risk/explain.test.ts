@@ -5,7 +5,7 @@ import {
   buildExplanationPrompt,
   EXPLANATION_BLOCKED_PHRASES,
 } from '@/lib/risk/explain'
-import type { RiskLevel } from '@/lib/rules/case-risk-engine'
+import type { RiskLevel } from '@lawyer-free/shared/rules/case-risk-engine'
 
 // ── isExplanationSafe ────────────────────────────────────────────
 

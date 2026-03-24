@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
-import { recommendVenue, validateJurisdiction } from '@/lib/rules/venue-helper'
+import { recommendVenue, validateJurisdiction } from '@lawyer-free/shared/rules/venue-helper'
 import { MapPin, AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 interface VenueStepProps {

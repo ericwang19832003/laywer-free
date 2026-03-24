@@ -4,7 +4,7 @@ import {
   continuanceFactsSchema,
   continuanceConfig,
   type ContinuanceFacts,
-} from '@/lib/motions/configs/motion-continuance'
+} from '@lawyer-free/shared/motions/configs/motion-continuance'
 
 describe('buildContinuancePrompt', () => {
   const baseFacts: ContinuanceFacts = {

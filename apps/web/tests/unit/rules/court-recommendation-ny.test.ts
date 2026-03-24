@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { recommendCourt } from '@/lib/rules/court-recommendation'
+import { recommendCourt } from '@lawyer-free/shared/rules/court-recommendation'
 
 const BASE_FLAGS = { realProperty: false, outOfState: false, governmentEntity: false, federalLaw: false }
 

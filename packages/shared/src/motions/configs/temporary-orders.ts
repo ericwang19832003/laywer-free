@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { partySchema } from '@lawyer-free/shared/schemas/filing'
-import type { FieldConfig, MotionConfig } from '@/lib/motions/types'
+import type { FieldConfig, MotionConfig } from '../types'
 
 // ---------------------------------------------------------------------------
 // Schema

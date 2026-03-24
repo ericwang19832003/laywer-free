@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import {
   MOTION_CONFIGS,
   MOTION_CONFIGS_BY_CATEGORY,
-} from '@/lib/motions/registry'
+} from '@lawyer-free/shared/motions/registry'
 
 export default async function MotionsHubPage({
   params,

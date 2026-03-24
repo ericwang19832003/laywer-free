@@ -12,8 +12,8 @@
  * avoid timezone boundary issues.
  */
 
-import { getDeadlineRulesForTask } from '@/lib/rules/deadline-rules'
-import { applyTexasRule4 } from '@/lib/rules/texas-rule-4'
+import { getDeadlineRulesForTask } from './deadline-rules'
+import { applyTexasRule4 } from './texas-rule-4'
 
 // ---------------------------------------------------------------------------
 // Types
