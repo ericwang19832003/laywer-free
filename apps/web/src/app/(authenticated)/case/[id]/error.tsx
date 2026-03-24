@@ -11,10 +11,13 @@ export default function DashboardError({
       <main className="mx-auto max-w-2xl px-4 py-10">
         <div className="text-center space-y-4 pt-20">
           <h1 className="text-xl font-semibold text-warm-text">
-            Something went wrong loading your dashboard.
+            Something went wrong.
           </h1>
           <p className="text-sm text-warm-muted">
             Your case data is safe &mdash; this is a temporary issue.
+          </p>
+          <p className="text-xs text-warm-muted">
+            If the problem persists, try reloading the page.
           </p>
           <button
             onClick={reset}
