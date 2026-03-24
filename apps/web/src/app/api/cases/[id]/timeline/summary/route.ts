@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   timelineSummarySchema,
@@ -88,20 +88,16 @@ export async function GET(
     // Try AI
     if (process.env.OPENAI_API_KEY) {
       try {
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
         const userPrompt = buildTimelineSummaryPrompt(eventList)
 
-        const completion = await openai.chat.completions.create({
-          model: AI_MODEL,
+        const { raw } = await aiClient.complete({
+          systemPrompt: TIMELINE_SUMMARY_SYSTEM_PROMPT,
+          userPrompt,
           temperature: 0.4,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: TIMELINE_SUMMARY_SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
+          jsonMode: true,
+          caller: 'timeline-summary',
         })
 
-        const raw = completion.choices[0]?.message?.content
         if (raw) {
           const parsed = JSON.parse(raw)
           const validated = timelineSummarySchema.safeParse(parsed)

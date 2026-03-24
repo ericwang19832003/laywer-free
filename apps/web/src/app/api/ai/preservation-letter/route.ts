@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   aiPreservationLetterRequestSchema,
@@ -37,14 +37,6 @@ export async function POST(request: NextRequest) {
 
   const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
-
-  // Check if OpenAI is configured
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json(
-      { error: 'AI generation is not configured', fallback: true },
-      { status: 503 }
-    )
-  }
 
   try {
     const body = await request.json()
@@ -88,25 +80,13 @@ export async function POST(request: NextRequest) {
 
     const userPrompt = parts.join('\n')
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const { raw } = await aiClient.complete({
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt,
       temperature: 0.4,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
+      jsonMode: true,
+      caller: 'preservation-letter',
     })
-
-    const raw = completion.choices[0]?.message?.content
-    if (!raw) {
-      return NextResponse.json(
-        { error: 'AI returned empty response', fallback: true },
-        { status: 502 }
-      )
-    }
 
     let aiOutput: unknown
     try {

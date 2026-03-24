@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   taskDescriptionSchema,
@@ -76,7 +76,6 @@ export async function GET(
     // Try AI
     if (process.env.OPENAI_API_KEY) {
       try {
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
         const userPrompt = buildTaskDescriptionPrompt({
           task_key: taskKey,
           task_title: task?.title ?? taskKey,
@@ -86,17 +85,14 @@ export async function GET(
           completed_tasks: (completedTasks ?? []).map((t) => t.task_key),
         })
 
-        const completion = await openai.chat.completions.create({
-          model: AI_MODEL,
+        const { raw } = await aiClient.complete({
+          systemPrompt: TASK_DESCRIPTION_SYSTEM_PROMPT,
+          userPrompt,
           temperature: 0.4,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: TASK_DESCRIPTION_SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
+          jsonMode: true,
+          caller: 'task-description',
         })
 
-        const raw = completion.choices[0]?.message?.content
         if (raw) {
           const parsed = JSON.parse(raw)
           const validated = taskDescriptionSchema.safeParse(parsed)

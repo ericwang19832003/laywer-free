@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient, AIError } from '@/lib/ai/client'
 import { z } from 'zod'
 import {
   type DocumentType,
@@ -169,19 +169,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        {
-          error: 'AI generation is not configured',
-          fallback: true,
-          message: 'Please set OPENAI_API_KEY in your environment variables.',
-        },
-        { status: 503 }
-      )
-    }
-
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
     const systemPrompt = getSystemPrompt(body.documentType)
     const userPrompt = buildUserPrompt(body)
 
@@ -189,23 +176,13 @@ export async function POST(request: NextRequest) {
     let lastError: z.ZodError | null = null
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const completion = await openai.chat.completions.create({
-        model: AI_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt,
-          },
-          {
-            role: 'user',
-            content: userPrompt,
-          },
-        ],
+      const { content: rawContent, usage } = await aiClient.complete({
+        systemPrompt,
+        userPrompt,
         temperature: 0.7,
-        max_tokens: 4000,
+        maxTokens: 4000,
+        caller: 'document-generation',
       })
-
-      const rawContent = completion.choices[0]?.message?.content ?? ''
 
       const result = aiResponseSchema.safeParse(rawContent)
 
@@ -232,7 +209,7 @@ export async function POST(request: NextRequest) {
         meta: {
           model: AI_MODEL,
           documentType: body.documentType,
-          tokens: completion.usage?.total_tokens,
+          tokens: usage?.totalTokens,
         },
       })
     }
@@ -252,13 +229,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Document generation error:', error)
 
-    if (error instanceof OpenAI.APIError) {
+    if (error instanceof AIError) {
       return NextResponse.json(
         {
-          error: `OpenAI API error: ${error.message}`,
+          error: `AI error: ${error.message}`,
           fallback: true,
         },
-        { status: error.status || 500 }
+        { status: 500 }
       )
     }
 

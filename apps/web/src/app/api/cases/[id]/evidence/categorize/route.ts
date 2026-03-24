@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   evidenceCategorySchema,
@@ -67,20 +67,16 @@ export async function POST(
     // Try AI if available
     if (process.env.OPENAI_API_KEY) {
       try {
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
         const userPrompt = buildCategorizationPrompt({ file_name, mime_type, text_snippet })
 
-        const completion = await openai.chat.completions.create({
-          model: AI_MODEL,
+        const { raw } = await aiClient.complete({
+          systemPrompt: EVIDENCE_CATEGORIZATION_SYSTEM_PROMPT,
+          userPrompt,
           temperature: 0.3,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: EVIDENCE_CATEGORIZATION_SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
+          jsonMode: true,
+          caller: 'evidence-categorize',
         })
 
-        const raw = completion.choices[0]?.message?.content
         if (raw) {
           const parsed = JSON.parse(raw)
           const validated = evidenceCategorySchema.safeParse(parsed)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   healthTipsSchema,
@@ -80,7 +80,6 @@ export async function GET(
     // Try AI
     if (process.env.OPENAI_API_KEY) {
       try {
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
         const userPrompt = buildHealthTipsPrompt({
           overall_score: risk.overall_score,
           deadline_risk: risk.deadline_risk,
@@ -94,17 +93,14 @@ export async function GET(
           evidence_count: evidenceResult.count ?? 0,
         })
 
-        const completion = await openai.chat.completions.create({
-          model: AI_MODEL,
+        const { raw } = await aiClient.complete({
+          systemPrompt: HEALTH_TIPS_SYSTEM_PROMPT,
+          userPrompt,
           temperature: 0.4,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: HEALTH_TIPS_SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
+          jsonMode: true,
+          caller: 'health-tips',
         })
 
-        const raw = completion.choices[0]?.message?.content
         if (raw) {
           const parsed = JSON.parse(raw)
           const validated = healthTipsSchema.safeParse(parsed)

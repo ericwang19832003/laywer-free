@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { aiRiskExplanationSchema } from '@lawyer-free/shared/schemas/ai-risk-explanation'
 import {
@@ -82,20 +82,16 @@ export async function POST(
     // Try AI generation if configured
     if (process.env.OPENAI_API_KEY) {
       try {
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
         const userPrompt = buildExplanationPrompt(riskInput)
 
-        const completion = await openai.chat.completions.create({
-          model: AI_MODEL,
+        const { raw } = await aiClient.complete({
+          systemPrompt: RISK_EXPLANATION_SYSTEM_PROMPT,
+          userPrompt,
           temperature: 0.4,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: RISK_EXPLANATION_SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
+          jsonMode: true,
+          caller: 'risk-explain',
         })
 
-        const raw = completion.choices[0]?.message?.content
         if (raw) {
           const parsed = JSON.parse(raw)
           const validated = aiRiskExplanationSchema.safeParse(parsed)

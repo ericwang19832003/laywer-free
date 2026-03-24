@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { storyInputSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt, parseAnalysisResult } from '@/lib/ai/story-analysis'
@@ -30,22 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: inputCheck.reason }, { status: 400 })
     }
 
-    const openai = new OpenAI()
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: buildAnalysisSystemPrompt() },
-        { role: 'user', content: buildAnalysisUserPrompt(parsed.data.story) },
-      ],
+    const { content: raw } = await aiClient.complete({
+      systemPrompt: buildAnalysisSystemPrompt(),
+      userPrompt: buildAnalysisUserPrompt(parsed.data.story),
       temperature: 0.2,
-      max_tokens: 500,
+      maxTokens: 500,
+      jsonMode: true,
+      caller: 'quick-resolve-analyze',
     })
-
-    const raw = completion.choices[0]?.message?.content
-    if (!raw) {
-      return NextResponse.json({ error: 'AI returned empty response' }, { status: 502 })
-    }
 
     const analysis = parseAnalysisResult(raw)
     if (!analysis) {

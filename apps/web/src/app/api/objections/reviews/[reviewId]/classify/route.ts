@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { aiClient, AIError } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
 import { extractTextFromImage } from '@/lib/extraction/ocr'
@@ -167,29 +167,16 @@ export async function POST(
       )
     }
 
-    // Call OpenAI
+    // Call AI
     let aiOutput: unknown
     try {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+      const { raw } = await aiClient.complete({
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt: text,
         temperature: 0.4,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: text },
-        ],
+        jsonMode: true,
+        caller: 'objection-classify',
       })
-
-      const raw = completion.choices[0]?.message?.content
-      if (!raw) {
-        await setErrorStatus(supabase, reviewId, review.case_id, 'AI returned empty response')
-        return NextResponse.json(
-          { error: 'AI returned empty response', fallback: true },
-          { status: 502 }
-        )
-      }
 
       try {
         aiOutput = JSON.parse(raw)
@@ -201,7 +188,7 @@ export async function POST(
         )
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'OpenAI call failed'
+      const message = err instanceof AIError ? err.message : (err instanceof Error ? err.message : 'AI call failed')
       await setErrorStatus(supabase, reviewId, review.case_id, message)
       return NextResponse.json(
         { error: 'AI classification failed', details: message, fallback: true },

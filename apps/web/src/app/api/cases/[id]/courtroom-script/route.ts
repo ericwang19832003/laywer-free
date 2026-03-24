@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 import { isStrategySafe } from '@/lib/ai/strategy-recommendations'
-import OpenAI from 'openai'
+import { aiClient } from '@/lib/ai/client'
 import { z } from 'zod'
 import { validateAIInput } from '@/lib/ai/input-validation'
 
@@ -64,14 +64,7 @@ export async function POST(
       .select('id', { count: 'exact', head: true })
       .eq('case_id', caseId)
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_tokens: 1500,
-      response_format: { type: 'json_object' },
-      messages: [{
-        role: 'user',
-        content: `Create a step-by-step courtroom script for a self-represented litigant in a ${caseData.dispute_type.replace(/_/g, ' ')} case in ${caseData.state ?? 'Texas'}, ${caseData.court_type?.replace(/_/g, ' ') ?? 'county'} court. They have ${evidenceCount ?? 0} evidence items.
+    const userPrompt = `Create a step-by-step courtroom script for a self-represented litigant in a ${caseData.dispute_type.replace(/_/g, ' ')} case in ${caseData.state ?? 'Texas'}, ${caseData.court_type?.replace(/_/g, ' ') ?? 'county'} court. They have ${evidenceCount ?? 0} evidence items.
 
 Return a JSON object with this structure:
 {
@@ -83,10 +76,14 @@ Return a JSON object with this structure:
 }
 
 Include phases: Arrival, Check In, Opening Statement, Presenting Evidence, Cross-Examination, Closing Statement, Awaiting Decision. Keep each instruction under 50 words. Make tips practical and encouraging.`
-      }],
-    })
 
-    const text = completion.choices[0]?.message?.content ?? ''
+    const { raw: text } = await aiClient.complete({
+      systemPrompt: 'You are a helpful assistant that generates courtroom preparation scripts in JSON format.',
+      userPrompt,
+      maxTokens: 1500,
+      jsonMode: true,
+      caller: 'courtroom-script',
+    })
     let parsed
     try {
       parsed = JSON.parse(text)
