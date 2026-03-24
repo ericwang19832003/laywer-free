@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { randomBytes } from 'crypto'
+import { randomUUID } from 'crypto'
 import { getSubscription } from '@/lib/subscription/check'
 
 export async function GET(
@@ -75,7 +75,7 @@ export async function POST(
         .single()
 
       if (!existing?.share_token) {
-        updates.share_token = randomBytes(32).toString('base64url')
+        updates.share_token = randomUUID()
       }
       updates.share_expires_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     }

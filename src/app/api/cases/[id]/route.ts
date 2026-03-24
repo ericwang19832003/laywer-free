@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { z } from 'zod'
+
+const casePatchSchema = z.object({
+  court_type: z.enum(['jp', 'county', 'district', 'federal']).optional(),
+  county: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  outcome: z.enum(['won', 'lost', 'settled', 'dismissed', 'continued']).optional(),
+}).strict()
 
 export async function DELETE(
   _request: NextRequest,
@@ -53,51 +61,23 @@ export async function PATCH(
     const { supabase } = auth
 
     const body = await request.json()
-    const { court_type, county, description, outcome } = body
+    const parsed = casePatchSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: parsed.error.issues },
+        { status: 400 }
+      )
+    }
+
+    const { court_type, county, description, outcome } = parsed.data
 
     // Build partial update object — only include provided fields
     const updates: Record<string, unknown> = {}
-
-    if (court_type !== undefined) {
-      if (!['jp', 'county', 'district', 'federal'].includes(court_type)) {
-        return NextResponse.json(
-          { error: 'Invalid court_type' },
-          { status: 422 }
-        )
-      }
-      updates.court_type = court_type
-    }
-
-    if (county !== undefined) {
-      if (county !== null && typeof county !== 'string') {
-        return NextResponse.json(
-          { error: 'Invalid county' },
-          { status: 422 }
-        )
-      }
-      updates.county = county
-    }
-
-    if (description !== undefined) {
-      if (description !== null && typeof description !== 'string') {
-        return NextResponse.json(
-          { error: 'Invalid description' },
-          { status: 422 }
-        )
-      }
-      updates.description = description
-    }
-
-    if (outcome !== undefined) {
-      const validOutcomes = ['won', 'lost', 'settled', 'dismissed', 'continued']
-      if (!validOutcomes.includes(outcome)) {
-        return NextResponse.json(
-          { error: 'Invalid outcome' },
-          { status: 422 }
-        )
-      }
-      updates.outcome = outcome
-    }
+    if (court_type !== undefined) updates.court_type = court_type
+    if (county !== undefined) updates.county = county
+    if (description !== undefined) updates.description = description
+    if (outcome !== undefined) updates.outcome = outcome
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(

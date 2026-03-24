@@ -65,10 +65,24 @@ RULES:
 - If you cannot determine a field, use empty arrays or null.
 - Return ONLY the JSON object, no markdown formatting.`
 
+const answerAnalysisSchema = z.object({
+  summary: z.string().optional(),
+  defenses_raised: z.array(z.string()).default([]),
+  counterclaims: z.array(z.string()).default([]),
+  deadlines: z.array(z.object({ label: z.string(), days: z.number().optional() })).default([]),
+  recommended_actions: z.array(z.string()).default([]),
+  risk_level: z.enum(['low', 'medium', 'high']).optional(),
+}).passthrough()
+
 function parseAnalysis(raw: string): Record<string, unknown> {
   try {
     const cleaned = raw.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim()
-    return JSON.parse(cleaned)
+    const parsed = JSON.parse(cleaned)
+    const result = answerAnalysisSchema.safeParse(parsed)
+    if (result.success) return result.data
+    // Fallback: return parsed but log validation failure
+    console.warn('Answer analysis schema validation failed:', result.error.message)
+    return parsed
   } catch {
     return { error: 'Failed to parse AI response', raw_preview: raw.slice(0, 200) }
   }

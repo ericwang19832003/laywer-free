@@ -7,6 +7,8 @@
  * - Weekends and Texas observed holidays push the deadline to the next business day
  */
 
+import { getTexasHolidays } from './texas-rule-4'
+
 export interface AnswerDeadline {
   deadline: Date
   daysRemaining: number
@@ -16,45 +18,10 @@ export interface AnswerDeadline {
   urgency: 'critical' | 'urgent' | 'normal'
 }
 
-/**
- * Texas observed holidays for 2026–2027.
- * Dates are stored as "YYYY-MM-DD" strings for fast lookup.
- */
-const TEXAS_HOLIDAYS: Set<string> = new Set([
-  // 2026
-  '2026-01-01', // New Year's Day
-  '2026-01-19', // Martin Luther King Jr. Day (3rd Mon in Jan)
-  '2026-02-16', // Presidents' Day (3rd Mon in Feb)
-  '2026-03-02', // Texas Independence Day
-  '2026-04-21', // San Jacinto Day
-  '2026-05-25', // Memorial Day (last Mon in May)
-  '2026-06-19', // Juneteenth
-  '2026-07-03', // Independence Day observed (Jul 4 is Saturday → Fri)
-  '2026-08-27', // Lyndon B. Johnson Day
-  '2026-09-07', // Labor Day (1st Mon in Sep)
-  '2026-11-11', // Veterans Day
-  '2026-11-26', // Thanksgiving Day (4th Thu in Nov)
-  '2026-11-27', // Day after Thanksgiving
-  '2026-12-24', // Christmas Eve
-  '2026-12-25', // Christmas Day
-
-  // 2027
-  '2027-01-01', // New Year's Day
-  '2027-01-18', // Martin Luther King Jr. Day
-  '2027-02-15', // Presidents' Day
-  '2027-03-02', // Texas Independence Day
-  '2027-04-21', // San Jacinto Day
-  '2027-05-31', // Memorial Day
-  '2027-06-18', // Juneteenth observed (Jun 19 is Saturday → Fri)
-  '2027-07-05', // Independence Day observed (Jul 4 is Sunday → Mon)
-  '2027-08-27', // Lyndon B. Johnson Day
-  '2027-09-06', // Labor Day
-  '2027-11-11', // Veterans Day
-  '2027-11-25', // Thanksgiving Day
-  '2027-11-26', // Day after Thanksgiving
-  '2027-12-24', // Christmas Eve
-  '2027-12-25', // Christmas Day (Saturday → observed Fri 12/24 already listed)
-])
+/** Build a Set of "YYYY-MM-DD" holiday keys for the given year using the dynamic calculator. */
+function getHolidaySet(year: number): Set<string> {
+  return new Set(getTexasHolidays(year).map((h) => h.dateKey))
+}
 
 /** Format a Date as "YYYY-MM-DD" using local time. */
 function toDateKey(d: Date): string {
@@ -79,7 +46,7 @@ function isWeekend(d: Date): boolean {
 
 /** True if the date is a Texas observed holiday. */
 function isHoliday(d: Date): boolean {
-  return TEXAS_HOLIDAYS.has(toDateKey(d))
+  return getHolidaySet(d.getFullYear()).has(toDateKey(d))
 }
 
 /** Advance a date forward until it lands on a business day. */

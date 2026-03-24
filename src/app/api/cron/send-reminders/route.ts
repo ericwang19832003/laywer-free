@@ -70,29 +70,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sent: 0, failed: 0, skipped: 0, message: 'No reminders due' })
   }
 
-  // 2. Get user emails and notification preferences
+  // 2. Get user emails and notification preferences (only for users with due reminders)
   const userIds = [...new Set(dueReminders.map((r: any) => r.cases.user_id))]
 
-  const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers()
-  if (usersError) {
-    return NextResponse.json(
-      { error: 'Failed to fetch users', details: usersError.message },
-      { status: 500 }
-    )
-  }
+  const userMap = new Map<string, {
+    email: string
+    name: string
+    preferences: { timing?: Record<string, boolean>; channels?: Record<string, boolean> } | undefined
+  }>()
 
-  const userMap = new Map(
-    users
-      .filter(u => userIds.includes(u.id))
-      .map(u => [u.id, {
-        email: u.email ?? '',
-        name: u.user_metadata?.display_name ?? u.user_metadata?.full_name ?? 'there',
-        preferences: u.user_metadata?.notification_preferences as {
-          timing?: Record<string, boolean>
-          channels?: Record<string, boolean>
-        } | undefined,
-      }])
-  )
+  for (const uid of userIds) {
+    const { data: { user: u }, error: userError } = await supabase.auth.admin.getUserById(uid)
+    if (userError || !u) continue
+    userMap.set(u.id, {
+      email: u.email ?? '',
+      name: u.user_metadata?.display_name ?? u.user_metadata?.full_name ?? 'there',
+      preferences: u.user_metadata?.notification_preferences as {
+        timing?: Record<string, boolean>
+        channels?: Record<string, boolean>
+      } | undefined,
+    })
+  }
 
   let sent = 0
   let failed = 0

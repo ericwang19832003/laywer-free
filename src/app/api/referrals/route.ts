@@ -92,23 +92,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to process referral' }, { status: 500 })
     }
 
-    // Grant referee bonus AI generations (10 instead of default 5)
-    // Upsert ai_usage to add 5 extra generations
-    const { data: usage } = await supabase
-      .from('ai_usage')
-      .select('generations_remaining')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
-    if (usage) {
+    // Grant referee bonus AI generations — use atomic upsert to prevent TOCTOU race
+    const { error: rpcError } = await supabase.rpc('grant_bonus_generations', {
+      p_user_id: user.id,
+      p_bonus: 5,
+      p_default_total: 10,
+    })
+    if (rpcError) {
+      // Fallback: simple upsert if RPC doesn't exist yet
       await supabase
         .from('ai_usage')
-        .update({ generations_remaining: usage.generations_remaining + 5 })
-        .eq('user_id', user.id)
-    } else {
-      await supabase
-        .from('ai_usage')
-        .insert({ user_id: user.id, generations_remaining: 10 })
+        .upsert(
+          { user_id: user.id, generations_remaining: 10 },
+          { onConflict: 'user_id' }
+        )
     }
 
     // Create a new pending referral row so the referrer's code stays active

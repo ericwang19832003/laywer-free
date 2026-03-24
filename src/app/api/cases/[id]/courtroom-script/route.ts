@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { isStrategySafe } from '@/lib/ai/strategy-recommendations'
 import OpenAI from 'openai'
+import { z } from 'zod'
+
+const courtroomScriptSchema = z.object({
+  steps: z.array(z.object({
+    phase: z.string().max(100),
+    instruction: z.string().max(300),
+    tip: z.string().max(300),
+  })).min(1).max(20),
+})
 
 export async function POST(
   request: NextRequest,
@@ -10,7 +21,10 @@ export async function POST(
     const { id: caseId } = await params
     const auth = await getAuthenticatedClient()
     if (!auth.ok) return auth.error
-    const { supabase } = auth
+    const { supabase, user } = auth
+
+    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Check cache first
     const { data: cached } = await supabase
@@ -41,6 +55,7 @@ export async function POST(
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       max_tokens: 1500,
+      response_format: { type: 'json_object' },
       messages: [{
         role: 'user',
         content: `Create a step-by-step courtroom script for a self-represented litigant in a ${caseData.dispute_type.replace(/_/g, ' ')} case in ${caseData.state ?? 'Texas'}, ${caseData.court_type?.replace(/_/g, ' ') ?? 'county'} court. They have ${evidenceCount ?? 0} evidence items.
@@ -59,13 +74,25 @@ Include phases: Arrival, Check In, Opening Statement, Presenting Evidence, Cross
     })
 
     const text = completion.choices[0]?.message?.content ?? ''
-    let script
+    let parsed
     try {
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      script = jsonMatch ? JSON.parse(jsonMatch[0]) : { steps: [] }
+      parsed = JSON.parse(text)
     } catch {
-      script = { steps: [] }
+      return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
+
+    const validated = courtroomScriptSchema.safeParse(parsed)
+    if (!validated.success) {
+      return NextResponse.json({ error: 'AI response did not match expected schema' }, { status: 500 })
+    }
+
+    // Safety check — block phrases that sound like legal advice
+    const allText = validated.data.steps.map((s) => `${s.instruction} ${s.tip}`).join(' ')
+    if (!isStrategySafe(allText)) {
+      return NextResponse.json({ error: 'AI response failed safety check' }, { status: 500 })
+    }
+
+    const script = validated.data
 
     // Cache the result
     await supabase.from('ai_cache').upsert({

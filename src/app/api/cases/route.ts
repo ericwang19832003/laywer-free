@@ -115,25 +115,7 @@ export async function GET(request: NextRequest) {
     const limitParam = searchParams.get('limit')
     const cursor = searchParams.get('cursor')
 
-    // Backward compatible: no limit/cursor returns all cases
-    if (!limitParam && !cursor) {
-      const { data: cases, error: casesError } = await supabase
-        .from('cases')
-        .select()
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-
-      if (casesError) {
-        return NextResponse.json(
-          { error: 'Failed to fetch cases', details: casesError.message },
-          { status: 500 }
-        )
-      }
-
-      return NextResponse.json({ cases })
-    }
-
-    const limit = Math.min(Math.max(parseInt(limitParam || '12', 10), 1), 50)
+    const limit = Math.min(Math.max(parseInt(limitParam || '50', 10), 1), 50)
 
     // If cursor provided, look up its created_at to paginate from
     let cursorDate: string | null = null

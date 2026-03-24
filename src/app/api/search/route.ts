@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
   if (!auth.ok) return auth.error
   const { supabase } = auth
 
-  const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
+  const escaped = q
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_')
+    .replace(/[,().]/g, '')
   const pattern = `%${escaped}%`
 
   const [casesResult, tasksResult, documentsResult, deadlinesResult] = await Promise.all([

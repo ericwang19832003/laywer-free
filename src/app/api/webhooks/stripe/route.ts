@@ -26,14 +26,18 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient()
 
-  // Idempotency: skip already-processed events
-  const { data: alreadyProcessed } = await supabase
+  // Idempotency: atomically claim this event via upsert
+  const { data: claimed } = await supabase
     .from('processed_events')
+    .upsert(
+      { event_id: event.id, event_type: event.type },
+      { onConflict: 'event_id', ignoreDuplicates: true }
+    )
     .select('event_id')
-    .eq('event_id', event.id)
-    .maybeSingle()
+    .single()
 
-  if (alreadyProcessed) {
+  if (!claimed) {
+    // Row already existed — duplicate delivery, skip processing
     return NextResponse.json({ received: true })
   }
 
@@ -86,12 +90,6 @@ export async function POST(request: NextRequest) {
       break
     }
   }
-
-  // Record event as processed
-  await supabase.from('processed_events').insert({
-    event_id: event.id,
-    event_type: event.type,
-  })
 
   return NextResponse.json({ received: true })
 }
