@@ -11,9 +11,9 @@ const tiers = [
     annualPrice: TIER_PRICING.free.annual,
     badge: 'No credit card',
     badgeColor: 'bg-calm-green/10 text-calm-green',
-    borderColor: 'border-warm-muted/20',
     cta: 'Start Free',
     href: '/signup',
+    description: 'Your first case, fully guided.',
     features: [
       '1 active case',
       '5 AI generations/month',
@@ -31,10 +31,10 @@ const tiers = [
     oneTimePrice: TIER_PRICING.essentials.oneTime,
     badge: 'Most Popular',
     badgeColor: 'bg-calm-indigo/10 text-calm-indigo',
-    borderColor: 'border-calm-indigo',
     highlighted: true,
     cta: 'Get Essentials',
     href: '/signup?plan=essentials',
+    description: 'For ongoing or multiple cases.',
     includesFrom: 'Free',
     features: [
       'Unlimited cases',
@@ -49,9 +49,9 @@ const tiers = [
     annualPrice: TIER_PRICING.pro.annual,
     badge: 'Power User',
     badgeColor: 'bg-calm-amber/10 text-calm-amber',
-    borderColor: 'border-warm-muted/20',
     cta: 'Get Pro',
     href: '/signup?plan=pro',
+    description: 'Discovery, trial prep, priority AI.',
     includesFrom: 'Essentials',
     features: [
       'Discovery tools',
@@ -101,28 +101,34 @@ export function PricingCards() {
         </div>
       </div>
 
-      {/* Pricing Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Pricing Cards — center card elevated */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:items-center max-w-4xl mx-auto">
         {tiers.map((tier) => {
           const isFree = tier.monthlyPrice === 0
           const savings = annualSavings(tier.monthlyPrice, tier.annualPrice)
+          const isHighlighted = tier.highlighted
 
           return (
             <div
               key={tier.name}
-              className={`relative rounded-2xl border-2 ${tier.borderColor} bg-warm-bg p-6 flex flex-col ${
-                tier.highlighted ? 'ring-2 ring-calm-indigo/30 shadow-lg' : ''
+              className={`relative rounded-2xl border-2 bg-warm-bg p-6 flex flex-col ${
+                isHighlighted
+                  ? 'border-calm-indigo ring-2 ring-calm-indigo/20 shadow-xl lg:scale-105 lg:z-10 lg:py-8'
+                  : 'border-warm-border lg:opacity-90'
               }`}
             >
               {/* Badge */}
               <span
-                className={`inline-block self-start text-xs font-semibold px-2.5 py-1 rounded-full mb-4 ${tier.badgeColor}`}
+                className={`inline-block self-start text-xs font-semibold px-2.5 py-1 rounded-full mb-3 ${tier.badgeColor}`}
               >
                 {tier.badge}
               </span>
 
-              {/* Name & Price */}
-              <h2 className="text-xl font-bold text-warm-text mb-1">{tier.name}</h2>
+              {/* Name & Description */}
+              <h2 className="text-xl font-bold text-warm-text">{tier.name}</h2>
+              <p className="text-sm text-warm-muted mb-3">{tier.description}</p>
+
+              {/* Price */}
               <div className="mb-1">
                 {isAnnual && !isFree ? (
                   <>
@@ -139,7 +145,7 @@ export function PricingCards() {
                     <span className="text-3xl font-bold text-warm-text">
                       ${tier.monthlyPrice}
                     </span>
-                    <span className="text-warm-muted">/month</span>
+                    <span className="text-warm-muted">{isFree ? '' : '/month'}</span>
                   </>
                 )}
               </div>
@@ -151,7 +157,7 @@ export function PricingCards() {
                 </span>
               )}
 
-              {/* One-time option (Essentials only, always visible) */}
+              {/* One-time option */}
               {tier.oneTimePrice && (
                 <p className="text-sm text-warm-muted mb-4">
                   or <span className="font-semibold text-warm-text">${tier.oneTimePrice}</span>{' '}
@@ -169,7 +175,7 @@ export function PricingCards() {
               <Link
                 href={tier.href}
                 className={`block text-center rounded-lg py-2.5 font-semibold mb-6 transition-colors ${
-                  tier.highlighted
+                  isHighlighted
                     ? 'bg-calm-indigo text-white hover:bg-calm-indigo/90'
                     : 'bg-warm-text/10 text-warm-text hover:bg-warm-text/20'
                 }`}
