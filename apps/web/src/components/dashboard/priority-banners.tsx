@@ -50,7 +50,7 @@ export async function PriorityBanners({
     years: number | null
     expiresAt: string | null
     daysRemaining: number | null
-    level: string
+    level: 'critical' | 'warning' | 'expired' | 'caution' | 'safe' | 'not_applicable'
     notes: string | null
   } | null = null
 
@@ -74,7 +74,8 @@ export async function PriorityBanners({
       null
 
     const rawSol = calculateSol(jurisdiction, disputeType, null, incidentDate)
-    solResult = { ...rawSol, expiresAt: rawSol.expiresAt?.toISOString() ?? null }
+    const level = rawSol.level as NonNullable<typeof solResult>['level']
+    solResult = { ...rawSol, level, expiresAt: rawSol.expiresAt?.toISOString() ?? null }
   }
 
   return (
