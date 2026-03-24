@@ -507,7 +507,7 @@ async function main() {
     try {
       const document = await generateDocument(scenario)
       const scores = scoreDocument(document, scenario)
-      const avg = averageDimensions(scores)
+      const avg = scores ? averageDimensions(scores) : null
       const status = avg !== null && avg >= PASSING_THRESHOLD ? 'pass' : 'fail'
 
       results.push({
