@@ -1,9 +1,9 @@
 import { ClipboardList, Calendar, FileText } from 'lucide-react'
 
 const BENEFITS = [
-  { icon: ClipboardList, text: 'Step-by-step case management' },
-  { icon: Calendar, text: 'Know your deadlines and next moves' },
-  { icon: FileText, text: 'AI-drafted legal documents' },
+  { icon: ClipboardList, text: 'AI-drafted legal documents in minutes' },
+  { icon: Calendar, text: 'Automatic deadline tracking based on your court rules' },
+  { icon: FileText, text: 'Step-by-step guidance from intake to resolution' },
 ]
 
 export function WelcomePanel() {
@@ -12,12 +12,13 @@ export function WelcomePanel() {
       <h1
         className="text-3xl lg:text-4xl font-bold leading-tight mb-2 text-warm-text"
       >
-        Lawyer Free
+        Facing a legal matter without a lawyer?
       </h1>
       <p
         className="text-lg lg:text-xl mb-10 leading-relaxed text-warm-muted"
       >
-        Organize your legal situation with calm, structured guidance.
+        Lawyer Free guides you step-by-step through filing, deadlines, evidence,
+        and legal documents — so you can handle your case with confidence.
       </p>
 
       <div className="space-y-5">
@@ -38,7 +39,7 @@ export function WelcomePanel() {
       <p
         className="mt-12 text-sm text-stone-400"
       >
-        Free to use. No lawyers required.
+        Free to start. No lawyers required. Your data stays private.
       </p>
     </div>
   )
