@@ -1,29 +1,10 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text } from 'react-native'
 
 export default function Home() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Lawyer Free</Text>
-      <Text style={styles.subtitle}>Your legal case assistant</Text>
+    <View className="flex-1 justify-center items-center bg-warm-bg">
+      <Text className="text-3xl font-bold text-warm-text">Lawyer Free</Text>
+      <Text className="text-base text-warm-muted mt-2">Your legal case assistant</Text>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAFAF8',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1C1917',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#78716C',
-    marginTop: 8,
-  },
-})
