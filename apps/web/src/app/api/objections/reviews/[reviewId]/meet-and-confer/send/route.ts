@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { sendEmail } from '@/lib/email/provider'
 import { createHash } from 'crypto'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 
@@ -23,7 +23,7 @@ export async function POST(
     const { supabase, user } = auth
 
     // Rate limit: 5 emails per hour per user
-    const rl = checkRateLimit(user.id, 'email', RATE_LIMITS.email.maxRequests, RATE_LIMITS.email.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'email', RATE_LIMITS.email.maxRequests, RATE_LIMITS.email.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const body = await request.json()

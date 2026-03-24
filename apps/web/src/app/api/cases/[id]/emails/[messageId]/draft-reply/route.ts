@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { isGmailMcpConfigured, getThreadTextForAI, readMessage } from '@/lib/mcp/gmail-client'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 const AI_MODEL = 'claude-sonnet-4-20250514'
 
@@ -16,7 +16,7 @@ export async function POST(
   const { id: caseId, messageId } = await params
 
   // Rate limit
-  const rl = checkRateLimit(user.id, 'ai_email_reply', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+  const rl = await checkDistributedRateLimit(supabase, user.id, 'ai_email_reply', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
   if (!isGmailMcpConfigured()) {

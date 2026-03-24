@@ -8,7 +8,7 @@ import {
   buildStrategyPrompt,
 } from '@/lib/ai/strategy-recommendations'
 import { safeError } from '@/lib/security/safe-log'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -26,7 +26,7 @@ export async function GET(
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
 
-    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Fetch all case context in parallel

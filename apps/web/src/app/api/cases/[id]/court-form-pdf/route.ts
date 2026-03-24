@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateCourtFormPdf, type CourtFormData } from '@/lib/pdf/court-form-pdf'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -16,7 +16,7 @@ export async function POST(
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
 
-    const rl = checkRateLimit(user.id, 'court_form_pdf', RATE_LIMITS.standard.maxRequests, RATE_LIMITS.standard.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'court_form_pdf', RATE_LIMITS.standard.maxRequests, RATE_LIMITS.standard.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Load case

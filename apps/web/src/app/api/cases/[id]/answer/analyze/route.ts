@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
 import { extractTextFromImage } from '@/lib/extraction/ocr'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -98,7 +98,7 @@ export async function POST(
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
 
-    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const body = await request.json()

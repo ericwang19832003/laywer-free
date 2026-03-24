@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { sendPreservationLetterSchema } from '@lawyer-free/shared/schemas/preservation-letter-send'
 import { sendEmail } from '@/lib/email/provider'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export async function POST(
   request: NextRequest,
@@ -15,7 +15,7 @@ export async function POST(
     const { supabase, user } = auth
 
     // Rate limit: 5 emails per hour per user
-    const rl = checkRateLimit(user.id, 'email', RATE_LIMITS.email.maxRequests, RATE_LIMITS.email.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'email', RATE_LIMITS.email.maxRequests, RATE_LIMITS.email.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const body = await request.json()
