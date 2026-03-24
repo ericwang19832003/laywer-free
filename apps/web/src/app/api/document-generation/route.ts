@@ -10,7 +10,9 @@ import {
 } from '@/lib/ai/document-generation'
 import { INPUT_LIMITS, validateTextLength } from '@/lib/validation/input-limits'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { validateAIInput } from '@/lib/ai/input-validation'
 import { getSubscription, incrementAiUsage } from '@/lib/subscription/check'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 const AI_MODEL = 'gpt-4o-mini'
 
@@ -94,6 +96,10 @@ export async function POST(request: NextRequest) {
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
 
+    // Rate limit
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
+
     // Subscription gate: aiGenerationsPerMonth
     const sub = await getSubscription(supabase, user.id)
     if (sub.aiRemaining <= 0) {
@@ -142,6 +148,24 @@ export async function POST(request: NextRequest) {
         if (err) {
           return NextResponse.json({ error: err }, { status: 422 })
         }
+      }
+    }
+
+    // Prompt injection check on free-text fields
+    const textFields: Record<string, string> = {}
+    if (body.documentDetails.facts) textFields.facts = body.documentDetails.facts
+    if (body.documentDetails.claims) textFields.claims = body.documentDetails.claims
+    if (body.documentDetails.damages) textFields.damages = body.documentDetails.damages
+    if (body.documentDetails.timeline) textFields.timeline = body.documentDetails.timeline
+    if (body.documentDetails.additionalInfo) textFields.additionalInfo = body.documentDetails.additionalInfo
+    if (body.documentDetails.subject) textFields.subject = body.documentDetails.subject
+    for (const [field, value] of Object.entries(textFields)) {
+      const check = validateAIInput(value)
+      if (!check.safe) {
+        return NextResponse.json(
+          { error: `Field "${field}": ${check.reason}` },
+          { status: 400 }
+        )
       }
     }
 
