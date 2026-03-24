@@ -43,7 +43,7 @@ function getRiskColor(level: string): string {
     case 'low': return 'bg-green-100 text-green-700'
     case 'moderate': return 'bg-amber-100 text-amber-700'
     case 'elevated': return 'bg-orange-100 text-orange-700'
-    case 'high': return 'bg-red-100 text-red-700'
+    case 'high': return 'bg-calm-amber/10 text-calm-amber'
     default: return 'bg-gray-100 text-gray-700'
   }
 }
@@ -110,7 +110,7 @@ export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskS
               <p className="text-xs font-medium text-warm-text">
                 {formatDeadlineKey(deadline.key)}
               </p>
-              <p className={`text-xs mt-0.5 ${urgent ? 'text-red-600 font-medium' : 'text-warm-muted'}`}>
+              <p className={`text-xs mt-0.5 ${urgent ? 'text-calm-amber font-medium' : 'text-warm-muted'}`}>
                 {days <= 0 ? 'Overdue' : days === 1 ? 'Due tomorrow' : `In ${days} days`}
               </p>
             </div>

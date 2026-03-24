@@ -132,7 +132,7 @@ export function Quiz({
                     'w-full flex items-start gap-3 p-4 rounded-lg border text-left transition-all',
                     isSelected && !hasAnswered && 'border-calm-indigo bg-calm-indigo/5',
                     showCorrect && 'border-calm-green bg-calm-green/10',
-                    showIncorrect && 'border-red-300 bg-red-50',
+                    showIncorrect && 'border-destructive/30 bg-destructive/5',
                     !isSelected && !showCorrect && 'border-warm-border hover:border-calm-indigo/50',
                     hasAnswered && 'cursor-default'
                   )}
@@ -141,7 +141,7 @@ export function Quiz({
                     'w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center',
                     isSelected && !hasAnswered && 'border-calm-indigo bg-calm-indigo',
                     showCorrect && 'border-calm-green bg-calm-green',
-                    showIncorrect && 'border-red-500 bg-red-500',
+                    showIncorrect && 'border-destructive bg-destructive',
                     !isSelected && !showCorrect && 'border-warm-muted'
                   )}>
                     {(isSelected || showCorrect) && (
@@ -153,7 +153,7 @@ export function Quiz({
                     <CheckCircle2 className="h-5 w-5 text-calm-green shrink-0" />
                   )}
                   {showIncorrect && (
-                    <XCircle className="h-5 w-5 text-red-500 shrink-0" />
+                    <XCircle className="h-5 w-5 text-destructive shrink-0" />
                   )}
                 </button>
               )
@@ -171,7 +171,7 @@ export function Quiz({
               {isCorrectAnswer ? (
                 <CheckCircle2 className="h-5 w-5 text-calm-green shrink-0 mt-0.5" />
               ) : (
-                <XCircle className={cn('h-5 w-5 shrink-0 mt-0.5', hasAnswered && selectedOption ? 'text-red-500' : 'text-calm-amber')} />
+                <XCircle className={cn('h-5 w-5 shrink-0 mt-0.5', hasAnswered && selectedOption ? 'text-destructive' : 'text-calm-amber')} />
               )}
               <div className="flex-1">
                 <p className={cn(

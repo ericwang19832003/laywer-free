@@ -432,8 +432,8 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
         )}
 
         {analysisError && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 mt-3">
-            <p className="text-sm text-red-700">{analysisError}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3 mt-3">
+            <p className="text-sm text-destructive">{analysisError}</p>
           </div>
         )}
 
@@ -457,7 +457,7 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-warm-text">{d.defense}</p>
                         <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                          d.strength_hint === 'strong' ? 'bg-red-100 text-red-700' :
+                          d.strength_hint === 'strong' ? 'bg-destructive/10 text-destructive' :
                           d.strength_hint === 'moderate' ? 'bg-amber-100 text-amber-700' :
                           'bg-green-100 text-green-700'
                         }`}>
@@ -487,9 +487,9 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
                     </div>
                   )}
                   {analysis.claims_response.denied && analysis.claims_response.denied.length > 0 && (
-                    <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-                      <p className="text-xs font-medium text-red-700 mb-1">Denied</p>
-                      <ul className="text-xs text-red-800 space-y-0.5">
+                    <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+                      <p className="text-xs font-medium text-destructive mb-1">Denied</p>
+                      <ul className="text-xs text-destructive space-y-0.5">
                         {analysis.claims_response.denied.map((item, i) => (
                           <li key={i}>- {item}</li>
                         ))}
@@ -502,13 +502,13 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
 
             {/* Counterclaim */}
             {analysis.counterclaim?.has_counterclaim && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
-                <p className="text-xs font-medium text-red-700 mb-1">Counterclaim Filed</p>
-                <p className="text-sm text-red-800">
+              <div className="rounded-md border border-calm-amber/20 bg-calm-amber/5 px-4 py-3">
+                <p className="text-xs font-medium text-calm-amber mb-1">Counterclaim Filed</p>
+                <p className="text-sm text-warm-text">
                   {analysis.counterclaim.summary}
                 </p>
                 {analysis.counterclaim.amount && (
-                  <p className="text-xs text-red-700 mt-1">
+                  <p className="text-xs text-calm-amber mt-1">
                     Amount: {analysis.counterclaim.amount}
                   </p>
                 )}
@@ -523,7 +523,7 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
                   {analysis.deadlines_triggered.map((d, i) => (
                     <div key={i} className="flex items-start gap-2 rounded-md border border-warm-border bg-white px-3 py-2">
                       <span className={`text-xs px-1.5 py-0.5 rounded-full mt-0.5 shrink-0 ${
-                        d.urgency === 'high' ? 'bg-red-100 text-red-700' :
+                        d.urgency === 'high' ? 'bg-calm-amber/10 text-calm-amber' :
                         d.urgency === 'medium' ? 'bg-amber-100 text-amber-700' :
                         'bg-gray-100 text-gray-700'
                       }`}>
@@ -548,7 +548,7 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
                     <div key={i} className="rounded-md border border-warm-border bg-white px-3 py-2">
                       <div className="flex items-center gap-2">
                         <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                          s.priority === 'immediate' ? 'bg-red-100 text-red-700' :
+                          s.priority === 'immediate' ? 'bg-calm-amber/10 text-calm-amber' :
                           s.priority === 'soon' ? 'bg-amber-100 text-amber-700' :
                           'bg-gray-100 text-gray-700'
                         }`}>
@@ -565,9 +565,9 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
 
             {/* Red flags & opportunities */}
             {Array.isArray(analysis.red_flags) && analysis.red_flags.length > 0 && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
-                <p className="text-xs font-medium text-red-700 mb-1">Red Flags</p>
-                <ul className="text-xs text-red-800 space-y-0.5">
+              <div className="rounded-md border border-calm-amber/20 bg-calm-amber/5 px-4 py-3">
+                <p className="text-xs font-medium text-calm-amber mb-1">Red Flags</p>
+                <ul className="text-xs text-warm-text space-y-0.5">
                   {analysis.red_flags.map((f, i) => (
                     <li key={i}>- {f}</li>
                   ))}
@@ -667,8 +667,8 @@ export function UploadAnswerStep({ caseId, taskId }: UploadAnswerStepProps) {
 
         {/* Error message */}
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 

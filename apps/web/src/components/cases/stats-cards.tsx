@@ -43,7 +43,7 @@ export function StatsCards({ activeCases, tasksCompleted, tasksTotal, upcomingDe
       value: averageHealth !== null ? `${averageHealth}%` : '\u2014',
       subtitle: null as string | null,
       icon: Heart,
-      iconColor: healthColor === 'green' ? 'text-green-600' : healthColor === 'amber' ? 'text-amber-600' : averageHealth !== null ? 'text-red-600' : 'text-warm-muted',
+      iconColor: healthColor === 'green' ? 'text-green-600' : healthColor === 'amber' ? 'text-amber-600' : averageHealth !== null ? 'text-destructive' : 'text-warm-muted',
     },
   ]
 

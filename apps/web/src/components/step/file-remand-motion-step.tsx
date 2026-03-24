@@ -94,7 +94,7 @@ export function FileRemandMotionStep({
         {remandDeadline && (
           <div className={`rounded-lg border p-4 ${
             daysRemaining !== null && daysRemaining <= 7
-              ? 'border-red-200 bg-red-50'
+              ? 'border-calm-amber/20 bg-calm-amber/5'
               : 'border-calm-amber/30 bg-calm-amber/5'
           }`}>
             <p className="text-sm font-medium text-warm-text">
@@ -106,7 +106,7 @@ export function FileRemandMotionStep({
             </p>
             {daysRemaining !== null && (
               <p className={`text-xs mt-1 ${
-                daysRemaining <= 7 ? 'text-red-600 font-medium' : 'text-warm-muted'
+                daysRemaining <= 7 ? 'text-calm-amber font-medium' : 'text-warm-muted'
               }`}>
                 {daysRemaining === 0
                   ? 'Due today!'

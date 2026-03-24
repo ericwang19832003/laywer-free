@@ -39,7 +39,7 @@ export function DeleteCaseCard({ caseId }: { caseId: string }) {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 shrink-0 ml-4">
+            <Button variant="outline" size="sm" className="text-destructive border-destructive/20 hover:bg-destructive/5 hover:text-destructive shrink-0 ml-4">
               Delete
             </Button>
           </AlertDialogTrigger>
@@ -55,7 +55,7 @@ export function DeleteCaseCard({ caseId }: { caseId: string }) {
               <AlertDialogAction
                 onClick={handleDelete}
                 disabled={deleting}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-destructive hover:bg-destructive/90"
               >
                 {deleting ? 'Deleting...' : 'Delete case'}
               </AlertDialogAction>

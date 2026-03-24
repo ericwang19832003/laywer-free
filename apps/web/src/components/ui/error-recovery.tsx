@@ -88,17 +88,17 @@ export function FormError({ error, onDismiss }: FormErrorProps) {
 
   return (
     <div
-      className="flex items-start gap-3 p-4 rounded-lg bg-red-50 border border-red-200 mb-4"
+      className="flex items-start gap-3 p-4 rounded-lg bg-destructive/5 border border-destructive/20 mb-4"
       role="alert"
     >
-      <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" aria-hidden="true" />
+      <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" aria-hidden="true" />
       <div className="flex-1">
-        <p className="text-sm text-red-700">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       </div>
       {onDismiss && (
         <button
           onClick={onDismiss}
-          className="text-red-400 hover:text-red-600 transition-colors"
+          className="text-destructive/60 hover:text-destructive transition-colors"
           aria-label="Dismiss error"
         >
           ×

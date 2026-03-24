@@ -80,14 +80,14 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
 
   const styles = {
     success: 'border-calm-green/30 bg-calm-green/10',
-    error: 'border-red-200 bg-red-50',
+    error: 'border-destructive/20 bg-destructive/5',
     info: 'border-primary/20 bg-primary/5',
     warning: 'border-calm-amber/30 bg-calm-amber/10',
   }
 
   const iconColors = {
     success: 'text-calm-green',
-    error: 'text-red-500',
+    error: 'text-destructive',
     info: 'text-primary',
     warning: 'text-calm-amber',
   }

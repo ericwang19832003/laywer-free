@@ -133,7 +133,7 @@ export function LessonPlayer({ topicId, topic: topicProp, topics: topicsProp }: 
           <CardContent>
             <ul className="space-y-2 text-sm text-warm-muted">
               {topic.mistakes.map((item) => (
-                <li key={item} className="rounded-lg bg-red-50 px-3 py-2 text-red-700">
+                <li key={item} className="rounded-lg bg-destructive/5 px-3 py-2 text-destructive">
                   {item}
                 </li>
               ))}
@@ -297,7 +297,7 @@ export function LessonPlayer({ topicId, topic: topicProp, topics: topicsProp }: 
               <Badge variant="secondary" className={cn(
                 topic.difficulty === 'beginner' && 'bg-calm-green/10 text-calm-green',
                 topic.difficulty === 'intermediate' && 'bg-calm-amber/10 text-calm-amber',
-                topic.difficulty === 'advanced' && 'bg-red-50 text-red-600',
+                topic.difficulty === 'advanced' && 'bg-destructive/5 text-destructive',
               )}>
                 {topic.difficulty}
               </Badge>

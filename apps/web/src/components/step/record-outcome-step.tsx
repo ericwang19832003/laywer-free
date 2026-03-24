@@ -13,7 +13,7 @@ interface RecordOutcomeStepProps {
 
 const OUTCOMES = [
   { value: 'won', label: 'Won', description: 'The court ruled in my favor', icon: CheckCircle, color: 'text-calm-green' },
-  { value: 'lost', label: 'Lost', description: 'The court ruled against me', icon: XCircle, color: 'text-red-500' },
+  { value: 'lost', label: 'Lost', description: 'The court ruled against me', icon: XCircle, color: 'text-destructive' },
   { value: 'settled', label: 'Settled', description: 'We reached an agreement', icon: Handshake, color: 'text-calm-indigo' },
   { value: 'dismissed', label: 'Dismissed', description: 'The case was dismissed', icon: Ban, color: 'text-warm-muted' },
   { value: 'continued', label: 'Continued', description: 'The hearing was rescheduled', icon: Clock, color: 'text-calm-amber' },

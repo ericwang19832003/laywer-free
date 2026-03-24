@@ -179,7 +179,7 @@ export function CaseEmailsClient({
                   </div>
                   <button
                     onClick={() => removeFilter(f.id)}
-                    className="text-xs text-warm-muted hover:text-red-500 transition-colors"
+                    className="text-xs text-warm-muted hover:text-destructive transition-colors"
                   >
                     Remove
                   </button>
@@ -222,7 +222,7 @@ export function CaseEmailsClient({
           </CardHeader>
           <CardContent>
             {emailError && (
-              <p className="text-sm text-red-500 mb-4">{emailError}</p>
+              <p className="text-sm text-destructive mb-4">{emailError}</p>
             )}
 
             {loadingEmails && emails.length === 0 ? (

@@ -27,7 +27,7 @@ export function ProgressRing({
     primary: 'stroke-primary',
     success: 'stroke-calm-green',
     warning: 'stroke-calm-amber',
-    error: 'stroke-red-500',
+    error: 'stroke-destructive',
   }
 
   return (
@@ -87,7 +87,7 @@ export function ProgressBar({
     primary: 'bg-primary',
     success: 'bg-calm-green',
     warning: 'bg-calm-amber',
-    error: 'bg-red-500',
+    error: 'bg-destructive',
   }
 
   return (

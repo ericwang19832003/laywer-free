@@ -67,7 +67,7 @@ export const REVIEW_STATUS_COLORS: Record<string, string> = {
   classifying: 'bg-calm-amber/10 text-calm-amber',
   needs_review: 'bg-calm-indigo/10 text-calm-indigo',
   completed: 'bg-calm-green/10 text-calm-green',
-  failed: 'bg-red-100 text-red-800',
+  failed: 'bg-destructive/10 text-destructive',
 }
 
 export const STATUS_STEPS = [

@@ -49,7 +49,7 @@ const STATUS_CONFIG = {
   },
   failed: {
     label: 'Failed',
-    className: 'bg-red-50 text-red-700 border-red-200',
+    className: 'bg-destructive/5 text-destructive border-destructive/20',
     icon: AlertCircleIcon,
   },
 } as const
@@ -172,7 +172,7 @@ export function BindersList({ caseId, initialBinders }: BindersListProps) {
                   {formatDate(binder.created_at)}
                 </p>
                 {binder.status === 'failed' && binder.error && (
-                  <p className="mt-1 text-xs text-red-600 line-clamp-2">
+                  <p className="mt-1 text-xs text-destructive line-clamp-2">
                     {binder.error}
                   </p>
                 )}

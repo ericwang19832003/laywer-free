@@ -30,7 +30,7 @@ function healthColor(score: number | null): string {
   if (score === null) return 'text-warm-muted'
   if (score >= 70) return 'text-green-600'
   if (score >= 40) return 'text-amber-600'
-  return 'text-red-600'
+  return 'text-destructive'
 }
 
 function relativeDate(dateStr: string): string {
@@ -115,7 +115,7 @@ export function CaseTable({ cases }: CaseTableProps) {
                 <td className="px-5 py-3.5 hidden lg:table-cell">
                   {c.nextDeadline ? (() => {
                     const days = daysUntil(c.nextDeadline.due_at)
-                    const color = days < 0 ? 'text-red-600' : days <= 7 ? 'text-amber-600' : 'text-warm-muted'
+                    const color = days < 0 ? 'text-calm-amber' : days <= 7 ? 'text-amber-600' : 'text-warm-muted'
                     const dayText = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `${days}d`
                     return (
                       <span className={`text-xs font-medium ${color}`}>

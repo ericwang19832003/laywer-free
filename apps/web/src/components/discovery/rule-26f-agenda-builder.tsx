@@ -189,7 +189,7 @@ export function Rule26fAgendaBuilder({ caseId, caseName, caseNumber }: Rule26fAg
                   <Badge variant="outline" className="text-calm-green">
                     <Check className="h-3 w-3 mr-1" />{agreedCount} Agreed
                   </Badge>
-                  <Badge variant="outline" className="text-red-500">
+                  <Badge variant="outline" className="text-calm-amber">
                     <Clock className="h-3 w-3 mr-1" />{pendingCount} Pending
                   </Badge>
                 </div>
@@ -278,7 +278,7 @@ export function Rule26fAgendaBuilder({ caseId, caseName, caseNumber }: Rule26fAg
                     <div className={cn(
                       'w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5',
                       topic.agreed === true ? 'bg-calm-green text-white' :
-                      topic.agreed === false ? 'bg-red-500 text-white' :
+                      topic.agreed === false ? 'bg-destructive text-white' :
                       'bg-warm-bg text-warm-muted'
                     )}>
                       {topic.agreed === true ? (

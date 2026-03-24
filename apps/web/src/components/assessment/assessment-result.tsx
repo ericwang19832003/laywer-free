@@ -15,7 +15,7 @@ export function AssessmentResultCard({ result, disputeType }: AssessmentResultPr
     ? 'text-green-600'
     : result.viabilityScore >= 40
     ? 'text-amber-600'
-    : 'text-red-600'
+    : 'text-destructive'
 
   return (
     <div className="max-w-lg mx-auto space-y-6">

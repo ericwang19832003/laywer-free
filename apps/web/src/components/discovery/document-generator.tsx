@@ -131,7 +131,7 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
 
           <TabsContent value="create" className="space-y-4">
             {error && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive">
                 <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm">Generation Failed</p>
@@ -190,7 +190,7 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
 
             <div className="space-y-2">
               <Label htmlFor="facts">
-                Key Facts <span className="text-red-500">*</span>
+                Key Facts <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 id="facts"

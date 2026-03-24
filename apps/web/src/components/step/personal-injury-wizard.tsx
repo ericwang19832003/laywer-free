@@ -1253,7 +1253,7 @@ export function PersonalInjuryWizard({
                   <button
                     type="button"
                     onClick={() => removeProvider(index)}
-                    className="text-warm-muted hover:text-red-500 transition-colors"
+                    className="text-warm-muted hover:text-destructive transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -1889,10 +1889,10 @@ export function PersonalInjuryWizard({
         </p>
 
         {genError && (
-          <div className="rounded-lg border border-red-500 bg-red-50 p-3 mb-4">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 mb-4">
             <div className="flex gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-800">{genError}</p>
+              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">{genError}</p>
             </div>
           </div>
         )}

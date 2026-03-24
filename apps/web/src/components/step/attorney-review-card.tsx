@@ -24,7 +24,7 @@ const STATUS_BADGES: Record<string, { label: string; color: string }> = {
   pending: { label: 'Payment Pending', color: 'bg-warm-muted/10 text-warm-muted' },
   in_review: { label: 'Under Review', color: 'bg-calm-amber/10 text-calm-amber' },
   completed: { label: 'Review Complete', color: 'bg-calm-green/10 text-calm-green' },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700' },
+  cancelled: { label: 'Cancelled', color: 'bg-destructive/10 text-destructive' },
 }
 
 export function AttorneyReviewCard({ caseId, documentType, existingReviews = [] }: AttorneyReviewCardProps) {

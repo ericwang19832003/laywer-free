@@ -202,7 +202,7 @@ export function InlineFileUpload({
 
       {/* Error message */}
       {error && (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-xs text-destructive">{error}</p>
       )}
     </div>
   )

@@ -296,14 +296,14 @@ export function DamagesCalculatorStep({
 
       {/* Exceeds cap warning */}
       {result.exceedsCap && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4">
+        <div className="rounded-lg border border-calm-amber/30 bg-calm-amber/5 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-calm-amber shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-warm-text">Exceeds Small Claims Limit</p>
               <p className="text-sm text-warm-muted mt-1">
                 Your claim total exceeds the $20,000 limit by{' '}
-                <span className="font-medium text-red-700">
+                <span className="font-medium text-calm-amber">
                   ${result.overCapBy.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>.
                 You may need to reduce your claim or file in County Court instead of JP Court.

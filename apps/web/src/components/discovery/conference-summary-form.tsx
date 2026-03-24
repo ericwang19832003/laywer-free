@@ -377,7 +377,7 @@ export function ConferenceSummaryForm({
               </div>
               {disagreements.map((disagreement, index) => (
                 <div key={index} className="flex items-start gap-2">
-                  <X className="h-5 w-5 text-red-500 mt-2" />
+                  <X className="h-5 w-5 text-destructive mt-2" />
                   <Input
                     value={disagreement}
                     onChange={(e) => {
@@ -518,8 +518,8 @@ export function ConferenceSummaryForm({
               )}
 
               {disagreements.length > 0 && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-                  <h4 className="font-medium text-red-600 mb-2 flex items-center gap-2">
+                <div className="rounded-lg border border-calm-amber/20 bg-calm-amber/5 p-4">
+                  <h4 className="font-medium text-calm-amber mb-2 flex items-center gap-2">
                     <X className="h-4 w-4" />
                     Open Issues ({disagreements.length})
                   </h4>

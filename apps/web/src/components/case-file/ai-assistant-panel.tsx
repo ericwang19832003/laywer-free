@@ -31,10 +31,10 @@ const priorityConfig: Record<
   { bg: string; border: string; icon: typeof AlertCircle; iconColor: string }
 > = {
   urgent: {
-    bg: 'bg-red-50',
-    border: 'border-red-200',
+    bg: 'bg-calm-amber/5',
+    border: 'border-calm-amber/20',
     icon: AlertCircle,
-    iconColor: 'text-red-500',
+    iconColor: 'text-calm-amber',
   },
   recommended: {
     bg: 'bg-calm-indigo/5',

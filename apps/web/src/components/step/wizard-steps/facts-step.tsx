@@ -91,7 +91,7 @@ export function FactsStep({
         <div className="mt-1.5 flex items-center justify-between">
           <p
             className={`text-xs ${
-              isTooShort ? 'text-red-500 font-medium' : 'text-warm-muted'
+              isTooShort ? 'text-destructive font-medium' : 'text-warm-muted'
             }`}
           >
             {isTooShort

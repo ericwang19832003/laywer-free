@@ -272,7 +272,7 @@ export const COMMON_EDUCATION = {
             <li>Property damage: 2 years</li>
           </ul>
         </div>
-        <p className="bg-red-50 p-2 rounded border border-red-200">
+        <p className="bg-calm-amber/5 p-2 rounded border border-calm-amber/20">
           ⚠️ This is critical. If your deadline has passed, consult an attorney before proceeding.
         </p>
       </div>
@@ -534,7 +534,7 @@ export const COMMON_EDUCATION = {
             <li><strong>Deadline:</strong> Usually 30-60 days after judgment (don't miss it!)</li>
           </ul>
         </div>
-        <p className="bg-red-50 p-2 rounded border border-red-200">
+        <p className="bg-calm-amber/5 p-2 rounded border border-calm-amber/20">
           Appeals are complex. Consult an attorney if you're considering one.
         </p>
       </div>

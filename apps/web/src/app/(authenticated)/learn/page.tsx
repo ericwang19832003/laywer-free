@@ -85,7 +85,7 @@ const QUICK_FACTS = [
 const TOPIC_DIFFICULTY_COLORS = {
   beginner: 'bg-calm-green/10 text-calm-green',
   intermediate: 'bg-calm-amber/10 text-calm-amber',
-  advanced: 'bg-red-50 text-red-600',
+  advanced: 'bg-destructive/5 text-destructive',
 } as const
 
 function FlashcardView() {
@@ -197,7 +197,7 @@ function QuizView({ onQuizComplete }: QuizViewProps) {
               className={cn(
                 completedQuizzes[selectedQuiz.id].passed 
                   ? 'bg-calm-green/10 text-calm-green border-calm-green/30'
-                  : 'bg-red-50 text-red-600 border-red-200'
+                  : 'bg-destructive/5 text-destructive border-destructive/20'
               )}
             >
               {completedQuizzes[selectedQuiz.id].passed ? 'Passed' : 'Not Passed'}: {completedQuizzes[selectedQuiz.id].score}%
@@ -253,7 +253,7 @@ function QuizView({ onQuizComplete }: QuizViewProps) {
                     {completed && (
                       <Badge 
                         variant="secondary"
-                        className={completed.passed ? 'bg-calm-green/10 text-calm-green' : 'bg-red-50 text-red-600'}
+                        className={completed.passed ? 'bg-calm-green/10 text-calm-green' : 'bg-destructive/5 text-destructive'}
                       >
                         {completed.score}%
                       </Badge>
@@ -269,7 +269,7 @@ function QuizView({ onQuizComplete }: QuizViewProps) {
                     {completed && (
                       <span className={cn(
                         'ml-2',
-                        completed.passed ? 'text-calm-green' : 'text-red-500'
+                        completed.passed ? 'text-calm-green' : 'text-destructive'
                       )}>
                         {completed.passed ? 'Completed' : 'Try again'}
                       </span>
@@ -674,7 +674,7 @@ export default function LearnPage() {
                         <CardContent>
                           <ul className="space-y-2 text-sm text-warm-muted">
                             {selectedTopic.mistakes.map((item) => (
-                              <li key={item} className="rounded-lg bg-red-50 px-3 py-2 text-red-700">
+                              <li key={item} className="rounded-lg bg-destructive/5 px-3 py-2 text-destructive">
                                 {item}
                               </li>
                             ))}

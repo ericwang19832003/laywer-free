@@ -317,8 +317,8 @@ export function PreservationLetterStep({
           )}
 
           {sendResult === 'failed' && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-              <p className="text-sm text-red-800">
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+              <p className="text-sm text-destructive">
                 We couldn&apos;t send the email right now. Your draft has been saved.
                 You can try again later or download the letter instead.
               </p>

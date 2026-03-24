@@ -53,7 +53,7 @@ function StepIcon({ status }: { status: StepStatus }) {
         <Loader2 className="size-4 shrink-0 animate-spin text-calm-indigo" />
       )
     case 'failed':
-      return <AlertCircle className="size-4 shrink-0 text-red-500" />
+      return <AlertCircle className="size-4 shrink-0 text-destructive" />
     case 'pending':
     default:
       return <Circle className="size-4 shrink-0 text-warm-border" />
@@ -124,7 +124,7 @@ export function BinderProgress({ binderId, onComplete }: BinderProgressProps) {
           <span
             className={cn(
               'tabular-nums',
-              isFailed ? 'text-red-500' : 'text-warm-muted'
+              isFailed ? 'text-destructive' : 'text-warm-muted'
             )}
           >
             {data.percent}%
@@ -135,7 +135,7 @@ export function BinderProgress({ binderId, onComplete }: BinderProgressProps) {
           <div
             className={cn(
               'h-full rounded-full transition-all duration-500',
-              isFailed ? 'bg-red-500' : 'bg-calm-indigo'
+              isFailed ? 'bg-destructive' : 'bg-calm-indigo'
             )}
             style={{ width: `${data.percent}%` }}
           />
@@ -152,7 +152,7 @@ export function BinderProgress({ binderId, onComplete }: BinderProgressProps) {
                 'text-sm',
                 step.status === 'done' && 'text-warm-muted',
                 step.status === 'running' && 'font-medium text-warm-text',
-                step.status === 'failed' && 'font-medium text-red-500',
+                step.status === 'failed' && 'font-medium text-destructive',
                 step.status === 'pending' && 'text-warm-muted/60'
               )}
             >
@@ -164,8 +164,8 @@ export function BinderProgress({ binderId, onComplete }: BinderProgressProps) {
 
       {/* Error message */}
       {isFailed && data.error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
-          <p className="text-xs text-red-600">{data.error}</p>
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5">
+          <p className="text-xs text-destructive">{data.error}</p>
         </div>
       )}
     </div>

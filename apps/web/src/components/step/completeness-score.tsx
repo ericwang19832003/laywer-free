@@ -25,7 +25,7 @@ export function CompletenessScore({ completeness, className }: CompletenessScore
               ? 'text-calm-green'
               : score >= 50
               ? 'text-calm-amber'
-              : 'text-red-600'
+              : 'text-destructive'
           )}
         >
           {score}%
@@ -60,7 +60,7 @@ export function CompletenessScore({ completeness, className }: CompletenessScore
           <ul className="space-y-1">
             {criticalMissing.slice(0, 3).map((field) => (
               <li key={field.id} className="flex items-start gap-2 text-sm">
-                <span className="text-red-500 mt-0.5">•</span>
+                <span className="text-destructive mt-0.5">•</span>
                 <span className="text-warm-text">{field.label}</span>
               </li>
             ))}

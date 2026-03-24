@@ -59,7 +59,7 @@ function ConsequenceExpander({ consequence }: { consequence: string }) {
           open ? 'max-h-40 mt-1.5' : 'max-h-0'
         }`}
       >
-        <p className="text-xs text-red-600 leading-relaxed">{consequence}</p>
+        <p className="text-xs text-calm-amber leading-relaxed">{consequence}</p>
       </div>
     </div>
   )

@@ -62,7 +62,7 @@ function getTodayKey(): string {
 
 /** Return a dot color class based on urgency. */
 function getDotColor(days: number): string {
-  if (days <= 0) return 'bg-red-500'
+  if (days <= 0) return 'bg-calm-amber'
   if (days <= 7) return 'bg-amber-500'
   return 'bg-emerald-500'
 }

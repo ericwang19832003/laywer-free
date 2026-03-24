@@ -125,12 +125,12 @@ export function QuizPlayer({ quiz, onComplete, onQuestionAnswer, className }: Qu
           <CardContent className="py-12">
             <div className={cn(
               'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6',
-              passed ? 'bg-calm-green/10' : 'bg-red-50'
+              passed ? 'bg-calm-green/10' : 'bg-destructive/5'
             )}>
               {passed ? (
                 <Trophy className="h-10 w-10 text-calm-green" />
               ) : (
-                <XCircle className="h-10 w-10 text-red-500" />
+                <XCircle className="h-10 w-10 text-destructive" />
               )}
             </div>
             
@@ -218,7 +218,7 @@ export function QuizPlayer({ quiz, onComplete, onQuestionAnswer, className }: Qu
                   'w-full flex items-start gap-3 p-4 rounded-lg border text-left transition-all',
                   isSelected && !showResult && 'border-primary bg-primary/5',
                   showCorrect && 'border-calm-green bg-calm-green/5',
-                  showIncorrect && 'border-red-500 bg-red-50',
+                  showIncorrect && 'border-destructive bg-destructive/5',
                   !showResult && !isSelected && 'hover:border-warm-border hover:bg-warm-border/30'
                 )}
               >
@@ -226,7 +226,7 @@ export function QuizPlayer({ quiz, onComplete, onQuestionAnswer, className }: Qu
                   'w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5',
                   isSelected && !showResult && 'border-primary bg-primary',
                   showCorrect && 'border-calm-green bg-calm-green',
-                  showIncorrect && 'border-red-500 bg-red-500',
+                  showIncorrect && 'border-destructive bg-destructive',
                   !isSelected && !showResult && 'border-warm-border'
                 )}>
                   {isSelected && !showResult && (
@@ -242,7 +242,7 @@ export function QuizPlayer({ quiz, onComplete, onQuestionAnswer, className }: Qu
                 <span className={cn(
                   'flex-1',
                   showCorrect && 'text-calm-green font-medium',
-                  showIncorrect && 'text-red-500'
+                  showIncorrect && 'text-destructive'
                 )}>
                   {option.text}
                 </span>
@@ -256,20 +256,20 @@ export function QuizPlayer({ quiz, onComplete, onQuestionAnswer, className }: Qu
             'p-4 rounded-lg border',
             selectedOption === currentQuestion.correctOptionId 
               ? 'bg-calm-green/5 border-calm-green/20'
-              : 'bg-red-50 border-red-200'
+              : 'bg-destructive/5 border-destructive/20'
           )}>
             <div className="flex items-start gap-3">
               {selectedOption === currentQuestion.correctOptionId ? (
                 <CheckCircle2 className="h-5 w-5 text-calm-green flex-shrink-0 mt-0.5" />
               ) : (
-                <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <XCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               )}
               <div>
                 <p className={cn(
                   'font-medium',
                   selectedOption === currentQuestion.correctOptionId 
                     ? 'text-calm-green'
-                    : 'text-red-500'
+                    : 'text-destructive'
                 )}>
                   {selectedOption === currentQuestion.correctOptionId 
                     ? 'Correct!' 

@@ -405,8 +405,8 @@ function AddItemsSection({
 
         {/* Error */}
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
@@ -524,8 +524,8 @@ function ExamplesDialog({
           )}
 
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
@@ -713,8 +713,8 @@ function ReviewSection({
         </label>
 
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
         <Button onClick={handleMarkReady} disabled={!acknowledged || updating}>
@@ -939,8 +939,8 @@ function ServiceSection({
             </div>
 
             {error && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
@@ -1048,8 +1048,8 @@ function DeadlineSection({ packId }: { packId: string }) {
             </div>
 
             {error && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
@@ -1309,8 +1309,8 @@ function ResponsesSection({
             </div>
 
             {error && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
@@ -1402,8 +1402,8 @@ function ResponsesSection({
 
         {/* Classify error */}
         {classifyError && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-            <p className="text-sm text-red-800">{classifyError}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+            <p className="text-sm text-destructive">{classifyError}</p>
           </div>
         )}
 

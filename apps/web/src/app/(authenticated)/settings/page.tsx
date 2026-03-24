@@ -392,9 +392,9 @@ export default function SettingsPage() {
           </Card>
 
           {/* Danger Zone */}
-          <Card className="border-red-200">
+          <Card className="border-destructive/20">
             <CardHeader>
-              <CardTitle className="text-base text-red-600">Danger Zone</CardTitle>
+              <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-warm-muted">
@@ -402,7 +402,7 @@ export default function SettingsPage() {
               </p>
               <Button
                 variant="outline"
-                className="border-red-200 text-red-600 hover:bg-red-50"
+                className="border-destructive/20 text-destructive hover:bg-destructive/5"
                 onClick={() => setShowDeleteDialog(true)}
               >
                 Delete Account
@@ -423,7 +423,7 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-2 py-2">
             <Label htmlFor="deleteConfirmation">
-              Type <span className="font-mono font-bold text-red-600">DELETE</span> to confirm
+              Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm
             </Label>
             <Input
               id="deleteConfirmation"
@@ -445,7 +445,7 @@ export default function SettingsPage() {
             </Button>
             <Button
               variant="outline"
-              className="border-red-200 bg-red-600 text-white hover:bg-red-700"
+              className="border-destructive/20 bg-destructive text-white hover:bg-destructive/90"
               onClick={handleDeleteAccount}
               disabled={deleteConfirmation !== 'DELETE' || deleting}
             >

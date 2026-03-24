@@ -333,8 +333,8 @@ function CreateSetSection({
           </p>
         </div>
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 mx-auto max-w-sm">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 mx-auto max-w-sm">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
         <Button onClick={handleCreate} disabled={creating}>
@@ -463,8 +463,8 @@ function AddFromVaultButton({
           </div>
 
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
@@ -802,7 +802,7 @@ function SortableExhibitRow({
             size="icon-xs"
             onClick={onRemove}
             aria-label="Remove exhibit"
-            className="text-warm-muted hover:text-red-600"
+            className="text-warm-muted hover:text-destructive"
           >
             <Trash2Icon className="size-3.5" />
           </Button>

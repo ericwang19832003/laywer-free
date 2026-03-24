@@ -270,8 +270,8 @@ export function UploadReturnOfServiceStep({
 
         {/* Error message */}
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 

@@ -95,7 +95,7 @@ export default async function SettlementPrepPage({ params }: PageProps) {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2 text-red-500">Weaken Their Position</h4>
+                  <h4 className="font-medium mb-2 text-calm-amber">Weaken Their Position</h4>
                   <ul className="text-warm-muted space-y-1">
                     <li>• Gaps in their evidence</li>
                     <li>• Uncertainty about facts</li>

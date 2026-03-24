@@ -30,7 +30,7 @@ export type UrgencyColors = { dot: string; border: string; text: string }
 
 export function getUrgencyColor(days: number): UrgencyColors {
   if (days <= 0) {
-    return { dot: 'bg-red-500', border: 'border-l-red-500', text: 'text-red-600' }
+    return { dot: 'bg-calm-amber', border: 'border-l-calm-amber', text: 'text-calm-amber' }
   }
   if (days <= 7) {
     return { dot: 'bg-amber-500', border: 'border-l-amber-500', text: 'text-amber-600' }

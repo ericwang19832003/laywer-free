@@ -258,14 +258,14 @@ export function EscalationDialog({
     low: 'border-calm-green/30 bg-calm-green/5',
     medium: 'border-calm-amber/30 bg-calm-amber/5',
     high: 'border-orange-300 bg-orange-50',
-    critical: 'border-red-300 bg-red-50',
+    critical: 'border-destructive/30 bg-destructive/5',
   }
 
   const severityBadges = {
     low: 'bg-calm-green/10 text-calm-green',
     medium: 'bg-calm-amber/10 text-calm-amber',
     high: 'bg-orange-100 text-orange-700',
-    critical: 'bg-red-100 text-red-700',
+    critical: 'bg-destructive/10 text-destructive',
   }
 
   const handleReasonSelect = (reason: EscalationReason) => {

@@ -222,7 +222,7 @@ export function FlashcardDeck({
               <div className="text-sm text-warm-muted">Correct</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-500">{sessionStats.incorrect}</div>
+              <div className="text-3xl font-bold text-destructive">{sessionStats.incorrect}</div>
               <div className="text-sm text-warm-muted">Needs Review</div>
             </div>
             <div className="text-center">
@@ -253,7 +253,7 @@ export function FlashcardDeck({
                 <CheckCircle2 className="h-4 w-4" />
                 {sessionStats.correct}
               </span>
-              <span className="flex items-center gap-1 text-red-500">
+              <span className="flex items-center gap-1 text-destructive">
                 <XCircle className="h-4 w-4" />
                 {sessionStats.incorrect}
               </span>
@@ -339,7 +339,7 @@ export function FlashcardDeck({
           <Button
             variant="outline"
             onClick={() => handleMark(false)}
-            className="gap-1 text-red-600 border-red-200 hover:bg-red-50"
+            className="gap-1 text-destructive border-destructive/20 hover:bg-destructive/5"
           >
             <XCircle className="h-4 w-4" />
             Need Review
