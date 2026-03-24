@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 import { isStrategySafe } from '@/lib/ai/strategy-recommendations'
 import OpenAI from 'openai'
 import { z } from 'zod'
+import { validateAIInput } from '@/lib/ai/input-validation'
 
 const courtroomScriptSchema = z.object({
   steps: z.array(z.object({
@@ -23,7 +24,7 @@ export async function POST(
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
 
-    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Check cache first
@@ -44,6 +45,18 @@ export async function POST(
       .single()
 
     if (!caseData) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
+
+    // Prompt injection check on case data that will be interpolated into the prompt
+    const disputeText = caseData.dispute_type ?? ''
+    const stateText = caseData.state ?? ''
+    for (const [field, value] of Object.entries({ dispute_type: disputeText, state: stateText })) {
+      if (value) {
+        const check = validateAIInput(value)
+        if (!check.safe) {
+          return NextResponse.json({ error: `${field}: ${check.reason}` }, { status: 400 })
+        }
+      }
+    }
 
     // Get evidence summary
     const { count: evidenceCount } = await supabase

@@ -4,7 +4,8 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { storyInputSchema } from '@lawyer-free/shared/schemas/quick-resolve'
 import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt, parseAnalysisResult } from '@/lib/ai/story-analysis'
 import { lookupBusinessEntity } from '@/lib/entity-lookup/opencorporates'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { validateAIInput } from '@/lib/ai/input-validation'
 
 export const maxDuration = 30
 
@@ -12,15 +13,21 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthenticatedClient()
     if (!auth.ok) return auth.error
-    const { user } = auth
+    const { supabase, user } = auth
 
-    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const body = await request.json()
     const parsed = storyInputSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+    }
+
+    // Prompt injection check
+    const inputCheck = validateAIInput(parsed.data.story)
+    if (!inputCheck.safe) {
+      return NextResponse.json({ error: inputCheck.reason }, { status: 400 })
     }
 
     const openai = new OpenAI()

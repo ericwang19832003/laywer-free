@@ -5,7 +5,8 @@ import {
   aiPreservationLetterRequestSchema,
   aiPreservationLetterResponseSchema,
 } from '@lawyer-free/shared/schemas/ai-preservation-letter'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { validateAIInput } from '@/lib/ai/input-validation'
 
 const PROMPT_VERSION = '1.0.0'
 
@@ -32,9 +33,9 @@ export async function POST(request: NextRequest) {
   // Auth check
   const auth = await getAuthenticatedClient()
   if (!auth.ok) return auth.error
-  const { user } = auth
+  const { supabase, user } = auth
 
-  const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+  const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
   // Check if OpenAI is configured
@@ -56,6 +57,24 @@ export async function POST(request: NextRequest) {
     }
 
     const { summary, incident_date, evidence_categories, tone, opponent_name } = parsed.data
+
+    // Prompt injection check on user-provided text
+    const summaryCheck = validateAIInput(summary)
+    if (!summaryCheck.safe) {
+      return NextResponse.json(
+        { error: `summary: ${summaryCheck.reason}` },
+        { status: 400 }
+      )
+    }
+    if (opponent_name) {
+      const nameCheck = validateAIInput(opponent_name)
+      if (!nameCheck.safe) {
+        return NextResponse.json(
+          { error: `opponent_name: ${nameCheck.reason}` },
+          { status: 400 }
+        )
+      }
+    }
 
     // Build the user prompt
     const parts: string[] = []

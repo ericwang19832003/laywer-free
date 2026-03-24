@@ -29,10 +29,26 @@ export async function PATCH(
       )
     }
 
+    // First, read the motion to get its case_id for scoped access
+    const { data: existing, error: fetchError } = await supabase
+      .from('motions')
+      .select('id, case_id')
+      .eq('id', motionId)
+      .single()
+
+    if (fetchError || !existing) {
+      return NextResponse.json(
+        { error: 'Motion not found' },
+        { status: 404 }
+      )
+    }
+
+    // Update scoped by both motion id and case_id
     const { data: motion, error: updateError } = await supabase
       .from('motions')
       .update(parsed.data)
       .eq('id', motionId)
+      .eq('case_id', existing.case_id)
       .select()
       .single()
 

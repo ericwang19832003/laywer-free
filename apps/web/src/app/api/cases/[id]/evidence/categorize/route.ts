@@ -9,8 +9,9 @@ import {
   EVIDENCE_CATEGORIZATION_SYSTEM_PROMPT,
 } from '@/lib/ai/evidence-categorization'
 import { safeError } from '@/lib/security/safe-log'
-import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
+import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 import { INPUT_LIMITS, validateTextLength } from '@/lib/validation/input-limits'
+import { validateAIInput } from '@/lib/ai/input-validation'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -27,7 +28,7 @@ export async function POST(
     if (!auth.ok) return auth.error
     const { supabase, user } = auth
 
-    const rl = checkRateLimit(user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
+    const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Verify case
@@ -46,6 +47,16 @@ export async function POST(
       const snippetError = validateTextLength(text_snippet, INPUT_LIMITS.TEXT_SNIPPET, 'text_snippet')
       if (snippetError) {
         return NextResponse.json({ error: snippetError }, { status: 422 })
+      }
+      const snippetCheck = validateAIInput(text_snippet)
+      if (!snippetCheck.safe) {
+        return NextResponse.json({ error: `text_snippet: ${snippetCheck.reason}` }, { status: 400 })
+      }
+    }
+    if (typeof file_name === 'string') {
+      const fileNameCheck = validateAIInput(file_name)
+      if (!fileNameCheck.safe) {
+        return NextResponse.json({ error: `file_name: ${fileNameCheck.reason}` }, { status: 400 })
       }
     }
 
