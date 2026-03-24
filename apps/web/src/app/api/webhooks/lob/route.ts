@@ -30,7 +30,11 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.text()
     const signature = request.headers.get('lob-signature') ?? ''
 
-    if (process.env.LOB_WEBHOOK_SECRET && !verifyWebhookSignature(rawBody, signature)) {
+    if (!process.env.LOB_WEBHOOK_SECRET) {
+      console.error('LOB_WEBHOOK_SECRET not configured — rejecting webhook')
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
+    }
+    if (!verifyWebhookSignature(rawBody, signature)) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
