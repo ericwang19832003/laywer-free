@@ -3,10 +3,10 @@
 import { getPasswordStrength, type StrengthLevel } from '@/lib/auth/password-strength'
 
 const COLORS: Record<StrengthLevel, string> = {
-  weak: 'bg-red-400',
-  fair: 'bg-amber-400',
-  good: 'bg-green-400',
-  strong: 'bg-green-500',
+  weak: 'bg-destructive',
+  fair: 'bg-calm-amber',
+  good: 'bg-calm-green',
+  strong: 'bg-calm-green',
 }
 
 const SEGMENT_COUNT = 4

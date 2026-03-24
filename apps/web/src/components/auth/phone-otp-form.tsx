@@ -103,7 +103,7 @@ export function PhoneOtpForm() {
   if (step === 'otp') {
     return (
       <div className="space-y-4">
-        <p className="text-sm" style={{ color: '#78716C' }}>
+        <p className="text-sm text-warm-muted">
           We sent a 6-digit code to <strong>{phone}</strong>
         </p>
         <div className="space-y-2">
@@ -120,7 +120,7 @@ export function PhoneOtpForm() {
           />
         </div>
         {error && (
-          <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
         )}
         <Button
           type="button"
@@ -130,7 +130,7 @@ export function PhoneOtpForm() {
         >
           {loading ? 'Verifying...' : 'Verify'}
         </Button>
-        <p className="text-center text-sm" style={{ color: '#78716C' }}>
+        <p className="text-center text-sm text-warm-muted">
           {resendCooldown > 0 ? (
             <>Resend code in {resendCooldown}s</>
           ) : (
@@ -171,12 +171,12 @@ export function PhoneOtpForm() {
           placeholder="+12125551234"
           required
         />
-        <p className="text-xs" style={{ color: '#78716C' }}>
+        <p className="text-xs text-warm-muted">
           US numbers only. Include country code +1.
         </p>
       </div>
       {error && (
-        <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       )}
       <Button
         type="button"

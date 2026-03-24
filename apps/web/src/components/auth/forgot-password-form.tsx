@@ -43,7 +43,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
   if (sent) {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-sm" style={{ color: '#1C1917' }}>
+        <p className="text-sm text-warm-text">
           Check your email — we sent a password reset link to <strong>{email}</strong>.
         </p>
         <button
@@ -60,7 +60,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
   return (
     <div className="space-y-4">
       <div className="text-center mb-2">
-        <p className="text-sm" style={{ color: '#78716C' }}>
+        <p className="text-sm text-warm-muted">
           Enter your email and we&apos;ll send you a link to reset your password.
         </p>
       </div>
@@ -77,7 +77,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
           />
         </div>
         {error && (
-          <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
         )}
         <Button type="submit" className="w-full" disabled={loading || !email}>
           {loading ? 'Sending...' : 'Send Reset Link'}

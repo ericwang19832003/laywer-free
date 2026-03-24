@@ -142,13 +142,8 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
                 className={`text-sm ${
                   resendMessage === 'Confirmation email sent'
                     ? 'text-calm-indigo'
-                    : 'text-warm-muted'
+                    : 'text-calm-amber'
                 }`}
-                style={
-                  resendMessage !== 'Confirmation email sent'
-                    ? { color: '#D97706' }
-                    : undefined
-                }
               >
                 {resendMessage}
               </p>
@@ -220,7 +215,7 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
                     />
                   </div>
                   {error && (
-                    <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+                    <p className="text-sm text-destructive">{error}</p>
                   )}
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? 'Signing in...' : 'Sign In'}
@@ -253,7 +248,7 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
                     <PasswordStrengthIndicator password={password} />
                   </div>
                   {error && (
-                    <p className="text-sm" style={{ color: '#D97706' }}>{error}</p>
+                    <p className="text-sm text-destructive">{error}</p>
                   )}
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? 'Creating account...' : 'Create Account'}
