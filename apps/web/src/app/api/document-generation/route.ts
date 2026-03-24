@@ -24,12 +24,44 @@ const AI_REFUSAL_PATTERNS = [
   'i\'m unable to',
 ]
 
-const aiResponseSchema = z.string().min(100, {
-  message: 'Response too short to be a valid legal document',
-}).refine(
-  (text) => !AI_REFUSAL_PATTERNS.some((p) => text.toLowerCase().includes(p)),
-  { message: 'AI response appears to be a refusal' }
-)
+/**
+ * Validates that AI output is a structurally valid legal document:
+ * - Minimum length (100 chars) to reject empty/stub responses
+ * - Not an AI refusal message
+ * - Contains paragraph structure (at least 2 line breaks)
+ * - Not repetitive gibberish (no single token repeated excessively)
+ */
+export const aiResponseSchema = z.string()
+  .min(100, {
+    message: 'Response too short to be a valid legal document',
+  })
+  .refine(
+    (text) => !AI_REFUSAL_PATTERNS.some((p) => text.toLowerCase().includes(p)),
+    { message: 'AI response appears to be a refusal' }
+  )
+  .refine(
+    (text) => {
+      // Must contain at least 2 line breaks indicating paragraph structure
+      const lineBreaks = (text.match(/\n/g) || []).length
+      return lineBreaks >= 2
+    },
+    { message: 'Response lacks paragraph structure expected in a legal document' }
+  )
+  .refine(
+    (text) => {
+      // Detect repetitive gibberish: if any single word accounts for >40% of
+      // total words (excluding common articles/prepositions), flag it
+      const words = text.toLowerCase().match(/[a-z]{4,}/g) || []
+      if (words.length < 20) return true // too short to judge by frequency
+      const freq: Record<string, number> = {}
+      for (const w of words) {
+        freq[w] = (freq[w] || 0) + 1
+      }
+      const maxFreq = Math.max(...Object.values(freq))
+      return maxFreq / words.length <= 0.4
+    },
+    { message: 'Response appears to contain repetitive or garbled text' }
+  )
 
 interface DocumentGenerationRequest {
   documentType: DocumentType
