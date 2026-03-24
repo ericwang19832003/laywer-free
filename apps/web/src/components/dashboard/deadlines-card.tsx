@@ -38,12 +38,13 @@ function filterDeadlines(deadlines: Deadline[]): Deadline[] {
 function CountdownBox({ deadline }: { deadline: Deadline }) {
   const days = daysUntil(deadline.due_at)
   const isOverdue = days < 0
-  const borderColor = isOverdue || days === 0 ? 'border-amber-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
-  const textColor = isOverdue || days === 0 ? 'text-calm-amber' : days <= 7 ? 'text-amber-600' : 'text-emerald-600'
+  const borderColor = isOverdue ? 'border-destructive' : days === 0 ? 'border-amber-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
+  const bgColor = isOverdue ? 'bg-destructive/10' : 'bg-white'
+  const textColor = isOverdue ? 'text-destructive' : days === 0 ? 'text-calm-amber' : days <= 7 ? 'text-amber-600' : 'text-emerald-600'
 
   return (
-    <div className="flex items-start gap-4">
-      <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 ${borderColor} bg-white shrink-0`}>
+    <div className="flex items-start gap-4" data-testid={`countdown-box-${deadline.id}`}>
+      <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 ${borderColor} ${bgColor} shrink-0`}>
         <span className={`text-2xl font-bold tabular-nums ${textColor}`}>
           {Math.abs(days)}
         </span>
@@ -55,7 +56,7 @@ function CountdownBox({ deadline }: { deadline: Deadline }) {
         </p>
         <p className="text-xs text-warm-muted">{formatDateShort(deadline.due_at)}</p>
         {isOverdue && (
-          <p className="text-xs font-medium text-calm-amber">This deadline has passed.</p>
+          <p className="text-xs font-medium text-destructive">This deadline passed. Take action as soon as possible.</p>
         )}
         {deadline.consequence && (
           <p className="text-xs text-warm-muted line-clamp-2">{deadline.consequence}</p>
@@ -102,6 +103,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
                 {otherDeadlines.slice(0, 4).map((deadline) => {
                   const countdown = formatCountdown(deadline.due_at)
                   const days = daysUntil(deadline.due_at)
+                  const isOverdue = days < 0
                   const isUrgent = days >= 0 && days <= 3
 
                   return (
@@ -112,7 +114,7 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
                         </p>
                         <p
                           className={`text-xs ${
-                            isUrgent ? 'text-calm-amber font-medium' : 'text-warm-muted'
+                            isOverdue ? 'text-destructive font-medium' : isUrgent ? 'text-calm-amber font-medium' : 'text-warm-muted'
                           }`}
                         >
                           {formatDateShort(deadline.due_at)}
