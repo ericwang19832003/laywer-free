@@ -185,6 +185,10 @@ export function NewCaseDialog() {
       const prefill = sessionStorage.getItem('onboarding_dispute_type')
       if (prefill && !open) {
         sessionStorage.removeItem('onboarding_dispute_type')
+        // Pre-fill the dispute type so user skips ahead in the wizard
+        if (prefill as DisputeType) {
+          dispatch({ type: 'SET_DISPUTE_TYPE', disputeType: prefill as DisputeType })
+        }
         setOpen(true)
       }
     } catch {

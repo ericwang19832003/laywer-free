@@ -9,17 +9,9 @@ import { SolBanner } from '@/components/dashboard/sol-banner'
 import { FilingInstructionsCard } from '@/components/dashboard/filing-instructions-card'
 import { calculateSol } from '@/lib/rules/statute-of-limitations'
 import { getPriorityCards } from '@/lib/dashboard-card-priority'
+import type { SharedCaseData } from './types'
 
-interface OverviewTabProps {
-  caseId: string
-  disputeType: string
-  jurisdiction: string
-  courtType: string
-  county: string | null
-  createdAt: string | null
-}
-
-export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType, county, createdAt }: OverviewTabProps) {
+export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType, county, createdAt }: Omit<SharedCaseData, 'outcome'>) {
   const supabase = await createClient()
 
   const [confidenceResult, insightsResult, strategyResult, timelineSummaryResult, dashboardResult, evidenceResult] = await Promise.all([

@@ -13,36 +13,9 @@ import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { calculateSol } from '@/lib/rules/statute-of-limitations'
 import { getPriorityCards } from '@/lib/dashboard-card-priority'
 import type { ReminderEscalation } from '@/lib/schemas/reminder-escalation'
+import type { DashboardData, SharedCaseData } from './types'
 
-interface DashboardData {
-  next_task: {
-    id: string
-    task_key: string
-    title: string
-    status: string
-  } | null
-  tasks_summary: Record<string, number>
-  upcoming_deadlines: Array<{
-    id: string
-    key: string
-    due_at: string
-    source: string
-    label: string | null
-    consequence: string | null
-  }>
-}
-
-interface FocusTabProps {
-  caseId: string
-  disputeType: string
-  jurisdiction: string
-  courtType: string
-  county: string | null
-  outcome: string | null
-  createdAt: string | null
-}
-
-export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, county, outcome, createdAt }: FocusTabProps) {
+export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, county, outcome, createdAt }: SharedCaseData) {
   const supabase = await createClient()
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
