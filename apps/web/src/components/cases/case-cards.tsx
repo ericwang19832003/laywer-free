@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,6 +54,7 @@ import {
   CheckSquare,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CasesTableView } from '@/components/cases/cases-table-view'
 
 export interface CaseCardData {
   id: string
@@ -401,7 +402,7 @@ function CaseCardView({ caseData, onAction, isSelected, onSelect }: { caseData: 
                               onAction('delete')
                               setShowMenu(false)
                             }}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/5 w-full transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete
@@ -450,7 +451,7 @@ function CaseCardView({ caseData, onAction, isSelected, onSelect }: { caseData: 
                 {caseData.deadline && (
                   <div className={cn(
                     'flex items-center gap-2 text-sm mt-1.5',
-                    isOverdue && 'text-red-600',
+                    isOverdue && 'text-calm-amber',
                     isUrgent && 'text-calm-amber',
                     !isOverdue && !isUrgent && 'text-warm-muted'
                   )}>
@@ -556,7 +557,7 @@ function CaseListRow({ caseData, onAction, isSelected, onSelect }: { caseData: C
         {caseData.deadline ? (
           <span className={cn(
             'text-sm font-medium',
-            isOverdue && 'text-red-600',
+            isOverdue && 'text-calm-amber',
             isUrgent && 'text-calm-amber',
             !isOverdue && !isUrgent && 'text-warm-muted'
           )}>
@@ -581,7 +582,7 @@ function CaseListRow({ caseData, onAction, isSelected, onSelect }: { caseData: C
               variant="ghost"
               size="icon-xs"
               onClick={() => onAction('delete')}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="text-destructive hover:text-destructive hover:bg-destructive/5"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -662,7 +663,20 @@ function CaseTimelineView({ cases }: { cases: CaseCardData[] }) {
 }
 
 export function CaseCards({ cases, onCaseAction }: CaseCardsProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('card')
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window === 'undefined') return 'card'
+    try {
+      const saved = localStorage.getItem('cases_view_preference')
+      if (saved === 'card' || saved === 'list' || saved === 'timeline') return saved
+    } catch { /* localStorage unavailable */ }
+    return window.innerWidth >= 1280 ? 'list' : 'card'
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('cases_view_preference', viewMode)
+    } catch { /* localStorage unavailable */ }
+  }, [viewMode])
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('date-created')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
@@ -992,47 +1006,7 @@ export function CaseCards({ cases, onCaseAction }: CaseCardsProps) {
               ))}
             </div>
           ) : viewMode === 'list' ? (
-            <Card>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-warm-border">
-                      <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">
-                        <button
-                          onClick={selectAllCases}
-                          className="flex items-center gap-2 hover:text-warm-text"
-                        >
-                          {selectedCases.size === filteredAndSortedCases.length && filteredAndSortedCases.length > 0 ? (
-                            <CheckSquare className="h-4 w-4 text-calm-indigo" />
-                          ) : (
-                            <Square className="h-4 w-4" />
-                          )}
-                          Case
-                        </button>
-                      </th>
-                      <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">Type</th>
-                  <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">Role</th>
-                  <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">Status</th>
-                  <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">Age</th>
-                  <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">Activity</th>
-                  <th className="text-left text-xs font-medium text-warm-muted py-3 px-4">Deadline</th>
-                  <th className="text-left text-xs font-medium text-warm-muted py-3 px-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAndSortedCases.map((caseData) => (
-                  <CaseListRow
-                    key={caseData.id}
-                    caseData={caseData}
-                    onAction={onCaseAction ? (action) => onCaseAction(caseData.id, action) : undefined}
-                    isSelected={selectedCases.has(caseData.id)}
-                    onSelect={() => toggleCaseSelection(caseData.id)}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+            <CasesTableView cases={filteredAndSortedCases} />
       ) : (
         <CaseTimelineView cases={filteredAndSortedCases} />
       )}
