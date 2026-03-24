@@ -101,6 +101,12 @@ export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
   const [dismissed, setDismissed] = useState(true) // default hidden to avoid flash
 
   useEffect(() => {
+    // Never auto-dismiss safety-critical banners — expired/critical/warning
+    // SOL levels contain time-sensitive legal deadlines users must not miss
+    if (sol.level === 'expired' || sol.level === 'critical' || sol.level === 'warning') {
+      setDismissed(false)
+      return
+    }
     const key = `banner_sol_views_${caseId}`
     const views = parseInt(localStorage.getItem(key) || '0', 10)
     if (views >= MAX_VIEWS) {
@@ -109,7 +115,7 @@ export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
     }
     localStorage.setItem(key, String(views + 1))
     setDismissed(false)
-  }, [caseId])
+  }, [caseId, sol.level])
 
   const config = LEVEL_CONFIG[sol.level]
   if (!config || dismissed) return null
@@ -185,13 +191,15 @@ export function SolBanner({ caseId, sol, disputeType, state }: SolBannerProps) {
             </div>
           )}
         </div>
-        <button
-          onClick={handleDismiss}
-          className="shrink-0 rounded p-1 hover:bg-black/5 transition-colors"
-          aria-label="Dismiss SOL banner"
-        >
-          <X className="h-3.5 w-3.5 text-warm-muted" />
-        </button>
+        {sol.level !== 'expired' && sol.level !== 'critical' && sol.level !== 'warning' && (
+          <button
+            onClick={handleDismiss}
+            className="shrink-0 rounded p-1 hover:bg-black/5 transition-colors"
+            aria-label="Dismiss SOL banner"
+          >
+            <X className="h-3.5 w-3.5 text-warm-muted" />
+          </button>
+        )}
       </div>
     </div>
   )
