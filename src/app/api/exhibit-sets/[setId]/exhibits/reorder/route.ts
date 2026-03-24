@@ -11,8 +11,9 @@ export async function PATCH(
 ) {
   try {
     const { setId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = reorderExhibitsSchema.safeParse(body)
@@ -27,7 +28,7 @@ export async function PATCH(
     const { ordered_exhibit_ids } = parsed.data
 
     // Verify exhibit set exists and get case_id (RLS handles ownership)
-    const { data: setData, error: setError } = await supabase!
+    const { data: setData, error: setError } = await supabase
       .from('exhibit_sets')
       .select('id, case_id')
       .eq('id', setId)
@@ -38,7 +39,7 @@ export async function PATCH(
     }
 
     // Verify all exhibit IDs belong to this set
-    const { data: existing, error: fetchError } = await supabase!
+    const { data: existing, error: fetchError } = await supabase
       .from('exhibits')
       .select('id')
       .eq('exhibit_set_id', setId)
@@ -63,7 +64,7 @@ export async function PATCH(
     // Update sort_order sequentially (1..N)
     // Use individual updates — exhibit count is small (≤26 for alpha, typically <50)
     for (let i = 0; i < ordered_exhibit_ids.length; i++) {
-      const { error: updateError } = await supabase!
+      const { error: updateError } = await supabase
         .from('exhibits')
         .update({ sort_order: i + 1 })
         .eq('id', ordered_exhibit_ids[i])
@@ -78,7 +79,7 @@ export async function PATCH(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: setData.case_id,
       kind: 'exhibits_reordered',
       payload: {

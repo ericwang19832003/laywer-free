@@ -36,6 +36,29 @@ export async function runAndApplyGatekeeper(
     throw new Error(`Failed to load deadlines: ${dlError?.message}`)
   }
 
+  // Fetch discovery response deadline
+  const { data: discoveryDeadline } = await supabase
+    .from('deadlines')
+    .select('due_at')
+    .eq('case_id', caseId)
+    .eq('key', 'discovery_response_deadline')
+    .maybeSingle()
+
+  // Fetch trial date
+  const { data: trialDeadline } = await supabase
+    .from('deadlines')
+    .select('due_at')
+    .eq('case_id', caseId)
+    .eq('key', 'trial_date')
+    .maybeSingle()
+
+  // Fetch completed motion types
+  const { data: completedMotions } = await supabase
+    .from('motions')
+    .select('motion_type')
+    .eq('case_id', caseId)
+    .in('status', ['finalized', 'filed'])
+
   // Evaluate rules
   const actions = evaluateGatekeeperRules({
     tasks: tasks.map((t) => ({
@@ -52,16 +75,61 @@ export async function runAndApplyGatekeeper(
       source: d.source,
     })),
     now: effectiveNow,
+    discoveryResponseDue: discoveryDeadline?.due_at
+      ? new Date(discoveryDeadline.due_at)
+      : null,
+    trialDate: trialDeadline?.due_at
+      ? new Date(trialDeadline.due_at)
+      : null,
+    completedMotionTypes: completedMotions?.map((m) => m.motion_type) ?? [],
   })
 
   if (actions.length === 0) {
     return { actionsApplied: [], rulesEvaluated: actions.length }
   }
 
-  // Apply each action
+  // Apply actions in two passes:
+  // 1. inject_tasks first (creates tasks that subsequent unlocks may reference)
+  // 2. unlock_task / complete_task second
   const actionsApplied: string[] = []
 
   for (const action of actions) {
+    if (action.type === 'inject_tasks') {
+      for (const def of action.task_definitions) {
+        const exists = tasks.find((t) => t.task_key === def.task_key)
+        if (exists) continue
+
+        await supabase.from('tasks').insert({
+          case_id: caseId,
+          task_key: def.task_key,
+          title: def.title,
+          status: 'locked',
+        })
+      }
+
+      // Update court_type to federal
+      await supabase
+        .from('cases')
+        .update({ court_type: 'federal' })
+        .eq('id', caseId)
+
+      // Re-fetch tasks so subsequent unlock actions find the new tasks
+      const { data: refreshedTasks } = await supabase
+        .from('tasks')
+        .select('id, task_key, status, due_at, metadata')
+        .eq('case_id', caseId)
+
+      if (refreshedTasks) {
+        tasks.splice(0, tasks.length, ...refreshedTasks)
+      }
+
+      actionsApplied.push(`inject_tasks:${action.task_definitions.map((d) => d.task_key).join(',')}`)
+    }
+  }
+
+  for (const action of actions) {
+    if (action.type === 'inject_tasks') continue
+
     const task = tasks.find((t) => t.task_key === action.task_key)
     if (!task) continue
 

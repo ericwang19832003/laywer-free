@@ -27,11 +27,16 @@ export interface GatekeeperInput {
   tasks: GatekeeperTask[]
   deadlines: GatekeeperDeadline[]
   now: Date
+  // Motion builder fields
+  discoveryResponseDue?: Date | null
+  trialDate?: Date | null
+  completedMotionTypes?: string[]
 }
 
 export type GatekeeperAction =
   | { type: 'unlock_task'; task_key: string; due_at?: string }
   | { type: 'complete_task'; task_key: string }
+  | { type: 'inject_tasks'; task_definitions: { task_key: string; title: string }[]; then_unlock: string }
 
 function findTask(tasks: GatekeeperTask[], key: string): GatekeeperTask | undefined {
   return tasks.find((t) => t.task_key === key)
@@ -97,6 +102,155 @@ export function evaluateGatekeeperRules(input: GatekeeperInput): GatekeeperActio
   // Rule 6: upload_answer completed → unlock discovery_starter_pack
   if (uploadAnswerTask?.status === 'completed' && discoveryTask?.status === 'locked') {
     actions.push({ type: 'unlock_task', task_key: 'discovery_starter_pack' })
+  }
+
+  // ── Federal Removal Branch ──────────────────────────────
+
+  const understandRemovalTask = findTask(tasks, 'understand_removal')
+  const chooseStrategyTask = findTask(tasks, 'choose_removal_strategy')
+  const prepAmendedTask = findTask(tasks, 'prepare_amended_complaint')
+  const fileAmendedTask = findTask(tasks, 'file_amended_complaint')
+  const prepRemandTask = findTask(tasks, 'prepare_remand_motion')
+  const fileRemandTask = findTask(tasks, 'file_remand_motion')
+  const rule26fTask = findTask(tasks, 'rule_26f_prep')
+  const mandatoryDisclosuresTask = findTask(tasks, 'mandatory_disclosures')
+
+  // Rule 7: Branch — case_removed → unlock understand_removal
+  if (
+    checkDocketTask?.status === 'completed' &&
+    checkDocketTask.metadata?.docket_result === 'case_removed' &&
+    understandRemovalTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'understand_removal' })
+  }
+
+  // Rule 8: understand_removal → choose_removal_strategy
+  if (understandRemovalTask?.status === 'completed' && chooseStrategyTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'choose_removal_strategy' })
+  }
+
+  // Rule 9: strategy includes accept → prepare_amended_complaint
+  const strategy = chooseStrategyTask?.metadata?.strategy as string | undefined
+  if (
+    chooseStrategyTask?.status === 'completed' &&
+    (strategy === 'accept' || strategy === 'both') &&
+    prepAmendedTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'prepare_amended_complaint' })
+  }
+
+  // Rule 10: strategy includes remand → prepare_remand_motion
+  if (
+    chooseStrategyTask?.status === 'completed' &&
+    (strategy === 'remand' || strategy === 'both') &&
+    prepRemandTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'prepare_remand_motion' })
+  }
+
+  // Rule 11: prepare_amended_complaint → file_amended_complaint
+  if (prepAmendedTask?.status === 'completed' && fileAmendedTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'file_amended_complaint' })
+  }
+
+  // Rule 12: file_amended_complaint → rule_26f_prep
+  if (fileAmendedTask?.status === 'completed' && rule26fTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'rule_26f_prep' })
+  }
+
+  // Rule 13: rule_26f_prep → mandatory_disclosures
+  if (rule26fTask?.status === 'completed' && mandatoryDisclosuresTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'mandatory_disclosures' })
+  }
+
+  // Rule 14: prepare_remand_motion → file_remand_motion
+  if (prepRemandTask?.status === 'completed' && fileRemandTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'file_remand_motion' })
+  }
+
+  // Rule 15: mandatory_disclosures → discovery_starter_pack (removal path)
+  if (mandatoryDisclosuresTask?.status === 'completed' && discoveryTask?.status === 'locked') {
+    actions.push({ type: 'unlock_task', task_key: 'discovery_starter_pack' })
+  }
+
+  // ── Motion Builder Rules ─────────────────────────────────
+
+  // Rule 16: motion to compel when discovery response overdue
+  const motionToCompel = findTask(tasks, 'motion_to_compel')
+  if (
+    discoveryTask?.status === 'completed' &&
+    motionToCompel?.status === 'locked' &&
+    input.discoveryResponseDue &&
+    input.now > input.discoveryResponseDue
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'motion_to_compel' })
+  }
+
+  // Rule 17: trial prep checklist when trial date within 60 days
+  const trialPrepChecklist = findTask(tasks, 'trial_prep_checklist')
+  if (
+    trialPrepChecklist?.status === 'locked' &&
+    input.trialDate &&
+    input.trialDate.getTime() - input.now.getTime() <= 60 * 24 * 60 * 60 * 1000
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'trial_prep_checklist' })
+  }
+
+  // Rule 18: appellate brief after notice of appeal completed
+  const appellateBrief = findTask(tasks, 'appellate_brief')
+  if (
+    appellateBrief?.status === 'locked' &&
+    input.completedMotionTypes?.includes('notice_of_appeal')
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'appellate_brief' })
+  }
+
+  // ── PI Federal Removal Branch ─────────────────────────
+
+  const piWaitTask = findTask(tasks, 'pi_wait_for_answer')
+  const piWaitAnswers = piWaitTask?.metadata?.guided_answers as Record<string, string> | undefined
+  const piReviewAnswerTask = findTask(tasks, 'pi_review_answer')
+  const piDiscoveryPrepTask = findTask(tasks, 'pi_discovery_prep')
+
+  // Rule 19: PI removal detected → inject removal tasks
+  if (
+    piWaitTask?.status === 'completed' &&
+    piWaitAnswers?.case_removed === 'yes' &&
+    !findTask(tasks, 'understand_removal') // Tasks don't exist yet
+  ) {
+    actions.push({
+      type: 'inject_tasks',
+      task_definitions: [
+        { task_key: 'understand_removal', title: 'Understand the Removal' },
+        { task_key: 'choose_removal_strategy', title: 'Choose Your Response Strategy' },
+        { task_key: 'prepare_amended_complaint', title: 'Prepare First Amended Complaint' },
+        { task_key: 'file_amended_complaint', title: 'File Your Amended Complaint' },
+        { task_key: 'prepare_remand_motion', title: 'Prepare Motion to Remand' },
+        { task_key: 'file_remand_motion', title: 'File Your Motion to Remand' },
+        { task_key: 'rule_26f_prep', title: 'Prepare for Rule 26(f) Conference' },
+        { task_key: 'mandatory_disclosures', title: 'Complete Mandatory Disclosures' },
+      ],
+      then_unlock: 'understand_removal',
+    })
+    actions.push({ type: 'unlock_task', task_key: 'understand_removal' })
+  }
+
+  // Rule 20: PI remand filed → resume PI chain at pi_review_answer
+  if (
+    piWaitAnswers?.case_removed === 'yes' &&
+    fileRemandTask?.status === 'completed' &&
+    piReviewAnswerTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'pi_review_answer' })
+  }
+
+  // Rule 21: PI accepted federal → resume PI chain at pi_discovery_prep
+  if (
+    piWaitAnswers?.case_removed === 'yes' &&
+    mandatoryDisclosuresTask?.status === 'completed' &&
+    piDiscoveryPrepTask?.status === 'locked'
+  ) {
+    actions.push({ type: 'unlock_task', task_key: 'pi_discovery_prep' })
   }
 
   return actions

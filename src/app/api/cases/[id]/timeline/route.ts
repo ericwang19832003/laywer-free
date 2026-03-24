@@ -7,8 +7,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const { searchParams } = new URL(request.url)
     const cursor = searchParams.get('cursor')
@@ -16,7 +17,7 @@ export async function GET(
     const limit = Math.min(Math.max(parseInt(limitParam || '20', 10) || 20, 1), 50)
 
     // Build query: fetch limit + 1 to determine has_more
-    let query = supabase!
+    let query = supabase
       .from('task_events')
       .select('id, case_id, task_id, kind, payload, created_at, tasks(title)')
       .eq('case_id', id)

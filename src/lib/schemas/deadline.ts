@@ -5,6 +5,9 @@ export const createDeadlineSchema = z.object({
   due_at: z.string().datetime(),
   source: z.enum(['system', 'user_confirmed', 'court_notice']).optional().default('user_confirmed'),
   rationale: z.string().optional(),
+  label: z.string().optional(),
+  consequence: z.string().optional(),
+  auto_generated: z.boolean().optional().default(false),
 })
 
 export type CreateDeadlineInput = z.infer<typeof createDeadlineSchema>

@@ -28,14 +28,24 @@ import {
   BookOpenIcon,
   Loader2Icon,
   InfoIcon,
+  LinkIcon,
 } from 'lucide-react'
+import Link from 'next/link'
+import { toast } from 'sonner'
 import type {
   DiscoveryPack,
   DiscoveryItem,
   ServiceLog,
   DiscoveryResponse,
+  ObjectionReviewSummary,
 } from './types'
-import { STATUS_STEPS, ITEM_TYPE_SHORT, ITEM_TYPE_LABELS } from './types'
+import {
+  STATUS_STEPS,
+  ITEM_TYPE_SHORT,
+  ITEM_TYPE_LABELS,
+  REVIEW_STATUS_LABELS,
+  REVIEW_STATUS_COLORS,
+} from './types'
 
 // ── Helpers ────────────────────────────────────────
 
@@ -132,6 +142,7 @@ interface DiscoveryPackDetailProps {
   initialItems: DiscoveryItem[]
   initialLogs: ServiceLog[]
   initialResponses: DiscoveryResponse[]
+  initialReviews?: ObjectionReviewSummary[]
 }
 
 export function DiscoveryPackDetail({
@@ -140,11 +151,32 @@ export function DiscoveryPackDetail({
   initialItems,
   initialLogs,
   initialResponses,
+  initialReviews = [],
 }: DiscoveryPackDetailProps) {
   const [pack, setPack] = useState(initialPack)
   const [items, setItems] = useState(initialItems)
   const [logs, setLogs] = useState(initialLogs)
   const [responses, setResponses] = useState(initialResponses)
+  const [reviews, setReviews] = useState(initialReviews)
+  const [evidenceLinks, setEvidenceLinks] = useState<Record<string, string[]>>({})
+
+  async function handleLinkEvidence(itemId: string, evidenceId: string) {
+    try {
+      const res = await fetch(`/api/cases/${caseId}/case-file/evidence-links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discovery_item_id: itemId, evidence_item_id: evidenceId }),
+      })
+      if (!res.ok) throw new Error('Failed to link')
+      setEvidenceLinks(prev => ({
+        ...prev,
+        [itemId]: [...(prev[itemId] || []), evidenceId],
+      }))
+      toast.success('Evidence linked')
+    } catch {
+      toast.error('Failed to link evidence')
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -164,7 +196,11 @@ export function DiscoveryPackDetail({
 
       {/* Items list (always visible if there are items) */}
       {items.length > 0 && (
-        <ItemsList items={items} />
+        <ItemsList
+          items={items}
+          evidenceLinks={evidenceLinks}
+          onLinkEvidence={handleLinkEvidence}
+        />
       )}
 
       {/* Section B: Review — mark ready */}
@@ -200,7 +236,9 @@ export function DiscoveryPackDetail({
           packId={pack.id}
           packStatus={pack.status}
           responses={responses}
+          reviews={reviews}
           onResponseAdded={(r) => setResponses((prev) => [r, ...prev])}
+          onReviewCreated={(r) => setReviews((prev) => [r, ...prev])}
           onStatusChange={(updated) => setPack(updated)}
         />
       )}
@@ -531,7 +569,15 @@ function ExamplesDialog({
 // Items List
 // ============================================
 
-function ItemsList({ items }: { items: DiscoveryItem[] }) {
+function ItemsList({
+  items,
+  evidenceLinks,
+  onLinkEvidence,
+}: {
+  items: DiscoveryItem[]
+  evidenceLinks: Record<string, string[]>
+  onLinkEvidence: (itemId: string, evidenceId: string) => void
+}) {
   const grouped = TAB_KEYS.reduce(
     (acc, key) => {
       const filtered = items.filter((i) => i.item_type === key)
@@ -554,27 +600,48 @@ function ItemsList({ items }: { items: DiscoveryItem[] }) {
           <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">
             {ITEM_TYPE_LABELS[type]}
           </p>
-          {typeItems.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="py-3">
-                <div className="flex items-start gap-3">
-                  <Badge variant="outline" className="text-xs shrink-0 mt-0.5">
-                    {ITEM_TYPE_SHORT[item.item_type]} #{item.item_no}
-                  </Badge>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-warm-text">
-                      {item.prompt_text}
-                    </p>
-                    {item.generated_text && (
-                      <p className="text-xs text-warm-muted mt-1.5 line-clamp-2 whitespace-pre-line">
-                        {item.generated_text.split('\n').slice(2, 4).join(' ')}
+          {typeItems.map((item) => {
+            const linked = evidenceLinks[item.id] ?? []
+            return (
+              <Card key={item.id}>
+                <CardContent className="py-3">
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline" className="text-xs shrink-0 mt-0.5">
+                      {ITEM_TYPE_SHORT[item.item_type]} #{item.item_no}
+                    </Badge>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-warm-text">
+                        {item.prompt_text}
                       </p>
-                    )}
+                      {item.generated_text && (
+                        <p className="text-xs text-warm-muted mt-1.5 line-clamp-2 whitespace-pre-line">
+                          {item.generated_text.split('\n').slice(2, 4).join(' ')}
+                        </p>
+                      )}
+
+                      {/* Evidence linking */}
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        {linked.length > 0 && linked.map((eid) => (
+                          <Badge
+                            key={eid}
+                            variant="secondary"
+                            className="text-[10px] bg-calm-indigo/10 text-calm-indigo"
+                          >
+                            <LinkIcon className="size-2.5 mr-0.5" />
+                            {eid.slice(0, 8)}
+                          </Badge>
+                        ))}
+                        <Button size="sm" variant="ghost" className="text-xs text-warm-muted h-6 px-2">
+                          <LinkIcon className="size-3 mr-1" />
+                          Link evidence
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       ))}
     </div>
@@ -1008,14 +1075,18 @@ function ResponsesSection({
   packId,
   packStatus,
   responses,
+  reviews,
   onResponseAdded,
+  onReviewCreated,
   onStatusChange,
 }: {
   caseId: string
   packId: string
   packStatus: string
   responses: DiscoveryResponse[]
+  reviews: ObjectionReviewSummary[]
   onResponseAdded: (r: DiscoveryResponse) => void
+  onReviewCreated: (r: ObjectionReviewSummary) => void
   onStatusChange: (pack: DiscoveryPack) => void
 }) {
   const [file, setFile] = useState<File | null>(null)
@@ -1024,7 +1095,79 @@ function ResponsesSection({
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [statusUpdating, setStatusUpdating] = useState(false)
+  const [classifyingId, setClassifyingId] = useState<string | null>(null)
+  const [classifyError, setClassifyError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Build a map: responseId → latest review
+  const reviewByResponse = new Map<string, ObjectionReviewSummary>()
+  for (const r of reviews) {
+    if (!reviewByResponse.has(r.response_id)) {
+      reviewByResponse.set(r.response_id, r)
+    }
+  }
+
+  async function handleClassify(responseId: string) {
+    setClassifyingId(responseId)
+    setClassifyError(null)
+
+    try {
+      // Step 1: Create review
+      const createRes = await fetch(
+        `/api/discovery/responses/${responseId}/objections/reviews`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pack_id: packId }),
+        }
+      )
+      if (!createRes.ok) {
+        const err = await createRes.json()
+        throw new Error(err.error || 'Failed to create review')
+      }
+      const { review } = await createRes.json()
+
+      // Add to local state immediately
+      onReviewCreated({
+        id: review.id,
+        response_id: responseId,
+        status: review.status,
+        error: null,
+        created_at: review.created_at,
+        follow_up_count: 0,
+      })
+
+      // Step 2: Extract text
+      const extractRes = await fetch(
+        `/api/objections/reviews/${review.id}/extract`,
+        { method: 'POST' }
+      )
+      if (!extractRes.ok) {
+        const err = await extractRes.json()
+        throw new Error(err.error || 'Text extraction failed')
+      }
+      const extractData = await extractRes.json()
+
+      // Step 3: Classify (only if extraction succeeded and status is 'classifying')
+      if (extractData.review?.status === 'classifying') {
+        const classifyRes = await fetch(
+          `/api/objections/reviews/${review.id}/classify`,
+          { method: 'POST' }
+        )
+        if (!classifyRes.ok) {
+          const err = await classifyRes.json()
+          throw new Error(err.error || 'Classification failed')
+        }
+      }
+
+      // Navigate to the review page
+      window.location.href = `/case/${caseId}/discovery/packs/${packId}/objections/${review.id}`
+    } catch (err) {
+      setClassifyError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setClassifyingId(null)
+    }
+  }
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -1187,28 +1330,80 @@ function ResponsesSection({
             <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">
               Received ({responses.length})
             </p>
-            {responses.map((r) => (
-              <div
-                key={r.id}
-                className="rounded-md border border-warm-border bg-warm-bg px-3 py-2.5"
-              >
-                <div className="flex items-center gap-2 text-sm">
-                  <FileTextIcon className="size-3.5 text-warm-muted shrink-0" />
-                  <span className="font-medium text-warm-text truncate">
-                    {r.file_name}
-                  </span>
-                  <Badge variant="outline" className="text-xs shrink-0">
-                    {r.response_type}
-                  </Badge>
+            {responses.map((r) => {
+              const review = reviewByResponse.get(r.id)
+              const isClassifying = classifyingId === r.id
+
+              return (
+                <div
+                  key={r.id}
+                  className="rounded-md border border-warm-border bg-warm-bg px-3 py-2.5"
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    <FileTextIcon className="size-3.5 text-warm-muted shrink-0" />
+                    <span className="font-medium text-warm-text truncate">
+                      {r.file_name}
+                    </span>
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      {r.response_type}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-warm-muted mt-1">
+                    Received {formatDateTime(r.received_at)}
+                  </p>
+                  {r.notes && (
+                    <p className="text-xs text-warm-muted mt-1">{r.notes}</p>
+                  )}
+
+                  {/* Objection review status or classify button */}
+                  <div className="mt-2 flex items-center gap-2">
+                    {review ? (
+                      <>
+                        <Badge className={`text-xs ${REVIEW_STATUS_COLORS[review.status] ?? 'bg-warm-border text-warm-text'}`}>
+                          {REVIEW_STATUS_LABELS[review.status] ?? review.status}
+                        </Badge>
+                        {review.follow_up_count > 0 && (
+                          <span className="text-xs text-warm-muted">
+                            {review.follow_up_count} follow-up{review.follow_up_count !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {(review.status === 'needs_review' || review.status === 'completed') && (
+                          <Button variant="ghost" size="sm" className="text-xs h-6 px-2" asChild>
+                            <Link href={`/case/${caseId}/discovery/packs/${packId}/objections/${review.id}`}>
+                              {review.status === 'needs_review' ? 'Review' : 'View'}
+                            </Link>
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={() => handleClassify(r.id)}
+                        disabled={isClassifying || classifyingId !== null}
+                      >
+                        {isClassifying ? (
+                          <>
+                            <Loader2Icon className="size-3 animate-spin" />
+                            Classifying...
+                          </>
+                        ) : (
+                          'Classify objections'
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-warm-muted mt-1">
-                  Received {formatDateTime(r.received_at)}
-                </p>
-                {r.notes && (
-                  <p className="text-xs text-warm-muted mt-1">{r.notes}</p>
-                )}
-              </div>
-            ))}
+              )
+            })}
+          </div>
+        )}
+
+        {/* Classify error */}
+        {classifyError && (
+          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+            <p className="text-sm text-red-800">{classifyError}</p>
           </div>
         )}
 

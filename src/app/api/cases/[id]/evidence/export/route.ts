@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import archiver from 'archiver'
 import { PassThrough } from 'stream'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { safeError } from '@/lib/security/safe-log'
 
 export const runtime = 'nodejs'
 
@@ -11,11 +12,12 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Verify case exists (RLS ensures ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -29,7 +31,7 @@ export async function GET(
     }
 
     // Fetch all evidence items for this case
-    const { data: items, error: fetchError } = await supabase!
+    const { data: items, error: fetchError } = await supabase
       .from('evidence_items')
       .select('id, file_name, storage_path, mime_type')
       .eq('case_id', caseId)
@@ -54,7 +56,7 @@ export async function GET(
     const usedNames = new Set<string>()
 
     for (const item of items) {
-      const { data: fileData, error: downloadError } = await supabase!.storage
+      const { data: fileData, error: downloadError } = await supabase.storage
         .from('case-documents')
         .download(item.storage_path)
 
@@ -115,7 +117,7 @@ export async function GET(
     const zipName = `Case_${shortId}_Evidence_${dateStr}.zip`
 
     // Log export event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'evidence_exported',
       payload: {
@@ -133,7 +135,7 @@ export async function GET(
       },
     })
   } catch (err) {
-    console.error('Evidence export error:', err)
+    safeError('evidence-export', err)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

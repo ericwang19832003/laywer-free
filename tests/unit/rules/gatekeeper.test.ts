@@ -210,4 +210,412 @@ describe('evaluateGatekeeperRules', () => {
     const actions = evaluateGatekeeperRules(makeInput())
     expect(actions).toEqual([])
   })
+
+  // ── Rule 7: case_removed → unlock understand_removal ────
+  it('unlocks understand_removal when docket result is case_removed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('check_docket_for_answer', 'completed', { docket_result: 'case_removed' }),
+          makeTask('understand_removal', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'understand_removal' },
+    ])
+  })
+
+  it('does not unlock understand_removal for other docket results', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('check_docket_for_answer', 'completed', { docket_result: 'answer_filed' }),
+          makeTask('understand_removal', 'locked'),
+          makeTask('upload_answer', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions.some(a => a.type === 'unlock_task' && a.task_key === 'understand_removal')).toBe(false)
+  })
+
+  // ── Rule 8: understand_removal → choose_removal_strategy ──
+  it('unlocks choose_removal_strategy when understand_removal completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('understand_removal', 'completed'),
+          makeTask('choose_removal_strategy', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'choose_removal_strategy' },
+    ])
+  })
+
+  // ── Rule 9: strategy=accept → prepare_amended_complaint ──
+  it('unlocks prepare_amended_complaint when strategy includes accept', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('choose_removal_strategy', 'completed', { strategy: 'accept' }),
+          makeTask('prepare_amended_complaint', 'locked'),
+          makeTask('prepare_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'prepare_amended_complaint' },
+    ])
+  })
+
+  // ── Rule 10: strategy=remand → prepare_remand_motion ──
+  it('unlocks prepare_remand_motion when strategy includes remand', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('choose_removal_strategy', 'completed', { strategy: 'remand' }),
+          makeTask('prepare_amended_complaint', 'locked'),
+          makeTask('prepare_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'prepare_remand_motion' },
+    ])
+  })
+
+  // ── Rule 9+10: strategy=both → both branches ──
+  it('unlocks both branches when strategy is both', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('choose_removal_strategy', 'completed', { strategy: 'both' }),
+          makeTask('prepare_amended_complaint', 'locked'),
+          makeTask('prepare_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    const keys = actions.map(a => a.type === 'unlock_task' ? a.task_key : null).filter(Boolean)
+    expect(keys).toContain('prepare_amended_complaint')
+    expect(keys).toContain('prepare_remand_motion')
+  })
+
+  // ── Rule 11: prepare_amended_complaint → file_amended_complaint ──
+  it('unlocks file_amended_complaint when prepare_amended_complaint completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('prepare_amended_complaint', 'completed'),
+          makeTask('file_amended_complaint', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'file_amended_complaint' },
+    ])
+  })
+
+  // ── Rule 12: file_amended_complaint → rule_26f_prep ──
+  it('unlocks rule_26f_prep when file_amended_complaint completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('file_amended_complaint', 'completed'),
+          makeTask('rule_26f_prep', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'rule_26f_prep' },
+    ])
+  })
+
+  // ── Rule 13: rule_26f_prep → mandatory_disclosures ──
+  it('unlocks mandatory_disclosures when rule_26f_prep completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('rule_26f_prep', 'completed'),
+          makeTask('mandatory_disclosures', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'mandatory_disclosures' },
+    ])
+  })
+
+  // ── Rule 14: prepare_remand_motion → file_remand_motion ──
+  it('unlocks file_remand_motion when prepare_remand_motion completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('prepare_remand_motion', 'completed'),
+          makeTask('file_remand_motion', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'file_remand_motion' },
+    ])
+  })
+
+  // ── Removal mutual exclusivity with other branches ──
+  it('only unlocks removal branch for case_removed — not default or answer', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('check_docket_for_answer', 'completed', { docket_result: 'case_removed' }),
+          makeTask('default_packet_prep', 'locked'),
+          makeTask('upload_answer', 'locked'),
+          makeTask('understand_removal', 'locked'),
+        ],
+      })
+    )
+
+    const keys = actions.map(a => a.type === 'unlock_task' ? a.task_key : null).filter(Boolean)
+    expect(keys).toContain('understand_removal')
+    expect(keys).not.toContain('default_packet_prep')
+    expect(keys).not.toContain('upload_answer')
+  })
+
+  // ── mandatory_disclosures → discovery_starter_pack ──
+  it('unlocks discovery_starter_pack when mandatory_disclosures completed', () => {
+    const actions = evaluateGatekeeperRules(
+      makeInput({
+        tasks: [
+          makeTask('mandatory_disclosures', 'completed'),
+          makeTask('discovery_starter_pack', 'locked'),
+        ],
+      })
+    )
+
+    expect(actions).toEqual([
+      { type: 'unlock_task', task_key: 'discovery_starter_pack' },
+    ])
+  })
+
+  // ── Rule 16: motion to compel ──────────────────────────
+  describe('Rule 16 — motion to compel', () => {
+    it('unlocks motion_to_compel when discovery_starter_pack completed AND response overdue', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'completed'),
+          makeTask('motion_to_compel', 'locked'),
+        ],
+        discoveryResponseDue: new Date('2026-02-01'),
+        now: new Date('2026-02-15'), // after deadline
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).toContainEqual({ type: 'unlock_task', task_key: 'motion_to_compel' })
+    })
+
+    it('does NOT unlock when response deadline not yet passed', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'completed'),
+          makeTask('motion_to_compel', 'locked'),
+        ],
+        discoveryResponseDue: new Date('2026-03-01'),
+        now: new Date('2026-02-15'), // before deadline
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'motion_to_compel' }))
+    })
+
+    it('does NOT unlock when discovery_starter_pack not completed', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'todo'),
+          makeTask('motion_to_compel', 'locked'),
+        ],
+        discoveryResponseDue: new Date('2026-02-01'),
+        now: new Date('2026-02-15'),
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'motion_to_compel' }))
+    })
+
+    it('does NOT unlock when motion_to_compel already unlocked', () => {
+      const input = makeInput({
+        tasks: [
+          makeTask('discovery_starter_pack', 'completed'),
+          makeTask('motion_to_compel', 'todo'), // already unlocked
+        ],
+        discoveryResponseDue: new Date('2026-02-01'),
+        now: new Date('2026-02-15'),
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'motion_to_compel' }))
+    })
+  })
+
+  // ── Rule 17: trial prep checklist ──────────────────────
+  describe('Rule 17 — trial prep checklist', () => {
+    it('unlocks trial_prep_checklist when trial date within 60 days', () => {
+      const trialDate = new Date('2026-04-01')
+      const input = makeInput({
+        tasks: [makeTask('trial_prep_checklist', 'locked')],
+        trialDate,
+        now: new Date('2026-03-01'), // 31 days away
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).toContainEqual({ type: 'unlock_task', task_key: 'trial_prep_checklist' })
+    })
+
+    it('does NOT unlock when trial date >60 days away', () => {
+      const trialDate = new Date('2026-06-01')
+      const input = makeInput({
+        tasks: [makeTask('trial_prep_checklist', 'locked')],
+        trialDate,
+        now: new Date('2026-03-01'), // 92 days away
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'trial_prep_checklist' }))
+    })
+
+    it('does NOT unlock when no trial date set', () => {
+      const input = makeInput({
+        tasks: [makeTask('trial_prep_checklist', 'locked')],
+        now: new Date('2026-03-01'),
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'trial_prep_checklist' }))
+    })
+  })
+
+  // ── Rule 18: appellate brief ───────────────────────────
+  describe('Rule 18 — appellate brief', () => {
+    it('unlocks appellate_brief when notice_of_appeal in completedMotionTypes', () => {
+      const input = makeInput({
+        tasks: [makeTask('appellate_brief', 'locked')],
+        completedMotionTypes: ['notice_of_appeal'],
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).toContainEqual({ type: 'unlock_task', task_key: 'appellate_brief' })
+    })
+
+    it('does NOT unlock when notice_of_appeal not completed', () => {
+      const input = makeInput({
+        tasks: [makeTask('appellate_brief', 'locked')],
+        completedMotionTypes: [],
+      })
+      const actions = evaluateGatekeeperRules(input)
+      expect(actions).not.toContainEqual(expect.objectContaining({ task_key: 'appellate_brief' }))
+    })
+  })
+
+  // ── PI Removal Rules ───────────────────────────────────
+
+  describe('PI Removal — inject_tasks', () => {
+    it('returns inject_tasks when pi_wait_for_answer completed with case_removed=yes and no removal tasks exist', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+          ],
+        })
+      )
+
+      const injectAction = actions.find((a) => a.type === 'inject_tasks')
+      expect(injectAction).toBeDefined()
+      if (injectAction && injectAction.type === 'inject_tasks') {
+        expect(injectAction.task_definitions).toHaveLength(8)
+        expect(injectAction.task_definitions.map(d => d.task_key)).toContain('understand_removal')
+        expect(injectAction.task_definitions.map(d => d.task_key)).toContain('prepare_remand_motion')
+      }
+
+      const unlockAction = actions.find(
+        (a) => a.type === 'unlock_task' && a.task_key === 'understand_removal'
+      )
+      expect(unlockAction).toBeDefined()
+    })
+
+    it('does NOT inject when removal tasks already exist', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+            makeTask('understand_removal', 'locked'),
+          ],
+        })
+      )
+
+      const injectAction = actions.find((a) => a.type === 'inject_tasks')
+      expect(injectAction).toBeUndefined()
+    })
+
+    it('does NOT inject when case_removed is not yes', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'no' },
+            }),
+          ],
+        })
+      )
+
+      const injectAction = actions.find((a) => a.type === 'inject_tasks')
+      expect(injectAction).toBeUndefined()
+    })
+  })
+
+  describe('PI Removal — resume PI chain', () => {
+    it('unlocks pi_review_answer when file_remand_motion completed', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+            makeTask('file_remand_motion', 'completed'),
+            makeTask('pi_review_answer', 'locked'),
+            makeTask('understand_removal', 'completed'),
+          ],
+        })
+      )
+
+      expect(actions).toContainEqual({
+        type: 'unlock_task',
+        task_key: 'pi_review_answer',
+      })
+    })
+
+    it('unlocks pi_discovery_prep when mandatory_disclosures completed', () => {
+      const actions = evaluateGatekeeperRules(
+        makeInput({
+          tasks: [
+            makeTask('pi_wait_for_answer', 'completed', {
+              guided_answers: { case_removed: 'yes' },
+            }),
+            makeTask('mandatory_disclosures', 'completed'),
+            makeTask('pi_discovery_prep', 'locked'),
+            makeTask('understand_removal', 'completed'),
+          ],
+        })
+      )
+
+      expect(actions).toContainEqual({
+        type: 'unlock_task',
+        task_key: 'pi_discovery_prep',
+      })
+    })
+  })
 })

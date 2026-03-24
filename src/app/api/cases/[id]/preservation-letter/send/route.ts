@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { sendPreservationLetterSchema } from '@/lib/schemas/preservation-letter-send'
 import { sendEmail } from '@/lib/email/provider'
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export async function POST(
   request: NextRequest,
@@ -9,8 +10,13 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase, user } = auth
+
+    // Rate limit: 5 emails per hour per user
+    const rl = checkRateLimit(user.id, 'email', RATE_LIMITS.email.maxRequests, RATE_LIMITS.email.windowMs)
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     const body = await request.json()
     const parsed = sendPreservationLetterSchema.safeParse(body)
@@ -24,7 +30,7 @@ export async function POST(
     const { document_id, to_email } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -38,7 +44,7 @@ export async function POST(
     }
 
     // Verify document exists and belongs to this case
-    const { data: doc, error: docError } = await supabase!
+    const { data: doc, error: docError } = await supabase
       .from('documents')
       .select('id, content_text, sha256, doc_type')
       .eq('id', document_id)
@@ -60,7 +66,7 @@ export async function POST(
     }
 
     // Verify disclaimer was acknowledged for this case
-    const { data: ackEvents } = await supabase!
+    const { data: ackEvents } = await supabase
       .from('task_events')
       .select('id')
       .eq('case_id', caseId)
@@ -78,7 +84,7 @@ export async function POST(
     const bodyPreview = doc.content_text.slice(0, 500)
 
     // Insert communications row (queued)
-    const { data: comm, error: commError } = await supabase!
+    const { data: comm, error: commError } = await supabase
       .from('communications')
       .insert({
         case_id: caseId,
@@ -108,7 +114,7 @@ export async function POST(
 
     // Update communications status
     if (result.success) {
-      await supabase!
+      await supabase
         .from('communications')
         .update({
           status: 'sent',
@@ -117,7 +123,7 @@ export async function POST(
         })
         .eq('id', comm.id)
     } else {
-      await supabase!
+      await supabase
         .from('communications')
         .update({
           status: 'failed',
@@ -126,7 +132,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'preservation_letter_sent',
       payload: {
@@ -144,6 +150,8 @@ export async function POST(
         { status: 502 }
       )
     }
+
+    console.log(`[email-audit] user=${user.id} to=${to_email} type=preservation_letter`)
 
     return NextResponse.json(
       {

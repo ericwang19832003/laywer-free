@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   Select,
   SelectContent,
@@ -23,7 +24,8 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import { UploadIcon, FileIcon, TrashIcon, DownloadIcon } from 'lucide-react'
+import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon, Sparkles, SearchIcon, PencilIcon, CheckIcon, XIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 // ── Types ──────────────────────────────────────────────
 
@@ -76,12 +78,21 @@ function formatDate(dateStr: string): string {
 interface EvidenceVaultProps {
   caseId: string
   initialEvidence: EvidenceItem[]
+  exhibitedIds?: string[]
 }
 
-export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
+export function EvidenceVault({ caseId, initialEvidence, exhibitedIds = [] }: EvidenceVaultProps) {
   // Evidence list state
   const [evidence, setEvidence] = useState<EvidenceItem[]>(initialEvidence)
   const [filterCategory, setFilterCategory] = useState<string>('all')
+
+  // Search & status filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'exhibited' | 'not_exhibited'>('all')
+
+  // Inline edit state
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<{ label: string; notes: string; captured_at: string }>({ label: '', notes: '', captured_at: '' })
 
   // Upload form state
   const [file, setFile] = useState<File | null>(null)
@@ -91,17 +102,28 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    suggested_category: string; relevance_note: string
+  } | null>(null)
+  const [categorizing, setCategorizing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<EvidenceItem | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  // Exhibit state
+  const [exhibitMap, setExhibitMap] = useState<Record<string, string>>({})
+  const [addingExhibit, setAddingExhibit] = useState<string | null>(null)
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
     const dropped = e.dataTransfer.files[0]
-    if (dropped) setFile(dropped)
+    if (dropped) {
+      setFile(dropped)
+      suggestCategory(dropped)
+    }
   }, [])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -112,6 +134,28 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
   const handleDragLeave = useCallback(() => {
     setDragOver(false)
   }, [])
+
+  async function suggestCategory(selectedFile: File) {
+    setCategorizing(true)
+    setAiSuggestion(null)
+    try {
+      const res = await fetch(`/api/cases/${caseId}/evidence/categorize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_name: selectedFile.name, mime_type: selectedFile.type }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.suggestion) {
+          setAiSuggestion(data.suggestion)
+          if (!category) {
+            setCategory(data.suggestion.suggested_category)
+          }
+        }
+      }
+    } catch { /* silent */ }
+    setCategorizing(false)
+  }
 
   async function handleUpload() {
     if (!file) return
@@ -143,6 +187,7 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
       setCategory('')
       setNotes('')
       setCapturedAt('')
+      setAiSuggestion(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
@@ -185,10 +230,117 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
     window.open(url, '_blank')
   }
 
-  const filteredEvidence =
-    filterCategory === 'all'
-      ? evidence
-      : evidence.filter((e) => e.label === filterCategory)
+  async function handleAddToExhibits(item: EvidenceItem) {
+    setAddingExhibit(item.id)
+    try {
+      // 1. Fetch existing exhibit sets
+      const setsRes = await fetch(`/api/cases/${caseId}/exhibit-sets`)
+      if (!setsRes.ok) throw new Error('Failed to load exhibit sets')
+      const { exhibit_sets } = await setsRes.json()
+
+      let setId: string
+
+      if (exhibit_sets.length > 0) {
+        // Use the first (and typically only) set
+        setId = exhibit_sets[0].id
+      } else {
+        // Auto-create one with numeric numbering
+        const createRes = await fetch(`/api/cases/${caseId}/exhibit-sets`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numbering_style: 'numeric' }),
+        })
+        if (!createRes.ok) throw new Error('Failed to create exhibit set')
+        const { exhibit_set } = await createRes.json()
+        setId = exhibit_set.id
+      }
+
+      // 2. Add the exhibit
+      const addRes = await fetch(`/api/exhibit-sets/${setId}/exhibits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evidence_item_id: item.id }),
+      })
+
+      if (addRes.status === 409) {
+        toast('Already in your exhibits.')
+        return
+      }
+
+      if (!addRes.ok) {
+        const err = await addRes.json()
+        toast.error(err.error || 'Something went wrong. Please try again.')
+        return
+      }
+
+      const { exhibit } = await addRes.json()
+      setExhibitMap((prev) => ({ ...prev, [item.id]: exhibit.exhibit_no }))
+      toast.success(`Added as Exhibit ${exhibit.exhibit_no}.`)
+    } catch {
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setAddingExhibit(null)
+    }
+  }
+
+  // ── Inline edit handlers ──────────────────────────
+
+  function startEdit(item: EvidenceItem) {
+    setEditingId(item.id)
+    setEditForm({
+      label: item.label || '',
+      notes: item.notes || '',
+      captured_at: item.captured_at || '',
+    })
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditForm({ label: '', notes: '', captured_at: '' })
+  }
+
+  async function saveEdit(itemId: string) {
+    try {
+      const res = await fetch(`/api/cases/${caseId}/evidence/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      setEvidence((prev) =>
+        prev.map((e) =>
+          e.id === itemId ? { ...e, ...editForm } : e
+        )
+      )
+      setEditingId(null)
+      toast.success('Evidence updated')
+    } catch {
+      toast.error('Failed to update evidence')
+    }
+  }
+
+  // ── Filtered evidence ──────────────────────────────
+
+  const filteredEvidence = evidence.filter((item) => {
+    // Category filter (existing)
+    if (filterCategory !== 'all' && item.label !== filterCategory) return false
+
+    // Search filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      const matchesSearch =
+        item.file_name.toLowerCase().includes(q) ||
+        (item.label?.toLowerCase().includes(q) ?? false) ||
+        (item.notes?.toLowerCase().includes(q) ?? false)
+      if (!matchesSearch) return false
+    }
+
+    // Status filter
+    if (statusFilter === 'exhibited') return exhibitedIds.includes(item.id)
+    if (statusFilter === 'not_exhibited') return !exhibitedIds.includes(item.id)
+
+    return true
+  })
 
   return (
     <div className="space-y-8">
@@ -218,7 +370,10 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
               className="hidden"
               onChange={(e) => {
                 const selected = e.target.files?.[0]
-                if (selected) setFile(selected)
+                if (selected) {
+                  setFile(selected)
+                  suggestCategory(selected)
+                }
               }}
             />
             <UploadIcon className="size-8 text-warm-muted mb-2" />
@@ -240,6 +395,19 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
               </div>
             )}
           </div>
+
+          {categorizing && (
+            <p className="text-xs text-warm-muted animate-pulse">Analyzing file...</p>
+          )}
+          {aiSuggestion && !categorizing && (
+            <div className="flex items-center gap-2 rounded-md bg-calm-indigo/10 px-3 py-2 text-sm">
+              <Sparkles className="h-4 w-4 text-calm-indigo" />
+              <span className="text-warm-muted">
+                Suggested: <strong className="text-warm-text">{aiSuggestion.suggested_category}</strong>
+                {' — '}{aiSuggestion.relevance_note}
+              </span>
+            </div>
+          )}
 
           {/* Category + Date row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -324,15 +492,37 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
           </Select>
         </div>
 
+        {/* Search + Status filter */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-warm-muted" />
+            <Input
+              placeholder="Search evidence..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as 'all' | 'exhibited' | 'not_exhibited')}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All evidence</SelectItem>
+              <SelectItem value="exhibited">Exhibited</SelectItem>
+              <SelectItem value="not_exhibited">Not exhibited</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {filteredEvidence.length === 0 ? (
           <Card>
-            <CardContent className="py-10 text-center">
-              <FileIcon className="size-8 text-warm-muted mx-auto mb-3" />
-              <p className="text-warm-muted">
-                {evidence.length === 0
-                  ? 'No documents yet. Upload your first file.'
-                  : 'No documents match this filter.'}
-              </p>
+            <CardContent className="py-8">
+              <EmptyState
+                illustration={evidence.length === 0 ? 'documents' : 'search'}
+                title={evidence.length === 0 ? 'No documents yet' : 'No documents match this filter'}
+                description={evidence.length === 0 ? 'Upload your first file to get started.' : 'Try adjusting your search or filters.'}
+              />
             </CardContent>
           </Card>
         ) : (
@@ -375,6 +565,34 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
+                      {exhibitMap[item.id] ? (
+                        <Badge variant="secondary" className="font-mono text-xs">
+                          Ex. {exhibitMap[item.id]}
+                        </Badge>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => handleAddToExhibits(item)}
+                          disabled={addingExhibit === item.id}
+                          title="Add to Exhibits"
+                        >
+                          {addingExhibit === item.id ? (
+                            <Loader2Icon className="size-3.5 animate-spin" />
+                          ) : (
+                            <StampIcon className="size-3.5" />
+                          )}
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => startEdit(item)}
+                        title="Edit"
+                        disabled={editingId === item.id}
+                      >
+                        <PencilIcon className="size-3.5" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon-xs"
@@ -394,6 +612,67 @@ export function EvidenceVault({ caseId, initialEvidence }: EvidenceVaultProps) {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Inline edit form */}
+                  {editingId === item.id && (
+                    <div className="mt-3 pt-3 border-t border-warm-border space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-warm-muted">Category</Label>
+                          <Select
+                            value={editForm.label}
+                            onValueChange={(v) => setEditForm((f) => ({ ...f, label: v }))}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CATEGORIES.map((cat) => (
+                                <SelectItem key={cat} value={cat}>
+                                  {cat}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-warm-muted">Date captured</Label>
+                          <Input
+                            type="date"
+                            value={editForm.captured_at}
+                            onChange={(e) => setEditForm((f) => ({ ...f, captured_at: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-warm-muted">Notes</Label>
+                        <Textarea
+                          placeholder="Describe this evidence..."
+                          value={editForm.notes}
+                          onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
+                          maxLength={2000}
+                          className="min-h-16"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => saveEdit(item.id)}
+                        >
+                          <CheckIcon className="size-3.5 mr-1.5" />
+                          Save
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={cancelEdit}
+                        >
+                          <XIcon className="size-3.5 mr-1.5" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

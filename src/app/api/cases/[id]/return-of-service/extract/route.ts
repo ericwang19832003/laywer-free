@@ -18,11 +18,12 @@ export async function GET(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Get most recent non-failed extraction for this case
-    const { data: extraction, error } = await supabase!
+    const { data: extraction, error } = await supabase
       .from('document_extractions')
       .select('id, case_id, court_document_id, extractor, status, confidence, fields, confirmed_by_user, confirmed_fields, created_at')
       .eq('case_id', caseId)
@@ -60,8 +61,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Validate body
     const body = await request.json()
@@ -76,7 +78,7 @@ export async function POST(
     const { court_document_id } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -90,7 +92,7 @@ export async function POST(
     }
 
     // Load court document — verify it's a return_of_service and belongs to this case
-    const { data: doc, error: docError } = await supabase!
+    const { data: doc, error: docError } = await supabase
       .from('court_documents')
       .select('id, case_id, doc_type, storage_path, mime_type')
       .eq('id', court_document_id)
@@ -118,7 +120,7 @@ export async function POST(
     }
 
     // Check for existing non-failed extraction
-    const { data: existing } = await supabase!
+    const { data: existing } = await supabase
       .from('document_extractions')
       .select('id')
       .eq('court_document_id', court_document_id)
@@ -133,7 +135,7 @@ export async function POST(
     }
 
     // Download file from storage
-    const { data: fileData, error: downloadError } = await supabase!.storage
+    const { data: fileData, error: downloadError } = await supabase.storage
       .from('case-documents')
       .download(doc.storage_path)
 
@@ -170,7 +172,7 @@ export async function POST(
     const status = deriveStatus(confidence)
 
     // Insert extraction row
-    const { data: extraction, error: insertError } = await supabase!
+    const { data: extraction, error: insertError } = await supabase
       .from('document_extractions')
       .insert({
         case_id: caseId,
@@ -192,7 +194,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'extraction_completed',
       payload: {

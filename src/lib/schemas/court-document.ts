@@ -10,6 +10,12 @@ export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
 export const DOC_TYPES = [
   'return_of_service',
+  'petition',
+  'answer',
+  'general_denial',
+  'amended_complaint',
+  'motion_to_remand',
+  'default_judgment_packet',
 ] as const
 
 export const courtDocumentSchema = z.object({

@@ -7,11 +7,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', id)
@@ -25,7 +26,7 @@ export async function GET(
     }
 
     // Fetch ALL task_events for the case
-    const { data: events, error: eventsError } = await supabase!
+    const { data: events, error: eventsError } = await supabase
       .from('task_events')
       .select('id, case_id, task_id, kind, payload, created_at, tasks(title)')
       .eq('case_id', id)

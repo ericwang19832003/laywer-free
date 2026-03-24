@@ -6,7 +6,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import { PlusIcon, FolderOpenIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { DiscoveryPack } from './types'
 import { STATUS_STEPS } from './types'
 
@@ -30,6 +32,49 @@ const STATUS_COLORS: Record<string, string> = {
 
 function statusLabel(status: string): string {
   return STATUS_STEPS.find((s) => s.key === status)?.label ?? status
+}
+
+// ── Pack Progress Stepper ─────────────────────────────
+
+function PackProgressStepper({ status }: { status: string }) {
+  const steps = ['draft', 'ready', 'served', 'responses_pending', 'complete']
+  const labels: Record<string, string> = {
+    draft: 'Draft',
+    ready: 'Ready',
+    served: 'Served',
+    responses_pending: 'Responses',
+    complete: 'Done',
+  }
+  const currentIndex = steps.indexOf(status)
+
+  return (
+    <div className="flex items-center gap-1 mt-2">
+      {steps.map((step, i) => (
+        <div key={step} className="flex items-center">
+          {i > 0 && (
+            <div className={cn(
+              'h-px w-3 mx-0.5',
+              i <= currentIndex ? 'bg-calm-green' : 'bg-warm-border'
+            )} />
+          )}
+          <div className="flex flex-col items-center">
+            <div className={cn(
+              'size-2 rounded-full',
+              i < currentIndex ? 'bg-calm-green' :
+              i === currentIndex ? 'bg-calm-indigo' :
+              'bg-warm-border'
+            )} />
+            <span className={cn(
+              'text-[9px] mt-0.5 whitespace-nowrap',
+              i <= currentIndex ? 'text-warm-text' : 'text-warm-muted/60'
+            )}>
+              {labels[step]}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 // ── Component ────────────────────────────────────────
@@ -124,11 +169,16 @@ export function DiscoveryListView({ caseId, initialPacks }: DiscoveryListViewPro
       {/* Pack list */}
       {packs.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center">
-            <FolderOpenIcon className="size-8 text-warm-muted mx-auto mb-3" />
-            <p className="text-warm-muted">
-              No discovery packs yet. Create one to get started.
-            </p>
+          <CardContent className="py-8">
+            <EmptyState
+              illustration="folder"
+              title="No discovery packs yet"
+              description="Create a discovery pack to organize your interrogatories, requests for production, and other discovery documents."
+              action={{
+                label: 'Create Discovery Pack',
+                onClick: () => setShowCreate(true),
+              }}
+            />
           </CardContent>
         </Card>
       ) : (
@@ -164,6 +214,7 @@ export function DiscoveryListView({ caseId, initialPacks }: DiscoveryListViewPro
                     {statusLabel(pack.status)}
                   </Badge>
                 </div>
+                <PackProgressStepper status={pack.status} />
               </CardContent>
             </Card>
           ))}

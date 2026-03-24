@@ -8,8 +8,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = createDeadlineSchema.safeParse(body)
@@ -24,7 +25,7 @@ export async function POST(
     const { key, due_at, source, rationale } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', id)
@@ -38,7 +39,7 @@ export async function POST(
     }
 
     // Insert the deadline
-    const { data: deadline, error: deadlineError } = await supabase!
+    const { data: deadline, error: deadlineError } = await supabase
       .from('deadlines')
       .insert({
         case_id: id,
@@ -82,7 +83,7 @@ export async function POST(
 
     let reminders: unknown[] = []
     if (remindersToInsert.length > 0) {
-      const { data: createdReminders, error: remindersError } = await supabase!
+      const { data: createdReminders, error: remindersError } = await supabase
         .from('reminders')
         .insert(remindersToInsert)
         .select()
@@ -96,7 +97,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: id,
       kind: 'deadline_created',
       payload: {
@@ -109,7 +110,7 @@ export async function POST(
     })
 
     // Fetch the created reminders for the response
-    const { data: fetchedReminders } = await supabase!
+    const { data: fetchedReminders } = await supabase
       .from('reminders')
       .select()
       .eq('deadline_id', deadline.id)
@@ -133,11 +134,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Fetch deadlines with their reminders, ordered by due_at asc
-    const { data: deadlines, error } = await supabase!
+    const { data: deadlines, error } = await supabase
       .from('deadlines')
       .select('*, reminders(*)')
       .eq('case_id', id)

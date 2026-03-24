@@ -12,8 +12,9 @@ export async function POST(
 ) {
   try {
     const { packId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Parse FormData
     const formData = await request.formData()
@@ -48,7 +49,7 @@ export async function POST(
     }
 
     // Fetch pack to verify access and get case_id (RLS handles ownership)
-    const { data: pack, error: packError } = await supabase!
+    const { data: pack, error: packError } = await supabase
       .from('discovery_packs')
       .select('id, case_id')
       .eq('id', packId)
@@ -66,7 +67,7 @@ export async function POST(
     const fileId = crypto.randomUUID()
     const storagePath = `cases/${pack.case_id}/discovery/${packId}/responses/${fileId}`
 
-    const { error: uploadError } = await supabase!.storage
+    const { error: uploadError } = await supabase.storage
       .from('case-documents')
       .upload(storagePath, buffer, {
         contentType: parsed.data.mime_type,
@@ -81,7 +82,7 @@ export async function POST(
     }
 
     // Insert discovery_responses row
-    const { data: response, error: insertError } = await supabase!
+    const { data: response, error: insertError } = await supabase
       .from('discovery_responses')
       .insert({
         pack_id: packId,
@@ -98,7 +99,7 @@ export async function POST(
 
     if (insertError) {
       // Cleanup: remove uploaded file on DB insert failure
-      await supabase!.storage
+      await supabase.storage
         .from('case-documents')
         .remove([storagePath])
 
@@ -109,7 +110,7 @@ export async function POST(
     }
 
     // Write timeline event
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: pack.case_id,
       kind: 'discovery_response_received',
       payload: {

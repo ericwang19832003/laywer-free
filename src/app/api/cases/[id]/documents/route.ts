@@ -8,8 +8,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = createDocumentSchema.safeParse(body)
@@ -23,7 +24,7 @@ export async function POST(
     const { task_id, doc_type, content_text, sha256, metadata } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -37,7 +38,7 @@ export async function POST(
     }
 
     // Determine next version number
-    const { data: existing } = await supabase!
+    const { data: existing } = await supabase
       .from('documents')
       .select('version')
       .eq('case_id', caseId)
@@ -48,7 +49,7 @@ export async function POST(
     const nextVersion = existing && existing.length > 0 ? existing[0].version + 1 : 1
 
     // Insert document
-    const { data: doc, error: docError } = await supabase!
+    const { data: doc, error: docError } = await supabase
       .from('documents')
       .insert({
         case_id: caseId,
@@ -71,7 +72,7 @@ export async function POST(
     }
 
     // Write timeline events
-    await supabase!.from('task_events').insert([
+    await supabase.from('task_events').insert([
       {
         case_id: caseId,
         task_id: task_id ?? null,

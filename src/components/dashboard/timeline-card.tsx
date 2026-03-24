@@ -1,8 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Sparkles } from 'lucide-react'
+import Link from 'next/link'
 
-interface TimelineEvent {
+export interface TimelineEvent {
   id: string
   kind: string
   payload: Record<string, unknown>
@@ -11,10 +15,12 @@ interface TimelineEvent {
 }
 
 interface TimelineCardProps {
+  caseId: string
   events: TimelineEvent[]
+  summary?: { summary: string; key_milestones: string[] } | null
 }
 
-function relativeTime(dateStr: string): string {
+export function relativeTime(dateStr: string): string {
   const now = new Date()
   const date = new Date(dateStr)
   const diffMs = now.getTime() - date.getTime()
@@ -34,7 +40,7 @@ function relativeTime(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function describeEvent(event: TimelineEvent): string {
+export function describeEvent(event: TimelineEvent): string {
   switch (event.kind) {
     case 'case_created':
       return 'Case started'
@@ -72,37 +78,173 @@ function describeEvent(event: TimelineEvent): string {
       if (count === 0) return 'Case rules evaluated'
       return `Case rules updated (${count} ${count === 1 ? 'change' : 'changes'})`
     }
+    case 'objection_review_created':
+      return 'Objection review started'
+    case 'objection_text_extracted': {
+      const status = event.payload?.status as string | undefined
+      if (status === 'needs_review') return 'Text extraction needs review'
+      return 'Response text extracted'
+    }
+    case 'objection_classified': {
+      const itemCount = event.payload?.items_count as number | undefined
+      return itemCount
+        ? `Objections classified (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`
+        : 'Objections classified'
+    }
+    case 'objection_review_confirmed':
+      return 'Objection review confirmed'
+    case 'meet_and_confer_generated':
+      return 'Meet-and-confer note drafted'
+    case 'filing_draft_generated': {
+      const docType = event.payload?.document_type as string | undefined
+      return docType ? `${docType.replace(/_/g, ' ')} draft generated` : 'Filing draft generated'
+    }
+    case 'court_document_uploaded':
+      return 'Court document uploaded'
+    case 'extraction_completed':
+      return 'Document data extracted'
+    case 'deadlines_generated':
+      return 'Case deadlines calculated'
+    case 'evidence_uploaded': {
+      const fileName = event.payload?.file_name as string | undefined
+      return fileName ? `Evidence uploaded: ${fileName}` : 'Evidence uploaded'
+    }
+    case 'evidence_exported':
+      return 'Evidence exported'
+    case 'note_added':
+      return 'Note added'
+    case 'motion_created': {
+      const motionType = event.payload?.motion_type as string | undefined
+      return motionType ? `Motion created: ${motionType.replace(/_/g, ' ')}` : 'Motion created'
+    }
+    case 'meet_and_confer_sent': {
+      const toEmail = event.payload?.to_email as string | undefined
+      return toEmail ? `Meet-and-confer letter sent to ${toEmail}` : 'Meet-and-confer letter sent'
+    }
+    case 'health_alert_triggered':
+      return 'Health alert triggered'
+    case 'reminder_escalated':
+      return 'Deadline reminder escalated'
+    case 'strategy_generated':
+      return 'Strategy recommendations generated'
+    case 'discovery_pack_created':
+      return 'Discovery pack created'
+    case 'discovery_pack_status_changed': {
+      const newStatus = event.payload?.status as string | undefined
+      return newStatus ? `Discovery pack ${newStatus}` : 'Discovery pack updated'
+    }
+    case 'discovery_template_acknowledged':
+      return 'Discovery template acknowledged'
+    case 'discovery_item_added':
+      return 'Discovery item added'
+    case 'discovery_pack_served':
+      return 'Discovery pack served'
+    case 'discovery_packet_exported':
+      return 'Discovery packet exported'
+    case 'discovery_response_received':
+      return 'Discovery response received'
+    case 'discovery_response_deadline_set':
+      return 'Discovery response deadline set'
+    case 'trial_binder_generated':
+      return 'Trial binder generated'
+    case 'trial_binder_failed':
+      return 'Trial binder generation failed'
+    case 'trial_binder_downloaded':
+      return 'Trial binder downloaded'
+    case 'exhibit_set_created':
+      return 'Exhibit set created'
+    case 'exhibit_added':
+      return 'Exhibit added'
+    case 'exhibits_reordered':
+      return 'Exhibits reordered'
+    case 'exhibit_list_exported':
+      return 'Exhibit list exported'
+    case 'exhibit_removed':
+      return 'Exhibit removed'
     default:
       return event.kind.replace(/_/g, ' ')
   }
 }
 
-export function TimelineCard({ events }: TimelineCardProps) {
+export function TimelineCard({ caseId, events: initialEvents, summary }: TimelineCardProps) {
+  const [events, setEvents] = useState(initialEvents)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(initialEvents.length >= 10)
+  const [cursor, setCursor] = useState<string | null>(
+    initialEvents.length > 0 ? initialEvents[initialEvents.length - 1].created_at : null
+  )
+
+  async function loadMore() {
+    if (!cursor || loading) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/cases/${caseId}/timeline?cursor=${encodeURIComponent(cursor)}&limit=10`)
+      if (res.ok) {
+        const data = await res.json()
+        const newEvents = data.events as TimelineEvent[]
+        setEvents((prev) => [...prev, ...newEvents])
+        setHasMore(data.has_more)
+        setCursor(data.next_cursor)
+      }
+    } catch { /* silent */ }
+    setLoading(false)
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg text-warm-text">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
+        {summary && (
+          <div className="mb-4 rounded-lg bg-calm-indigo/5 border border-calm-indigo/20 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-calm-indigo" />
+              <span className="text-xs font-medium text-calm-indigo">AI Summary</span>
+            </div>
+            <p className="text-sm text-warm-muted">{summary.summary}</p>
+            {summary.key_milestones.length > 0 && (
+              <ul className="text-xs text-warm-muted space-y-1">
+                {summary.key_milestones.map((m, i) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-calm-green mt-0.5">•</span> {m}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         {events.length === 0 ? (
           <p className="text-warm-muted text-sm">
             No activity yet. Complete your first step to see it here.
           </p>
         ) : (
-          <ul className="space-y-3">
-            {events.slice(0, 10).map((event) => (
-              <li key={event.id} className="flex items-start gap-3">
-                <span
-                  className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-calm-indigo"
-                  aria-hidden="true"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-warm-text">{describeEvent(event)}</p>
-                  <p className="text-xs text-warm-muted">{relativeTime(event.created_at)}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="space-y-3">
+              {events.map((event) => (
+                <li key={event.id} className="flex items-start gap-3">
+                  <span
+                    className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-calm-indigo"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-warm-text">{describeEvent(event)}</p>
+                    <p className="text-xs text-warm-muted">{relativeTime(event.created_at)}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 flex items-center justify-between">
+              {hasMore && (
+                <Button variant="ghost" size="sm" onClick={loadMore} disabled={loading} className="text-xs">
+                  {loading ? 'Loading...' : 'Load more'}
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" asChild className="text-xs ml-auto">
+                <Link href={`/case/${caseId}/activity`}>View all activity</Link>
+              </Button>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

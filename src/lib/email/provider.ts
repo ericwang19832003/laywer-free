@@ -1,7 +1,10 @@
 /**
  * Email Provider Abstraction
  *
- * In production, swap the stub for a real provider (Resend, SendGrid, etc.).
+ * Provider selection via EMAIL_PROVIDER env var:
+ * - 'stub' (default): Logs to console, returns fake message ID
+ * - 'resend': Sends real email via Resend API
+ *
  * Provider keys are NEVER exposed to the client — this runs server-side only.
  */
 
@@ -20,13 +23,18 @@ export interface SendEmailResult {
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   const provider = process.env.EMAIL_PROVIDER ?? 'stub'
 
+  if (provider === 'resend') {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      console.warn('[EMAIL] RESEND_API_KEY not set — falling back to stub provider')
+      return sendEmailStub(input)
+    }
+    return sendEmailResend(input, apiKey)
+  }
+
   if (provider === 'stub') {
     return sendEmailStub(input)
   }
-
-  // Future: add real provider implementations here
-  // if (provider === 'resend') return sendEmailResend(input)
-  // if (provider === 'sendgrid') return sendEmailSendGrid(input)
 
   return {
     success: false,
@@ -52,5 +60,46 @@ async function sendEmailStub(input: SendEmailInput): Promise<SendEmailResult> {
   return {
     success: true,
     messageId: `stub-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  }
+}
+
+/**
+ * Resend provider for production email delivery.
+ */
+async function sendEmailResend(input: SendEmailInput, apiKey: string): Promise<SendEmailResult> {
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS ?? 'noreply@lawyerfree.app'
+
+  try {
+    const { Resend } = await import('resend')
+    const resend = new Resend(apiKey)
+
+    const { data, error } = await resend.emails.send({
+      from: fromAddress,
+      to: input.to,
+      subject: input.subject,
+      text: input.body,
+    })
+
+    if (error) {
+      console.error('[EMAIL RESEND] Send failed:', error.message)
+      return {
+        success: false,
+        messageId: null,
+        error: error.message,
+      }
+    }
+
+    return {
+      success: true,
+      messageId: data?.id ?? null,
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown Resend error'
+    console.error('[EMAIL RESEND] Exception:', message)
+    return {
+      success: false,
+      messageId: null,
+      error: message,
+    }
   }
 }

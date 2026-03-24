@@ -10,8 +10,9 @@ export async function POST(
 ) {
   try {
     const { id: caseId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     // Validate body
     const body = await request.json()
@@ -26,7 +27,7 @@ export async function POST(
     const { extraction_id, served_at, return_filed_at, service_method, served_to, server_name } = parsed.data
 
     // Verify case exists (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', caseId)
@@ -40,7 +41,7 @@ export async function POST(
     }
 
     // Verify extraction exists and belongs to this case
-    const { data: extraction, error: extractionError } = await supabase!
+    const { data: extraction, error: extractionError } = await supabase
       .from('document_extractions')
       .select('id, case_id')
       .eq('id', extraction_id)
@@ -62,7 +63,7 @@ export async function POST(
 
     // Upsert service_facts (case_id has UNIQUE constraint — idempotent)
     const now = new Date().toISOString()
-    const { data: serviceFacts, error: upsertError } = await supabase!
+    const { data: serviceFacts, error: upsertError } = await supabase
       .from('service_facts')
       .upsert(
         {
@@ -88,7 +89,7 @@ export async function POST(
     }
 
     // Mark extraction as confirmed
-    await supabase!
+    await supabase
       .from('document_extractions')
       .update({
         confirmed_by_user: true,
@@ -99,7 +100,7 @@ export async function POST(
     // --- Generate deadlines (idempotent: delete old system deadlines first) ---
     // Delete existing system-generated deadlines for this case
     // (reminders cascade-delete via FK)
-    await supabase!
+    await supabase
       .from('deadlines')
       .delete()
       .eq('case_id', caseId)
@@ -110,7 +111,7 @@ export async function POST(
     const createdDeadlines: { id: string; key: string; due_at: string }[] = []
 
     for (const dl of computed) {
-      const { data: deadline, error: dlError } = await supabase!
+      const { data: deadline, error: dlError } = await supabase
         .from('deadlines')
         .insert({
           case_id: caseId,
@@ -140,7 +141,7 @@ export async function POST(
           status: 'scheduled' as const,
         }))
 
-        const { error: remErr } = await supabase!
+        const { error: remErr } = await supabase
           .from('reminders')
           .insert(remindersToInsert)
 
@@ -151,7 +152,7 @@ export async function POST(
     }
 
     // Write timeline events
-    await supabase!.from('task_events').insert({
+    await supabase.from('task_events').insert({
       case_id: caseId,
       kind: 'service_facts_confirmed',
       payload: {
@@ -166,7 +167,7 @@ export async function POST(
     })
 
     if (createdDeadlines.length > 0) {
-      await supabase!.from('task_events').insert({
+      await supabase.from('task_events').insert({
         case_id: caseId,
         kind: 'deadlines_generated',
         payload: {

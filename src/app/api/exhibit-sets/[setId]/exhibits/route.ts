@@ -11,8 +11,9 @@ export async function POST(
 ) {
   try {
     const { setId } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = addExhibitSchema.safeParse(body)
@@ -25,7 +26,7 @@ export async function POST(
     }
 
     // Call the atomic RPC — handles locking, numbering, and insert
-    const { data, error: rpcError } = await supabase!
+    const { data, error: rpcError } = await supabase
       .rpc('assign_next_exhibit_number', {
         p_exhibit_set_id: setId,
         p_evidence_item_id: parsed.data.evidence_item_id,
@@ -70,14 +71,14 @@ export async function POST(
     }
 
     // Look up case_id for the timeline event
-    const { data: setData } = await supabase!
+    const { data: setData } = await supabase
       .from('exhibit_sets')
       .select('case_id')
       .eq('id', setId)
       .single()
 
     if (setData) {
-      await supabase!.from('task_events').insert({
+      await supabase.from('task_events').insert({
         case_id: setData.case_id,
         kind: 'exhibit_added',
         payload: {

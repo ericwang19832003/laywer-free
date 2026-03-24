@@ -259,4 +259,76 @@ describe('RLS Isolation', () => {
     expect(error).toBeTruthy()
     expect(error!.code).toBe('23505') // unique_violation
   })
+
+  // =============================================
+  // Trial Binder RLS tests
+  // =============================================
+
+  let userABinderId: string
+
+  it('User A can create a trial binder', async () => {
+    const { data, error } = await userAClient
+      .from('trial_binders')
+      .insert({
+        case_id: userACaseId,
+        created_by: userAId,
+      })
+      .select()
+      .single()
+
+    expect(error).toBeNull()
+    expect(data).toBeTruthy()
+    expect(data!.status).toBe('queued')
+    expect(data!.title).toBe('Trial Binder')
+    userABinderId = data!.id
+  })
+
+  it('User A can read own trial binders', async () => {
+    const { data, error } = await userAClient
+      .from('trial_binders')
+      .select()
+      .eq('case_id', userACaseId)
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(1)
+    expect(data![0].id).toBe(userABinderId)
+  })
+
+  it('User B cannot see User A trial binders', async () => {
+    const { data } = await userBClient
+      .from('trial_binders')
+      .select()
+
+    expect(data).toHaveLength(0)
+  })
+
+  it('User B cannot insert into User A case trial binders', async () => {
+    const { data, error } = await userBClient
+      .from('trial_binders')
+      .insert({
+        case_id: userACaseId,
+        created_by: userBId,
+      })
+      .select()
+
+    // RLS blocks the insert — either error or empty result
+    expect(data?.length ?? 0).toBe(0)
+  })
+
+  it('User A can delete own trial binder', async () => {
+    const { error } = await userAClient
+      .from('trial_binders')
+      .delete()
+      .eq('id', userABinderId)
+
+    expect(error).toBeNull()
+
+    // Verify deleted
+    const { data } = await userAClient
+      .from('trial_binders')
+      .select()
+      .eq('id', userABinderId)
+
+    expect(data).toHaveLength(0)
+  })
 })

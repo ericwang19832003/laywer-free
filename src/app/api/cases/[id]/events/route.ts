@@ -8,8 +8,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const { supabase, error: authError } = await getAuthenticatedClient()
-    if (authError) return authError
+    const auth = await getAuthenticatedClient()
+    if (!auth.ok) return auth.error
+    const { supabase } = auth
 
     const body = await request.json()
     const parsed = createEventSchema.safeParse(body)
@@ -24,7 +25,7 @@ export async function POST(
     const { kind, payload, task_id } = parsed.data
 
     // Verify case exists and user owns it (RLS handles ownership)
-    const { data: caseData, error: caseError } = await supabase!
+    const { data: caseData, error: caseError } = await supabase
       .from('cases')
       .select('id')
       .eq('id', id)
@@ -38,7 +39,7 @@ export async function POST(
     }
 
     // Insert the event
-    const { data: event, error: insertError } = await supabase!
+    const { data: event, error: insertError } = await supabase
       .from('task_events')
       .insert({
         case_id: id,
