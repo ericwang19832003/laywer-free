@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { ClipboardList, Map, CheckCircle, Gavel, Home, CreditCard, Users, Car, MoreHorizontal } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ClipboardList, Map, CheckCircle, Gavel, Home, CreditCard, Users, Car, MoreHorizontal, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SituationCard } from '@/components/onboarding/situation-card'
 
 const SITUATIONS = [
   { icon: Gavel, label: 'Being sued', description: 'Someone filed a case against you', disputeType: 'small_claims' },
@@ -19,15 +20,32 @@ interface OnboardingFlowProps {
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState(1)
+  const [selectedType, setSelectedType] = useState<string | undefined>()
 
-  async function handleSelect(disputeType: string) {
-    try {
-      await fetch('/api/user-preferences', { method: 'POST' })
-    } catch {
-      // Non-blocking — onboarding still works
-    }
-    onComplete(disputeType || undefined)
+  function handleSelect(disputeType: string) {
+    setSelectedType(disputeType || undefined)
+    setStep(3)
   }
+
+  // Screen 3: persist preference then complete
+  useEffect(() => {
+    if (step !== 3) return
+    let cancelled = false
+
+    async function finish() {
+      try {
+        await fetch('/api/user-preferences', { method: 'POST' })
+      } catch {
+        // Non-blocking — onboarding still works
+      }
+      if (!cancelled) {
+        onComplete(selectedType)
+      }
+    }
+    finish()
+
+    return () => { cancelled = true }
+  }, [step, selectedType, onComplete])
 
   if (step === 1) {
     return (
@@ -41,9 +59,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
         <div className="space-y-6 mb-10">
           {[
-            { icon: ClipboardList, step: '1', title: 'Tell us your situation', desc: 'Answer a few questions about your legal matter' },
-            { icon: Map, step: '2', title: 'We build your roadmap', desc: 'Get a personalized step-by-step plan' },
-            { icon: CheckCircle, step: '3', title: 'Follow guided steps', desc: 'Complete tasks at your own pace' },
+            { icon: ClipboardList, step: '1', title: 'Describe your situation', desc: 'Answer a few questions about your legal matter' },
+            { icon: Map, step: '2', title: 'Get AI-guided steps', desc: 'Get a personalized step-by-step plan' },
+            { icon: CheckCircle, step: '3', title: 'File with confidence', desc: 'Complete tasks at your own pace' },
           ].map(({ icon: Icon, step: num, title, desc }) => (
             <div key={num} className="flex items-start gap-4">
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-calm-indigo/10 shrink-0">
@@ -64,37 +82,48 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     )
   }
 
-  return (
-    <div className="max-w-lg mx-auto py-12 px-4">
-      <h2 className="text-2xl font-bold text-warm-text text-center mb-2">
-        What&apos;s your situation?
-      </h2>
-      <p className="text-warm-muted text-center mb-8">
-        We&apos;ll set up your case based on your answer
-      </p>
+  if (step === 2) {
+    return (
+      <div className="max-w-lg mx-auto py-12 px-4">
+        <h2 className="text-2xl font-bold text-warm-text text-center mb-2">
+          What&apos;s your situation?
+        </h2>
+        <p className="text-warm-muted text-center mb-8">
+          We&apos;ll set up your case based on your answer
+        </p>
 
-      <div className="grid grid-cols-2 gap-3">
-        {SITUATIONS.map(({ icon: Icon, label, description, disputeType }) => (
-          <button
-            key={label}
-            onClick={() => handleSelect(disputeType)}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg border border-warm-border bg-white hover:border-calm-indigo/50 hover:bg-calm-indigo/5 transition-colors text-center"
-          >
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-calm-indigo/10">
-              <Icon className="h-5 w-5 text-calm-indigo" />
-            </div>
-            <span className="text-sm font-medium text-warm-text">{label}</span>
-            <span className="text-xs text-warm-muted">{description}</span>
-          </button>
-        ))}
+        <div className="grid grid-cols-2 gap-3">
+          {SITUATIONS.map(({ icon, label, description, disputeType }) => (
+            <SituationCard
+              key={label}
+              icon={icon}
+              label={label}
+              description={description}
+              onSelect={() => handleSelect(disputeType)}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={() => setStep(1)}
+          className="block mx-auto mt-6 text-sm text-warm-muted hover:text-warm-text transition-colors"
+        >
+          &larr; Back
+        </button>
       </div>
+    )
+  }
 
-      <button
-        onClick={() => setStep(1)}
-        className="block mx-auto mt-6 text-sm text-warm-muted hover:text-warm-text transition-colors"
-      >
-        &larr; Back
-      </button>
+  // Screen 3: Loading / transition
+  return (
+    <div className="max-w-lg mx-auto py-20 px-4 text-center">
+      <Loader2 className="h-8 w-8 text-calm-indigo animate-spin mx-auto mb-4" />
+      <h2 className="text-xl font-semibold text-warm-text mb-1">
+        Setting up your case
+      </h2>
+      <p className="text-sm text-warm-muted">
+        This will just take a moment&hellip;
+      </p>
     </div>
   )
 }
