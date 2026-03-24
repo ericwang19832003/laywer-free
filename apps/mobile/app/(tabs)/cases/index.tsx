@@ -9,7 +9,7 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { api } from '../../../lib/api'
-import { ChevronRight } from 'lucide-react-native'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function CaseList() {
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
@@ -77,7 +77,7 @@ export default function CaseList() {
               {item.role} · {item.status}
             </Text>
           </View>
-          <ChevronRight size={20} color="#78716C" />
+          <Ionicons name="chevron-forward" size={20} color="#78716C" />
         </TouchableOpacity>
       )}
     />

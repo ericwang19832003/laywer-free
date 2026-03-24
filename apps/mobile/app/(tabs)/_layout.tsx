@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import { Briefcase, Settings } from 'lucide-react-native'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function TabLayout() {
   return (
@@ -16,14 +16,14 @@ export default function TabLayout() {
         name="cases"
         options={{
           title: 'Cases',
-          tabBarIcon: ({ color, size }) => <Briefcase size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="briefcase-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
     </Tabs>
