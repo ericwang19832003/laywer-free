@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ArrowRight } from 'lucide-react'
 import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
+import { getHealthLabel } from '@/lib/health-labels'
 
 interface CaseCardProps {
   id: string
@@ -19,13 +20,6 @@ interface CaseCardProps {
   tasksTotal: number
   nextDeadline: string | null
   lastActivity: string | null
-}
-
-function healthColor(score: number | null): string {
-  if (score === null) return 'text-warm-muted'
-  if (score >= 70) return 'text-green-600'
-  if (score >= 40) return 'text-amber-600'
-  return 'text-red-600'
 }
 
 function relativeDate(dateStr: string): string {
@@ -55,6 +49,7 @@ export function CaseCard({
   id, county, role, courtType, disputeType, piSubType, createdAt,
   healthScore, tasksCompleted, tasksTotal, nextDeadline, lastActivity,
 }: CaseCardProps) {
+  const healthInfo = getHealthLabel(healthScore)
   const displayCounty = county ? `${county} County` : 'County not set'
   const courtLabel = getCourtLabel(courtType) || null
   const roleLabel = role === 'plaintiff' ? 'Plaintiff' : 'Defendant'
@@ -67,11 +62,13 @@ export function CaseCard({
         <CardContent className="py-4 px-5">
           <div className="flex items-center gap-4">
             {/* Health score */}
-            <div className="shrink-0 text-center w-10">
-              <p className={`text-lg font-semibold ${healthColor(healthScore)}`}>
+            <div className="shrink-0 text-center w-14">
+              <p className={`text-lg font-semibold ${healthInfo.colorClass}`}>
                 {healthScore !== null ? healthScore : '\u2014'}
               </p>
-              <p className="text-[10px] text-warm-muted">health</p>
+              <p className={`text-[10px] ${healthInfo.colorClass}`}>
+                {healthInfo.label}
+              </p>
             </div>
 
             {/* Case identity */}

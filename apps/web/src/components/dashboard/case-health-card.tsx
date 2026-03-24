@@ -99,7 +99,7 @@ export function CaseHealthCard({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-warm-text">Case Health</CardTitle>
+          <CardTitle className="text-lg text-warm-muted">Health &middot; Pending</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-warm-muted mb-4">
