@@ -88,7 +88,7 @@ describe('PriorityAlertsSection', () => {
   })
 
   describe('border colors by level', () => {
-    it('level 3 has red left border', () => {
+    it('level 3 has amber left border', () => {
       render(
         <PriorityAlertsSection
           caseId="case-001"
@@ -96,8 +96,8 @@ describe('PriorityAlertsSection', () => {
         />
       )
       const card = screen.getByTestId('alert-card-esc-001')
-      expect(card.className).toContain('border-l-red-500')
-      expect(card.className).toContain('bg-red-50')
+      expect(card.className).toContain('border-l-amber-500')
+      expect(card.className).toContain('bg-amber-50')
     })
 
     it('level 2 has amber left border', () => {
