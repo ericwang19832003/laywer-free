@@ -5,13 +5,10 @@ import { ProgressCard } from '@/components/dashboard/progress-card'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
-import { SolBanner } from '@/components/dashboard/sol-banner'
-import { FilingInstructionsCard } from '@/components/dashboard/filing-instructions-card'
+import { PriorityBanners } from '@/components/dashboard/priority-banners'
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
 import { SavingsCard } from '@/components/dashboard/savings-card'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
-import { calculateSol } from '@lawyer-free/shared/rules/statute-of-limitations'
-import { getPriorityCards } from '@/lib/dashboard-card-priority'
 import type { ReminderEscalation } from '@lawyer-free/shared/schemas/reminder-escalation'
 import type { DashboardData, SharedCaseData } from './types'
 
@@ -96,43 +93,22 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
     }
   })
 
-  // SOL calculation
-  const intakeKeys = [
-    'pi_intake', 'small_claims_intake', 'lt_intake', 'family_intake',
-    'contract_intake', 'property_dispute_intake', 'other_dispute_intake',
-    're_intake', 'business_intake', 'intake', 'debt_defense_intake',
-  ]
-  const { data: intakeTask } = await supabase
-    .from('tasks')
-    .select('metadata')
-    .eq('case_id', caseId)
-    .in('task_key', intakeKeys)
-    .eq('status', 'completed')
-    .limit(1)
-    .maybeSingle()
-
-  const intakeMeta = intakeTask?.metadata as Record<string, unknown> | null
-  const incidentDate = (intakeMeta?.incident_date as string)
-    ?? (intakeMeta?.contract_date as string)
-    ?? (intakeMeta?.lease_start_date as string)
-    ?? (intakeMeta?.separation_date as string)
-    ?? null
-
-  const rawSol = calculateSol(jurisdiction, disputeType, null, incidentDate)
-  const solResult = { ...rawSol, expiresAt: rawSol.expiresAt?.toISOString() ?? null }
-
   const tasksSummary = dashboard.tasks_summary ?? {}
   const totalTasks = Object.values(tasksSummary).reduce((s: number, v) => s + (v as number), 0)
   const completedTasks = (tasksSummary.completed as number ?? 0) + (tasksSummary.skipped as number ?? 0)
-  const priorityCards = getPriorityCards(disputeType)
 
   return (
     <div className="space-y-6">
       <NextStepCard caseId={caseId} nextTask={dashboard.next_task} taskDescription={taskDescription} />
       <PriorityAlertsSection caseId={caseId} alerts={alerts} />
-      {priorityCards.includes('sol_banner') && (
-        <SolBanner caseId={caseId} sol={solResult} disputeType={disputeType} state={jurisdiction} />
-      )}
+      <PriorityBanners
+        caseId={caseId}
+        disputeType={disputeType}
+        jurisdiction={jurisdiction}
+        courtType={courtType}
+        county={county}
+        placement="focus"
+      />
       <DeadlinesCard caseId={caseId} deadlines={dashboard.upcoming_deadlines} />
       <ProgressCard tasksSummary={dashboard.tasks_summary} />
       <CaseHealthCard
@@ -144,9 +120,6 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
       />
       <ProSeBanner />
       <BackfillBanner caseId={caseId} skippedCount={skippedResult.count ?? 0} />
-      {priorityCards.includes('filing_instructions') && (
-        <FilingInstructionsCard state={jurisdiction} courtType={courtType} county={county} disputeType={disputeType} />
-      )}
       <OutcomePrompt
         caseId={caseId}
         currentOutcome={outcome}

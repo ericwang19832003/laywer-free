@@ -5,10 +5,7 @@ import { CaseComparisonCard } from '@/components/dashboard/case-comparison-card'
 import { InsightsCard } from '@/components/dashboard/insights-card'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
-import { SolBanner } from '@/components/dashboard/sol-banner'
-import { FilingInstructionsCard } from '@/components/dashboard/filing-instructions-card'
-import { calculateSol } from '@lawyer-free/shared/rules/statute-of-limitations'
-import { getPriorityCards } from '@/lib/dashboard-card-priority'
+import { PriorityBanners } from '@/components/dashboard/priority-banners'
 import type { SharedCaseData } from './types'
 
 export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType, county, createdAt }: Omit<SharedCaseData, 'outcome'>) {
@@ -40,31 +37,6 @@ export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType
   const taskCompletionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
   const daysSinceCreation = createdAt ? Math.ceil((Date.now() - new Date(createdAt).getTime()) / 86400000) : 0
 
-  // SOL for non-priority display
-  const priorityCards = getPriorityCards(disputeType)
-  const intakeKeys = [
-    'pi_intake', 'small_claims_intake', 'lt_intake', 'family_intake',
-    'contract_intake', 'property_dispute_intake', 'other_dispute_intake',
-    're_intake', 'business_intake', 'intake', 'debt_defense_intake',
-  ]
-  const { data: intakeTask } = await supabase
-    .from('tasks')
-    .select('metadata')
-    .eq('case_id', caseId)
-    .in('task_key', intakeKeys)
-    .eq('status', 'completed')
-    .limit(1)
-    .maybeSingle()
-
-  const intakeMeta = intakeTask?.metadata as Record<string, unknown> | null
-  const incidentDate = (intakeMeta?.incident_date as string)
-    ?? (intakeMeta?.contract_date as string)
-    ?? (intakeMeta?.lease_start_date as string)
-    ?? (intakeMeta?.separation_date as string)
-    ?? null
-  const rawSol = calculateSol(jurisdiction, disputeType, null, incidentDate)
-  const solResult = { ...rawSol, expiresAt: rawSol.expiresAt?.toISOString() ?? null }
-
   return (
     <div className="space-y-6">
       <ConfidenceScoreCard score={confidenceResult.score} breakdown={confidenceResult.breakdown} />
@@ -80,12 +52,14 @@ export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType
         recommendations={strategyRecs}
         generatedAt={strategyResult.data?.generated_at ?? null}
       />
-      {!priorityCards.includes('sol_banner') && (
-        <SolBanner caseId={caseId} sol={solResult} disputeType={disputeType} state={jurisdiction} />
-      )}
-      {!priorityCards.includes('filing_instructions') && (
-        <FilingInstructionsCard state={jurisdiction} courtType={courtType} county={county} disputeType={disputeType} />
-      )}
+      <PriorityBanners
+        caseId={caseId}
+        disputeType={disputeType}
+        jurisdiction={jurisdiction}
+        courtType={courtType}
+        county={county}
+        placement="overview"
+      />
       <TimelineCard caseId={caseId} events={dashboard?.recent_events ?? []} summary={timelineSummary} />
     </div>
   )
