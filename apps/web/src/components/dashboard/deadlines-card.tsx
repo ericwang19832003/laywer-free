@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   daysUntil,
@@ -28,14 +27,61 @@ interface DeadlinesCardProps {
 /**
  * Filter deadlines: if a confirmed answer deadline exists,
  * hide the estimated one (confirmed supersedes it).
+ * Returns the filtered list plus a map of superseded estimated deadlines
+ * keyed by the base deadline type (e.g. "answer_deadline").
  */
-function filterDeadlines(deadlines: Deadline[]): Deadline[] {
+function filterDeadlines(deadlines: Deadline[]): {
+  visible: Deadline[]
+  superseded: Map<string, Deadline>
+} {
+  const superseded = new Map<string, Deadline>()
   const hasConfirmed = deadlines.some((d) => d.key === 'answer_deadline_confirmed')
-  if (!hasConfirmed) return deadlines
-  return deadlines.filter((d) => d.key !== 'answer_deadline_estimated')
+  if (!hasConfirmed) return { visible: deadlines, superseded }
+  const estimated = deadlines.find((d) => d.key === 'answer_deadline_estimated')
+  if (estimated) superseded.set('answer_deadline', estimated)
+  return {
+    visible: deadlines.filter((d) => d.key !== 'answer_deadline_estimated'),
+    superseded,
+  }
 }
 
-function CountdownBox({ deadline }: { deadline: Deadline }) {
+/** Derive the base deadline type from a key (strip _confirmed/_estimated suffix). */
+function baseDeadlineType(key: string): string {
+  return key.replace(/_confirmed$/, '').replace(/_estimated$/, '')
+}
+
+/** Whether a deadline source indicates it was confirmed by the user or court. */
+function isConfirmedSource(source: string): boolean {
+  return source === 'user_confirmed' || source === 'court_notice'
+}
+
+/** Source badge label for display. */
+function sourceLabel(source: string): string {
+  if (source === 'user_confirmed' || source === 'court_notice') return 'Confirmed'
+  if (source === 'system' || source === 'ai_generated') return 'Estimated'
+  return source.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function SourceBadge({ source }: { source: string }) {
+  const confirmed = isConfirmedSource(source)
+  const label = sourceLabel(source)
+  return (
+    <span
+      data-testid="source-badge"
+      className={`text-xs font-medium ${confirmed ? 'text-calm-green' : 'text-calm-amber'}`}
+    >
+      {label}
+    </span>
+  )
+}
+
+function CountdownBox({
+  deadline,
+  supersededEstimate,
+}: {
+  deadline: Deadline
+  supersededEstimate?: Deadline | null
+}) {
   const days = daysUntil(deadline.due_at)
   const isOverdue = days < 0
   const borderColor = isOverdue ? 'border-destructive' : days === 0 ? 'border-amber-500' : days <= 7 ? 'border-amber-500' : 'border-emerald-500'
@@ -53,8 +99,16 @@ function CountdownBox({ deadline }: { deadline: Deadline }) {
       <div className="space-y-1 min-w-0">
         <p className="text-sm font-medium text-warm-text">
           {formatDeadlineLabel(deadline.key, deadline.label)}
+          <span className="mx-1 text-warm-muted">·</span>
+          <span className="text-xs font-normal text-warm-muted">{formatDateShort(deadline.due_at)}</span>
+          <span className="mx-1 text-warm-muted">·</span>
+          <SourceBadge source={deadline.source} />
         </p>
-        <p className="text-xs text-warm-muted">{formatDateShort(deadline.due_at)}</p>
+        {supersededEstimate && (
+          <p className="text-xs text-warm-muted" data-testid="originally-estimated">
+            Originally estimated: {formatDateShort(supersededEstimate.due_at)}
+          </p>
+        )}
         {isOverdue && (
           <p className="text-xs font-medium text-destructive">This deadline passed. Take action as soon as possible.</p>
         )}
@@ -67,7 +121,7 @@ function CountdownBox({ deadline }: { deadline: Deadline }) {
 }
 
 export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
-  const visible = filterDeadlines(deadlines)
+  const { visible, superseded } = filterDeadlines(deadlines)
 
   // Find the most urgent deadline: earliest future, or most recent overdue
   const sortedByUrgency = [...visible].sort((a, b) => {
@@ -95,7 +149,10 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
         ) : (
           <div className="space-y-4">
             {heroDeadline && (
-              <CountdownBox deadline={heroDeadline} />
+              <CountdownBox
+                deadline={heroDeadline}
+                supersededEstimate={superseded.get(baseDeadlineType(heroDeadline.key))}
+              />
             )}
 
             {otherDeadlines.length > 0 && (
@@ -105,6 +162,8 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
                   const days = daysUntil(deadline.due_at)
                   const isOverdue = days < 0
                   const isUrgent = days >= 0 && days <= 3
+
+                  const estimateForThis = superseded.get(baseDeadlineType(deadline.key))
 
                   return (
                     <li key={deadline.id} className="flex items-center justify-between">
@@ -120,14 +179,13 @@ export function DeadlinesCard({ caseId, deadlines }: DeadlinesCardProps) {
                           {formatDateShort(deadline.due_at)}
                           {countdown && ` — ${countdown}`}
                         </p>
+                        {estimateForThis && (
+                          <p className="text-xs text-warm-muted" data-testid="originally-estimated">
+                            Originally estimated: {formatDateShort(estimateForThis.due_at)}
+                          </p>
+                        )}
                       </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {deadline.source === 'user_confirmed'
-                          ? 'Confirmed'
-                          : deadline.source === 'system'
-                            ? 'Estimated'
-                            : deadline.source}
-                      </Badge>
+                      <SourceBadge source={deadline.source} />
                     </li>
                   )
                 })}
