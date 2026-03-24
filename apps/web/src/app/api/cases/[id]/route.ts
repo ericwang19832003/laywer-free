@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { z } from 'zod'
+import { INPUT_LIMITS } from '@/lib/validation/input-limits'
 
 const casePatchSchema = z.object({
   court_type: z.enum(['jp', 'county', 'district', 'federal']).optional(),
   county: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
+  description: z.string().max(INPUT_LIMITS.CASE_DESCRIPTION).nullable().optional(),
   outcome: z.enum(['won', 'lost', 'settled', 'dismissed', 'continued']).optional(),
 }).strict()
 

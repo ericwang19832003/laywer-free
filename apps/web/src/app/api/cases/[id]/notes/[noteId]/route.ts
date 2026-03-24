@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
+import { INPUT_LIMITS } from '@/lib/validation/input-limits'
 
 const updateNoteSchema = z.object({
-  content: z.string().min(1).max(5000).optional(),
+  content: z.string().min(1).max(INPUT_LIMITS.NOTE_CONTENT).optional(),
   pinned: z.boolean().optional(),
 })
 
