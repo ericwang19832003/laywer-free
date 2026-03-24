@@ -12,6 +12,7 @@ import { getPriorityCards } from '@/lib/dashboard-card-priority'
 import type { SharedCaseData } from './types'
 
 export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType, county, createdAt }: Omit<SharedCaseData, 'outcome'>) {
+  try {
   const supabase = await createClient()
 
   const [confidenceResult, insightsResult, strategyResult, timelineSummaryResult, dashboardResult, evidenceResult] = await Promise.all([
@@ -88,4 +89,13 @@ export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType
       <TimelineCard caseId={caseId} events={dashboard?.recent_events ?? []} summary={timelineSummary} />
     </div>
   )
+  } catch (error) {
+    console.error('OverviewTab error:', error)
+    return (
+      <div className="rounded-xl border border-warm-border bg-white p-6 text-center">
+        <p className="text-warm-text font-medium mb-2">Something went wrong loading this tab.</p>
+        <p className="text-sm text-warm-muted mb-4">Your case data is safe. Try refreshing the page.</p>
+      </div>
+    )
+  }
 }

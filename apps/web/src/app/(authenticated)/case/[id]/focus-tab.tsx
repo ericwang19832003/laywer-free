@@ -16,6 +16,7 @@ import type { ReminderEscalation } from '@lawyer-free/shared/schemas/reminder-es
 import type { DashboardData, SharedCaseData } from './types'
 
 export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, county, outcome, createdAt }: SharedCaseData) {
+  try {
   const supabase = await createClient()
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -127,13 +128,11 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
 
   return (
     <div className="space-y-6">
-      <ProSeBanner />
-      <BackfillBanner caseId={caseId} skippedCount={skippedResult.count ?? 0} />
+      <NextStepCard caseId={caseId} nextTask={dashboard.next_task} taskDescription={taskDescription} />
       <PriorityAlertsSection caseId={caseId} alerts={alerts} />
       {priorityCards.includes('sol_banner') && (
         <SolBanner caseId={caseId} sol={solResult} disputeType={disputeType} state={jurisdiction} />
       )}
-      <NextStepCard caseId={caseId} nextTask={dashboard.next_task} taskDescription={taskDescription} />
       <DeadlinesCard caseId={caseId} deadlines={dashboard.upcoming_deadlines} />
       <ProgressCard tasksSummary={dashboard.tasks_summary} />
       <CaseHealthCard
@@ -143,6 +142,8 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
         score30DaysAgo={score30dData}
         aiTips={aiTips}
       />
+      <ProSeBanner />
+      <BackfillBanner caseId={caseId} skippedCount={skippedResult.count ?? 0} />
       {priorityCards.includes('filing_instructions') && (
         <FilingInstructionsCard state={jurisdiction} courtType={courtType} county={county} disputeType={disputeType} />
       )}
@@ -154,4 +155,13 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
       <SavingsCard disputeType={disputeType} outcome={outcome} userTier="free" />
     </div>
   )
+  } catch (error) {
+    console.error('FocusTab error:', error)
+    return (
+      <div className="rounded-xl border border-warm-border bg-white p-6 text-center">
+        <p className="text-warm-text font-medium mb-2">Something went wrong loading this tab.</p>
+        <p className="text-sm text-warm-muted mb-4">Your case data is safe. Try refreshing the page.</p>
+      </div>
+    )
+  }
 }

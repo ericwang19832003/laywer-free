@@ -15,6 +15,7 @@ interface ToolsTabProps {
 }
 
 export async function ToolsTab({ caseId }: ToolsTabProps) {
+  try {
   const supabase = await createClient()
 
   // Fetch all tools data in parallel
@@ -111,4 +112,13 @@ export async function ToolsTab({ caseId }: ToolsTabProps) {
       <DeleteCaseCard caseId={caseId} />
     </div>
   )
+  } catch (error) {
+    console.error('ToolsTab error:', error)
+    return (
+      <div className="rounded-xl border border-warm-border bg-white p-6 text-center">
+        <p className="text-warm-text font-medium mb-2">Something went wrong loading this tab.</p>
+        <p className="text-sm text-warm-muted mb-4">Your case data is safe. Try refreshing the page.</p>
+      </div>
+    )
+  }
 }
