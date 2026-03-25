@@ -179,15 +179,29 @@ export function NewCaseDialog() {
   const [open, setOpen] = useState(false)
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // Pick up pre-filled dispute type from onboarding flow
+  // Pick up pre-filled values from onboarding flow
   useEffect(() => {
     try {
-      const prefill = sessionStorage.getItem('onboarding_dispute_type')
-      if (prefill && !open) {
-        sessionStorage.removeItem('onboarding_dispute_type')
-        // Pre-fill the dispute type so user skips ahead in the wizard
-        if (prefill as DisputeType) {
-          dispatch({ type: 'SET_DISPUTE_TYPE', disputeType: prefill as DisputeType })
+      const prefillType = sessionStorage.getItem('onboarding_dispute_type')
+      const prefillRole = sessionStorage.getItem('onboarding_role') as 'plaintiff' | 'defendant' | null
+      const prefillState = sessionStorage.getItem('onboarding_state')
+
+      if ((prefillType || prefillRole || prefillState) && !open) {
+        // Pre-fill state selection (skips wizard step 1)
+        if (prefillState) {
+          // Onboarding stores full name; wizard expects State code
+          dispatch({ type: 'SET_STATE', selectedState: prefillState as State })
+          sessionStorage.removeItem('onboarding_state')
+        }
+        // Pre-fill role (skips wizard step 2)
+        if (prefillRole) {
+          dispatch({ type: 'SET_ROLE', role: prefillRole })
+          sessionStorage.removeItem('onboarding_role')
+        }
+        // Pre-fill dispute type (skips wizard step 3)
+        if (prefillType && prefillType as DisputeType) {
+          dispatch({ type: 'SET_DISPUTE_TYPE', disputeType: prefillType as DisputeType })
+          sessionStorage.removeItem('onboarding_dispute_type')
         }
         setOpen(true)
       }
