@@ -73,7 +73,16 @@ QUALITY:
 - Every statement must be specific to this case. Do not use generic filler language or placeholder sentences like "insert details here."
 - Ground every factual assertion in the case data provided. If information is missing, leave a bracketed placeholder (e.g., "[DATE OF INCIDENT]") rather than inventing facts.
 - Use proper legal terminology where appropriate (e.g., "Plaintiff," "Defendant," "WHEREFORE," "premises considered").
-- If a court and jurisdiction are provided, reference them specifically in the document.`
+- If a court and jurisdiction are provided, reference them specifically in the document.
+
+REQUIRED ELEMENTS (apply to ALL documents):
+- Begin every document with today's date in the format: Month Day, Year.
+- Include the sender's full name and address at the top of the document. Use [Your Address] as placeholder if not provided.
+- When referencing a court, use the full official name (e.g., "Superior Court of California, County of Los Angeles") not shorthand.
+- Reference at least one specific legal statute, code section, or regulation relevant to this dispute type and jurisdiction.
+- End every document with a signature block containing: a line for signature (use underscores: ____________________), printed name below, date line, and address.
+- For letters: begin with "Dear [recipient name]:" or "To Whom It May Concern:". For court filings: begin with "IN THE [COURT NAME]" caption.
+- Include the sender's contact information (address, phone, or email) in the header or signature block.`
 
   const prompts: Record<DocumentType, string> = {
     letter: `You are a professional legal document drafting assistant. Generate a formal legal letter suitable for use in a civil legal matter.
