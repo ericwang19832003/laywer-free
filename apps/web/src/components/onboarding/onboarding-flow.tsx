@@ -1,17 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClipboardList, Map, CheckCircle, Gavel, Home, CreditCard, Users, Car, MoreHorizontal, Loader2, Shield, Scale } from 'lucide-react'
+import { ClipboardList, Map, CheckCircle, Gavel, Home, CreditCard, Users, Car, MoreHorizontal, Loader2, Shield, Scale, FileText, Building2, Landmark, Handshake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SituationCard } from '@/components/onboarding/situation-card'
 
-const SITUATIONS = [
+const PLAINTIFF_SITUATIONS = [
+  { icon: Gavel, label: 'Small claims', description: 'Owed money, broken contract, deposit not returned', disputeType: 'small_claims' },
+  { icon: Users, label: 'Family matter', description: 'Divorce, custody, child support, or guardianship', disputeType: 'family' },
+  { icon: Car, label: 'Personal injury', description: 'Accident, medical malpractice, or injury claim', disputeType: 'personal_injury' },
+  { icon: Home, label: 'Landlord-tenant', description: 'Repairs, deposit, or lease dispute', disputeType: 'landlord_tenant' },
+  { icon: Landmark, label: 'Property dispute', description: 'Boundary, easement, or real estate issue', disputeType: 'property' },
+  { icon: Handshake, label: 'Contract dispute', description: 'Breach of contract or agreement', disputeType: 'contract' },
+  { icon: Building2, label: 'Business dispute', description: 'Partnership, fraud, or commercial claim', disputeType: 'business' },
+  { icon: MoreHorizontal, label: 'Something else', description: 'Other civil matter', disputeType: '' },
+] as const
+
+const DEFENDANT_SITUATIONS = [
   { icon: Gavel, label: 'Being sued', description: 'Someone filed a case against you', disputeType: 'small_claims' },
-  { icon: Home, label: 'Facing eviction', description: 'Landlord-tenant dispute', disputeType: 'landlord_tenant' },
-  { icon: CreditCard, label: 'Debt collection', description: 'Being contacted by collectors', disputeType: 'debt_collection' },
-  { icon: Users, label: 'Family matter', description: 'Divorce, custody, or support', disputeType: 'family' },
-  { icon: Car, label: 'Personal injury', description: 'Accident or injury claim', disputeType: 'personal_injury' },
-  { icon: MoreHorizontal, label: 'Something else', description: 'Contract, property, or other', disputeType: '' },
+  { icon: Home, label: 'Facing eviction', description: 'Landlord is trying to remove you', disputeType: 'landlord_tenant' },
+  { icon: CreditCard, label: 'Debt collection', description: 'Collector or creditor demanding payment', disputeType: 'debt_collection' },
+  { icon: Users, label: 'Family matter', description: 'Responding to divorce, custody, or support filing', disputeType: 'family' },
+  { icon: FileText, label: 'Contract claim against me', description: 'Accused of breaching a contract', disputeType: 'contract' },
+  { icon: Building2, label: 'Business claim against me', description: 'Commercial dispute or lawsuit', disputeType: 'business' },
+  { icon: MoreHorizontal, label: 'Something else', description: 'Other civil matter', disputeType: '' },
 ] as const
 
 const SUPPORTED_STATES = [
@@ -180,17 +192,22 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   if (step === 3) {
+    const situations = role === 'plaintiff' ? PLAINTIFF_SITUATIONS : DEFENDANT_SITUATIONS
+    const heading = role === 'plaintiff'
+      ? 'What type of case are you filing?'
+      : 'What type of case is against you?'
+
     return (
       <div className="max-w-lg mx-auto py-12 px-4">
         <h2 className="text-2xl font-bold text-warm-text text-center mb-2">
-          What&apos;s your situation?
+          {heading}
         </h2>
         <p className="text-warm-muted text-center mb-8">
           We&apos;ll set up your case based on your answer
         </p>
 
         <div className="grid grid-cols-2 gap-3">
-          {SITUATIONS.map(({ icon, label, description, disputeType }) => (
+          {situations.map(({ icon, label, description, disputeType }) => (
             <SituationCard
               key={label}
               icon={icon}
