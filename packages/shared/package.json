@@ -1,0 +1,34 @@
+{
+  "name": "@lawyer-free/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas": "./src/schemas/index.ts",
+    "./schemas/*": "./src/schemas/*",
+    "./guided-steps": "./src/guided-steps/index.ts",
+    "./guided-steps/*": "./src/guided-steps/*",
+    "./rules": "./src/rules/index.ts",
+    "./rules/*": "./src/rules/*",
+    "./discovery": "./src/discovery/index.ts",
+    "./discovery/*": "./src/discovery/*",
+    "./motions": "./src/motions/index.ts",
+    "./motions/*": "./src/motions/*",
+    "./courts": "./src/courts/index.ts",
+    "./courts/*": "./src/courts/*",
+    "./subscription": "./src/subscription/index.ts",
+    "./subscription/*": "./src/subscription/*",
+    "./types": "./src/types/index.ts",
+    "./types/*": "./src/types/*",
+    "./api-client": "./src/api-client/index.ts",
+    "./api-client/*": "./src/api-client/*"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
