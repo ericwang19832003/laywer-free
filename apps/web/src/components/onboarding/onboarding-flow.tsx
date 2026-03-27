@@ -63,10 +63,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     let cancelled = false
 
     async function finish() {
-      try {
-        await fetch('/api/user-preferences', { method: 'POST' })
-      } catch {
-        // Non-blocking — onboarding still works
+      let retries = 0
+      const maxRetries = 2
+      while (retries <= maxRetries) {
+        try {
+          const res = await fetch('/api/user-preferences', { method: 'POST' })
+          if (res.ok) break
+          retries++
+        } catch {
+          retries++
+        }
+        if (retries <= maxRetries) {
+          await new Promise(r => setTimeout(r, 500 * retries))
+        }
       }
       if (!cancelled) {
         onComplete(selectedType)

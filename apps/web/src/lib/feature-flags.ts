@@ -2,12 +2,12 @@
 // Uses Vercel Flags SDK for edge-optimized flag evaluation
 
 export const FEATURE_FLAGS = {
-  // New dispute type wizards (Sprint 2)
-  wizard_contract: false,
-  wizard_property: false,
-  wizard_real_estate: false,
-  wizard_business: false,
-  wizard_other: false,
+  // New dispute type wizards (Sprint 2) — all implemented, enabled
+  wizard_contract: true,
+  wizard_property: true,
+  wizard_real_estate: true,
+  wizard_business: true,
+  wizard_other: true,
 } as const
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS

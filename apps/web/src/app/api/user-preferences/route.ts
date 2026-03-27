@@ -9,7 +9,10 @@ export async function POST() {
 
   const { error } = await supabase
     .from('user_preferences')
-    .upsert({ user_id: user.id, onboarding_completed: true, updated_at: new Date().toISOString() })
+    .upsert(
+      { user_id: user.id, onboarding_completed: true, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    )
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
