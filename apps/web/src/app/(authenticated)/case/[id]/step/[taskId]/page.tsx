@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { transformDemandLetterToFiling } from '@/lib/demand-letter-prefill'
 import { WelcomeStep } from '@/components/step/welcome-step'
 import { IntakeStep } from '@/components/step/intake-step'
 import { UploadReturnOfServiceStep } from '@/components/step/upload-return-of-service-step'
@@ -96,6 +97,13 @@ import { familyTempOrdersPrepConfig } from '@lawyer-free/shared/guided-steps/fam
 import { familyPropertyDivisionGuideConfig } from '@lawyer-free/shared/guided-steps/family/family-property-division-guide'
 import { familyCustodyFactorsConfig } from '@lawyer-free/shared/guided-steps/family/family-custody-factors'
 import { familyUncontestedPathConfig } from '@lawyer-free/shared/guided-steps/family/family-uncontested-path'
+import { createResponseCheckpointConfig } from '@lawyer-free/shared/guided-steps/family/family-response-checkpoint'
+import { createPostDecreeConfig } from '@lawyer-free/shared/guided-steps/family/family-post-decree'
+import { uccjeaAffidavitConfig } from '@lawyer-free/shared/guided-steps/family/family-uccjea-affidavit'
+import { agOptionConfig } from '@lawyer-free/shared/guided-steps/family/family-ag-option'
+import { spousalEligibilityConfig } from '@lawyer-free/shared/guided-steps/family/family-spousal-eligibility'
+import { paternityConfig } from '@lawyer-free/shared/guided-steps/family/family-paternity'
+import { standingOrdersConfig } from '@lawyer-free/shared/guided-steps/family/family-standing-orders'
 // Personal injury depth guided-step configs
 import { piDamagesCalculationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-damages-calculation'
 import { piPipClaimConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pip-claim'
@@ -377,6 +385,46 @@ export default async function StepPage({
       }
     }
     task.metadata = merged
+  }
+
+  // Smart pre-fill: carry demand letter data forward into petition wizards
+  // so users don't re-enter parties, facts, and damages they already provided.
+  const FILING_TO_DEMAND_LETTER: Record<string, string> = {
+    prepare_filing: 'demand_letter',
+    prepare_small_claims_filing: 'sc_demand_letter',
+    prepare_landlord_tenant_filing: 'prepare_lt_demand_letter',
+    prepare_pi_petition: 'prepare_pi_demand_letter',
+    contract_prepare_filing: 'contract_demand_letter',
+    property_prepare_filing: 'property_demand_letter',
+    re_prepare_filing: 're_demand_letter',
+    biz_partnership_prepare_filing: 'biz_partnership_demand_letter',
+    biz_employment_prepare_filing: 'biz_employment_demand_letter',
+    biz_b2b_prepare_filing: 'biz_b2b_demand_letter',
+    other_prepare_filing: 'other_demand_letter',
+  }
+  const demandLetterKey = FILING_TO_DEMAND_LETTER[task.task_key]
+  if (demandLetterKey) {
+    const { data: dlRow } = await supabase
+      .from('tasks').select('metadata')
+      .eq('case_id', id).eq('task_key', demandLetterKey)
+      .eq('status', 'completed').maybeSingle()
+    const dlMeta = (dlRow?.metadata as Record<string, unknown>) ?? {}
+    // Only pre-fill if demand letter was completed and has data
+    if (Object.keys(dlMeta).length > 0) {
+      const currentMeta = (task.metadata ?? {}) as Record<string, unknown>
+      const prefilled = transformDemandLetterToFiling(dlMeta, task.task_key)
+      // Merge: demand letter provides base, existing wizard values take precedence
+      for (const [key, value] of Object.entries(prefilled)) {
+        if (
+          value !== null &&
+          value !== undefined &&
+          currentMeta[key] === undefined
+        ) {
+          currentMeta[key] = value
+        }
+      }
+      task.metadata = currentMeta
+    }
   }
 
   switch (task.task_key) {
@@ -1197,6 +1245,47 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={familyCustodyFactorsConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'family_uncontested_path':
       return <GuidedStep caseId={id} taskId={taskId} config={familyUncontestedPathConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+
+    // Family law — Response checkpoint (6 sub-types)
+    case 'divorce_response_checkpoint':
+      return <GuidedStep caseId={id} taskId={taskId} config={createResponseCheckpointConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_response_checkpoint':
+      return <GuidedStep caseId={id} taskId={taskId} config={createResponseCheckpointConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_response_checkpoint':
+      return <GuidedStep caseId={id} taskId={taskId} config={createResponseCheckpointConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_response_checkpoint':
+      return <GuidedStep caseId={id} taskId={taskId} config={createResponseCheckpointConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_response_checkpoint':
+      return <GuidedStep caseId={id} taskId={taskId} config={createResponseCheckpointConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_response_checkpoint':
+      return <GuidedStep caseId={id} taskId={taskId} config={createResponseCheckpointConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Post-decree (6 sub-types)
+    case 'divorce_post_decree':
+      return <GuidedStep caseId={id} taskId={taskId} config={createPostDecreeConfig('divorce')} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_post_decree':
+      return <GuidedStep caseId={id} taskId={taskId} config={createPostDecreeConfig('custody')} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_post_decree':
+      return <GuidedStep caseId={id} taskId={taskId} config={createPostDecreeConfig('child_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'visitation_post_decree':
+      return <GuidedStep caseId={id} taskId={taskId} config={createPostDecreeConfig('visitation')} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_post_decree':
+      return <GuidedStep caseId={id} taskId={taskId} config={createPostDecreeConfig('spousal_support')} existingAnswers={task.metadata?.guided_answers} />
+    case 'mod_post_decree':
+      return <GuidedStep caseId={id} taskId={taskId} config={createPostDecreeConfig('modification')} existingAnswers={task.metadata?.guided_answers} />
+
+    // Family law — Sub-type specific steps
+    case 'custody_uccjea_affidavit':
+      return <GuidedStep caseId={id} taskId={taskId} config={uccjeaAffidavitConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'child_support_ag_option':
+      return <GuidedStep caseId={id} taskId={taskId} config={agOptionConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'spousal_support_eligibility':
+      return <GuidedStep caseId={id} taskId={taskId} config={spousalEligibilityConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'custody_paternity':
+    case 'child_support_paternity':
+      return <GuidedStep caseId={id} taskId={taskId} config={paternityConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'divorce_standing_orders':
+      return <GuidedStep caseId={id} taskId={taskId} config={standingOrdersConfig} existingAnswers={task.metadata?.guided_answers} />
 
     // Debt defense task chain steps
     case 'debt_defense_intake':

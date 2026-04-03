@@ -40,6 +40,22 @@ export const propertyDivisionConfig: GuidedStepConfig = {
       prompt: 'Have you obtained valuations for major assets?',
       helpText: 'Real estate appraisals, business valuations, and retirement account statements help ensure fair division.',
     },
+    {
+      id: 'retirement_accounts',
+      type: 'yes_no',
+      prompt: 'Does either spouse have retirement accounts (401(k), pension, IRA)?',
+    },
+    {
+      id: 'qdro_warning',
+      type: 'info',
+      prompt: 'IMPORTANT — QDRO REQUIRED FOR RETIREMENT ACCOUNTS:\n\nDividing 401(k)s and pensions requires a Qualified Domestic Relations Order (QDRO) — a separate legal document the plan administrator must approve.\n\n\u2022 TexasLawHelp does NOT provide QDRO forms\n\u2022 A missing or defective QDRO can permanently lose your community interest in the retirement plan\n\u2022 QDRO specialists typically charge $500\u2013$1,500 — far less than the benefits at stake\n\u2022 The QDRO must be included with or shortly after the final decree\n\u2022 IRAs can be divided by transfer incident to divorce without a QDRO, but must follow IRS rules\n\nSTRONG RECOMMENDATION: Hire a QDRO specialist or family law attorney for this part, even if you handle the rest yourself.',
+      showIf: (a) => a.retirement_accounts === 'yes',
+    },
+    {
+      id: 'debt_creditor_warning',
+      type: 'info',
+      prompt: 'DEBT REMINDER: Creditors are NOT bound by the divorce decree. If your name is on a joint debt (mortgage, credit card, car loan), the creditor can still pursue you even if the decree assigns that debt to your spouse. Consider requiring refinancing as part of the settlement — especially for mortgages.',
+    },
   ],
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
@@ -66,6 +82,11 @@ export const propertyDivisionConfig: GuidedStepConfig = {
       items.push({ status: 'needed', text: 'Obtain valuations for major assets.' })
     }
 
+    if (answers.retirement_accounts === 'yes') {
+      items.push({ status: 'needed', text: 'Retirement accounts require a QDRO. Strongly consider hiring a QDRO specialist ($500–$1,500).' })
+    }
+
+    items.push({ status: 'info', text: 'Creditors are NOT bound by the decree — joint debts can still be collected from either spouse.' })
     items.push({ status: 'info', text: 'Texas divides community property "just and right" — not necessarily 50/50.' })
     return items
   },
