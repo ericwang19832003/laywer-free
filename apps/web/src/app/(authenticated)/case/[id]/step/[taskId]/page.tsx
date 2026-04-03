@@ -85,6 +85,13 @@ import { debtEvidenceRulesConfig } from '@lawyer-free/shared/guided-steps/debt-d
 import { debtContinuanceRequestConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-continuance-request'
 import { debtWitnessPrepConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-witness-prep'
 import { debtCreditDisputeGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-credit-dispute-guide'
+import { debtDiscoveryResponseConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-discovery-response'
+import { debtExemptionClaimConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-exemption-claim'
+import { debtCourtTypeGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-court-type-guide'
+import { debtStandingChallengeConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-standing-challenge'
+import { debtBusinessRecordsChallengeConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-business-records-challenge'
+import { debtPreAnswerSettlementConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-pre-answer-settlement'
+import { debtAppealProcessConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-appeal-process'
 // Landlord-tenant depth guided-step configs
 // Family law depth guided-step configs
 import { familyFilingGuideConfig } from '@lawyer-free/shared/guided-steps/family/family-filing-guide'
@@ -1363,6 +1370,20 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={debtWitnessPrepConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'debt_credit_dispute':
       return <GuidedStep caseId={id} taskId={taskId} config={debtCreditDisputeGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_court_type_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtCourtTypeGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_pre_answer_settlement':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtPreAnswerSettlementConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_standing_challenge':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtStandingChallengeConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_discovery_response':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtDiscoveryResponseConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_business_records_challenge':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtBusinessRecordsChallengeConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_exemption_claim':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtExemptionClaimConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_appeal_process':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtAppealProcessConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_prep':
       return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':

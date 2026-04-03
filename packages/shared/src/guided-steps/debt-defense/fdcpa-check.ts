@@ -1,11 +1,30 @@
 import type { GuidedStepConfig } from '../types'
 
 export const fdcpaCheckConfig: GuidedStepConfig = {
-  title: 'Check for Collector Violations',
+  title: 'Check for Collector Violations (FDCPA & TDCPA)',
   reassurance:
-    'Debt collectors must follow strict rules. If they broke them, you may have additional defenses or even a counterclaim.',
+    'Debt collectors must follow strict federal and Texas rules. If they broke them, you may have additional defenses or even a counterclaim worth real money.',
 
   questions: [
+    {
+      id: 'tdcpa_intro',
+      type: 'info',
+      prompt:
+        'This step checks for violations under TWO laws:\n\n1. FEDERAL (FDCPA) — Applies to third-party debt collectors. Statutory damages up to $1,000 per lawsuit.\n\n2. TEXAS (TDCPA / Texas Finance Code Ch. 392) — Applies to BOTH debt collectors AND original creditors (broader protection). TDCPA violations automatically become DTPA violations, which can mean TREBLE DAMAGES (3x your actual damages) for knowing or intentional conduct.\n\nIf the company suing you is the original creditor (not a debt buyer), the TDCPA still protects you even though the FDCPA may not.',
+    },
+    {
+      id: 'plaintiff_is_original',
+      type: 'yes_no',
+      prompt: 'Is the plaintiff the original creditor (not a debt buyer or collection agency)?',
+      helpText: 'The FDCPA only covers third-party collectors, but the TDCPA covers original creditors too.',
+    },
+    {
+      id: 'original_creditor_info',
+      type: 'info',
+      prompt:
+        'Since this is the original creditor, the federal FDCPA may not apply — but the Texas TDCPA still does. All the violations below are also prohibited under Texas law. If you find violations, you can pursue a counterclaim under the TDCPA/DTPA.',
+      showIf: (answers) => answers.plaintiff_is_original === 'yes',
+    },
     {
       id: 'called_odd_hours',
       type: 'yes_no',
@@ -211,7 +230,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
 
       items.push({
         status: 'needed',
-        text: 'Document each violation with dates, times, and any evidence (call logs, voicemails, letters). You may have a counterclaim for up to $1,000 in statutory damages per lawsuit under FDCPA § 1692k.',
+        text: 'Document each violation with dates, times, and any evidence (call logs, voicemails, letters). Potential damages: up to $1,000 statutory (FDCPA § 1692k) + actual damages. Under Texas TDCPA/DTPA, knowing violations can result in TREBLE damages (3x actual damages).',
       })
     }
 

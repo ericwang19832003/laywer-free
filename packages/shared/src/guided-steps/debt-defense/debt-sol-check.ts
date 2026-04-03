@@ -40,14 +40,38 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       id: 'recent_payment',
       type: 'yes_no',
       prompt: 'Have you made any payment on this debt in the last 4 years, even a small one?',
-      helpText: 'Any payment — even $1 — restarts the statute of limitations in Texas.',
+      helpText: 'Any payment — even $1 — may restart the statute of limitations in Texas.',
+    },
+    {
+      id: 'who_is_suing',
+      type: 'single_choice',
+      prompt: 'Who is suing you — the original creditor or a debt buyer?',
+      options: [
+        { value: 'original_creditor', label: 'Original creditor (the company I borrowed from)' },
+        { value: 'debt_buyer', label: 'Debt buyer (a company that purchased the debt)' },
+        { value: 'not_sure', label: 'Not sure' },
+      ],
+      showIf: (answers) => answers.recent_payment === 'yes',
+    },
+    {
+      id: 'sol_2019_reform',
+      type: 'info',
+      prompt:
+        '2019 TEXAS REFORM — IMPORTANT PROTECTION:\n\nUnder Texas Finance Code § 392.307 (effective 2019), if a DEBT BUYER is suing you, a partial payment does NOT restart the statute of limitations. This law was specifically designed to stop debt buyers from tricking consumers into making small payments to restart an expired SOL.\n\nThis protection applies to debt buyers and third-party collectors — NOT to original creditors.\n\nIf the SOL had already expired before you made that payment, the debt buyer cannot use the payment to revive the case.',
+      showIf: (answers) => answers.recent_payment === 'yes' && (answers.who_is_suing === 'debt_buyer' || answers.who_is_suing === 'not_sure'),
     },
     {
       id: 'sol_restart_info',
       type: 'info',
       prompt:
-        'Since you made a payment, the statute of limitations may have restarted from that payment date. Use the date of your most recent payment as the start date instead of the original default date.',
-      showIf: (answers) => answers.recent_payment === 'yes',
+        'Since you made a payment to the original creditor, the statute of limitations may have restarted from that payment date. Use the date of your most recent payment as the start date instead of the original default date.',
+      showIf: (answers) => answers.recent_payment === 'yes' && answers.who_is_suing === 'original_creditor',
+    },
+    {
+      id: 'sol_vs_credit_reporting',
+      type: 'info',
+      prompt:
+        'IMPORTANT DISTINCTION: The statute of limitations (4 years) is different from the credit reporting period (7 years). Even if the SOL has expired and they can\'t sue you, the debt may still appear on your credit report for up to 7 years from the date of first delinquency. These are separate clocks.',
     },
     {
       id: 'sol_credit_card_info',
