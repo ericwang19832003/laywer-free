@@ -190,6 +190,13 @@ import { ltWritOfPossessionConfig } from '@lawyer-free/shared/guided-steps/landl
 import { ltRepairRequestConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-repair-request'
 import { ltEvictionResponseConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-response'
 import { ltHabitabilityChecklistConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-habitability-checklist'
+import { ltSb38AwarenessConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-sb38-awareness'
+import { ltFederalPropertyCheckConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-federal-property-check'
+import { ltRetaliationDefenseConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-retaliation-defense'
+import { ltRentIntoRegistryConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-rent-into-registry'
+import { ltPostEvictionRightsConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-post-eviction-rights'
+import { ltConstructiveEvictionConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-constructive-eviction'
+import { ltCodeEnforcementConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-code-enforcement'
 import { PIIntakeStep } from '@/components/step/personal-injury/pi-intake-step'
 import { PIDemandLetterStep } from '@/components/step/personal-injury/pi-demand-letter-step'
 import { PersonalInjuryWizard } from '@/components/step/personal-injury-wizard'
@@ -1230,6 +1237,20 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={ltLeaseTerminationGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'lt_writ_of_possession':
       return <GuidedStep caseId={id} taskId={taskId} config={ltWritOfPossessionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_sb38_awareness':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltSb38AwarenessConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_federal_property_check':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltFederalPropertyCheckConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_retaliation_defense':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltRetaliationDefenseConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_rent_into_registry':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltRentIntoRegistryConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_post_eviction_rights':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltPostEvictionRightsConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_constructive_eviction':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltConstructiveEvictionConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'lt_code_enforcement':
+      return <GuidedStep caseId={id} taskId={taskId} config={ltCodeEnforcementConfig} existingAnswers={task.metadata?.guided_answers} />
 
     // Family law depth steps
     case 'family_filing_guide':

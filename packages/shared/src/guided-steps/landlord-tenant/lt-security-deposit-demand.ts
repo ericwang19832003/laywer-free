@@ -27,15 +27,24 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
       id: 'forwarding_address_warning',
       type: 'info',
       prompt:
-        "You MUST provide a written forwarding address. Without it, the 30-day clock doesn't start. Send it now via certified mail.",
+        "CRITICAL: You MUST provide a written forwarding address. The 30-day clock does NOT start from your move-out date — it starts from the date you provide BOTH: (1) vacated the property AND (2) delivered a written forwarding address to the landlord.\n\nSend it now via certified mail with return receipt requested. Keep the receipt as proof of the date. Until you provide the forwarding address, the landlord's obligation to return the deposit is delayed.\n\nNote: Even without a forwarding address, you do NOT forfeit the deposit (\u00a792.107). You can still sue to recover it.",
       showIf: (answers) =>
         answers.moved_out === 'yes' && answers.forwarding_address === 'no',
     },
     {
+      id: 'forwarding_address_date',
+      type: 'text',
+      prompt: 'When did you provide the written forwarding address?',
+      placeholder: 'MM/DD/YYYY',
+      helpText: 'The 30-day clock starts from THIS date (or your move-out date, whichever is LATER). Not from the day you moved out.',
+      showIf: (answers) =>
+        answers.moved_out === 'yes' && answers.forwarding_address === 'yes',
+    },
+    {
       id: 'over_30_days',
       type: 'yes_no',
-      prompt: 'Has it been more than 30 days since move-out?',
-      showIf: (answers) => answers.moved_out === 'yes',
+      prompt: 'Has it been more than 30 days since you provided the forwarding address?',
+      showIf: (answers) => answers.moved_out === 'yes' && answers.forwarding_address === 'yes',
     },
     {
       id: 'violation_info',
