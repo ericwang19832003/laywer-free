@@ -70,6 +70,37 @@ export function PIIntakeStep({
     (meta.police_report_files as UploadedFile[]) ?? []
   )
 
+  // Government entity detection
+  const [govEmployeeOnDuty, setGovEmployeeOnDuty] = useState(
+    (meta.gov_employee_on_duty as string) ?? ''
+  )
+  const [govProperty, setGovProperty] = useState(
+    (meta.gov_property as string) ?? ''
+  )
+  const [govVehicle, setGovVehicle] = useState(
+    (meta.gov_vehicle as string) ?? ''
+  )
+  const [govEntityType, setGovEntityType] = useState(
+    (meta.gov_entity_type as string) ?? ''
+  )
+  const [govEntityName, setGovEntityName] = useState(
+    (meta.gov_entity_name as string) ?? ''
+  )
+
+  // SOL tolling
+  const [minorAtIncident, setMinorAtIncident] = useState(
+    (meta.minor_at_incident as string) ?? ''
+  )
+  const [mentalIncapacity, setMentalIncapacity] = useState(
+    (meta.mental_incapacity as string) ?? ''
+  )
+  const [discoveredLater, setDiscoveredLater] = useState(
+    (meta.discovered_later as string) ?? ''
+  )
+
+  // Derived
+  const isGovEntity = govEmployeeOnDuty === 'yes' || govProperty === 'yes' || govVehicle === 'yes'
+
   // -- SOL warning calculator --
 
   function getSolWarning(): { show: boolean; daysRemaining: number } | null {
@@ -112,6 +143,15 @@ export function PIIntakeStep({
       incident_files: incidentFiles,
       detail_files: detailFiles,
       police_report_files: policeReportFiles,
+      gov_employee_on_duty: govEmployeeOnDuty || null,
+      gov_property: govProperty || null,
+      gov_vehicle: govVehicle || null,
+      gov_entity_type: isGovEntity ? govEntityType || null : null,
+      gov_entity_name: isGovEntity ? govEntityName.trim() || null : null,
+      government_entity_detected: isGovEntity,
+      minor_at_incident: minorAtIncident || null,
+      mental_incapacity: mentalIncapacity || null,
+      discovered_later: discoveredLater || null,
       guided_answers: { case_stage: caseStage },
     }
   }
@@ -137,6 +177,24 @@ export function PIIntakeStep({
     const metadata = buildMetadata()
     await patchTask('in_progress', metadata)
     await patchTask('completed')
+
+    // Inject Tort Claims tasks if government entity detected
+    if (isGovEntity) {
+      try {
+        await fetch(`/api/cases/${caseId}/inject-tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            task_keys: ['pi_tort_claims_notice', 'pi_tort_claims_tracking'],
+            insert_after: 'pi_intake',
+            incident_date: incidentDate,
+            gov_entity_type: govEntityType,
+          }),
+        })
+      } catch (e) {
+        console.error('Failed to inject Tort Claims tasks:', e)
+      }
+    }
   }
 
   async function handleSave() {
@@ -274,6 +332,46 @@ export function PIIntakeStep({
           </div>
         </>
       )}
+
+      <div>
+        <dt className="text-sm font-medium text-warm-muted">
+          Government entity involved
+        </dt>
+        <dd className="text-warm-text mt-0.5">
+          {isGovEntity ? (
+            <>
+              Yes
+              {govEntityName.trim() && (
+                <span className="text-warm-muted ml-2">
+                  ({govEntityName.trim()}
+                  {govEntityType && ` — ${govEntityType}`})
+                </span>
+              )}
+            </>
+          ) : govEmployeeOnDuty ? (
+            'No'
+          ) : (
+            'Not answered'
+          )}
+        </dd>
+      </div>
+
+      <div>
+        <dt className="text-sm font-medium text-warm-muted">
+          SOL tolling factors
+        </dt>
+        <dd className="text-warm-text mt-0.5">
+          {minorAtIncident === 'yes'
+            ? 'Minor at time of incident'
+            : mentalIncapacity === 'yes'
+              ? 'Mental incapacity at time of incident'
+              : discoveredLater === 'yes'
+                ? 'Injury discovered at a later date'
+                : minorAtIncident
+                  ? 'None'
+                  : 'Not answered'}
+        </dd>
+      </div>
     </dl>
   )
 
@@ -591,6 +689,265 @@ export function PIIntakeStep({
           </>
         )}
 
+        {/* Government Entity Check */}
+        <div className="space-y-4">
+          <label className="text-sm font-medium text-warm-text">
+            Government Entity Check
+          </label>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-warm-text">
+              Was the at-fault party a government employee acting on duty?
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setGovEmployeeOnDuty('yes')}
+                className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                  govEmployeeOnDuty === 'yes'
+                    ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                    : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setGovEmployeeOnDuty('no')}
+                className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                  govEmployeeOnDuty === 'no'
+                    ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                    : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+
+          {govEmployeeOnDuty === 'no' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-warm-text">
+                Did it happen on government property (e.g. city park, public building)?
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGovProperty('yes')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    govProperty === 'yes'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGovProperty('no')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    govProperty === 'no'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          )}
+
+          {govEmployeeOnDuty === 'no' && govProperty === 'no' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-warm-text">
+                Was a government vehicle involved?
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGovVehicle('yes')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    govVehicle === 'yes'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGovVehicle('no')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    govVehicle === 'no'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isGovEntity && (
+            <>
+              <div className="space-y-2">
+                <label
+                  htmlFor="pi-gov-entity-type"
+                  className="text-sm font-medium text-warm-text"
+                >
+                  Type of government entity
+                </label>
+                <select
+                  id="pi-gov-entity-type"
+                  value={govEntityType}
+                  onChange={(e) => setGovEntityType(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Select...</option>
+                  <option value="city">City / Municipality</option>
+                  <option value="county">County</option>
+                  <option value="state">State of Texas</option>
+                  <option value="federal">Federal</option>
+                  <option value="school_district">School District</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="pi-gov-entity-name"
+                  className="text-sm font-medium text-warm-text"
+                >
+                  Name of government entity
+                </label>
+                <input
+                  id="pi-gov-entity-name"
+                  type="text"
+                  placeholder="e.g. City of Austin, TxDOT, AISD"
+                  value={govEntityName}
+                  onChange={(e) => setGovEntityName(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
+                <p className="text-sm font-medium text-warm-text">
+                  &#x26A0; Texas Tort Claims Act Applies
+                </p>
+                <p className="text-xs text-warm-muted mt-1">
+                  Claims against government entities in Texas must follow the
+                  Texas Tort Claims Act (Tex. Civ. Prac. &amp; Rem. Code Ch.
+                  101). This typically requires filing a formal notice of claim
+                  within 6 months of the incident. We&apos;ll add the required
+                  steps to your case automatically.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Statute of Limitations Tolling */}
+        <div className="space-y-4">
+          <label className="text-sm font-medium text-warm-text">
+            Statute of Limitations
+          </label>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-warm-text">
+              Were you a minor (under 18) at the time of the incident?
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setMinorAtIncident('yes')}
+                className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                  minorAtIncident === 'yes'
+                    ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                    : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setMinorAtIncident('no')}
+                className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                  minorAtIncident === 'no'
+                    ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                    : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+
+          {minorAtIncident !== 'yes' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-warm-text">
+                Were you mentally incapacitated at the time of the incident?
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMentalIncapacity('yes')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    mentalIncapacity === 'yes'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMentalIncapacity('no')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    mentalIncapacity === 'no'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          )}
+
+          {minorAtIncident !== 'yes' && mentalIncapacity !== 'yes' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-warm-text">
+                Did you discover the injury or damage at a later date?
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDiscoveredLater('yes')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    discoveredLater === 'yes'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDiscoveredLater('no')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    discoveredLater === 'no'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Texas PI SOL info callout */}
         <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
           <p className="text-xs font-medium text-warm-text">
@@ -605,6 +962,19 @@ export function PIIntakeStep({
             {isPropertyDamage ? 'date of the incident' : 'date of injury'} (Tex.
             Civ. Prac. &amp; Rem. Code &sect; 16.003). Filing after this
             deadline can result in your case being dismissed.
+          </p>
+        </div>
+
+        {/* 51% Rule / Proportionate Responsibility */}
+        <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
+          <p className="text-xs font-medium text-warm-text">
+            Texas 51% Rule (Proportionate Responsibility)
+          </p>
+          <p className="text-xs text-warm-muted mt-0.5">
+            Under Texas law (Tex. Civ. Prac. &amp; Rem. Code Ch. 33), you
+            cannot recover damages if you are found to be more than 50%
+            responsible for the incident. If your responsibility is 50% or less,
+            your recovery is reduced by your percentage of fault.
           </p>
         </div>
       </div>
