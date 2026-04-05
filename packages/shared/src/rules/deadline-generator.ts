@@ -243,6 +243,26 @@ export function generateDeadlines(
       continue
     }
 
+    // --- Conditional metadata check: skip if condition not met ---
+    if (rule.condition_metadata_field && rule.condition_metadata_values) {
+      const parts = rule.condition_metadata_field.split('.')
+      let value: unknown = input.taskMetadata
+      for (const part of parts) {
+        if (value && typeof value === 'object') {
+          value = (value as Record<string, unknown>)[part]
+        } else {
+          value = undefined
+          break
+        }
+      }
+      if (
+        typeof value !== 'string' ||
+        !rule.condition_metadata_values.includes(value)
+      ) {
+        continue
+      }
+    }
+
     // --- Determine the reference date ---
     let referenceDate: Date
 
