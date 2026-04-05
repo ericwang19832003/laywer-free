@@ -35,6 +35,14 @@ export interface DeadlineRule {
   consequence: string
   /** Event key that satisfies/clears this deadline (optional) */
   condition_event?: string
+  /**
+   * Dot-notation path in task metadata to check before creating this deadline.
+   * When set, the deadline is only created if the resolved value is in
+   * `condition_metadata_values`.
+   */
+  condition_metadata_field?: string
+  /** Allowed values — deadline created only when the field's value is in this array */
+  condition_metadata_values?: string[]
 }
 
 // ---------------------------------------------------------------------------
@@ -52,6 +60,9 @@ const DIVORCE_WAITING_CONSEQUENCE =
 
 const PO_HEARING_CONSEQUENCE =
   'The court must set a full hearing within 14 days of issuing a temporary ex parte protective order.'
+
+const UM_UIM_NOTICE_CONSEQUENCE =
+  'Most UM/UIM policies require notification within 30 days. Failure to notify your insurer in time may jeopardize your UM/UIM claim.'
 
 // ---------------------------------------------------------------------------
 // Service deadline trigger tasks
@@ -155,6 +166,18 @@ function buildDisputeSpecificRules(): DeadlineRule[] {
       reference: 'task_completed_at' as const,
       apply_rule_4: true,
       consequence: PO_HEARING_CONSEQUENCE,
+    },
+    // UM/UIM 30-day insurer notification (only when at-fault has no/unknown insurance)
+    {
+      trigger_task: 'pi_insurance_communication',
+      deadline_key: 'um_uim_notice_30day',
+      deadline_label: 'UM/UIM Insurer Notification Deadline',
+      offset_days: 30,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: UM_UIM_NOTICE_CONSEQUENCE,
+      condition_metadata_field: 'guided_answers.at_fault_has_insurance',
+      condition_metadata_values: ['no', 'unknown'],
     },
   ]
 }
