@@ -131,21 +131,28 @@ function getStepsForSubType(subType: string): WizardStep[] {
   const medical: WizardStep = { id: 'medical', title: 'Medical Treatment', subtitle: 'Your medical providers and costs.' }
   const damages: WizardStep = { id: 'damages', title: 'Your Damages', subtitle: 'Calculate your total damages.' }
   const insurance: WizardStep = { id: 'insurance', title: 'Insurance Information', subtitle: 'Your insurance details.' }
+  const reliefLevelStep: WizardStep = { id: 'relief_level', title: 'Relief Level (Required)', subtitle: 'Select the amount you seek to recover.' }
+  const filingVenue: WizardStep = { id: 'filing_venue', title: 'Filing Venue', subtitle: 'Where should your case be filed?' }
+  const causeOfAction: WizardStep = { id: 'cause_of_action', title: 'Your Legal Claim', subtitle: 'Describe the legal basis for your claim.' }
+  const petitionDamages: WizardStep = { id: 'petition_damages', title: 'Your Damages', subtitle: 'Itemize your damages for the petition.' }
+  const juryDemandStep: WizardStep = { id: 'jury_demand', title: 'Jury Trial', subtitle: 'Do you want a jury to decide your case?' }
   const venue: WizardStep = { id: 'venue', title: 'Where to File', subtitle: "We'll help you pick the right court." }
   const howToFile: WizardStep = { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how to submit your petition.' }
   const review: WizardStep = { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' }
 
   const common = [preflight, incident]
 
+  const petitionSteps = [reliefLevelStep, filingVenue, causeOfAction, petitionDamages, juryDemandStep]
+
   // Property damage cases: no injuries/medical steps
   if (isPropertyDamageSubType(subType)) {
     if (subType === 'vehicle_damage') {
-      return [...common, otherDriver, damageDetails, damages, insurance, venue, howToFile, review]
+      return [...common, otherDriver, damageDetails, damages, insurance, ...petitionSteps, venue, howToFile, review]
     }
-    return [...common, damageDetails, damages, insurance, venue, howToFile, review]
+    return [...common, damageDetails, damages, insurance, ...petitionSteps, venue, howToFile, review]
   }
 
-  const tail = [injuries, medical, damages, insurance, venue, howToFile, review]
+  const tail = [injuries, medical, damages, insurance, ...petitionSteps, venue, howToFile, review]
 
   if (isMotorVehicleSubType(subType)) {
     return [...common, otherDriver, ...tail]
@@ -171,6 +178,42 @@ function getDraftTitle(subType: string): string {
 /* ------------------------------------------------------------------ */
 /*  Default severity multiplier                                        */
 /* ------------------------------------------------------------------ */
+
+function getDefaultDuty(subType?: string): string {
+  switch (subType) {
+    case 'auto_accident':
+    case 'pedestrian_cyclist':
+    case 'rideshare':
+    case 'uninsured_motorist':
+      return 'Defendant owed a duty to operate their motor vehicle in a safe and prudent manner, obeying all traffic laws and exercising ordinary care.'
+    case 'slip_and_fall':
+      return 'Defendant owed a duty to maintain their premises in a reasonably safe condition and to warn of known hazards.'
+    case 'dog_bite':
+      return 'Defendant owed a duty to control their animal and prevent it from causing harm to others.'
+    case 'product_liability':
+      return 'Defendant owed a duty to design, manufacture, and market a product that was reasonably safe for its intended use.'
+    default:
+      return 'Defendant owed a duty of ordinary care to prevent harm to others.'
+  }
+}
+
+function getBreachPlaceholder(subType?: string): string {
+  switch (subType) {
+    case 'auto_accident':
+    case 'pedestrian_cyclist':
+    case 'rideshare':
+    case 'uninsured_motorist':
+      return 'e.g. Defendant ran a red light, was texting while driving, failed to yield...'
+    case 'slip_and_fall':
+      return 'e.g. Defendant failed to clean up a spill, failed to post warning signs...'
+    case 'dog_bite':
+      return 'e.g. Defendant allowed their dog to roam unleashed despite prior biting incidents...'
+    case 'product_liability':
+      return 'e.g. Defendant sold a product with a known manufacturing defect...'
+    default:
+      return 'Describe how the defendant failed to meet their duty of care...'
+  }
+}
 
 function defaultMultiplier(severity: string): number {
   switch (severity) {
@@ -391,6 +434,40 @@ export function PersonalInjuryWizard({
   const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
     (meta.filing_method as 'online' | 'in_person') ?? ''
   )
+
+  /* ---- Petition builder fields ---- */
+  const [reliefLevel, setReliefLevel] = useState(
+    (meta.relief_level as string) ?? ''
+  )
+  const [venueCounty, setVenueCounty] = useState(
+    (meta.venue_county as string) ?? ''
+  )
+  const [venueBasis, setVenueBasis] = useState(
+    (meta.venue_basis as string) ?? ''
+  )
+  const [defendantCounty, setDefendantCounty] = useState(
+    (meta.defendant_county as string) ?? ''
+  )
+  const [juryDemand, setJuryDemand] = useState(
+    (meta.jury_demand as string) ?? ''
+  )
+  const [duty, setDuty] = useState(
+    (meta.cause_duty as string) ?? getDefaultDuty(piSubType)
+  )
+  const [breach, setBreach] = useState(
+    (meta.cause_breach as string) ?? ''
+  )
+  const [causationText, setCausationText] = useState(
+    (meta.cause_causation as string) ?? ''
+  )
+  const [pastMedical, setPastMedical] = useState((meta.damages_past_medical as string) ?? '')
+  const [futureMedical, setFutureMedical] = useState((meta.damages_future_medical as string) ?? '')
+  const [pastLostWages, setPastLostWages] = useState((meta.damages_past_lost_wages as string) ?? '')
+  const [futureLostEarning, setFutureLostEarning] = useState((meta.damages_future_lost_earning as string) ?? '')
+  const [painSuffering, setPainSuffering] = useState((meta.damages_pain_suffering as boolean) ?? false)
+  const [mentalAnguish, setMentalAnguish] = useState((meta.damages_mental_anguish as boolean) ?? false)
+  const [physicalImpairment, setPhysicalImpairment] = useState((meta.damages_physical_impairment as boolean) ?? false)
+  const [disfigurement, setDisfigurement] = useState((meta.damages_disfigurement as boolean) ?? false)
 
   /* ---- Wizard / draft state ---- */
   const [currentStep, setCurrentStep] = useState(
@@ -644,6 +721,24 @@ export function PersonalInjuryWizard({
       cause_number: causeNumber || null,
       // Filing method
       filing_method: filingMethod || null,
+      // Petition builder
+      relief_level: reliefLevel || null,
+      discovery_level: reliefLevel === '250k_or_less' ? 1 : 2,
+      venue_county: venueCounty || null,
+      venue_basis: venueBasis || null,
+      defendant_county: defendantCounty || null,
+      jury_demand: juryDemand === 'yes',
+      cause_duty: duty || null,
+      cause_breach: breach.trim() || null,
+      cause_causation: causationText.trim() || null,
+      damages_past_medical: pastMedical || null,
+      damages_future_medical: futureMedical || null,
+      damages_past_lost_wages: pastLostWages || null,
+      damages_future_lost_earning: futureLostEarning || null,
+      damages_pain_suffering: painSuffering,
+      damages_mental_anguish: mentalAnguish,
+      damages_physical_impairment: physicalImpairment,
+      damages_disfigurement: disfigurement,
       // Draft
       draft_text: draft || null,
       final_text: draft || null,
@@ -694,6 +789,22 @@ export function PersonalInjuryWizard({
       courtType,
       causeNumber,
       filingMethod,
+      reliefLevel,
+      venueCounty,
+      venueBasis,
+      defendantCounty,
+      juryDemand,
+      duty,
+      breach,
+      causationText,
+      pastMedical,
+      futureMedical,
+      pastLostWages,
+      futureLostEarning,
+      painSuffering,
+      mentalAnguish,
+      physicalImpairment,
+      disfigurement,
       draft,
       annotations,
       currentStep,
@@ -799,6 +910,16 @@ export function PersonalInjuryWizard({
         return effectiveGrandTotal > 0
       case 'insurance':
         return true
+      case 'relief_level':
+        return reliefLevel !== ''
+      case 'filing_venue':
+        return venueCounty.trim() !== ''
+      case 'cause_of_action':
+        return duty.trim() !== '' && breach.trim() !== '' && causationText.trim() !== ''
+      case 'petition_damages':
+        return true
+      case 'jury_demand':
+        return juryDemand !== ''
       case 'venue':
         return county.trim() !== '' && courtType !== ''
       case 'how_to_file':
@@ -821,6 +942,12 @@ export function PersonalInjuryWizard({
     injuryDescription,
     injurySeverity,
     effectiveGrandTotal,
+    reliefLevel,
+    venueCounty,
+    duty,
+    breach,
+    causationText,
+    juryDemand,
     county,
     courtType,
     filingMethod,
@@ -1579,6 +1706,302 @@ export function PersonalInjuryWizard({
         )
 
       /* ============================================================ */
+      /*  RELIEF LEVEL                                                 */
+      /* ============================================================ */
+      case 'relief_level':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              Texas requires you to state the level of relief you seek. This determines discovery rules and limits your maximum recovery.
+            </p>
+
+            <div className="space-y-3">
+              {([
+                { value: '250k_or_less', label: '$250,000 or less', desc: 'Level 1 expedited — faster discovery, 15 interrogatories, 180-day discovery limit.' },
+                { value: '250k_to_1m', label: '$250,001 to $1,000,000', desc: 'Standard Level 2 — 25 interrogatories, 50 hours depositions.' },
+                { value: 'over_1m', label: 'Over $1,000,000', desc: 'Standard Level 2 — 25 interrogatories, 50 hours depositions.' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setReliefLevel(opt.value)}
+                  className={`w-full text-left rounded-lg border p-4 transition-colors ${
+                    reliefLevel === opt.value
+                      ? 'border-calm-indigo bg-calm-indigo/5'
+                      : 'border-warm-border hover:border-warm-border/80'
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${reliefLevel === opt.value ? 'text-calm-indigo' : 'text-warm-text'}`}>
+                    {opt.label}
+                  </p>
+                  <p className="text-xs text-warm-muted mt-1">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
+              <div className="flex gap-2">
+                <AlertTriangle className="h-4 w-4 text-calm-amber shrink-0 mt-0.5" />
+                <p className="text-xs text-warm-muted">
+                  <span className="font-medium text-warm-text">Important:</span> You cannot recover more than the level you select. Choose carefully based on your total expected damages.
+                </p>
+              </div>
+            </div>
+
+            {reliefLevel && (
+              <div className="rounded-lg bg-warm-surface p-3">
+                <p className="text-xs text-warm-muted">
+                  Discovery level: <span className="font-medium text-warm-text">{reliefLevel === '250k_or_less' ? 'Level 1 (expedited)' : 'Level 2 (standard)'}</span>
+                </p>
+              </div>
+            )}
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  FILING VENUE                                                 */
+      /* ============================================================ */
+      case 'filing_venue':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              Venue determines which county court will hear your case. In Texas, you generally file where the incident occurred or where the defendant resides.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="venue-county">County Where Incident Occurred</Label>
+              <Input
+                id="venue-county"
+                placeholder="e.g. Travis"
+                value={venueCounty}
+                onChange={(e) => setVenueCounty(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="defendant-county">County of Defendant&apos;s Residence</Label>
+              <Input
+                id="defendant-county"
+                placeholder="e.g. Harris (if different from incident county)"
+                value={defendantCounty}
+                onChange={(e) => setDefendantCounty(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Venue Basis</Label>
+              <div className="space-y-2">
+                {([
+                  { value: 'incident', label: 'County where the incident occurred' },
+                  { value: 'defendant_residence', label: "County of defendant's residence" },
+                  { value: 'plaintiff_residence', label: "County of plaintiff's residence (if applicable)" },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setVenueBasis(opt.value)}
+                    className={`w-full text-left rounded-lg border p-3 transition-colors ${
+                      venueBasis === opt.value
+                        ? 'border-calm-indigo bg-calm-indigo/5'
+                        : 'border-warm-border hover:border-warm-border/80'
+                    }`}
+                  >
+                    <p className={`text-sm ${venueBasis === opt.value ? 'text-calm-indigo font-medium' : 'text-warm-text'}`}>
+                      {opt.label}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {venueCounty && (
+              <div className="rounded-lg bg-warm-surface p-3">
+                <p className="text-xs text-warm-muted">
+                  Recommended venue: <span className="font-medium text-warm-text">{venueCounty} County</span>
+                  {venueBasis === 'incident' && ' (where the incident occurred)'}
+                  {venueBasis === 'defendant_residence' && defendantCounty && ` — or ${defendantCounty} County (defendant's residence)`}
+                </p>
+              </div>
+            )}
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  CAUSE OF ACTION                                              */
+      /* ============================================================ */
+      case 'cause_of_action':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              A negligence claim requires three elements: duty, breach, and causation. We&apos;ve pre-filled the duty based on your case type.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="cause-duty">Duty</Label>
+              <Textarea
+                id="cause-duty"
+                value={duty}
+                onChange={(e) => setDuty(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-warm-muted">
+                What legal obligation did the defendant owe you?
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cause-breach">Breach</Label>
+              <Textarea
+                id="cause-breach"
+                placeholder={getBreachPlaceholder(piSubType)}
+                value={breach}
+                onChange={(e) => setBreach(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-warm-muted">
+                How did the defendant fail to meet their duty?
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cause-causation">Causation</Label>
+              <Textarea
+                id="cause-causation"
+                placeholder="Describe how the defendant's breach directly caused your injuries and damages..."
+                value={causationText}
+                onChange={(e) => setCausationText(e.target.value)}
+                rows={3}
+              />
+              <p className="text-xs text-warm-muted">
+                How did the breach directly cause your injuries or damages?
+              </p>
+            </div>
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  PETITION DAMAGES                                             */
+      /* ============================================================ */
+      case 'petition_damages':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              Itemize the damages you are claiming in your petition. Dollar amounts can be estimates.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="past-medical">Past Medical Expenses ($)</Label>
+              <Input
+                id="past-medical"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={pastMedical}
+                onChange={(e) => setPastMedical(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="future-medical">Future Medical Expenses ($)</Label>
+              <Input
+                id="future-medical"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={futureMedical}
+                onChange={(e) => setFutureMedical(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="past-lost-wages">Past Lost Wages ($)</Label>
+              <Input
+                id="past-lost-wages"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={pastLostWages}
+                onChange={(e) => setPastLostWages(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="future-lost-earning">Future Lost Earning Capacity ($)</Label>
+              <Input
+                id="future-lost-earning"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={futureLostEarning}
+                onChange={(e) => setFutureLostEarning(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <Label>Non-Economic Damages</Label>
+              <div className="space-y-2">
+                {([
+                  { id: 'pain-suffering', label: 'Pain and suffering', checked: painSuffering, onChange: setPainSuffering },
+                  { id: 'mental-anguish', label: 'Mental anguish', checked: mentalAnguish, onChange: setMentalAnguish },
+                  { id: 'physical-impairment', label: 'Physical impairment', checked: physicalImpairment, onChange: setPhysicalImpairment },
+                  { id: 'disfigurement', label: 'Disfigurement', checked: disfigurement, onChange: setDisfigurement },
+                ] as const).map((item) => (
+                  <div key={item.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={item.id}
+                      checked={item.checked}
+                      onCheckedChange={(c) => item.onChange(c === true)}
+                    />
+                    <Label htmlFor={item.id} className="text-sm cursor-pointer">
+                      {item.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  JURY DEMAND                                                  */
+      /* ============================================================ */
+      case 'jury_demand':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              You have a constitutional right to a jury trial. Juries tend to be more sympathetic to injured plaintiffs. The jury fee is $30-$50.
+            </p>
+
+            <div className="space-y-3">
+              {([
+                { value: 'yes', label: 'Yes, I want a jury trial', desc: 'A panel of 6 or 12 jurors will decide your case. Jury fee of $30-$50 applies.' },
+                { value: 'no', label: 'No, bench trial is fine', desc: 'The judge alone will decide your case. No jury fee required.' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setJuryDemand(opt.value)}
+                  className={`w-full text-left rounded-lg border p-4 transition-colors ${
+                    juryDemand === opt.value
+                      ? 'border-calm-indigo bg-calm-indigo/5'
+                      : 'border-warm-border hover:border-warm-border/80'
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${juryDemand === opt.value ? 'text-calm-indigo' : 'text-warm-text'}`}>
+                    {opt.label}
+                  </p>
+                  <p className="text-xs text-warm-muted mt-1">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+
+      /* ============================================================ */
       /*  VENUE                                                        */
       /* ============================================================ */
       case 'venue': {
@@ -1846,6 +2269,71 @@ export function PersonalInjuryWizard({
               <ReviewRow label="Your carrier" value={yourInsuranceCarrier || 'Not provided'} />
               <ReviewRow label="Your policy #" value={yourPolicyNumber || 'Not provided'} />
               <ReviewRow label="UM/UIM coverage" value={umUimCoverage ? 'Yes' : 'No'} />
+            </ReviewSection>
+
+            {/* Relief Level */}
+            <ReviewSection
+              title="Relief Level"
+              stepId="relief_level"
+              onEdit={handleReviewEdit}
+            >
+              <ReviewRow label="Level" value={
+                reliefLevel === '250k_or_less' ? '$250,000 or less' :
+                reliefLevel === '250k_to_1m' ? '$250,001 to $1,000,000' :
+                reliefLevel === 'over_1m' ? 'Over $1,000,000' : 'Not selected'
+              } />
+              <ReviewRow label="Discovery level" value={reliefLevel === '250k_or_less' ? 'Level 1 (expedited)' : 'Level 2 (standard)'} />
+            </ReviewSection>
+
+            {/* Filing Venue */}
+            <ReviewSection
+              title="Filing Venue"
+              stepId="filing_venue"
+              onEdit={handleReviewEdit}
+            >
+              <ReviewRow label="Incident county" value={venueCounty || 'Not provided'} />
+              <ReviewRow label="Defendant county" value={defendantCounty || 'Not provided'} />
+              <ReviewRow label="Venue basis" value={
+                venueBasis === 'incident' ? 'County of incident' :
+                venueBasis === 'defendant_residence' ? "Defendant's residence" :
+                venueBasis === 'plaintiff_residence' ? "Plaintiff's residence" : 'Not selected'
+              } />
+            </ReviewSection>
+
+            {/* Cause of Action */}
+            <ReviewSection
+              title="Legal Claim"
+              stepId="cause_of_action"
+              onEdit={handleReviewEdit}
+            >
+              <ReviewRow label="Duty" value={duty || 'Not provided'} />
+              <ReviewRow label="Breach" value={breach || 'Not provided'} />
+              <ReviewRow label="Causation" value={causationText || 'Not provided'} />
+            </ReviewSection>
+
+            {/* Petition Damages */}
+            <ReviewSection
+              title="Petition Damages"
+              stepId="petition_damages"
+              onEdit={handleReviewEdit}
+            >
+              {pastMedical && <ReviewRow label="Past medical" value={`$${parseFloat(pastMedical).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />}
+              {futureMedical && <ReviewRow label="Future medical" value={`$${parseFloat(futureMedical).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />}
+              {pastLostWages && <ReviewRow label="Past lost wages" value={`$${parseFloat(pastLostWages).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />}
+              {futureLostEarning && <ReviewRow label="Future lost earning" value={`$${parseFloat(futureLostEarning).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />}
+              {painSuffering && <ReviewRow label="Pain & suffering" value="Yes" />}
+              {mentalAnguish && <ReviewRow label="Mental anguish" value="Yes" />}
+              {physicalImpairment && <ReviewRow label="Physical impairment" value="Yes" />}
+              {disfigurement && <ReviewRow label="Disfigurement" value="Yes" />}
+            </ReviewSection>
+
+            {/* Jury Demand */}
+            <ReviewSection
+              title="Jury Trial"
+              stepId="jury_demand"
+              onEdit={handleReviewEdit}
+            >
+              <ReviewRow label="Jury demand" value={juryDemand === 'yes' ? 'Yes' : juryDemand === 'no' ? 'No' : 'Not selected'} />
             </ReviewSection>
 
             {/* Venue */}
