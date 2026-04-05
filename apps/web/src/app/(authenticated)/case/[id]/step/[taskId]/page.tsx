@@ -106,6 +106,8 @@ import { piCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/persona
 import { piComparativeFaultConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-lien-resolution'
 import { piExpertWitnessGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-expert-witness-guide'
+import { piTortClaimsNoticeConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice'
+import { piTortClaimsTrackingConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking'
 // Small claims depth guided-step configs
 import { scJpCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
 import { scFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
@@ -1149,6 +1151,10 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={piLienResolutionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'pi_expert_witness_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={piExpertWitnessGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_tort_claims_notice':
+      return <GuidedStep caseId={id} taskId={taskId} config={piTortClaimsNoticeConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_tort_claims_tracking':
+      return <GuidedStep caseId={id} taskId={taskId} config={piTortClaimsTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
 
     // Landlord-tenant depth steps
     case 'lt_repair_request':
