@@ -23,7 +23,7 @@ import {
 import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Shield, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import { StepAuthoritySidebar } from './step-authority-sidebar'
-import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
+import { isPropertyDamageSubType, isMotorVehicleSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 import { FilingMethodStep } from '@/components/step/filing-method-step'
 import { FILING_CONFIGS } from '@/lib/filing-configs'
 
@@ -71,7 +71,6 @@ interface PersonalInjuryWizardProps {
 /*  Sub-type helpers                                                    */
 /* ------------------------------------------------------------------ */
 
-const MOTOR_VEHICLE_TYPES = ['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist']
 
 function getSubTypeLabel(subType: string): string {
   switch (subType) {
@@ -148,7 +147,7 @@ function getStepsForSubType(subType: string): WizardStep[] {
 
   const tail = [injuries, medical, damages, insurance, venue, howToFile, review]
 
-  if (MOTOR_VEHICLE_TYPES.includes(subType)) {
+  if (isMotorVehicleSubType(subType)) {
     return [...common, otherDriver, ...tail]
   }
   if (subType === 'slip_and_fall') {
@@ -503,7 +502,7 @@ export function PersonalInjuryWizard({
     const opposingParties = []
 
     // Add opposing party based on sub-type
-    if (MOTOR_VEHICLE_TYPES.includes(piSubType) && otherDriverName) {
+    if (isMotorVehicleSubType(piSubType) && otherDriverName) {
       opposingParties.push({ full_name: otherDriverName })
     } else if (piSubType === 'slip_and_fall' && premisesOwnerName) {
       opposingParties.push({ full_name: premisesOwnerName })
@@ -1552,7 +1551,7 @@ export function PersonalInjuryWizard({
               />
             </div>
 
-            {MOTOR_VEHICLE_TYPES.includes(piSubType) && (
+            {isMotorVehicleSubType(piSubType) && (
               <>
                 <div className="space-y-2">
                   <Label>Other Party&apos;s Insurance</Label>
@@ -1720,7 +1719,7 @@ export function PersonalInjuryWizard({
             </ReviewSection>
 
             {/* Sub-type-specific section */}
-            {(MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && (
+            {(isMotorVehicleSubType(piSubType) || piSubType === 'vehicle_damage') && (
               <ReviewSection
                 title="Other Driver"
                 stepId="other_driver"
