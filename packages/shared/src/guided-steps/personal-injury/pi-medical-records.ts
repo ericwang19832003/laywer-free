@@ -113,6 +113,67 @@ export const piMedicalRecordsConfig: GuidedStepConfig = {
       helpText:
         'Ask your doctor when they expect you to reach MMI. This is the point where your condition has stabilized.',
     },
+    {
+      id: 'lien_section_header',
+      type: 'info',
+      prompt:
+        '🏥 Hospital Lien Check\n\nTexas law (Property Code Chapter 55) allows hospitals to file a lien against your personal injury settlement. If a lien exists, it must be paid from your settlement before you receive any money.',
+    },
+    {
+      id: 'hospital_admitted_72h',
+      type: 'yes_no',
+      prompt:
+        'Were you admitted to a hospital (not just an ER visit and release) within 72 hours of the incident?',
+      helpText:
+        'Hospital admission means you were formally admitted as an inpatient, not just treated and released from the emergency room.',
+    },
+    {
+      id: 'lien_check_guidance',
+      type: 'info',
+      prompt:
+        '📋 How to Check for Hospital Liens\n\nContact the county clerk in the county where you received treatment and ask if a hospital lien has been filed under your name. You can also check online — many Texas counties have searchable lien records.\n\nThe hospital must have filed the lien to enforce it. If no lien was filed, you are not bound by it.',
+      showIf: (answers) => answers.hospital_admitted_72h === 'yes',
+    },
+    {
+      id: 'lien_filed',
+      type: 'yes_no',
+      prompt: 'Have you found a hospital lien filed against you?',
+      showIf: (answers) => answers.hospital_admitted_72h === 'yes',
+    },
+    {
+      id: 'lien_hospital_name',
+      type: 'text',
+      prompt: 'What is the name of the hospital that filed the lien?',
+      placeholder: 'Hospital name',
+      showIf: (answers) => answers.lien_filed === 'yes',
+    },
+    {
+      id: 'lien_amount',
+      type: 'text',
+      prompt: 'What is the lien amount (if known)?',
+      placeholder: 'e.g., $15,000',
+      showIf: (answers) => answers.lien_filed === 'yes',
+    },
+    {
+      id: 'lien_county',
+      type: 'text',
+      prompt: 'In what county was the lien filed?',
+      placeholder: 'County name',
+      showIf: (answers) => answers.lien_filed === 'yes',
+    },
+    {
+      id: 'lien_cap_info',
+      type: 'info',
+      prompt:
+        '💡 Lien Amount Cap\n\nGood news: Texas law caps hospital liens. The hospital can only recover the lesser of:\n\n• Total charges for the first 100 days of hospitalization, OR\n• 50% of your total settlement/judgment amount\n\nAlso, hospital liens do NOT attach to:\n• UM/UIM (uninsured/underinsured motorist) benefits\n• PIP (Personal Injury Protection) benefits\n• Med-Pay benefits',
+      showIf: (answers) => answers.lien_filed === 'yes',
+    },
+    {
+      id: 'medical_auth_warning',
+      type: 'info',
+      prompt:
+        '🚫 DON\'T Sign Blanket Medical Authorizations\n\nThe insurance company may ask you to sign a broad medical authorization giving them access to your entire medical history. DON\'T do this.\n\n✅ DO: Only authorize release of records directly related to this injury.\n❌ DON\'T: Sign anything that gives them access to unrelated medical history.\n\nThey want to find pre-existing conditions to reduce your claim.',
+    },
   ],
 
   generateSummary(answers) {
@@ -212,6 +273,29 @@ export const piMedicalRecordsConfig: GuidedStepConfig = {
         status: 'needed',
         text: 'Create a chronological timeline of all medical visits (date, provider, treatment, cost).',
       })
+    }
+
+    if (answers.hospital_admitted_72h === 'yes') {
+      if (answers.lien_filed === 'yes') {
+        items.push({
+          status: answers.lien_hospital_name ? 'done' : 'needed',
+          text: `Hospital lien: ${answers.lien_hospital_name || 'Hospital name needed'} — ${answers.lien_amount || 'Amount unknown'}`,
+        })
+        items.push({
+          status: 'info',
+          text: 'Lien must be satisfied before distributing any settlement',
+        })
+      } else if (answers.lien_filed === 'no') {
+        items.push({
+          status: 'done',
+          text: 'Hospital lien check complete — no lien found',
+        })
+      } else {
+        items.push({
+          status: 'needed',
+          text: 'Hospital lien check needed — contact county clerk',
+        })
+      }
     }
 
     items.push({
