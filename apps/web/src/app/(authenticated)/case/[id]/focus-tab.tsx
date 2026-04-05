@@ -5,6 +5,7 @@ import { ProgressCard } from '@/components/dashboard/progress-card'
 import { CaseHealthCard } from '@/components/dashboard/case-health-card'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
+import { LienWarningCard } from '@/components/dashboard/lien-warning-card'
 import { PriorityBanners } from '@/components/dashboard/priority-banners'
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
 import { SavingsCard } from '@/components/dashboard/savings-card'
@@ -100,6 +101,7 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
   return (
     <div className="space-y-6">
       <NextStepCard caseId={caseId} nextTask={dashboard.next_task} taskDescription={taskDescription} />
+      <LienWarningCard caseId={caseId} disputeType={disputeType} nextTaskKey={dashboard.next_task?.task_key ?? null} />
       <PriorityAlertsSection caseId={caseId} alerts={alerts} />
       <PriorityBanners
         caseId={caseId}

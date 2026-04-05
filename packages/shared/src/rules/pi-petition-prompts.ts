@@ -490,7 +490,53 @@ Number annotations sequentially starting from 1. Cover these sections at minimum
 - Jury Demand (your right to have a jury decide the case)
 - Prayer (what you\u2019re asking the court to give you at the end of the case)
 
-Use simple language a high school student could understand. Do NOT use legal jargon in the explanations.`
+Use simple language a high school student could understand. Do NOT use legal jargon in the explanations.
+
+CRITICAL REQUIREMENTS FOR TEXAS STATE COURT PETITIONS:
+
+FIRST PARAGRAPH — DISCOVERY CONTROL PLAN (TRCP 190.1):
+The very first numbered paragraph of the petition MUST state the discovery control plan level.
+- If the plaintiff seeks $250,000 or less in monetary relief: "Plaintiff intends that discovery be conducted under Level 1 of Rule 190 of the Texas Rules of Civil Procedure."
+- Otherwise: "Plaintiff intends that discovery be conducted under Level 2 of Rule 190 of the Texas Rules of Civil Procedure."
+This is mandatory. Omitting it makes the petition deficient.
+
+RELIEF LEVEL STATEMENT (TRCP 47(c)):
+The petition MUST include one of these relief level statements:
+- For $250,000 or less: "Plaintiff seeks only monetary relief of $250,000 or less, excluding interest, statutory or punitive damages, penalties, attorney's fees, and costs."
+- For $250,001 to $1,000,000: "Plaintiff seeks monetary relief over $250,000 but not more than $1,000,000."
+- For over $1,000,000: "Plaintiff seeks monetary relief over $1,000,000."
+Failure to include this bars the party from conducting discovery until the pleading is amended.
+
+VENUE STATEMENT:
+Include the statutory basis for venue under CPRC §15.002:
+- "Venue is proper in [County] County because [all or a substantial part of the events giving rise to this claim occurred in this county / Defendant resides in this county / Defendant's principal office is in this county]."
+
+JURY DEMAND:
+If the plaintiff requests a jury trial, include: "Plaintiff demands a trial by jury and has paid or will tender the required jury fee."
+
+PETITION SECTION ORDER:
+1. Discovery Control Plan (first numbered paragraph)
+2. Parties
+3. Jurisdiction
+4. Venue (with statutory citation)
+5. Relief Level (TRCP 47(c))
+6. Statement of Facts
+7. Negligence / Cause of Action (duty, breach, causation)
+8. Damages (itemized: past/future medical, lost wages, pain & suffering, etc.)
+9. Jury Demand (if applicable)
+10. Prayer for Relief
+
+DAMAGES ITEMIZATION:
+List each category of damages separately:
+- Past medical expenses: $[amount]
+- Future medical expenses: $[amount]
+- Past lost wages: $[amount]
+- Future lost earning capacity: $[amount]
+- Past and future physical pain and suffering
+- Past and future mental anguish
+- Physical impairment
+- Disfigurement
+Only include categories the plaintiff has selected. For non-economic damages, do not specify dollar amounts — request the jury to determine.`
 }
 
 // ---------------------------------------------------------------------------
@@ -508,6 +554,38 @@ function buildSystemPrompt(facts: PiPetitionFacts): string {
 // User prompt builder
 // ---------------------------------------------------------------------------
 
+/**
+ * Builds the user prompt that passes structured case facts to the LLM.
+ *
+ * For full TRCP 47(c) and 190.1 compliance, the following metadata fields
+ * should be supplied via `PiPetitionFacts` in a future schema update:
+ *
+ *  - `relief_level`: 'under_250k' | '250k_to_1m' | 'over_1m'
+ *      Determines both the discovery control plan level (TRCP 190.1) and
+ *      the mandatory relief level statement (TRCP 47(c)).
+ *
+ *  - `venue_county`: string
+ *      The county where venue is asserted (currently derived from `county`).
+ *
+ *  - `venue_basis`: 'events_occurred' | 'defendant_resides' | 'principal_office'
+ *      The statutory basis for venue under CPRC §15.002.
+ *
+ *  - `jury_demand`: boolean
+ *      Whether the plaintiff requests a jury trial.
+ *
+ *  - `damages`: object  (already exists — categories listed below for reference)
+ *      For bodily injury cases, ideally broken into:
+ *        past_medical, future_medical, past_lost_wages, future_lost_earning_capacity,
+ *        pain_suffering, mental_anguish, physical_impairment, disfigurement
+ *
+ *  - `cause_of_action`: string | string[]
+ *      Explicit cause(s) of action selected by the plaintiff
+ *      (currently inferred from `pi_sub_type` + `negligence_theory`).
+ *
+ * Until these fields are added to the schema, the system prompt instructs
+ * the LLM to infer appropriate values from the total damages amount and
+ * the existing facts provided below.
+ */
 function buildUserPrompt(facts: PiPetitionFacts): string {
   const caption = getCourtCaption(facts.court_type, facts.county, facts.cause_number)
   const isPropDamage = isPropertyDamageCase(facts.pi_sub_type)
