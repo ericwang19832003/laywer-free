@@ -114,6 +114,10 @@ import { piInsuranceCommunicationCaConfig } from '@lawyer-free/shared/guided-ste
 import { piTortClaimsNoticeCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-ca'
 import { piTortClaimsTrackingCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-ca'
 import { preparePiPetitionCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-ca'
+import { piCourtSelectionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-court-selection'
+import { piDisclosuresGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-disclosures-guide'
+import { piPretrialPreparationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pretrial-preparation'
+import { piJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-judgment-guide'
 // Small claims depth guided-step configs
 import { scJpCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
 import { scFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
@@ -1167,6 +1171,14 @@ export default async function StepPage({
       const tortTrackingConfig = caseRow?.state === 'California' ? piTortClaimsTrackingCaConfig : piTortClaimsTrackingConfig
       return <GuidedStep caseId={id} taskId={taskId} config={tortTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
     }
+    case 'pi_court_selection':
+      return <GuidedStep caseId={id} taskId={taskId} config={piCourtSelectionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_disclosures_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={piDisclosuresGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_pretrial_preparation':
+      return <GuidedStep caseId={id} taskId={taskId} config={piPretrialPreparationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_judgment_guide':
+      return <GuidedStep caseId={id} taskId={taskId} config={piJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
 
     // Landlord-tenant depth steps
     case 'lt_repair_request':
