@@ -75,6 +75,24 @@ import { debtFilingGuideConfig } from '@lawyer-free/shared/guided-steps/debt-def
 import { debtServiceGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-service-guide'
 import { debtCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-courtroom-guide'
 import { debtPostJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-guide'
+import { debtSolCheckCaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-sol-check-ca'
+import { debtSolCheckPaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-sol-check-pa'
+import { debtAnswerPrepCaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-answer-prep-ca'
+import { debtAnswerPrepPaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-answer-prep-pa'
+import { fdcpaCheckCaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-check-ca'
+import { fdcpaCheckPaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-check-pa'
+import { debtPostJudgmentCaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-ca'
+import { debtPostJudgmentPaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-pa'
+import { debtDiscoveryCaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-discovery-ca'
+import { debtConfessionJudgmentPaConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-confession-judgment-pa'
+import { debtSolCheckNyConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-sol-check-ny'
+import { debtAnswerPrepNyConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-answer-prep-ny'
+import { fdcpaCheckNyConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-check-ny'
+import { debtPostJudgmentNyConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-ny'
+import { debtSolCheckFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-sol-check-fl'
+import { debtAnswerPrepFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-answer-prep-fl'
+import { fdcpaCheckFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-check-fl'
+import { debtPostJudgmentFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-fl'
 import { fdcpaCounterclaimGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-counterclaim-guide'
 import { debtMotionToDismissConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-motion-to-dismiss'
 import { debtDefaultJudgmentRecoveryConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-default-judgment-recovery'
@@ -120,6 +138,18 @@ import { piInsuranceCommunicationPaConfig } from '@lawyer-free/shared/guided-ste
 import { piTortClaimsNoticePaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-pa'
 import { piTortClaimsTrackingPaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-pa'
 import { preparePiPetitionPaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-pa'
+import { piIntakeNyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-intake-ny'
+import { piMedicalRecordsNyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-medical-records-ny'
+import { piInsuranceCommunicationNyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-insurance-communication-ny'
+import { piTortClaimsNoticeNyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-ny'
+import { piTortClaimsTrackingNyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-ny'
+import { preparePiPetitionNyConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-ny'
+import { piIntakeFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-intake-fl'
+import { piMedicalRecordsFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-medical-records-fl'
+import { piInsuranceCommunicationFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-insurance-communication-fl'
+import { piTortClaimsNoticeFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-fl'
+import { piTortClaimsTrackingFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-fl'
+import { preparePiPetitionFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-fl'
 import { piCourtSelectionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-court-selection'
 import { piDisclosuresGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-disclosures-guide'
 import { piPretrialPreparationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pretrial-preparation'
@@ -1171,6 +1201,8 @@ export default async function StepPage({
       const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
       const tortNoticeConfig = caseRow?.state === 'California' ? piTortClaimsNoticeCaConfig
         : caseRow?.state === 'Pennsylvania' ? piTortClaimsNoticePaConfig
+        : caseRow?.state === 'New York' ? piTortClaimsNoticeNyConfig
+        : caseRow?.state === 'Florida' ? piTortClaimsNoticeFlConfig
         : piTortClaimsNoticeConfig
       return <GuidedStep caseId={id} taskId={taskId} config={tortNoticeConfig} existingAnswers={task.metadata?.guided_answers} />
     }
@@ -1178,6 +1210,8 @@ export default async function StepPage({
       const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
       const tortTrackingConfig = caseRow?.state === 'California' ? piTortClaimsTrackingCaConfig
         : caseRow?.state === 'Pennsylvania' ? piTortClaimsTrackingPaConfig
+        : caseRow?.state === 'New York' ? piTortClaimsTrackingNyConfig
+        : caseRow?.state === 'Florida' ? piTortClaimsTrackingFlConfig
         : piTortClaimsTrackingConfig
       return <GuidedStep caseId={id} taskId={taskId} config={tortTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
     }
@@ -1282,20 +1316,52 @@ export default async function StepPage({
     case 'serve_plaintiff':
       return <ServePlaintiffStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     // Debt defense depth steps
-    case 'fdcpa_check':
-      return <GuidedStep caseId={id} taskId={taskId} config={fdcpaCheckConfig} existingAnswers={task.metadata?.guided_answers} skippable />
-    case 'debt_sol_check':
-      return <GuidedStep caseId={id} taskId={taskId} config={debtSolCheckConfig} existingAnswers={task.metadata?.guided_answers} skippable />
-    case 'debt_answer_prep':
-      return <GuidedStep caseId={id} taskId={taskId} config={debtAnswerPrepConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'fdcpa_check': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const fdcpaConfig = caseRow?.state === 'California' ? fdcpaCheckCaConfig
+        : caseRow?.state === 'Pennsylvania' ? fdcpaCheckPaConfig
+        : caseRow?.state === 'New York' ? fdcpaCheckNyConfig
+        : caseRow?.state === 'Florida' ? fdcpaCheckFlConfig
+        : fdcpaCheckConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={fdcpaConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    }
+    case 'debt_sol_check': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const solConfig = caseRow?.state === 'California' ? debtSolCheckCaConfig
+        : caseRow?.state === 'Pennsylvania' ? debtSolCheckPaConfig
+        : caseRow?.state === 'New York' ? debtSolCheckNyConfig
+        : caseRow?.state === 'Florida' ? debtSolCheckFlConfig
+        : debtSolCheckConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={solConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    }
+    case 'debt_answer_prep': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const answerConfig = caseRow?.state === 'California' ? debtAnswerPrepCaConfig
+        : caseRow?.state === 'Pennsylvania' ? debtAnswerPrepPaConfig
+        : caseRow?.state === 'New York' ? debtAnswerPrepNyConfig
+        : caseRow?.state === 'Florida' ? debtAnswerPrepFlConfig
+        : debtAnswerPrepConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={answerConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    }
     case 'debt_filing_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={debtFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_service_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={debtServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_courtroom_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={debtCourtroomGuideConfig} existingAnswers={task.metadata?.guided_answers} />
-    case 'debt_post_judgment_guide':
-      return <GuidedStep caseId={id} taskId={taskId} config={debtPostJudgmentGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'debt_post_judgment_guide': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const postJudgmentConfig = caseRow?.state === 'California' ? debtPostJudgmentCaConfig
+        : caseRow?.state === 'Pennsylvania' ? debtPostJudgmentPaConfig
+        : caseRow?.state === 'New York' ? debtPostJudgmentNyConfig
+        : caseRow?.state === 'Florida' ? debtPostJudgmentFlConfig
+        : debtPostJudgmentGuideConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
+    }
+    case 'debt_discovery':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtDiscoveryCaConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_confession_judgment':
+      return <GuidedStep caseId={id} taskId={taskId} config={debtConfessionJudgmentPaConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'fdcpa_counterclaim_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={fdcpaCounterclaimGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'debt_motion_to_dismiss':
@@ -1330,6 +1396,12 @@ export default async function StepPage({
       if (caseRow?.state === 'Pennsylvania') {
         return <GuidedStep caseId={id} taskId={taskId} config={piIntakePaConfig} existingAnswers={task.metadata?.guided_answers} />
       }
+      if (caseRow?.state === 'New York') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piIntakeNyConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'Florida') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piIntakeFlConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       return (
         <PIIntakeStep
           caseId={id}
@@ -1351,6 +1423,12 @@ export default async function StepPage({
       if (caseRow?.state === 'Pennsylvania') {
         return <GuidedStep caseId={id} taskId={taskId} config={piMedicalRecordsPaConfig} existingAnswers={task.metadata?.guided_answers} />
       }
+      if (caseRow?.state === 'New York') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piMedicalRecordsNyConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'Florida') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piMedicalRecordsFlConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
     case 'pi_insurance_communication': {
@@ -1363,6 +1441,12 @@ export default async function StepPage({
       }
       if (caseRow?.state === 'Pennsylvania') {
         return <GuidedStep caseId={id} taskId={taskId} config={piInsuranceCommunicationPaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'New York') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piInsuranceCommunicationNyConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'Florida') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piInsuranceCommunicationFlConfig} existingAnswers={task.metadata?.guided_answers} />
       }
       return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
@@ -1395,6 +1479,12 @@ export default async function StepPage({
       }
       if (caseRow?.state === 'Pennsylvania') {
         return <GuidedStep caseId={id} taskId={taskId} config={preparePiPetitionPaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'New York') {
+        return <GuidedStep caseId={id} taskId={taskId} config={preparePiPetitionNyConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'Florida') {
+        return <GuidedStep caseId={id} taskId={taskId} config={preparePiPetitionFlConfig} existingAnswers={task.metadata?.guided_answers} />
       }
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('*').eq('case_id', id).maybeSingle()
