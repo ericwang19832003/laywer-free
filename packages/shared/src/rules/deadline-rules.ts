@@ -43,6 +43,8 @@ export interface DeadlineRule {
   condition_metadata_field?: string
   /** Allowed values — deadline created only when the field's value is in this array */
   condition_metadata_values?: string[]
+  /** Only create deadline if case state matches */
+  condition_state?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -176,6 +178,54 @@ function buildDisputeSpecificRules(): DeadlineRule[] {
       reference: 'task_completed_at' as const,
       apply_rule_4: false,
       consequence: UM_UIM_NOTICE_CONSEQUENCE,
+      condition_metadata_field: 'guided_answers.at_fault_has_insurance',
+      condition_metadata_values: ['no', 'unknown'],
+    },
+    // CA: Service deadline (60 days)
+    {
+      trigger_task: 'pi_file_with_court',
+      deadline_key: 'ca_service_deadline',
+      deadline_label: 'Deadline to Serve (California)',
+      offset_days: 60,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If you do not serve the defendant within 60 days, the court may dismiss or sanction (CRC 3.110(b)).',
+      condition_state: 'California',
+    },
+    // CA: Answer deadline (30 days)
+    {
+      trigger_task: 'pi_serve_defendant',
+      deadline_key: 'ca_answer_deadline',
+      deadline_label: 'Defendant Answer Deadline (California)',
+      offset_days: 30,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If the defendant does not respond within 30 days, you may request entry of default (CCP §412.20).',
+      condition_state: 'California',
+    },
+    // CA: Jury fee deadline (~180 days)
+    {
+      trigger_task: 'pi_file_with_court',
+      deadline_key: 'ca_jury_fee_deadline',
+      deadline_label: 'Jury Fee Posting Deadline',
+      offset_days: 180,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'You must post the $150 jury fee at or before your initial CMC. Missing this permanently waives your right to a jury trial.',
+      condition_state: 'California',
+      condition_metadata_field: 'guided_answers.jury_demand',
+      condition_metadata_values: ['yes'],
+    },
+    // CA: UM/UIM arbitration deadline (2 years)
+    {
+      trigger_task: 'pi_insurance_communication',
+      deadline_key: 'ca_um_uim_arbitration_deadline',
+      deadline_label: 'UM/UIM Arbitration Deadline',
+      offset_days: 730,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'You have 2 years to initiate UM/UIM arbitration (Insurance Code §11580.2(i)(1)).',
+      condition_state: 'California',
       condition_metadata_field: 'guided_answers.at_fault_has_insurance',
       condition_metadata_values: ['no', 'unknown'],
     },

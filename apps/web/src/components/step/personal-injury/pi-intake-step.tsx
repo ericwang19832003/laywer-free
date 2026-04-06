@@ -11,6 +11,7 @@ interface PIIntakeStepProps {
   taskId: string
   existingMetadata?: Record<string, unknown>
   piSubType?: string
+  state?: string
 }
 
 export function PIIntakeStep({
@@ -18,6 +19,7 @@ export function PIIntakeStep({
   taskId,
   existingMetadata,
   piSubType,
+  state,
 }: PIIntakeStepProps) {
   const meta = existingMetadata ?? {}
   const isPropertyDamage = PROPERTY_DAMAGE_SUB_TYPES.includes(
@@ -98,6 +100,16 @@ export function PIIntakeStep({
     (meta.discovered_later as string) ?? ''
   )
 
+  // Prop 213 (CA only)
+  const [hadValidInsurance, setHadValidInsurance] = useState(
+    (meta.had_valid_insurance as string) ?? ''
+  )
+  const [prop213Exception, setProp213Exception] = useState(
+    (meta.prop_213_exception as string) ?? ''
+  )
+  const prop213Applies = hadValidInsurance === 'no' && (prop213Exception === 'none' || prop213Exception === '')
+  const isCalifornia = state === 'California'
+
   // Derived
   const isGovEntity = govEmployeeOnDuty === 'yes' || govProperty === 'yes' || govVehicle === 'yes'
 
@@ -152,6 +164,9 @@ export function PIIntakeStep({
       minor_at_incident: minorAtIncident || null,
       mental_incapacity: mentalIncapacity || null,
       discovered_later: discoveredLater || null,
+      had_valid_insurance: isCalifornia ? hadValidInsurance || null : null,
+      prop_213_exception: isCalifornia && hadValidInsurance === 'no' ? prop213Exception || null : null,
+      prop_213_applies: isCalifornia ? prop213Applies : null,
       guided_answers: { case_stage: caseStage },
     }
   }
@@ -464,12 +479,25 @@ export function PIIntakeStep({
               &#x26A0; Statute of Limitations Warning
             </p>
             <p className="text-xs text-warm-muted mt-1">
-              The Texas statute of limitations for{' '}
-              {isPropertyDamage ? 'property damage' : 'personal injury'} is 2
-              years from the{' '}
-              {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
-              (Tex. Civ. Prac. &amp; Rem. Code &sect; 16.003). You have
-              approximately {solWarning.daysRemaining} days remaining to file.
+              {isCalifornia ? (
+                <>
+                  The California statute of limitations for{' '}
+                  {isPropertyDamage ? 'property damage' : 'personal injury'} is 2
+                  years from the{' '}
+                  {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
+                  (Cal. Civ. Proc. Code &sect; 335.1). You have approximately{' '}
+                  {solWarning.daysRemaining} days remaining to file.
+                </>
+              ) : (
+                <>
+                  The Texas statute of limitations for{' '}
+                  {isPropertyDamage ? 'property damage' : 'personal injury'} is 2
+                  years from the{' '}
+                  {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
+                  (Tex. Civ. Prac. &amp; Rem. Code &sect; 16.003). You have
+                  approximately {solWarning.daysRemaining} days remaining to file.
+                </>
+              )}
             </p>
           </div>
         )}
@@ -689,6 +717,96 @@ export function PIIntakeStep({
           </>
         )}
 
+        {/* Prop 213 — CA only */}
+        {isCalifornia && (
+          <div className="space-y-4">
+            <label className="text-sm font-medium text-warm-text">
+              Insurance Status (Proposition 213)
+            </label>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-warm-text">
+                Did you have valid auto liability insurance at the time of the incident?
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHadValidInsurance('yes')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    hadValidInsurance === 'yes'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHadValidInsurance('no')}
+                  className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    hadValidInsurance === 'no'
+                      ? 'border-calm-indigo bg-calm-indigo/10 text-calm-indigo'
+                      : 'border-warm-border text-warm-muted hover:border-warm-text hover:text-warm-text'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+
+            {hadValidInsurance === 'no' && (
+              <>
+                <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
+                  <p className="text-sm font-medium text-warm-text">
+                    &#x26A0; Proposition 213 Warning
+                  </p>
+                  <p className="text-xs text-warm-muted mt-1">
+                    Under California Civil Code &sect; 3333.4 (Prop 213), uninsured
+                    drivers generally cannot recover non-economic damages (pain and
+                    suffering) in a personal injury claim. You may still recover
+                    economic damages (medical bills, lost wages, property damage).
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="pi-prop213-exception"
+                    className="text-sm font-medium text-warm-text"
+                  >
+                    Does an exception apply?
+                  </label>
+                  <select
+                    id="pi-prop213-exception"
+                    value={prop213Exception}
+                    onChange={(e) => setProp213Exception(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">Select...</option>
+                    <option value="not_at_fault">I was not at fault at all (0% liability)</option>
+                    <option value="dui_defendant">The other driver was convicted of DUI</option>
+                    <option value="felony_defendant">The other driver was committing a felony</option>
+                    <option value="none">None of these apply</option>
+                  </select>
+                </div>
+
+                {prop213Exception && prop213Exception !== 'none' && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                    <p className="text-sm font-medium text-warm-text">
+                      Prop 213 exception may apply
+                    </p>
+                    <p className="text-xs text-warm-muted mt-1">
+                      Based on your answer, you may qualify for an exception to
+                      Proposition 213, which could allow you to recover
+                      non-economic damages despite not having insurance at the
+                      time of the incident.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {/* Government Entity Check */}
         <div className="space-y-4">
           <label className="text-sm font-medium text-warm-text">
@@ -807,9 +925,10 @@ export function PIIntakeStep({
                   <option value="">Select...</option>
                   <option value="city">City / Municipality</option>
                   <option value="county">County</option>
-                  <option value="state">State of Texas</option>
+                  <option value="state">{isCalifornia ? 'State of California' : 'State of Texas'}</option>
                   <option value="federal">Federal</option>
                   <option value="school_district">School District</option>
+                  {isCalifornia && <option value="special_district">Special District</option>}
                   <option value="other">Other</option>
                 </select>
               </div>
@@ -833,14 +952,27 @@ export function PIIntakeStep({
 
               <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
                 <p className="text-sm font-medium text-warm-text">
-                  &#x26A0; Texas Tort Claims Act Applies
+                  &#x26A0; {isCalifornia ? 'California Government Tort Claims Act Applies' : 'Texas Tort Claims Act Applies'}
                 </p>
                 <p className="text-xs text-warm-muted mt-1">
-                  Claims against government entities in Texas must follow the
-                  Texas Tort Claims Act (Tex. Civ. Prac. &amp; Rem. Code Ch.
-                  101). This typically requires filing a formal notice of claim
-                  within 6 months of the incident. We&apos;ll add the required
-                  steps to your case automatically.
+                  {isCalifornia ? (
+                    <>
+                      Claims against government entities in California must follow
+                      the Government Tort Claims Act (Cal. Gov. Code &sect;910-913).
+                      You must file a written claim with the government entity within
+                      6 months of the incident. If the deadline has passed, you may
+                      apply for late claim relief under Gov. Code &sect;911.4.
+                      We&apos;ll add the required steps to your case automatically.
+                    </>
+                  ) : (
+                    <>
+                      Claims against government entities in Texas must follow the
+                      Texas Tort Claims Act (Tex. Civ. Prac. &amp; Rem. Code Ch.
+                      101). This typically requires filing a formal notice of claim
+                      within 6 months of the incident. We&apos;ll add the required
+                      steps to your case automatically.
+                    </>
+                  )}
                 </p>
               </div>
             </>
@@ -948,35 +1080,66 @@ export function PIIntakeStep({
           )}
         </div>
 
-        {/* Texas PI SOL info callout */}
+        {/* SOL info callout */}
         <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
           <p className="text-xs font-medium text-warm-text">
-            {isPropertyDamage
-              ? 'Texas statute of limitations for property damage'
-              : 'Texas statute of limitations for personal injury'}
+            {isCalifornia
+              ? isPropertyDamage
+                ? 'California statute of limitations for property damage'
+                : 'California statute of limitations for personal injury'
+              : isPropertyDamage
+                ? 'Texas statute of limitations for property damage'
+                : 'Texas statute of limitations for personal injury'}
           </p>
           <p className="text-xs text-warm-muted mt-0.5">
-            In Texas, the statute of limitations for{' '}
-            {isPropertyDamage ? 'property damage' : 'personal injury'} claims is
-            2 years from the{' '}
-            {isPropertyDamage ? 'date of the incident' : 'date of injury'} (Tex.
-            Civ. Prac. &amp; Rem. Code &sect; 16.003). Filing after this
-            deadline can result in your case being dismissed.
+            {isCalifornia ? (
+              <>
+                In California, the statute of limitations for{' '}
+                {isPropertyDamage ? 'property damage' : 'personal injury'} claims
+                is 2 years from the{' '}
+                {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
+                (Cal. Civ. Proc. Code &sect; 335.1). Filing after this deadline
+                can result in your case being dismissed.
+              </>
+            ) : (
+              <>
+                In Texas, the statute of limitations for{' '}
+                {isPropertyDamage ? 'property damage' : 'personal injury'} claims is
+                2 years from the{' '}
+                {isPropertyDamage ? 'date of the incident' : 'date of injury'} (Tex.
+                Civ. Prac. &amp; Rem. Code &sect; 16.003). Filing after this
+                deadline can result in your case being dismissed.
+              </>
+            )}
           </p>
         </div>
 
-        {/* 51% Rule / Proportionate Responsibility */}
-        <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
-          <p className="text-xs font-medium text-warm-text">
-            Texas 51% Rule (Proportionate Responsibility)
-          </p>
-          <p className="text-xs text-warm-muted mt-0.5">
-            Under Texas law (Tex. Civ. Prac. &amp; Rem. Code Ch. 33), you
-            cannot recover damages if you are found to be more than 50%
-            responsible for the incident. If your responsibility is 50% or less,
-            your recovery is reduced by your percentage of fault.
-          </p>
-        </div>
+        {/* Comparative Fault */}
+        {isCalifornia ? (
+          <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
+            <p className="text-xs font-medium text-warm-text">
+              California Pure Comparative Fault
+            </p>
+            <p className="text-xs text-warm-muted mt-0.5">
+              Under California law (Li v. Yellow Cab Co., 13 Cal.3d 804), you
+              can recover damages even if you are partially at fault. Your
+              recovery is reduced by your percentage of fault. For example, if
+              you are 30% at fault, you can still recover 70% of your damages.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
+            <p className="text-xs font-medium text-warm-text">
+              Texas 51% Rule (Proportionate Responsibility)
+            </p>
+            <p className="text-xs text-warm-muted mt-0.5">
+              Under Texas law (Tex. Civ. Prac. &amp; Rem. Code Ch. 33), you
+              cannot recover damages if you are found to be more than 50%
+              responsible for the incident. If your responsibility is 50% or less,
+              your recovery is reduced by your percentage of fault.
+            </p>
+          </div>
+        )}
       </div>
     </StepRunner>
   )
