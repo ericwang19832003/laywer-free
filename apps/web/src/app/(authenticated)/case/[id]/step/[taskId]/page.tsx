@@ -202,6 +202,10 @@ import { contractDamagesMethodsConfig } from '@lawyer-free/shared/guided-steps/c
 import { contractProvisionsCheckConfig } from '@lawyer-free/shared/guided-steps/contract/contract-provisions-check'
 import { contractDefensesGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-defenses-guide'
 import { contractFilingGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide'
+import { contractFilingGuideCaConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide-ca'
+import { contractFilingGuidePaConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide-pa'
+import { contractFilingGuideNyConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide-ny'
+import { contractFilingGuideFlConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide-fl'
 import { contractServiceGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-service-guide'
 import { contractCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-courtroom-guide'
 import { contractSettlementGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-settlement-guide'
@@ -1153,8 +1157,15 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={contractProvisionsCheckConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'contract_defenses_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={contractDefensesGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
-    case 'contract_filing_guide':
-      return <GuidedStep caseId={id} taskId={taskId} config={contractFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'contract_filing_guide': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const contractFiling = caseRow?.state === 'California' ? contractFilingGuideCaConfig
+        : caseRow?.state === 'Pennsylvania' ? contractFilingGuidePaConfig
+        : caseRow?.state === 'New York' ? contractFilingGuideNyConfig
+        : caseRow?.state === 'Florida' ? contractFilingGuideFlConfig
+        : contractFilingGuideConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={contractFiling} existingAnswers={task.metadata?.guided_answers} />
+    }
     case 'contract_service_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={contractServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'contract_courtroom_guide':
