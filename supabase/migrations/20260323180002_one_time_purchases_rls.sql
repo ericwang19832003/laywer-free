@@ -1,0 +1,2 @@
+-- Superseded by 20260323180000_security_rls_fixes.sql which already enables RLS on one_time_purchases.
+-- This migration intentionally left empty to avoid duplicate policy errors.

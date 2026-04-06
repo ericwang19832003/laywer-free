@@ -1,0 +1,2266 @@
+export interface StepGuidance {
+  why: string
+  checklist: string[]
+  tip?: string
+}
+
+export const STEP_GUIDANCE: Record<string, StepGuidance> = {
+  // --- Shared / Civil ---
+  welcome: {
+    why: 'This introduction helps you understand how the process works and what to expect at each stage.',
+    checklist: [
+      'A few minutes of uninterrupted time',
+      'Basic details about your situation',
+    ],
+  },
+  intake: {
+    why: 'The details you provide here shape every document and deadline in your case. Accuracy matters.',
+    checklist: [
+      'County where the case will be filed',
+      'Names of the parties involved',
+      'Brief description of what happened',
+    ],
+    tip: 'You can update these details later if something changes.',
+  },
+  evidence_vault: {
+    why: 'Well-organized evidence strengthens your case at every stage — from demand letters to trial.',
+    checklist: [
+      'Photos, screenshots, or documents related to your case',
+      'Receipts or invoices showing damages',
+      'Any written communication with the other party',
+    ],
+    tip: 'Upload what you have now. You can always add more later.',
+  },
+  preservation_letter: {
+    why: 'This letter puts the other side on notice to keep relevant evidence. Sending it early protects your ability to obtain proof later.',
+    checklist: [
+      'Name and address of the opposing party',
+      'Description of the evidence you want preserved',
+    ],
+    tip: 'Even if you\'re not sure you\'ll go to court, sending this letter is a smart precaution.',
+  },
+  prepare_filing: {
+    why: 'Your initial court filing establishes your legal claims. Getting the format right is essential for the court to accept it.',
+    checklist: [
+      'Completed intake information',
+      'Evidence organized in the vault',
+      'Filing fee amount for your county',
+    ],
+  },
+  file_with_court: {
+    why: 'Submitting your filing officially starts your case. This step tracks what you need at the courthouse or online.',
+    checklist: [
+      'Your prepared petition or filing document',
+      'Payment method for filing fees',
+      'Government-issued ID',
+    ],
+  },
+  upload_return_of_service: {
+    why: 'Proof of service shows the court that the other party was properly notified. Without it, your case cannot move forward.',
+    checklist: [
+      'The signed return of service document',
+      'Date the other party was served',
+    ],
+  },
+  confirm_service_facts: {
+    why: 'Confirming service details lets us calculate your critical deadlines accurately.',
+    checklist: [
+      'Exact date of service',
+      'Method used (personal, substituted, etc.)',
+    ],
+  },
+  wait_for_answer: {
+    why: 'After service, the other side has a set number of days to respond. This step tracks that window.',
+    checklist: [
+      'Monitor your court\'s online docket if available',
+      'Check your mailbox for any court notices',
+    ],
+  },
+  check_docket_for_answer: {
+    why: 'Whether the other side responded determines your next path — default judgment or discovery.',
+    checklist: [
+      'Access to the court\'s online docket system',
+      'Your case number',
+    ],
+  },
+  default_packet_prep: {
+    why: 'If the other side didn\'t respond in time, you may be able to win by default. This packet asks the court to enter judgment.',
+    checklist: [
+      'Proof of service document',
+      'Your original filed petition',
+      'Evidence of damages',
+    ],
+  },
+  upload_answer: {
+    why: 'Uploading the answer lets us analyze their defenses so you can plan your response strategy.',
+    checklist: [
+      'The defendant\'s filed answer document (PDF)',
+    ],
+  },
+  discovery_starter_pack: {
+    why: 'Discovery is how you legally request information from the other side. This gives you standard requests for your case type.',
+    checklist: [
+      'Review your evidence vault for gaps',
+      'List of questions you want answered',
+    ],
+  },
+  rule_26f_prep: {
+    why: 'Rule 26(f) requires both sides to meet and plan for discovery before the court conference. Being prepared shows the judge you are organized.',
+    checklist: [
+      'List of proposed discovery topics',
+      'Your calendar for scheduling deadlines',
+      'Any preservation concerns to raise',
+    ],
+  },
+  mandatory_disclosures: {
+    why: 'Federal rules require you to disclose key witnesses and documents early, even without being asked. Missing this deadline can limit your evidence at trial.',
+    checklist: [
+      'Names and contact info of witnesses',
+      'Documents supporting your claims or defenses',
+      'Computation of damages with supporting materials',
+    ],
+  },
+
+  // --- Personal Injury ---
+  pi_intake: {
+    why: 'Injury case details shape your entire strategy — from medical documentation to calculating damages.',
+    checklist: [
+      'Date and location of the incident',
+      'Other party\'s name and insurance info',
+      'Your insurance policy number',
+      'Police report number (if applicable)',
+    ],
+    tip: 'Don\'t worry if you don\'t have everything yet — you can update details later.',
+  },
+  pi_medical_records: {
+    why: 'Medical records are the foundation of your injury claim. They document what happened and connect your injuries to the incident.',
+    checklist: [
+      'Names and addresses of treating doctors',
+      'Hospital or ER visit records',
+      'Medical bills and receipts',
+      'Prescription records',
+    ],
+  },
+  pi_insurance_communication: {
+    why: 'How you communicate with insurance companies can significantly impact your claim. Being prepared helps protect your interests.',
+    checklist: [
+      'Your claim number (if you have one)',
+      'Insurance adjuster\'s name and contact info',
+      'Notes from any prior conversations',
+    ],
+    tip: 'Keep a record of every interaction with the insurance company.',
+  },
+  prepare_pi_demand_letter: {
+    why: 'A demand letter formally requests compensation and often leads to settlement without going to court.',
+    checklist: [
+      'Complete medical records and bills',
+      'Documentation of lost wages',
+      'Evidence of property damage',
+      'Photos of injuries',
+    ],
+  },
+  pi_settlement_negotiation: {
+    why: 'Most personal injury cases settle before trial. Knowing your case value and negotiation range gives you leverage.',
+    checklist: [
+      'Total medical expenses to date',
+      'Lost wages documentation',
+      'Your minimum acceptable settlement amount',
+    ],
+  },
+  prepare_pi_petition: {
+    why: 'If settlement talks fail, filing a lawsuit preserves your right to recover damages through the court.',
+    checklist: [
+      'All evidence from your vault',
+      'Completed demand letter (if sent)',
+      'Filing fee for your county',
+    ],
+  },
+  pi_file_with_court: {
+    why: 'Filing officially starts your lawsuit and sets legal deadlines in motion.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  pi_serve_defendant: {
+    why: 'The defendant must be formally notified of the lawsuit. Proper service is required before the case can proceed.',
+    checklist: [
+      'Defendant\'s address for service',
+      'Budget for process server or constable',
+    ],
+  },
+  pi_wait_for_answer: {
+    why: 'The defendant has a limited time to respond after being served. This waiting period is normal.',
+    checklist: [
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  pi_review_answer: {
+    why: 'Understanding the defendant\'s response helps you identify their strategy and prepare your counterarguments.',
+    checklist: [
+      'The defendant\'s filed answer',
+      'Note any counterclaims or defenses raised',
+    ],
+  },
+  pi_discovery_prep: {
+    why: 'Discovery lets you formally request evidence from the other side. Well-crafted requests strengthen your position.',
+    checklist: [
+      'List of facts you need to prove',
+      'Documents you want from the defendant',
+      'Questions about the incident',
+    ],
+  },
+  pi_discovery_responses: {
+    why: 'You must respond to the defendant\'s discovery requests within the deadline. Timely, complete responses prevent court sanctions.',
+    checklist: [
+      'The discovery requests you received',
+      'Documents requested by the other side',
+    ],
+  },
+  pi_scheduling_conference: {
+    why: 'The scheduling conference sets the timeline for your entire case — discovery cutoffs, motion deadlines, and trial date.',
+    checklist: [
+      'Your calendar for the next 6-12 months',
+      'Any scheduling conflicts',
+    ],
+  },
+  pi_pretrial_motions: {
+    why: 'Pre-trial motions can narrow the issues, exclude evidence, or even resolve parts of the case before trial.',
+    checklist: [
+      'Review all discovery responses received',
+      'Identify weak points in the opposing case',
+    ],
+  },
+  pi_mediation: {
+    why: 'Mediation is a chance to resolve the case with a neutral third party. Many cases settle at this stage.',
+    checklist: [
+      'Your settlement range (minimum to ideal)',
+      'Summary of your strongest evidence',
+      'All medical documentation and bills',
+    ],
+  },
+  pi_trial_prep: {
+    why: 'Thorough trial preparation is critical. Organized exhibits, clear witness testimony, and a strong narrative win cases.',
+    checklist: [
+      'Exhibit list organized and labeled',
+      'Witness list with contact information',
+      'Opening statement outline',
+    ],
+  },
+  pi_post_resolution: {
+    why: 'After your case resolves, there are important follow-up steps to ensure you receive and manage your recovery.',
+    checklist: [
+      'Settlement agreement or court order',
+      'List of medical liens to satisfy',
+    ],
+  },
+
+  // --- Personal Injury: Property Damage Variants ---
+  pi_intake_property: {
+    why: 'Property damage details shape your entire strategy — from documenting the damage to calculating your claim value.',
+    checklist: [
+      'Date and location of the incident',
+      'Other party\'s name and insurance info',
+      'Your insurance policy number',
+      'Police report number (if applicable)',
+    ],
+    tip: 'Don\'t worry if you don\'t have everything yet — you can update details later.',
+  },
+  pi_medical_records_property: {
+    why: 'Thorough damage documentation is the foundation of your property damage claim. Photos, estimates, and receipts prove your losses.',
+    checklist: [
+      'Photos of the damage from multiple angles',
+      'Professional repair estimates',
+      'Receipts for any repairs already made',
+      'Pre-damage condition records or photos',
+    ],
+  },
+  pi_insurance_communication_property: {
+    why: 'How you communicate with insurance companies can significantly impact your claim. Being prepared helps protect your interests.',
+    checklist: [
+      'Your claim number (if you have one)',
+      'Insurance adjuster\'s name and contact info',
+      'Notes from any prior conversations',
+    ],
+    tip: 'Never agree to a settlement before you have complete repair estimates.',
+  },
+  prepare_pi_demand_letter_property: {
+    why: 'A demand letter formally requests compensation and often leads to settlement without going to court.',
+    checklist: [
+      'Complete damage documentation and photos',
+      'Professional repair or replacement estimates',
+      'Evidence of loss of use costs',
+      'Receipts for all related expenses',
+    ],
+  },
+  pi_settlement_negotiation_property: {
+    why: 'Most property damage cases settle before trial. Knowing your property\'s value and repair costs gives you leverage.',
+    checklist: [
+      'Total repair or replacement costs',
+      'Loss of use documentation',
+      'Your minimum acceptable settlement amount',
+    ],
+  },
+  prepare_pi_petition_property: {
+    why: 'If settlement talks fail, filing a lawsuit preserves your right to recover damages through the court.',
+    checklist: [
+      'All evidence from your vault',
+      'Completed demand letter (if sent)',
+      'Filing fee for your county',
+    ],
+  },
+  pi_post_resolution_property: {
+    why: 'After your case resolves, there are important follow-up steps to ensure you receive your compensation and complete any remaining repairs.',
+    checklist: [
+      'Settlement agreement or court order',
+      'Outstanding repair or replacement invoices',
+    ],
+  },
+
+  // --- Contract ---
+  contract_intake: {
+    why: 'Contract details — the parties, terms, and breach — form the foundation of your legal claim.',
+    checklist: [
+      'A copy of the contract (written or summary of oral terms)',
+      'Names of all parties involved',
+      'Description of what the other party failed to do',
+      'Amount of damages you\'re claiming',
+    ],
+    tip: 'Even if you don\'t have a written contract, oral agreements can be enforceable.',
+  },
+  contract_demand_letter: {
+    why: 'A demand letter formally notifies the other party and often resolves disputes without court involvement.',
+    checklist: [
+      'Other party\'s name and mailing address',
+      'Specific contract terms that were breached',
+      'Amount you\'re demanding',
+      'Deadline for response (typically 30 days)',
+    ],
+  },
+  contract_negotiation: {
+    why: 'Many contract disputes settle through negotiation. Understanding your leverage helps you reach a fair resolution.',
+    checklist: [
+      'Your minimum acceptable settlement amount',
+      'Evidence of the breach and your damages',
+      'Any prior communications about the dispute',
+    ],
+  },
+  contract_prepare_filing: {
+    why: 'Your petition establishes your legal claims in court. Getting the format and content right is essential.',
+    checklist: [
+      'Completed demand letter (if sent)',
+      'All evidence from your vault',
+      'Filing fee for your county',
+    ],
+  },
+  contract_file_with_court: {
+    why: 'Filing officially starts your lawsuit. This step guides you through the filing process.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  contract_serve_defendant: {
+    why: 'The defendant must be formally notified of the lawsuit before the case can proceed.',
+    checklist: [
+      'Defendant\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  contract_wait_for_answer: {
+    why: 'After service, the defendant has a set number of days to respond. This waiting period is normal.',
+    checklist: [
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  contract_review_answer: {
+    why: 'Understanding the defendant\'s response helps you identify their defenses and plan your strategy.',
+    checklist: [
+      'The defendant\'s filed answer',
+      'Note any counterclaims or affirmative defenses',
+    ],
+  },
+  contract_discovery: {
+    why: 'Discovery lets you formally request evidence from the other side to strengthen your position.',
+    checklist: [
+      'List of documents you want from the defendant',
+      'Questions about the contract and breach',
+      'Financial records related to damages',
+    ],
+  },
+  contract_mediation: {
+    why: 'Mediation with a neutral third party can resolve your dispute faster and cheaper than going to trial.',
+    checklist: [
+      'Your settlement range (minimum to ideal)',
+      'Summary of your strongest evidence',
+      'All financial documentation of damages',
+    ],
+  },
+  contract_post_resolution: {
+    why: 'After your case resolves, there are steps to collect payment or enforce the judgment.',
+    checklist: [
+      'Settlement agreement or court order',
+      'Payment timeline and method',
+    ],
+  },
+
+  // --- Property Dispute ---
+  property_intake: {
+    why: 'Property dispute details — location, parties, and the nature of the dispute — shape your legal strategy.',
+    checklist: [
+      'Property address',
+      'Other party\'s name and relationship (neighbor, seller, HOA, etc.)',
+      'Description of the dispute',
+      'Any surveys, deeds, or title documents',
+    ],
+    tip: 'Photos and documentation of the property issue are especially valuable.',
+  },
+  property_demand_letter: {
+    why: 'A demand letter formally notifies the other party and establishes a record of your attempt to resolve the issue.',
+    checklist: [
+      'Other party\'s name and address',
+      'Specific property right being violated',
+      'What you want them to do (stop, pay, fix)',
+      'Deadline for response',
+    ],
+  },
+  property_negotiation: {
+    why: 'Property disputes often benefit from negotiation, especially between neighbors or in real estate transactions.',
+    checklist: [
+      'Your ideal resolution',
+      'Evidence supporting your position (surveys, photos, deeds)',
+      'Any prior communications about the issue',
+    ],
+  },
+  property_prepare_filing: {
+    why: 'Your court filing establishes your property rights claims. Getting the legal basis right is essential.',
+    checklist: [
+      'Property deed or title documents',
+      'Survey (if applicable)',
+      'Evidence from your vault',
+      'Filing fee for your county',
+    ],
+  },
+  property_file_with_court: {
+    why: 'Filing officially starts your lawsuit to protect your property rights.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  property_serve_defendant: {
+    why: 'The other party must be formally notified of the lawsuit before the case can proceed.',
+    checklist: [
+      'Other party\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  property_wait_for_answer: {
+    why: 'After service, the other party has a set number of days to respond.',
+    checklist: [
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  property_review_answer: {
+    why: 'Understanding the other party\'s response reveals their legal position and any counterclaims.',
+    checklist: [
+      'The defendant\'s filed answer',
+      'Note any counterclaims about property rights',
+    ],
+  },
+  property_discovery: {
+    why: 'Discovery in property cases often involves surveys, appraisals, and title searches.',
+    checklist: [
+      'Documents you want from the other party',
+      'Whether you need a professional survey or appraisal',
+      'Title search records',
+    ],
+  },
+  property_post_resolution: {
+    why: 'After resolution, you may need to record the judgment or take steps to enforce property rights.',
+    checklist: [
+      'Court order or settlement agreement',
+      'Recording requirements at the county clerk',
+    ],
+  },
+
+  // --- Real Estate ---
+  re_intake: {
+    why: 'Property details, transaction timeline, and the nature of the dispute form the foundation of your real estate claim.',
+    checklist: [
+      'Purchase agreement or contract',
+      'Property address and description',
+      'Other party\'s name and role (buyer, seller, agent, etc.)',
+      'Timeline of key events',
+      'Amount of damages you\'re claiming',
+    ],
+    tip: 'Gather your closing documents and any correspondence with agents or title companies.',
+  },
+  re_evidence_vault: {
+    why: 'Real estate disputes are document-heavy — organized evidence strengthens your position significantly.',
+    checklist: [
+      'Purchase agreement or contract',
+      'Title report or title insurance policy',
+      'Inspection report',
+      'Closing documents (HUD-1 or settlement statement)',
+      'Communications with other party or agents',
+    ],
+  },
+  re_demand_letter: {
+    why: 'A formal demand letter puts the other party on notice and often resolves real estate disputes without court.',
+    checklist: [
+      'Clear description of the breach or issue',
+      'Specific dollar amount of damages',
+      'Deadline to respond (typically 30 days)',
+      'Copies of key supporting documents',
+    ],
+  },
+  re_negotiation: {
+    why: 'Many real estate disputes settle through negotiation, saving time and court costs.',
+    checklist: [
+      'Your minimum acceptable outcome',
+      'Key evidence to reference',
+      'Written record of all offers',
+      'Timeline for resolution',
+    ],
+  },
+  re_prepare_filing: {
+    why: 'Filing requires specific forms and accurate information about the property and dispute.',
+    checklist: [
+      'Completed petition with property details',
+      'Filing fee or fee waiver application',
+      'Legal description of the property',
+      'Correct court jurisdiction',
+    ],
+  },
+  re_file_with_court: {
+    why: 'Filing officially starts your lawsuit and establishes your claim timeline.',
+    checklist: [
+      'Completed petition and copies',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  re_serve_defendant: {
+    why: 'The defendant must be properly served for the court to have jurisdiction.',
+    checklist: [
+      'Certified copy of the petition',
+      'Process server or constable contact',
+      'Defendant\'s address for service',
+    ],
+  },
+  re_wait_for_answer: {
+    why: 'After service, the defendant typically has 20 days (Texas) to file an answer.',
+    checklist: [
+      'Service date and deadline calculation',
+      'Monitor the court docket for filings',
+      'Watch for mail from the court',
+    ],
+  },
+  re_review_answer: {
+    why: 'Understanding the defendant\'s response helps you prepare your strategy.',
+    checklist: [
+      'Read all claims and defenses',
+      'Identify disputed vs. admitted facts',
+      'Note any counterclaims against you',
+    ],
+  },
+  re_discovery: {
+    why: 'Discovery lets you request documents and information from the other party.',
+    checklist: [
+      'Written interrogatories (questions)',
+      'Requests for production of documents',
+      'Requests for admissions',
+      'Responses to their discovery requests',
+    ],
+  },
+  re_post_resolution: {
+    why: 'After resolution, there may be steps to enforce a judgment or complete a transaction.',
+    checklist: [
+      'Record any judgment with the county',
+      'Follow up on payment deadlines',
+      'Update title records if needed',
+      'Keep copies of all final documents',
+    ],
+  },
+
+  // --- Other ---
+  other_intake: {
+    why: 'Understanding your situation helps us guide you through the right legal process.',
+    checklist: [
+      'Names of the parties involved',
+      'Description of what happened',
+      'What outcome you\'re seeking',
+      'Any deadlines you\'re aware of',
+    ],
+    tip: 'Even if your situation feels unique, the legal process follows the same basic steps.',
+  },
+  other_demand_letter: {
+    why: 'A demand letter formally requests resolution and creates a record of your attempt to settle before court.',
+    checklist: [
+      'Other party\'s name and address',
+      'Clear description of your complaint',
+      'What you want (compensation, action, or both)',
+      'Deadline for response',
+    ],
+  },
+  other_prepare_filing: {
+    why: 'Your court filing establishes your legal claims. Getting the content right helps the court understand your case.',
+    checklist: [
+      'All evidence from your vault',
+      'Demand letter (if sent)',
+      'Filing fee for your county',
+    ],
+  },
+  other_file_with_court: {
+    why: 'Filing officially starts your case with the court.',
+    checklist: [
+      'Prepared petition document',
+      'Filing fee payment',
+      'Government-issued ID',
+    ],
+  },
+  other_serve_defendant: {
+    why: 'The other party must receive formal notice of the lawsuit before the case can move forward.',
+    checklist: [
+      'Other party\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  other_wait_for_answer: {
+    why: 'After service, the other party has a set number of days to respond.',
+    checklist: [
+      'Monitor the court docket',
+      'Watch for court mail',
+    ],
+  },
+  other_review_answer: {
+    why: 'The other party\'s response reveals their defenses and any counterclaims.',
+    checklist: [
+      'The filed answer document',
+      'Note any counterclaims or defenses',
+    ],
+  },
+  other_discovery: {
+    why: 'Discovery lets you formally obtain evidence and information from the other side.',
+    checklist: [
+      'List of documents you need',
+      'Questions for the other party',
+    ],
+  },
+  other_post_resolution: {
+    why: 'After your case resolves, there may be steps to enforce the judgment or finalize the outcome.',
+    checklist: [
+      'Court order or settlement agreement',
+      'Payment or compliance deadlines',
+    ],
+  },
+
+  // --- Small Claims ---
+  small_claims_intake: {
+    why: 'These details determine your filing court, fees, and whether your claim fits within the small claims limit.',
+    checklist: [
+      'Amount you\'re claiming (must be within limit)',
+      'Defendant\'s name and address',
+      'Description of what happened',
+    ],
+  },
+  sc_demand_letter: {
+    why: 'Many disputes resolve after a formal demand letter. It shows you\'re serious and gives the other side a chance to settle.',
+    checklist: [
+      'Amount you\'re demanding',
+      'Evidence supporting your claim',
+      'Defendant\'s mailing address',
+    ],
+  },
+  prepare_small_claims_filing: {
+    why: 'Small claims court has simplified forms, but filling them out correctly is still important for your case to be accepted.',
+    checklist: [
+      'Defendant\'s full legal name and address',
+      'Exact amount of your claim',
+      'Brief description of the dispute',
+    ],
+  },
+  sc_evidence_vault: {
+    why: 'Organized evidence is the foundation of a strong small claims case. Judges appreciate clear, well-organized documentation.',
+    checklist: [
+      'Receipts or invoices showing the amount owed',
+      'Written contracts or agreements',
+      'Photos or videos of damage',
+      'Text messages, emails, or letters with the other party',
+      'Witness contact information',
+    ],
+    tip: 'Upload what you have now. You can always add more later.',
+  },
+  sc_serve_defendant: {
+    why: 'The defendant must receive formal notice of your claim. The court requires proof this was done correctly.',
+    checklist: [
+      'Defendant\'s address for service',
+      'Budget for certified mail or process server',
+    ],
+  },
+  sc_file_with_court: {
+    why: 'Small claims court has simplified filing, but filing in the right court with the correct forms is essential for your case to proceed.',
+    checklist: [
+      'Completed small claims petition',
+      'Filing fee ready (typically $35-$100)',
+      'Defendant\'s full name and address',
+    ],
+    tip: 'File in the Justice of the Peace court where the defendant lives or where the issue occurred. Claims up to $20,000.',
+  },
+  sc_prepare_for_hearing: {
+    why: 'Small claims hearings are brief — usually 15-30 minutes. Being prepared and organized makes a strong impression on the judge.',
+    checklist: [
+      'All evidence organized in order',
+      'Brief timeline of events written out',
+      'Copies of everything for the judge and defendant',
+    ],
+    tip: 'Practice explaining your case in under 5 minutes.',
+  },
+  sc_hearing_day: {
+    why: 'This is your day in court. Arriving prepared, on time, and organized is the best thing you can do.',
+    checklist: [
+      'All exhibits and copies',
+      'Government-issued ID',
+      'Arrive 15-30 minutes early',
+    ],
+  },
+
+  // --- Landlord-Tenant ---
+  landlord_tenant_intake: {
+    why: 'Landlord-tenant disputes have specific rules depending on your situation. These details help us guide you correctly.',
+    checklist: [
+      'Your lease or rental agreement',
+      'Landlord or property manager\'s name and address',
+      'Description of the issue',
+    ],
+    tip: 'Take photos and video of the property condition now — this evidence is time-sensitive.',
+  },
+  prepare_lt_demand_letter: {
+    why: 'Many landlord-tenant issues require a written demand before you can take legal action. This letter starts that clock.',
+    checklist: [
+      'Specific amount owed or issue to be fixed',
+      'Landlord\'s mailing address',
+      'Copies of relevant lease provisions',
+    ],
+    tip: 'Send the letter by certified mail with return receipt — this creates proof of delivery.',
+  },
+  lt_negotiation: {
+    why: 'Settling a landlord-tenant dispute without court saves time, money, and preserves the relationship if needed.',
+    checklist: [
+      'Copy of your demand letter and proof of delivery',
+      'Documentation of damages or issues',
+      'Your minimum acceptable settlement terms',
+      'Any response from the other party',
+    ],
+  },
+  prepare_landlord_tenant_filing: {
+    why: 'Your court filing must include the right claims and follow local rules for landlord-tenant cases.',
+    checklist: [
+      'Completed demand letter (or proof it was sent)',
+      'Lease agreement',
+      'Evidence of the issue (photos, communications)',
+    ],
+    tip: 'JP courts handle claims up to $20,000. For larger amounts, file in county or district court.',
+  },
+  lt_file_with_court: {
+    why: 'Filing officially starts your landlord-tenant case. JP and district courts have different procedures.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Copy of the lease agreement',
+      'Proof that demand letter was sent',
+    ],
+  },
+  serve_other_party: {
+    why: 'The other party must be formally notified. Landlord-tenant cases often have specific service requirements.',
+    checklist: [
+      'Other party\'s address for service',
+      'Correct service method for your court',
+    ],
+    tip: 'For contested cases, consider using a process server instead of certified mail for more reliable service.',
+  },
+  lt_wait_for_response: {
+    why: 'After being served, the other party has a limited number of days to file a response. Tracking this deadline is critical.',
+    checklist: [
+      'Calendar the answer deadline based on the service date',
+      'Check the court docket regularly for filings',
+      'Watch your mailbox for court notices',
+    ],
+  },
+  lt_review_response: {
+    why: 'Understanding the other party\'s defenses and any counterclaims shapes your hearing strategy.',
+    checklist: [
+      'The other party\'s filed answer or response',
+      'List of claims they admitted vs. denied',
+      'Note any counterclaims or affirmative defenses',
+    ],
+  },
+  lt_discovery: {
+    why: 'District court landlord-tenant cases may involve formal discovery. This lets you request evidence from the other side.',
+    checklist: [
+      'List of documents you want from the other party',
+      'Interrogatories (written questions) to send',
+      'Whether depositions are needed',
+    ],
+  },
+  lt_prepare_for_hearing: {
+    why: 'Landlord-tenant hearings focus on lease terms, property condition, and compliance. Being organized wins cases.',
+    checklist: [
+      'Lease agreement with key terms highlighted',
+      'Photos and videos of property condition',
+      'Rent payment records and receipts',
+      'Timeline of events written out',
+      'Three copies of everything (you, judge, other party)',
+    ],
+  },
+  lt_mediation: {
+    why: 'Courts often prefer mediated settlements for landlord-tenant disputes. Mediation can resolve issues faster than a full hearing.',
+    checklist: [
+      'Your settlement authority (what you can agree to)',
+      'Your bottom line and ideal outcome',
+      'Key lease terms and evidence summary',
+    ],
+  },
+  lt_hearing_day: {
+    why: 'This is your day in court for your landlord-tenant case. Preparation and composure make the strongest impression.',
+    checklist: [
+      'All exhibits organized and labeled',
+      'Government-issued ID',
+      'Arrive 30 minutes early',
+      'Copies for the judge and other party',
+    ],
+  },
+  lt_post_judgment: {
+    why: 'Landlord-tenant judgments have unique enforcement options including writs of possession and specific appeal timelines.',
+    checklist: [
+      'Copy of the court\'s judgment or order',
+      'Compliance deadlines noted on your calendar',
+      'Appeal deadline (5 days for evictions, 21 days for money judgments)',
+    ],
+  },
+
+  // --- Debt Defense ---
+  debt_defense_intake: {
+    why: 'Understanding the debt claim against you is the first step to building your defense.',
+    checklist: [
+      'The lawsuit papers you received',
+      'Any debt collection letters',
+      'Original credit agreement (if you have it)',
+    ],
+    tip: 'Even if you owe the debt, there may be valid defenses available to you.',
+  },
+  prepare_debt_validation_letter: {
+    why: 'Debt collectors must prove the debt is valid and that they have the right to collect. This letter forces them to show their proof.',
+    checklist: [
+      'Creditor\'s name and address',
+      'Account number from the collection notice',
+    ],
+  },
+  prepare_debt_defense_answer: {
+    why: 'Filing an answer prevents a default judgment against you and preserves all your defenses.',
+    checklist: [
+      'The plaintiff\'s petition or complaint',
+      'Any validation response you received',
+      'Deadline for filing your answer',
+    ],
+  },
+  debt_file_with_court: {
+    why: 'Filing your answer on time is critical. Missing the deadline can result in an automatic judgment against you.',
+    checklist: [
+      'Your prepared answer document',
+      'Filing fee (or fee waiver application)',
+    ],
+  },
+  serve_plaintiff: {
+    why: 'The plaintiff\'s attorney must receive a copy of your answer. This is required by court rules.',
+    checklist: [
+      'Plaintiff\'s attorney name and address',
+      'Certificate of service form',
+    ],
+  },
+  debt_hearing_prep: {
+    why: 'Preparation is your biggest advantage. Knowing the plaintiff\'s weak points helps you challenge their case effectively.',
+    checklist: [
+      'All documents received from the plaintiff',
+      'Your validation letter and any response',
+      'Timeline of the debt',
+    ],
+  },
+  debt_hearing_day: {
+    why: 'This is your chance to present your defense. Being organized and calm makes a strong impression.',
+    checklist: [
+      'All exhibits and copies',
+      'Government-issued ID',
+      'Arrive 15-30 minutes early',
+    ],
+  },
+  debt_post_judgment: {
+    why: 'After the ruling, you may need to act quickly — whether it\'s appealing, negotiating payment, or enforcing a win.',
+    checklist: [
+      'Copy of the court\'s judgment',
+      'Note the appeal deadline',
+    ],
+  },
+  fdcpa_check: {
+    why: 'If a debt collector violated federal law, you may have additional defenses or even a counterclaim worth up to $1,000 in statutory damages.',
+    checklist: [
+      'Dates and times of collector calls',
+      'Notes about what the collector said',
+      'Any voicemails or written communications',
+    ],
+    tip: 'Even one violation can strengthen your defense significantly.',
+  },
+  debt_sol_check: {
+    why: 'In Texas, creditors have a limited time to sue. If the statute of limitations has expired, they cannot legally collect through the courts.',
+    checklist: [
+      'Date of last payment on the account',
+      'Date the account went into default',
+      'Type of debt (credit card, medical, loan, etc.)',
+    ],
+    tip: 'The clock typically starts from your last payment or the default date — whichever is later.',
+  },
+  debt_answer_prep: {
+    why: 'A well-prepared answer is your most important defense. It prevents default judgment and puts the burden on the creditor to prove their case.',
+    checklist: [
+      'The plaintiff\'s petition or complaint',
+      'Your FDCPA check results',
+      'Your statute of limitations calculation',
+      'Any validation response from the collector',
+    ],
+  },
+  lt_repair_request: {
+    why: 'Under Texas Property Code § 92.052, your landlord must make a diligent effort to repair conditions that materially affect your health or safety.',
+    checklist: [
+      'Photos or video of the repair issue',
+      'Dates when the issue started',
+      'Any prior communication with your landlord',
+    ],
+    tip: 'Written notice is required before your landlord\'s duty to repair kicks in.',
+  },
+  lt_eviction_response: {
+    why: 'You have legal rights when facing eviction. Many evictions can be contested, delayed, or resolved through negotiation.',
+    checklist: [
+      'The eviction notice or court citation',
+      'Your lease agreement',
+      'Rent payment records',
+      'Any evidence of landlord retaliation or habitability issues',
+    ],
+    tip: 'Never ignore an eviction notice. Responding on time preserves all your rights.',
+  },
+  lt_habitability_checklist: {
+    why: 'Documenting habitability issues strengthens your case and may give you leverage in negotiations or court.',
+    checklist: [
+      'Photos of each habitability issue with timestamps',
+      'A written log of when issues started',
+      'Copies of any repair requests sent to your landlord',
+    ],
+  },
+  debt_filing_guide: {
+    why: 'Filing your answer correctly is just as important as writing it. This guide walks you through exactly how to submit it to the court.',
+    checklist: [
+      'Your completed Answer (signed)',
+      'Filing fee payment or fee waiver form',
+      'Your case number from the citation',
+      'Government-issued ID',
+    ],
+    tip: 'eFileTexas.gov is the easiest way to file — you can do it from home.',
+  },
+  debt_service_guide: {
+    why: 'Texas law requires you to give the other side a copy of everything you file. Without proper service, your answer may be rejected.',
+    checklist: [
+      'A copy of your Answer for the plaintiff\'s attorney',
+      'Certificate of Service (attached to your Answer)',
+      'Plaintiff attorney\'s name and address (from court papers)',
+    ],
+    tip: 'If you e-file, service often happens automatically — check your e-filing receipt.',
+  },
+  debt_courtroom_guide: {
+    why: 'Knowing what to expect removes the fear. Most defendants who prepare are more effective than those with attorneys who don\'t.',
+    checklist: [
+      '3 copies of all documents',
+      'Your filed Answer with court stamp',
+      'Proof of service',
+      'Evidence supporting your defenses',
+      'Government-issued ID',
+      'Notebook and pen',
+    ],
+    tip: 'Arrive 30 minutes early. If the plaintiff doesn\'t show up, you can ask for dismissal.',
+  },
+  debt_post_judgment_guide: {
+    why: 'Whether you won or lost, there are important next steps to protect yourself and your rights.',
+    checklist: [
+      'Copy of the court\'s judgment or order',
+      'Note your appeal deadline (5 days JP, 21 days county/district)',
+    ],
+    tip: 'Texas protects your wages, home, car, and retirement from debt collection — even if you lose.',
+  },
+  fdcpa_counterclaim_guide: {
+    why: 'If the collector broke federal law, you can file a counterclaim for up to $1,000 in statutory damages — turning their lawsuit into YOUR payday.',
+    checklist: [
+      'Your FDCPA violation findings',
+      'Evidence of each violation (dates, call logs, letters)',
+    ],
+    tip: 'Include your counterclaim IN your Answer — it\'s filed as one document.',
+  },
+  debt_motion_to_dismiss: {
+    why: 'If the statute of limitations expired or the collector can\'t prove they own the debt, you can ask the judge to throw out the case before trial.',
+    checklist: [
+      'Your SOL calculation showing expiration',
+      'Any validation letter response (or proof of non-response)',
+    ],
+    tip: 'File this AFTER your Answer but BEFORE the trial date.',
+  },
+  debt_default_recovery: {
+    why: 'Missing a deadline isn\'t the end. Texas law gives you a second chance if you act quickly.',
+    checklist: [
+      'Date the default judgment was entered',
+      'Reason you missed the deadline',
+      'Your defenses (to show the case has merit)',
+    ],
+    tip: 'The sooner you act, the better your chances. Under 30 days is ideal.',
+  },
+  debt_settlement_guide: {
+    why: 'About 80% of debt cases settle. Knowing what to demand gives you leverage that most defendants don\'t have.',
+    checklist: [
+      'The claimed debt amount',
+      'How much you can realistically pay',
+    ],
+    tip: 'Never pay before getting the agreement IN WRITING. And always demand credit report deletion.',
+  },
+  debt_validation_response: {
+    why: 'What the collector sent back (or didn\'t) is powerful evidence. Non-response means they can\'t prove the debt.',
+    checklist: [
+      'Your certified mail receipt',
+      'Any response from the collector',
+      'Date you sent the validation letter',
+    ],
+  },
+  debt_evidence_rules: {
+    why: 'You don\'t need a law degree — just 5 basic rules that will make your evidence count in court.',
+    checklist: [
+      'Your organized evidence folder',
+      '3 copies of each document',
+    ],
+    tip: 'In JP court, judges are more relaxed about rules. In county/district court, they\'re strict.',
+  },
+  debt_continuance_request: {
+    why: 'Courts understand pro se litigants need extra time. Continuances are granted regularly.',
+    checklist: [
+      'Your hearing date',
+      'Reason you need more time',
+    ],
+  },
+  debt_witness_prep: {
+    why: 'A witness who saw or heard what happened can be your strongest evidence — especially for FDCPA violations.',
+    checklist: [
+      'Witness name and contact info',
+      'What they can testify about',
+    ],
+    tip: 'You can review facts with witnesses, but never tell them what to say.',
+  },
+  debt_credit_dispute: {
+    why: 'Even after winning, the debt may still show on your credit report. You have the right to correct it.',
+    checklist: [
+      'Copy of the court order (dismissal or satisfaction)',
+      'Your credit reports from all 3 bureaus',
+    ],
+    tip: 'Get free reports at annualcreditreport.com — it\'s the official site.',
+  },
+
+  // --- Small Claims Depth ---
+  sc_jp_court_guide: {
+    why: 'JP Court is the most informal court in Texas — relaxed rules, quick hearings, no lawyers required. Knowing the process is your advantage.',
+    checklist: ['Court citation with hearing date', 'Your claim amount (under $20K)', 'All evidence organized'],
+    tip: 'JP judges are often non-lawyers. They value clear facts and organized evidence over legal jargon.',
+  },
+  sc_filing_guide: {
+    why: 'JP Court has simplified forms and lower fees ($35-75). Many clerks will help you fill out the paperwork.',
+    checklist: ['Petition or complaint form', 'Filing fee ($35-75)', 'Defendant\'s name and address', 'Government ID'],
+    tip: 'Ask the clerk if they have fill-in-the-blank petition forms — most JP courts do.',
+  },
+  sc_service_guide: {
+    why: 'In many JP courts, the clerk handles service for you — just provide the defendant\'s address.',
+    checklist: ['Defendant\'s current address', 'Service fee ($50-100 for constable)'],
+    tip: 'When you file, ask the clerk: "Will you issue citation and arrange constable service?"',
+  },
+  sc_courtroom_guide: {
+    why: 'JP Court hearings last 15-30 minutes. Tell your story clearly, show your evidence, and let the judge decide.',
+    checklist: ['3 copies of all evidence', 'Your story organized chronologically', 'Receipts/contracts/photos', 'Government ID'],
+    tip: 'The plaintiff goes first. Tell your story simply: what happened, what you lost, what you want.',
+  },
+  sc_evidence_rules: {
+    why: 'JP Court has the most relaxed evidence rules in Texas. Written statements and business records are easier to admit.',
+    checklist: ['Evidence organized by topic', 'Numbered exhibits', '3 copies of everything'],
+    tip: 'Even written witness statements (affidavits) are accepted in JP Court if the witness can\'t attend.',
+  },
+  sc_damages_by_type: {
+    why: 'Different claim types have different damage formulas. Security deposits can get 3x penalties; consumer claims can get treble damages.',
+    checklist: ['Receipts and invoices', 'Repair estimates', 'Contract or agreement'],
+  },
+  sc_settlement_guide: {
+    why: 'About 60% of small claims settle before the hearing. A fair settlement saves everyone time and money.',
+    checklist: ['Your total damages amount', 'Minimum amount you\'d accept', 'Written settlement agreement template'],
+    tip: 'Always get the settlement IN WRITING before dismissing your case.',
+  },
+  sc_default_judgment: {
+    why: 'If the other side doesn\'t respond or show up, you may win automatically. Know the procedure.',
+    checklist: ['Proof of service (showing defendant was notified)', 'Your damages evidence (still needed)'],
+    tip: 'Even for default judgment, you must prove your damages. Bring your evidence.',
+  },
+  sc_counterclaim_defense: {
+    why: 'If the defendant filed a counterclaim, you\'re now defending too. Prepare for both sides of the case.',
+    checklist: ['The counterclaim document', 'Evidence disproving their claims', 'Your original claim evidence'],
+  },
+  sc_post_judgment_guide: {
+    why: 'Winning is step one. Collecting is step two. Texas gives you powerful tools to enforce your judgment.',
+    checklist: ['Copy of the judgment', 'Defendant\'s known address/employer/bank'],
+    tip: 'Judgments accrue 5% interest per year. File an Abstract of Judgment to create a lien on their property.',
+  },
+  sc_appeal_guide: {
+    why: 'An appeal from JP Court gives you a completely new trial in County Court — everything starts fresh.',
+    checklist: ['JP Court judgment (with date signed)', 'Appeal filing fee', 'Appeal bond (or inability-to-pay affidavit)'],
+    tip: 'You have 21 days to appeal (5 days for eviction). Act quickly.',
+  },
+
+  // --- Real Estate Depth ---
+  re_filing_guide: {
+    why: 'Real estate lawsuits MUST be filed in the county where the property is located. Getting venue wrong means dismissal.',
+    checklist: ['Full legal description of property', 'Petition', 'Filing fee', 'Government ID'],
+    tip: 'Consider filing a lis pendens to cloud the title — prevents the property from being sold during litigation.',
+  },
+  re_service_guide: {
+    why: 'RE cases often involve multiple parties (seller, buyer, agents, title company, builder). Each must be properly served.',
+    checklist: ['Names of all parties', 'Registered agent info for businesses', 'Filed petition with court stamp'],
+  },
+  re_courtroom_guide: {
+    why: 'RE trials revolve around documents — title records, surveys, inspection reports. Organized evidence wins.',
+    checklist: ['Title documents', 'Survey/plat', 'Inspection reports', 'Communications', '3 copies of everything'],
+  },
+  re_title_defect_analysis: {
+    why: 'Understanding what makes your title "defective" determines whether you claim against the seller, the title company, or both.',
+    checklist: ['Title insurance policy', 'Title commitment', 'Deed records', 'Any lien or encumbrance documents'],
+  },
+  re_seller_disclosure: {
+    why: 'Texas sellers must disclose known defects. Non-disclosure can result in treble damages under the DTPA.',
+    checklist: ['Seller\'s disclosure form', 'Inspection report', 'Repair estimates', 'Evidence seller knew about defects'],
+    tip: 'DTPA allows up to 3x your actual damages if the seller knowingly concealed defects.',
+  },
+  re_earnest_money: {
+    why: 'Earnest money disputes are common and often resolved quickly in JP court. Know your release conditions.',
+    checklist: ['Purchase contract (earnest money paragraph)', 'Escrow receipt', 'Communications about the deal'],
+  },
+  re_construction_defect: {
+    why: 'RCLA requires 60 days notice to the builder BEFORE you can file suit. Missing this step can dismiss your case.',
+    checklist: ['RCLA notice (sent 60+ days ago)', 'Expert inspection report', 'Repair estimates', 'Builder\'s response (if any)'],
+    tip: 'An expert affidavit is required for construction defect claims. Budget $1,500-3,000.',
+  },
+  re_failed_closing: {
+    why: 'When a closing falls through, the remedy depends on WHO caused it — buyer, seller, or lender.',
+    checklist: ['Purchase contract', 'Closing timeline communications', 'Earnest money receipt', 'Lender denial letter (if applicable)'],
+  },
+  re_adverse_possession: {
+    why: 'Adverse possession lets you claim ownership of land you\'ve openly used for years. Texas has 3-year and 10-year rules.',
+    checklist: ['Survey showing disputed area', 'Photos of your use over time', 'Tax payment records', 'Witness statements'],
+  },
+  re_discovery_guide: {
+    why: 'RE cases are document-heavy. Title records, inspection reports, and communications are your strongest evidence.',
+    checklist: ['List of documents to request', 'Deposition targets', 'Expert report needs'],
+  },
+  re_post_judgment_guide: {
+    why: 'RE judgments must be recorded with the County Clerk to affect title. Don\'t skip this step.',
+    checklist: ['Court judgment', 'County Clerk recording fee', 'Lis pendens release (if filed)'],
+    tip: 'Recording your judgment creates a public record that protects your property rights.',
+  },
+
+  // --- Business Dispute Depth ---
+  biz_courtroom_guide: {
+    why: 'Business trials are document-heavy. Organized financial evidence and clear testimony win cases.',
+    checklist: ['3 copies of all financial documents', 'Contract/partnership agreement', 'Communications evidence', 'Damages calculation'],
+    tip: 'Present your story chronologically with documents backing each point.',
+  },
+  biz_service_guide: {
+    why: 'Serving a business requires finding their registered agent — different from serving an individual.',
+    checklist: ['Entity name and type (LLC, Corp, etc.)', 'Registered agent info from sos.state.tx.us', 'Filed petition with court stamp'],
+    tip: 'Search the TX Secretary of State website for any business\'s registered agent.',
+  },
+  biz_discovery_guide: {
+    why: 'Business disputes are won in discovery. Getting financial records and communications is your strongest weapon.',
+    checklist: ['List of documents you need', 'Names of people to depose', 'Questions for interrogatories'],
+    tip: 'Request bank records, tax returns, and internal emails — they tell the real story.',
+  },
+  biz_wrongful_termination: {
+    why: 'Texas is at-will, but firing based on discrimination, retaliation, or contract violation is illegal.',
+    checklist: ['Termination letter/notice', 'Performance reviews', 'Evidence of discrimination or retaliation', 'Employment contract (if any)'],
+    tip: 'You must file an EEOC/TWC complaint BEFORE you can sue for discrimination.',
+  },
+  biz_wage_theft: {
+    why: 'Texas Payday Law requires employers to pay on time. Failure can result in triple damages.',
+    checklist: ['Pay stubs showing missed wages', 'Employment contract or offer letter', 'Time records', 'Written demands for payment'],
+    tip: 'File a TWC wage claim at twc.texas.gov — it\'s free and they investigate for you.',
+  },
+  biz_non_compete: {
+    why: 'Many non-competes are unenforceable in Texas. Courts can narrow or void unreasonable restrictions.',
+    checklist: ['Non-compete agreement', 'Employment contract', 'Description of what you want to do'],
+    tip: 'Texas courts use the "blue pencil doctrine" — they rewrite unreasonable terms rather than voiding the whole agreement.',
+  },
+  biz_b2b_contract_breach: {
+    why: 'B2B contract claims have specific rules — especially when the UCC applies to goods transactions.',
+    checklist: ['The contract', 'Invoices and payment records', 'Communications about the breach', 'Damages calculation'],
+  },
+  biz_b2b_trade_secrets: {
+    why: 'Texas law provides strong protections for trade secrets — including injunctions, damages, and attorney fees.',
+    checklist: ['Description of the trade secret', 'Evidence of misappropriation', 'Measures you took to protect it'],
+    tip: 'You can get a TRO (emergency court order) the SAME DAY to stop ongoing misappropriation.',
+  },
+  biz_partnership_fiduciary: {
+    why: 'Partners owe each other the highest legal duty — loyalty, honesty, and good faith. Breach carries serious damages.',
+    checklist: ['Partnership agreement', 'Financial records', 'Evidence of self-dealing or secret profits'],
+    tip: 'Punitive damages may be available if the breach involved intentional fraud.',
+  },
+  biz_partnership_accounting: {
+    why: 'Every partner has the right to a full accounting. If money is missing, the law gives you tools to find it.',
+    checklist: ['Partnership financial statements', 'Bank records', 'Tax returns (business and personal)'],
+    tip: 'A forensic accountant can find hidden income and unauthorized expenses.',
+  },
+
+  // --- Contract Dispute Depth ---
+  contract_breach_analysis: {
+    why: 'Material vs minor breach determines your remedies. A material breach lets you cancel the contract AND sue for damages.',
+    checklist: ['Description of what was promised', 'What was actually delivered', 'Any benefit you received'],
+  },
+  contract_statute_of_frauds: {
+    why: 'Some contracts MUST be written to be enforceable. Knowing the rules protects your claim from dismissal.',
+    checklist: ['The contract (if written)', 'Emails/texts discussing terms', 'Evidence of partial performance'],
+  },
+  contract_damages_methods: {
+    why: 'Three different calculation methods exist. Using the right one maximizes your recovery.',
+    checklist: ['All receipts and invoices', 'Lost income documentation', 'Cost of replacement/cover'],
+  },
+  contract_provisions_check: {
+    why: 'Arbitration clauses, liability caps, and fee-shifting provisions can change everything about your case.',
+    checklist: ['Your full contract (read every page)', 'Any amendments or addendums'],
+    tip: 'An attorney fees clause is good news — the loser pays the winner\'s costs.',
+  },
+  contract_defenses_guide: {
+    why: 'Knowing what the other side will argue lets you prepare your rebuttal before they even raise it.',
+    checklist: ['Evidence you performed your obligations', 'Timeline showing you filed within 4 years', 'Documentation disproving their claims'],
+  },
+  contract_filing_guide: {
+    why: 'The right court depends on your damages amount and any venue clause in the contract.',
+    checklist: ['Petition', 'Copy of the contract', 'Filing fee', 'Government ID'],
+    tip: 'Check your contract for a forum selection clause — it may specify where to file.',
+  },
+  contract_service_guide: {
+    why: 'The defendant must receive official notice. For businesses, serve their registered agent.',
+    checklist: ['Defendant\'s name and address', 'Filed petition with court stamp', 'Service fee'],
+    tip: 'Find a business\'s registered agent at sos.state.tx.us.',
+  },
+  contract_courtroom_guide: {
+    why: 'Contract cases are won with the contract itself and proof of breach. Clear storytelling beats legal jargon.',
+    checklist: ['3 copies of the contract', 'Breach evidence (emails, invoices)', 'Damages calculation', 'Government ID'],
+    tip: 'Present your story chronologically: contract → performance → breach → damages.',
+  },
+  contract_settlement_guide: {
+    why: 'Most contract cases settle. A written settlement agreement is often more reliable than a judgment.',
+    checklist: ['Total damages calculation', 'Minimum acceptable amount', 'Payment terms you\'d accept'],
+    tip: 'Always get the settlement in writing BEFORE accepting payment.',
+  },
+  contract_post_judgment_guide: {
+    why: 'Winning a judgment is step one. Collecting is step two — and Texas gives you powerful tools.',
+    checklist: ['Copy of judgment', 'Defendant\'s known assets/employer', 'Appeal deadline (30 days)'],
+    tip: 'Judgments accrue 5% interest per year. Every day they don\'t pay, they owe more.',
+  },
+
+  // --- Landlord-Tenant Depth ---
+  lt_security_deposit_demand: {
+    why: 'Texas law gives landlords 30 days to return your deposit — or face triple damages plus $100 plus attorney fees.',
+    checklist: ['Move-out date', 'Written forwarding address (sent to landlord)', 'Original deposit amount', 'Any itemized deduction list received'],
+    tip: 'If your landlord hasn\'t returned your deposit in 30 days, you can recover up to 3x the amount.',
+  },
+  lt_repair_and_deduct: {
+    why: 'If your landlord won\'t fix health/safety issues, Texas law lets you repair it yourself and deduct the cost from rent.',
+    checklist: ['Written repair notice (with proof of delivery)', 'Photos of the issue', 'Contractor estimates'],
+    tip: 'You MUST give written notice and wait a reasonable time (7+ days) before repairing.',
+  },
+  lt_illegal_lockout: {
+    why: 'Illegal lockouts are one of the clearest violations in Texas law. The court can order immediate access plus damages.',
+    checklist: ['Photos/video of the lockout', 'Witness names', 'Police report (if filed)'],
+    tip: 'Call the police first. Then go to JP Court for an emergency order — same day relief is possible.',
+  },
+  lt_eviction_notice_analysis: {
+    why: 'Many eviction notices have technical defects that invalidate the eviction. A flawed notice is a strong defense.',
+    checklist: ['The eviction notice itself', 'Envelope or delivery proof', 'Your lease agreement'],
+    tip: 'If the notice doesn\'t give you the required number of days, it may be void.',
+  },
+  lt_jp_court_procedures: {
+    why: 'JP Court handles most evictions. It\'s informal and fast — hearings are 15-30 minutes. Knowing the rules helps.',
+    checklist: ['Court citation with hearing date', 'Your written answer (recommended)', 'All evidence'],
+    tip: 'You have the right to request a jury trial — but you must ask in writing before the hearing.',
+  },
+  lt_appeal_guide: {
+    why: 'Losing in JP Court is NOT the end. An appeal gives you a completely new trial in County Court.',
+    checklist: ['JP Court judgment (with date signed)', 'Appeal filing fee or inability-to-pay affidavit', 'Appeal bond (one month\'s rent) or inability-to-pay'],
+    tip: 'You have ONLY 5 DAYS to appeal an eviction — act immediately.',
+  },
+  lt_courtroom_guide: {
+    why: 'JP Court hearings are short but consequential. Knowing the structure and having a script gives you confidence.',
+    checklist: ['Lease agreement', 'Rent payment records', 'Repair request copies', 'Photos of conditions', '3 copies of everything'],
+    tip: 'The landlord goes first and must prove their case. Listen carefully — then present your defense.',
+  },
+  lt_lease_termination: {
+    why: 'Texas law provides specific protections for military members and DV survivors who need to end their lease early.',
+    checklist: ['Military orders or protective order (if applicable)', 'Written termination notice', 'Forwarding address for deposit'],
+  },
+  lt_writ_of_possession: {
+    why: 'Even after losing, you have time. Texas gives you at least 6 days before physical removal.',
+    checklist: ['Appeal deadline (5 days from judgment)', 'Important documents and belongings secured'],
+    tip: 'Filing an appeal STOPS the eviction while the appeal is pending.',
+  },
+
+  // --- Property Damage Depth ---
+  property_damage_assessment: {
+    why: 'Well-documented damage is your strongest evidence. Judges need to SEE what happened.',
+    checklist: ['Photos from multiple angles (with timestamps)', 'Video walkthrough', 'At least 3 written contractor estimates', 'Before photos (if available)'],
+    tip: 'Don\'t repair until you\'ve documented everything AND the other party has had a chance to inspect.',
+  },
+  property_insurance_guide: {
+    why: 'Insurance can fund your repairs immediately — but you need to navigate the claims process correctly.',
+    checklist: ['Insurance policy information', 'Police report (if applicable)', 'Damage photos', 'Repair estimates'],
+    tip: 'Always get your OWN repair estimates — don\'t rely solely on the adjuster\'s.',
+  },
+  property_damages_guide: {
+    why: 'Most people undervalue property claims. Damages include repair costs PLUS diminished value, loss of use, and consequential costs.',
+    checklist: ['Repair estimates', 'Property appraisal (before/after)', 'Receipts for related costs (hotel, storage, etc.)'],
+  },
+  property_filing_guide: {
+    why: 'The right court depends on your damages amount. Under $20K goes to JP Court (simpler). Over $20K goes to County or District Court.',
+    checklist: ['Original Petition', 'Filing fee', 'Evidence exhibits', 'Government ID'],
+    tip: 'File in the county where the property is located.',
+  },
+  property_service_guide: {
+    why: 'The defendant must be officially notified. For businesses and HOAs, you serve their registered agent.',
+    checklist: ['Defendant\'s name and address', 'Filed petition with court stamp', 'Service fee ($50-100)'],
+    tip: 'Find a business\'s registered agent at sos.state.tx.us.',
+  },
+  property_pretrial_motions: {
+    why: 'Property cases with clear documentary evidence (surveys, deeds) can sometimes be won before trial via summary judgment.',
+    checklist: ['Survey/deed showing your position', 'Photos and estimates', 'Timeline of events'],
+  },
+  property_mediation_guide: {
+    why: 'Most property disputes settle in mediation. Know your total damages and walk-away point before you walk in.',
+    checklist: ['Total damages calculation', 'All evidence organized', 'Proposed resolution terms'],
+  },
+  property_courtroom_guide: {
+    why: 'Property trials are evidence-heavy. Organized photos, estimates, and a clear timeline win cases.',
+    checklist: ['3 copies of all exhibits', 'Photos organized chronologically', 'Contractor estimates', 'Government ID'],
+    tip: 'Present your story chronologically: what happened, the damage, the cost to fix.',
+  },
+  property_post_judgment_guide: {
+    why: 'If your judgment involves property rights, record it with the County Clerk so it appears in property records.',
+    checklist: ['Copy of the court\'s judgment', 'Appeal deadline (30 days)'],
+    tip: 'If the defendant doesn\'t pay, you can place a lien on THEIR property.',
+  },
+
+  // --- Personal Injury Depth ---
+  pi_pip_claim: {
+    why: 'PIP pays YOUR medical bills regardless of fault. It\'s coverage you already paid for — don\'t leave it unused.',
+    checklist: ['Your auto insurance card', 'Police report', 'Medical bills', 'Proof of lost wages'],
+    tip: 'File within 30 days of the accident for fastest processing.',
+  },
+  pi_medical_improvement: {
+    why: 'Settling before your treatment is complete means guessing at your total costs. Wait until your doctor confirms you\'ve recovered as much as you will.',
+    checklist: ['Doctor\'s latest treatment notes', 'Prognosis report', 'Any disability rating'],
+    tip: 'Tell the adjuster: "I\'m still treating. I\'ll make a demand when treatment is complete."',
+  },
+  pi_damages_calculation: {
+    why: 'Knowing your case value prevents you from accepting a lowball offer. Insurance companies count on your not knowing.',
+    checklist: ['All medical bills', 'Lost wage documentation', 'Property damage estimates'],
+    tip: 'The "multiplier method" (medical bills × 2-5 for pain/suffering) is how most cases are valued.',
+  },
+  pi_comparative_fault: {
+    why: 'In Texas, if you\'re 51% or more at fault, you recover NOTHING. Understanding this shapes your entire case strategy.',
+    checklist: ['Police report', 'Witness statements', 'Photos/video of the scene'],
+  },
+  pi_filing_guide: {
+    why: 'Filing your lawsuit starts the clock on the legal process. Getting it right the first time saves weeks.',
+    checklist: ['Original Petition', 'Filing fee ($300-400)', 'Cover sheet', 'Government ID'],
+    tip: 'File in the county where the accident happened or where the defendant lives.',
+  },
+  pi_service_guide: {
+    why: 'The defendant must be officially notified of the lawsuit before the case can proceed.',
+    checklist: ['Defendant\'s name and address', 'Service fee ($50-100)', 'Filed petition with court stamp'],
+    tip: 'You CANNOT serve the papers yourself. Use a process server or the sheriff.',
+  },
+  pi_expert_witness_guide: {
+    why: 'Without a medical expert, the defense can argue your injuries weren\'t caused by the accident. Expert testimony is often essential.',
+    checklist: ['Medical records', 'Accident report', 'List of disputed issues'],
+    tip: 'University professors and retired doctors are often the most affordable experts.',
+  },
+  pi_courtroom_guide: {
+    why: 'PI trials have a specific structure. Knowing what to expect — from jury selection to closing arguments — is your preparation advantage.',
+    checklist: ['3 copies of all exhibits', 'Medical records organized chronologically', 'Damages summary', 'Witness list'],
+    tip: 'Present your story chronologically: what happened, how you were hurt, how it changed your life.',
+  },
+  pi_lien_resolution: {
+    why: 'Medical liens can eat 30-50% of your settlement if you don\'t negotiate them. Understanding liens protects your recovery.',
+    checklist: ['List of all medical providers', 'Lien letters from each', 'Health insurance EOBs'],
+    tip: 'Most providers will reduce their lien by 30-50% if you negotiate. Always ask.',
+  },
+
+  // --- Family Law Depth ---
+  family_filing_guide: {
+    why: 'Filing correctly is critical — mistakes can delay your case by weeks. We\'ll walk you through exactly how.',
+    checklist: ['Original Petition', 'Filing fee or fee waiver form', 'Cover sheet', 'Government-issued ID'],
+    tip: 'eFileTexas.gov lets you file from home — no trip to the courthouse needed.',
+  },
+  family_service_guide: {
+    why: 'The other party must receive official notice of the case. Texas law requires a third party to deliver the papers.',
+    checklist: ['Copy of filed petition with court stamp', 'Other party\'s address', 'Service fee ($50-100 for process server)'],
+    tip: 'If your spouse agrees, they can sign a Waiver of Service — no delivery needed.',
+  },
+  family_courtroom_guide: {
+    why: 'Knowing what to expect removes the fear. Judges appreciate prepared pro se litigants.',
+    checklist: ['3 copies of all documents', 'Evidence organized by issue', 'Proposed orders', 'Government-issued ID'],
+    tip: 'Address the judge as "Your Honor." Stay calm. Don\'t bad-mouth your spouse — judges watch for this.',
+  },
+  family_mediation_prep: {
+    why: 'Mediation is mandatory in most Texas custody cases. Good preparation often leads to settlement — saving you a trial.',
+    checklist: ['Financial documents', 'Proposed parenting schedule', 'List of priorities (must-haves vs. nice-to-haves)'],
+    tip: 'Know your walk-away point before you walk in. If you agree, the mediator drafts a binding agreement.',
+  },
+  family_post_judgment_guide: {
+    why: 'The court order is just the beginning. Knowing how to enforce it — or modify it — protects you long-term.',
+    checklist: ['Copy of the final order', 'Appeal deadline (30 days)'],
+    tip: 'If the other party doesn\'t comply, call the TX Attorney General: 1-800-252-8014.',
+  },
+  family_discovery_guide: {
+    why: 'Discovery forces the other party to share financial records, communications, and other evidence you need.',
+    checklist: ['List of information you need', 'Specific documents to request'],
+    tip: 'File discovery requests EARLY — most courts set a deadline 30-60 days before trial.',
+  },
+  family_temp_orders_prep: {
+    why: 'Temporary orders protect you and your children while the case is pending — often for months.',
+    checklist: ['Proposed temporary orders (written)', 'Evidence supporting your requests', 'Financial information'],
+  },
+  family_property_division_guide: {
+    why: 'Texas is a community property state. Understanding what\'s yours, what\'s shared, and what\'s owed is essential.',
+    checklist: ['List of all assets with estimated values', 'List of all debts', 'Separate property documentation'],
+    tip: 'The court divides debts too — but creditors aren\'t bound by the decree if your name is on the account.',
+  },
+  family_custody_factors: {
+    why: 'Texas judges decide custody based on 8 specific "best interest" factors. Knowing them shapes your entire strategy.',
+    checklist: ['Evidence of your parenting involvement', 'Child\'s current routine and schedule', 'Safety concerns (if any)'],
+    tip: 'The primary caretaker often has an advantage — document your daily involvement.',
+  },
+  family_uncontested_path: {
+    why: 'If you and your spouse agree on everything, an uncontested divorce can cost as little as $300 and take 60 days.',
+    checklist: ['Agreement on property, custody, support, and debts', 'Filing fee ($300-350)'],
+    tip: 'Both parties sign the decree, submit to the judge — often no hearing required.',
+  },
+
+  // --- Family: Divorce ---
+  divorce_intake: {
+    why: 'Divorce details — marriage dates, children, property — shape every document and deadline in your case.',
+    checklist: [
+      'Marriage date and separation date',
+      'Whether you have children together',
+      'General overview of community property and debts',
+      'County where you or your spouse has lived for at least 90 days',
+    ],
+    tip: 'Texas requires 6 months of state residency and 90 days of county residency before filing.',
+  },
+  divorce_safety_screening: {
+    why: 'Your safety comes first. This screening helps identify if protective measures are needed.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'Your answers are confidential and help us provide appropriate resources.',
+  },
+  divorce_evidence_vault: {
+    why: 'Organized evidence strengthens your case at every stage — from temporary orders to final decree.',
+    checklist: [
+      'Financial documents (tax returns, bank statements, pay stubs)',
+      'Property records (deeds, titles, appraisals)',
+      'Photos and communications relevant to the case',
+    ],
+    tip: 'Upload what you have now. You can always add more later.',
+  },
+  divorce_prepare_filing: {
+    why: 'Your divorce petition establishes your claims. Getting the paperwork right avoids delays.',
+    checklist: [
+      'Financial information (income, debts, assets)',
+      'Children\'s information (if applicable)',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  divorce_file_with_court: {
+    why: 'Filing officially starts your divorce case and sets legal deadlines in motion.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  divorce_serve_respondent: {
+    why: 'Your spouse must be formally notified of the divorce filing before the case can proceed.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or constable',
+    ],
+    tip: 'If your spouse will sign a waiver of service, that can save time and money.',
+  },
+  divorce_waiting_period: {
+    why: 'Texas requires a 60-day waiting period from filing before the court can finalize a divorce.',
+    checklist: [
+      'Mark the 60-day end date on your calendar',
+      'Use this time to gather financial documents and prepare',
+    ],
+  },
+  divorce_temporary_orders: {
+    why: 'Temporary orders set the rules while your divorce is pending — custody, support, property use.',
+    checklist: [
+      'Current living and custody arrangements',
+      'Monthly income and expenses',
+      'Immediate concerns that need court attention',
+    ],
+  },
+  divorce_mediation: {
+    why: 'Mediation helps both sides reach agreement with a neutral third party. Courts often require it.',
+    checklist: [
+      'Your ideal outcome for each issue',
+      'Your minimum acceptable terms',
+      'All relevant financial documents',
+    ],
+  },
+  divorce_property_division: {
+    why: 'Texas is a community property state. This step helps you inventory and value marital assets and debts.',
+    checklist: [
+      'List of all community property (real estate, vehicles, accounts)',
+      'List of separate property with proof of separate character',
+      'Debt inventory with account balances',
+      'Appraisals or valuations of major assets',
+    ],
+    tip: 'Property acquired during marriage is presumed community property. You must prove separate property with clear and convincing evidence.',
+  },
+  divorce_final_orders: {
+    why: 'The final decree is the court\'s binding decision on property, custody, and support.',
+    checklist: [
+      'Proposed final decree prepared',
+      'All financial documents gathered',
+      'Hearing date scheduled (if needed)',
+    ],
+  },
+
+  // --- Family: Custody ---
+  custody_intake: {
+    why: 'Custody details — children\'s ages, current arrangements, existing orders — shape your legal strategy.',
+    checklist: [
+      'Number and ages of children',
+      'Current living arrangement',
+      'Whether existing court orders affect custody',
+      'County where the children have lived for at least 6 months',
+    ],
+    tip: 'Texas uses "best interest of the child" as the primary standard for custody decisions.',
+  },
+  custody_safety_screening: {
+    why: 'Your safety and your children\'s safety come first. This screening helps identify protective measures.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'Your answers are confidential and help us provide appropriate resources.',
+  },
+  custody_evidence_vault: {
+    why: 'Custody cases rely heavily on evidence of parenting involvement, stability, and the children\'s needs.',
+    checklist: [
+      'School records and report cards',
+      'Medical records for children',
+      'Photos showing your involvement in the children\'s lives',
+      'Communications about custody arrangements',
+    ],
+  },
+  custody_prepare_filing: {
+    why: 'Your custody petition (SAPCR) establishes your requests for conservatorship and possession.',
+    checklist: [
+      'Children\'s information (names, DOB, current arrangements)',
+      'Proposed custody schedule',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  custody_file_with_court: {
+    why: 'Filing officially starts your custody case. Family courts handle SAPCR filings.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  custody_serve_respondent: {
+    why: 'The other parent must be formally notified of the custody filing before the case can proceed.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or constable',
+    ],
+  },
+  custody_temporary_orders: {
+    why: 'Temporary custody orders protect the children while the case is pending.',
+    checklist: [
+      'Current custody and visitation arrangements',
+      'Children\'s school and activity schedules',
+      'Any immediate safety concerns',
+    ],
+  },
+  custody_mediation: {
+    why: 'Texas Family Code §153.0071 requires mediation in custody cases before trial. This is mandatory.',
+    checklist: [
+      'Your proposed custody schedule',
+      'Children\'s needs and best interests',
+      'Your minimum acceptable terms',
+    ],
+    tip: 'Mediation is required by Texas law in custody cases. Come prepared with a detailed proposed schedule.',
+  },
+  custody_final_orders: {
+    why: 'The final custody order establishes conservatorship, possession schedule, and child support.',
+    checklist: [
+      'Proposed parenting plan / possession schedule',
+      'Child support calculations',
+      'Hearing date scheduled',
+    ],
+  },
+
+  // --- Family: Child Support ---
+  child_support_intake: {
+    why: 'Child support is calculated based on income, number of children, and special needs.',
+    checklist: [
+      'Number of children requiring support',
+      'Both parents\' employment status and income',
+      'Whether an existing support order is in place',
+      'Children\'s special needs (medical, educational)',
+    ],
+  },
+  child_support_evidence_vault: {
+    why: 'Income documentation is critical for child support calculations.',
+    checklist: [
+      'Recent pay stubs (both parents if available)',
+      'Tax returns (last 2 years)',
+      'Documentation of other income sources',
+      'Children\'s expense records (medical, childcare, activities)',
+    ],
+  },
+  child_support_prepare_filing: {
+    why: 'Your child support petition must include income information and the proposed support amount.',
+    checklist: [
+      'Income documentation gathered',
+      'Child support calculation worksheet',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  child_support_file_with_court: {
+    why: 'Filing officially starts your child support case.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  child_support_serve_respondent: {
+    why: 'The other parent must be formally notified of the child support filing.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  child_support_temporary_orders: {
+    why: 'Temporary child support orders ensure the children are financially supported while the case is pending.',
+    checklist: [
+      'Both parents\' current income documentation',
+      'Children\'s monthly expenses',
+      'Childcare and medical insurance costs',
+    ],
+  },
+  child_support_final_orders: {
+    why: 'The final child support order sets the ongoing support amount and wage withholding.',
+    checklist: [
+      'Updated income documentation',
+      'Child support calculation worksheet',
+      'Proposed wage withholding order',
+    ],
+    tip: 'Texas child support is typically 20% of net resources for one child, 25% for two, up to 40% for five or more.',
+  },
+
+  // --- Family: Visitation ---
+  visitation_intake: {
+    why: 'Visitation details help us craft a schedule that serves the children\'s best interests.',
+    checklist: [
+      'Number and ages of children',
+      'Current custody arrangement',
+      'Your relationship to the children (parent, grandparent, etc.)',
+      'Any existing court orders',
+    ],
+  },
+  visitation_safety_screening: {
+    why: 'Your safety and your children\'s safety come first.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'Your answers are confidential and help us provide appropriate resources.',
+  },
+  visitation_evidence_vault: {
+    why: 'Evidence of your relationship with the children and involvement in their lives strengthens your case.',
+    checklist: [
+      'Photos showing your relationship with the children',
+      'Communications about visitation arrangements',
+      'Records of your involvement (school events, activities)',
+    ],
+  },
+  visitation_prepare_filing: {
+    why: 'Your visitation petition requests a specific possession schedule.',
+    checklist: [
+      'Proposed visitation schedule',
+      'Children\'s school and activity schedules',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  visitation_file_with_court: {
+    why: 'Filing officially starts your visitation case.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  visitation_serve_respondent: {
+    why: 'The other party must be formally notified of the visitation filing.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  visitation_mediation: {
+    why: 'Texas Family Code §153.0071 requires mediation in visitation cases before trial. This is mandatory.',
+    checklist: [
+      'Your proposed visitation schedule',
+      'Children\'s needs and best interests',
+      'Your minimum acceptable terms',
+    ],
+    tip: 'Mediation is required by Texas law. Come prepared with a detailed proposed schedule.',
+  },
+  visitation_final_orders: {
+    why: 'The final visitation order establishes the possession and access schedule.',
+    checklist: [
+      'Proposed possession schedule',
+      'Holiday and summer schedule',
+      'Hearing date scheduled',
+    ],
+  },
+
+  // --- Family: Spousal Support ---
+  spousal_support_intake: {
+    why: 'Spousal support eligibility depends on marriage duration, income disparity, and other factors.',
+    checklist: [
+      'Marriage date and anticipated end date',
+      'Marriage duration',
+      'Both spouses\' employment status and income',
+      'Any disability or health concerns',
+    ],
+    tip: 'Texas spousal maintenance is typically limited to marriages of 10+ years, unless there are special circumstances.',
+  },
+  spousal_support_evidence_vault: {
+    why: 'Financial documentation proves the need for (or ability to pay) spousal support.',
+    checklist: [
+      'Income documentation for both spouses',
+      'Monthly living expenses',
+      'Education and employment history',
+      'Medical records (if disability is a factor)',
+    ],
+  },
+  spousal_support_prepare_filing: {
+    why: 'Your spousal support petition must demonstrate eligibility and the requested amount.',
+    checklist: [
+      'Income and expense documentation',
+      'Marriage duration documentation',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  spousal_support_file_with_court: {
+    why: 'Filing officially starts your spousal support case.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+  },
+  spousal_support_serve_respondent: {
+    why: 'Your spouse must be formally notified of the support filing.',
+    checklist: [
+      'Respondent\'s address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  spousal_support_temporary_orders: {
+    why: 'Temporary spousal support ensures financial stability while the case is pending.',
+    checklist: [
+      'Both spouses\' current income',
+      'Monthly expenses and financial needs',
+      'Existing financial obligations',
+    ],
+  },
+  spousal_support_final_orders: {
+    why: 'The final support order sets the amount, duration, and terms of spousal maintenance.',
+    checklist: [
+      'Updated income documentation',
+      'Proposed support amount and duration',
+      'Hearing date scheduled',
+    ],
+    tip: 'Texas caps spousal maintenance at $5,000/month or 20% of the obligor\'s average monthly gross income, whichever is less.',
+  },
+
+  // --- Family: Protective Order ---
+  po_intake: {
+    why: 'Protective order details help us prepare your application and assess urgency.',
+    checklist: [
+      'Your relationship to the respondent',
+      'Type of abuse or violence experienced',
+      'Whether you are in immediate danger',
+      'Any prior incidents or existing orders',
+    ],
+    tip: 'If you are in immediate danger, call 911. The National DV Hotline is 1-800-799-7233.',
+  },
+  po_safety_screening: {
+    why: 'This screening helps assess the level of danger and determine if an emergency protective order is needed.',
+    checklist: ['A private, safe space to answer honestly'],
+    tip: 'If you need immediate protection, you can request an emergency ex parte order.',
+  },
+  po_prepare_filing: {
+    why: 'Your protective order application must detail the abuse and the protections you need.',
+    checklist: [
+      'Specific dates and descriptions of abuse incidents',
+      'Names of witnesses',
+      'Photos or documentation of injuries',
+      'Filing fee waiver application (PO filings are free in Texas)',
+    ],
+  },
+  po_file_with_court: {
+    why: 'Filing your protective order application starts the court process. The court may grant a temporary ex parte order the same day.',
+    checklist: [
+      'Your prepared application',
+      'Government-issued ID',
+      'Safety plan in place',
+    ],
+    tip: 'There is no filing fee for protective orders in Texas. The court handles service to the respondent.',
+  },
+  po_hearing: {
+    why: 'The full protective order hearing occurs within 14 days of filing. The court decides whether to grant a 2-year order.',
+    checklist: [
+      'All evidence of abuse (photos, messages, medical records)',
+      'Witness availability',
+      'Government-issued ID',
+      'Arrive early and check in with the court coordinator',
+    ],
+    tip: 'The respondent has a right to be present and contest the order. Focus on specific incidents and evidence.',
+  },
+
+  // --- Family: Modification ---
+  mod_intake: {
+    why: 'Modification requires showing a material and substantial change in circumstances since the last order.',
+    checklist: [
+      'Existing order court and cause number',
+      'What you want to modify (custody, support, visitation)',
+      'Description of the change in circumstances',
+    ],
+    tip: 'Texas law requires a "material and substantial change" or that the order was entered more than 3 years ago (for support).',
+  },
+  mod_evidence_vault: {
+    why: 'Evidence of changed circumstances is the foundation of your modification case.',
+    checklist: [
+      'Copy of the existing court order',
+      'Documentation of changed circumstances',
+      'Updated financial information (if modifying support)',
+    ],
+  },
+  mod_existing_order_review: {
+    why: 'Understanding your existing order helps identify exactly what to modify and what legal standard applies.',
+    checklist: [
+      'Upload or review your existing court order',
+      'List the specific provisions you want to change',
+      'Document the change in circumstances for each provision',
+    ],
+  },
+  mod_prepare_filing: {
+    why: 'Your modification petition must specify what changed and what new terms you\'re requesting.',
+    checklist: [
+      'Existing order details (court, cause number)',
+      'Proposed changes and supporting evidence',
+      'Filing fee or fee waiver application',
+    ],
+  },
+  mod_file_with_court: {
+    why: 'Filing officially starts your modification case. It should be filed in the court that issued the original order.',
+    checklist: [
+      'Your prepared petition document',
+      'Filing fee payment method',
+      'Government-issued ID',
+    ],
+    tip: 'Modifications are usually filed in the same court that issued the original order.',
+  },
+  mod_serve_respondent: {
+    why: 'The other party must be formally notified of the modification filing.',
+    checklist: [
+      'Respondent\'s current address for service',
+      'Budget for process server or certified mail',
+    ],
+  },
+  mod_mediation: {
+    why: 'Mediation can resolve modification disputes without the cost and uncertainty of a hearing.',
+    checklist: [
+      'Your proposed modified terms',
+      'Evidence of changed circumstances',
+      'Your minimum acceptable terms',
+    ],
+  },
+  mod_final_orders: {
+    why: 'The modified order replaces the relevant provisions of the original order.',
+    checklist: [
+      'Proposed modified order prepared',
+      'All evidence of changed circumstances',
+      'Hearing date scheduled',
+    ],
+  },
+
+  // ── BUSINESS: PARTNERSHIP ────────────────────────────────
+  biz_partnership_intake: {
+    why: 'Understanding the business structure, partners involved, and the nature of the dispute helps us determine the best legal strategy for your partnership or LLC case.',
+    checklist: [
+      'Partnership or operating agreement',
+      'Names and roles of all partners/members',
+      'Ownership percentages',
+      'Financial records showing the dispute',
+      'Timeline of key events',
+    ],
+    tip: 'If you have an operating or partnership agreement, it may contain dispute resolution clauses that affect your options.',
+  },
+  biz_partnership_evidence: {
+    why: 'Strong evidence is critical in partnership disputes, where the facts often involve complex financial arrangements and verbal agreements.',
+    checklist: [
+      'Partnership/operating agreement and amendments',
+      'Financial statements and tax returns',
+      'Bank statements and transaction records',
+      'Emails, texts, and letters between partners',
+      'Meeting minutes or written decisions',
+    ],
+    tip: 'Forensic accounting may be needed if you suspect financial misconduct — start gathering bank and financial records early.',
+  },
+  biz_partnership_demand_letter: {
+    why: 'A formal demand letter notifies your partner of the dispute and your intent to seek resolution, creating a record that you attempted to resolve the matter before filing suit.',
+    checklist: [
+      'Specific breaches or actions you are alleging',
+      'Dollar amount of damages or relief requested',
+      'Deadline for response (typically 30 days)',
+      'Reference to any agreement provisions violated',
+    ],
+    tip: 'Reference specific sections of your partnership or operating agreement to strengthen your demand.',
+  },
+  biz_partnership_adr: {
+    why: 'Many partnership and LLC agreements require mediation or arbitration before filing a lawsuit. Skipping mandatory ADR could get your case dismissed.',
+    checklist: [
+      'Review operating/partnership agreement for ADR clauses',
+      'Identify whether mediation or arbitration is required',
+      'Research qualified business mediators in your area',
+      'Prepare a summary of the dispute for the mediator',
+    ],
+    tip: 'Even if ADR is not mandatory, mediation is often faster and cheaper than litigation for partnership disputes.',
+  },
+  biz_partnership_prepare_filing: {
+    why: 'Preparing your court filing correctly ensures your case proceeds without delays or dismissals due to procedural errors.',
+    checklist: [
+      'Completed petition or complaint',
+      'Filing fee payment ready',
+      'Correct court identified (county where business operates)',
+      'All defendants properly named',
+    ],
+  },
+  biz_partnership_file_with_court: {
+    why: 'Filing your lawsuit with the court officially starts the legal process and establishes your case timeline.',
+    checklist: [
+      'File petition with the district clerk',
+      'Pay filing fee',
+      'Get file-stamped copies for your records',
+      'Note your cause number',
+    ],
+    tip: 'Many Texas counties support e-filing at efiletexas.gov — check if yours does.',
+  },
+  biz_partnership_serve_defendant: {
+    why: 'Proper service notifies the other party of the lawsuit. Improper service can delay or invalidate your case.',
+    checklist: [
+      'Serve each defendant individually',
+      'Use a licensed process server or constable',
+      'Serve at the registered agent address for LLCs/corporations',
+      'File proof of service (return of citation) with the court',
+    ],
+    tip: 'For business entities, serve the registered agent listed with the Texas Secretary of State.',
+  },
+  biz_partnership_wait_for_answer: {
+    why: 'After service, the defendant has a deadline to respond. Understanding this timeline helps you prepare for what comes next.',
+    checklist: [
+      'Monitor the court docket for the defendant\'s answer',
+      'Note the answer deadline (typically 20 days after service in Texas)',
+      'Watch for counterclaims or cross-claims',
+      'Consult an attorney if the response is complex',
+    ],
+  },
+  biz_partnership_discovery: {
+    why: 'Discovery lets both sides gather evidence. In partnership disputes, this often involves financial records, communications, and depositions.',
+    checklist: [
+      'Prepare interrogatories (written questions)',
+      'Draft requests for production of documents',
+      'Plan depositions of key witnesses',
+      'Review discovery responses from the other side',
+    ],
+    tip: 'Request complete financial records, including bank statements, QuickBooks exports, and tax returns for the partnership.',
+  },
+  biz_partnership_post_resolution: {
+    why: 'After your case resolves, there are important steps to protect the outcome — whether you won, settled, or need to dissolve the business.',
+    checklist: [
+      'Enforce the judgment or settlement terms',
+      'File any required dissolution paperwork with the state',
+      'Update business registrations if ownership changed',
+      'Close shared business accounts if applicable',
+    ],
+  },
+
+  // ── BUSINESS: EMPLOYMENT ─────────────────────────────────
+  biz_employment_intake: {
+    why: 'Employment disputes have strict deadlines and specific legal requirements. Understanding your situation early helps us guide you to the right process.',
+    checklist: [
+      'Employer name and size',
+      'Your position and employment dates',
+      'Description of what happened',
+      'Any HR complaints you\'ve filed',
+      'Employment contract or handbook (if available)',
+    ],
+    tip: 'Discrimination and harassment claims have strict filing deadlines — usually 180-300 days from the incident.',
+  },
+  biz_employment_evidence: {
+    why: 'Employment cases depend heavily on documentation. The more records you have, the stronger your case.',
+    checklist: [
+      'Pay stubs and W-2s showing compensation',
+      'Employment contract, offer letter, or handbook',
+      'Performance reviews and evaluations',
+      'Emails, texts, and written communications',
+      'Witness names and contact information',
+    ],
+    tip: 'Save copies of all work-related communications before you lose access to company systems.',
+  },
+  biz_employment_demand_letter: {
+    why: 'A demand letter formally notifies your employer of the dispute and gives them a chance to resolve it before litigation.',
+    checklist: [
+      'Specific violations or wrongful actions alleged',
+      'Dollar amount of damages (lost wages, benefits, etc.)',
+      'Deadline for response',
+      'Reference to applicable employment laws',
+    ],
+    tip: 'For wage claims, reference the Texas Payday Law or FLSA provisions that apply to your situation.',
+  },
+  biz_employment_eeoc: {
+    why: 'For discrimination or harassment claims, you must file a charge with the EEOC or Texas Workforce Commission (TWC) before you can sue in court. This is a legal prerequisite.',
+    checklist: [
+      'Determine if your claim requires EEOC/TWC filing',
+      'File charge within 180 days (TWC) or 300 days (EEOC) of the incident',
+      'Provide a clear description of the discriminatory actions',
+      'Wait for right-to-sue letter (or request one after 180 days)',
+    ],
+    tip: 'You can file with the EEOC online at publicportal.eeoc.gov. Filing with one agency automatically cross-files with the other.',
+  },
+  biz_employment_prepare_filing: {
+    why: 'Employment lawsuits require careful preparation to ensure all claims are properly stated and the right court is selected.',
+    checklist: [
+      'Completed petition with all causes of action',
+      'Filing fee payment ready',
+      'Right-to-sue letter (if discrimination claim)',
+      'Correct court identified',
+    ],
+  },
+  biz_employment_file_with_court: {
+    why: 'Filing your employment lawsuit officially begins the legal process and preserves your right to recovery.',
+    checklist: [
+      'File petition with the district clerk',
+      'Pay filing fee',
+      'Get file-stamped copies',
+      'Note your cause number',
+    ],
+    tip: 'Some employment claims can be filed in federal court. Consider whether state or federal court is more favorable.',
+  },
+  biz_employment_serve_defendant: {
+    why: 'Your employer must be properly served to respond to the lawsuit. Service on a business has specific requirements.',
+    checklist: [
+      'Serve the employer\'s registered agent',
+      'Use a licensed process server or constable',
+      'For federal claims, follow federal service rules',
+      'File proof of service with the court',
+    ],
+    tip: 'Look up the employer\'s registered agent on the Texas Secretary of State website.',
+  },
+  biz_employment_wait_for_answer: {
+    why: 'After service, your employer has a deadline to respond. Their answer may include counterclaims or affirmative defenses.',
+    checklist: [
+      'Monitor the court docket for the answer',
+      'Note the answer deadline (20 days in Texas state court)',
+      'Watch for motions to dismiss',
+      'Review any counterclaims carefully',
+    ],
+  },
+  biz_employment_discovery: {
+    why: 'Discovery in employment cases focuses on company records, policies, and communications that support your claim.',
+    checklist: [
+      'Request your complete personnel file',
+      'Request company policies and handbooks',
+      'Request communications about your termination/discipline',
+      'Depose key decision-makers (supervisor, HR)',
+    ],
+    tip: 'Request comparator evidence — how were similarly situated employees treated?',
+  },
+  biz_employment_post_resolution: {
+    why: 'After resolution, there are practical steps to take regardless of the outcome — from enforcing a judgment to managing your career transition.',
+    checklist: [
+      'Enforce judgment or settlement terms',
+      'Negotiate reference letter terms if applicable',
+      'File for unemployment benefits if not already done',
+      'Update professional references and resume',
+    ],
+  },
+
+  // ── BUSINESS: B2B COMMERCIAL ─────────────────────────────
+  biz_b2b_intake: {
+    why: 'Understanding the business relationship, contract terms, and nature of the commercial dispute helps us build the strongest case strategy.',
+    checklist: [
+      'Other business name and contact information',
+      'Contract or agreement (if written)',
+      'Description of goods or services involved',
+      'Amount in dispute',
+      'Timeline of key events',
+    ],
+    tip: 'Check your contract for a forum selection clause — it may specify where disputes must be filed.',
+  },
+  biz_b2b_evidence: {
+    why: 'Commercial disputes are won with documentation. Contracts, invoices, communications, and deliverables tell the story of what was agreed and what went wrong.',
+    checklist: [
+      'Signed contracts and amendments',
+      'Invoices, purchase orders, and payment records',
+      'Emails and written communications',
+      'Deliverables, reports, or work product',
+      'Witness statements from employees involved',
+    ],
+    tip: 'Organize evidence chronologically — courts want to see the timeline of events.',
+  },
+  biz_b2b_demand_letter: {
+    why: 'A formal demand letter puts the other business on notice and creates a record of your good-faith attempt to resolve the dispute before litigation.',
+    checklist: [
+      'Specific contract provisions breached',
+      'Dollar amount of damages claimed',
+      'Deadline for response (typically 30 days)',
+      'Reference to applicable contract terms',
+    ],
+    tip: 'Send the demand via certified mail with return receipt for proof of delivery.',
+  },
+  biz_b2b_negotiation: {
+    why: 'Business-to-business disputes often resolve through negotiation, saving both sides the cost and disruption of litigation.',
+    checklist: [
+      'Determine your minimum acceptable settlement',
+      'Prepare a settlement proposal with supporting evidence',
+      'Consider the ongoing business relationship',
+      'Document all negotiation communications in writing',
+    ],
+    tip: 'Consider whether preserving the business relationship matters — this may influence your negotiation strategy.',
+  },
+  biz_b2b_prepare_filing: {
+    why: 'Commercial litigation requires careful pleading to capture all causes of action and potential damages.',
+    checklist: [
+      'Completed petition with all causes of action',
+      'Filing fee payment ready',
+      'Correct court identified (check contract for forum clause)',
+      'All business entity defendants properly named',
+    ],
+  },
+  biz_b2b_file_with_court: {
+    why: 'Filing your commercial lawsuit starts the litigation clock and preserves your right to recover damages.',
+    checklist: [
+      'File petition with the district clerk',
+      'Pay filing fee',
+      'Get file-stamped copies',
+      'Note your cause number',
+    ],
+    tip: 'For disputes over $75,000 between businesses in different states, consider federal diversity jurisdiction.',
+  },
+  biz_b2b_serve_defendant: {
+    why: 'Proper service on a business entity requires serving the registered agent, not just any employee.',
+    checklist: [
+      'Identify the registered agent for each business defendant',
+      'Use a licensed process server or constable',
+      'For out-of-state businesses, follow long-arm statute requirements',
+      'File proof of service with the court',
+    ],
+    tip: 'Look up registered agents on the Secretary of State website for the state where the business is incorporated.',
+  },
+  biz_b2b_wait_for_answer: {
+    why: 'After service, the defendant business has a deadline to respond. Their answer may include counterclaims for amounts they claim you owe.',
+    checklist: [
+      'Monitor the court docket for the answer',
+      'Note the answer deadline',
+      'Watch for counterclaims and affirmative defenses',
+      'Prepare responses to any counterclaims',
+    ],
+  },
+  biz_b2b_discovery: {
+    why: 'Commercial discovery focuses on contracts, financial records, and communications that prove the breach and damages.',
+    checklist: [
+      'Request all contracts and amendments',
+      'Request financial records showing damages',
+      'Request internal communications about the dispute',
+      'Depose key personnel who managed the relationship',
+    ],
+    tip: 'In IP/trade secret cases, request forensic imaging of relevant computers and storage devices early.',
+  },
+  biz_b2b_post_resolution: {
+    why: 'After resolution, enforce the outcome and make business decisions about the ongoing relationship.',
+    checklist: [
+      'Enforce judgment or settlement terms',
+      'Collect on the judgment if the other side doesn\'t pay voluntarily',
+      'Decide whether to continue the business relationship',
+      'Update internal contracts and processes to prevent future disputes',
+    ],
+  },
+
+  // --- Post-Filing Lifecycle ---
+  record_outcome: {
+    why: 'Recording your outcome helps us provide the right next steps and improves guidance for future users.',
+    checklist: [
+      'Know the result of your hearing or resolution',
+      'Any written judgment or order from the court',
+    ],
+  },
+  post_judgment: {
+    why: 'After a judgment, there are important deadlines and actions that can affect whether you actually get what you were awarded.',
+    checklist: [
+      'A copy of the court judgment or order',
+      'Notes on any payment terms discussed',
+    ],
+    tip: 'The judgment is not the end — enforcement may require additional steps.',
+  },
+  case_closure: {
+    why: 'Properly closing your case ensures all documents are saved and any remaining actions are tracked.',
+    checklist: [
+      'All court documents saved',
+      'Any payment received or made',
+    ],
+  },
+  courtroom_prep: {
+    why: 'Good preparation is the single biggest factor in how pro se litigants perform in court.',
+    checklist: [
+      'Know your courthouse location and courtroom number',
+      'Three copies of all documents',
+      'Practice your key points out loud',
+      'Professional attire ready',
+    ],
+    tip: 'Arrive 30 minutes early. Address the judge as "Your Honor."',
+  },
+}

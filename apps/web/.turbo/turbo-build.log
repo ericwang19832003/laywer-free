@@ -1,0 +1,196 @@
+
+> @lawyer-free/web@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 10.0s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/54) ...
+  Generating static pages using 7 workers (13/54) 
+  Generating static pages using 7 workers (26/54) 
+  Generating static pages using 7 workers (40/54) 
+✓ Generating static pages using 7 workers (54/54) in 292.7ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /api/account/delete
+├ ƒ /api/account/export
+├ ƒ /api/ai/preservation-letter
+├ ƒ /api/analytics/ai-accept-rate
+├ ƒ /api/analytics/funnel
+├ ƒ /api/auth/google
+├ ƒ /api/auth/google/callback
+├ ƒ /api/auth/google/disconnect
+├ ƒ /api/billing/create-checkout
+├ ƒ /api/billing/portal
+├ ƒ /api/binders/[binderId]/download
+├ ƒ /api/binders/[binderId]/generate
+├ ƒ /api/binders/[binderId]/progress
+├ ƒ /api/cases
+├ ƒ /api/cases/[id]
+├ ƒ /api/cases/[id]/answer/analyze
+├ ƒ /api/cases/[id]/answer/extract
+├ ƒ /api/cases/[id]/attorney-review
+├ ƒ /api/cases/[id]/binders
+├ ƒ /api/cases/[id]/case-file
+├ ƒ /api/cases/[id]/case-file/checklist
+├ ƒ /api/cases/[id]/case-file/checklist/items/[itemId]
+├ ƒ /api/cases/[id]/case-file/evidence-links
+├ ƒ /api/cases/[id]/case-file/suggestions
+├ ƒ /api/cases/[id]/case-file/suggestions/[suggestionId]
+├ ƒ /api/cases/[id]/conference-summaries
+├ ƒ /api/cases/[id]/confidence
+├ ƒ /api/cases/[id]/court-documents
+├ ƒ /api/cases/[id]/court-form-pdf
+├ ƒ /api/cases/[id]/courtroom-script
+├ ƒ /api/cases/[id]/dashboard
+├ ƒ /api/cases/[id]/deadlines
+├ ƒ /api/cases/[id]/deadlines/[deadlineId]/ics
+├ ƒ /api/cases/[id]/deadlines/backfill
+├ ƒ /api/cases/[id]/deadlines/confirm-answer-deadline
+├ ƒ /api/cases/[id]/deadlines/ics
+├ ƒ /api/cases/[id]/deadlines/ics/all
+├ ƒ /api/cases/[id]/discovery/packs
+├ ƒ /api/cases/[id]/documents
+├ ƒ /api/cases/[id]/draft-versions
+├ ƒ /api/cases/[id]/email-filters
+├ ƒ /api/cases/[id]/email-filters/[filterId]
+├ ƒ /api/cases/[id]/emails
+├ ƒ /api/cases/[id]/emails/[messageId]
+├ ƒ /api/cases/[id]/emails/[messageId]/draft-reply
+├ ƒ /api/cases/[id]/events
+├ ƒ /api/cases/[id]/evidence
+├ ƒ /api/cases/[id]/evidence/categorize
+├ ƒ /api/cases/[id]/evidence/download
+├ ƒ /api/cases/[id]/evidence/export
+├ ƒ /api/cases/[id]/exhibit-sets
+├ ƒ /api/cases/[id]/generate-filing
+├ ƒ /api/cases/[id]/import
+├ ƒ /api/cases/[id]/insights
+├ ƒ /api/cases/[id]/meetings/agenda
+├ ƒ /api/cases/[id]/motions
+├ ƒ /api/cases/[id]/notes
+├ ƒ /api/cases/[id]/notes/[noteId]
+├ ƒ /api/cases/[id]/outcome
+├ ƒ /api/cases/[id]/preservation-letter/send
+├ ƒ /api/cases/[id]/research/ask
+├ ƒ /api/cases/[id]/research/authority
+├ ƒ /api/cases/[id]/research/folders
+├ ƒ /api/cases/[id]/research/search
+├ ƒ /api/cases/[id]/return-of-service/confirm
+├ ƒ /api/cases/[id]/return-of-service/extract
+├ ƒ /api/cases/[id]/risk/explain
+├ ƒ /api/cases/[id]/risk/tips
+├ ƒ /api/cases/[id]/rules/run
+├ ƒ /api/cases/[id]/rules/run-risk-score
+├ ƒ /api/cases/[id]/share
+├ ƒ /api/cases/[id]/strategy
+├ ƒ /api/cases/[id]/task-description
+├ ƒ /api/cases/[id]/timeline
+├ ƒ /api/cases/[id]/timeline/export
+├ ƒ /api/cases/[id]/timeline/summary
+├ ƒ /api/cases/[id]/verify-citations
+├ ƒ /api/cases/todays-action
+├ ƒ /api/cron/demand-followup
+├ ƒ /api/cron/escalation
+├ ƒ /api/cron/health
+├ ƒ /api/cron/insights
+├ ƒ /api/cron/research-precompute
+├ ƒ /api/cron/send-reminders
+├ ƒ /api/discovery/examples
+├ ƒ /api/discovery/packs/[packId]
+├ ƒ /api/discovery/packs/[packId]/deadline
+├ ƒ /api/discovery/packs/[packId]/export
+├ ƒ /api/discovery/packs/[packId]/items
+├ ƒ /api/discovery/packs/[packId]/responses
+├ ƒ /api/discovery/packs/[packId]/serve
+├ ƒ /api/discovery/packs/[packId]/status
+├ ƒ /api/discovery/responses/[responseId]/objections/reviews
+├ ƒ /api/document-generation
+├ ƒ /api/exhibit-sets/[setId]/exhibits
+├ ƒ /api/exhibit-sets/[setId]/exhibits/reorder
+├ ƒ /api/exhibit-sets/[setId]/export
+├ ƒ /api/exhibit-sets/[setId]/renumber
+├ ƒ /api/exhibits/[exhibitId]
+├ ƒ /api/gmail/status
+├ ƒ /api/motions/[id]
+├ ƒ /api/notifications
+├ ƒ /api/notifications/read-all
+├ ƒ /api/objections/reviews/[reviewId]/classify
+├ ƒ /api/objections/reviews/[reviewId]/confirm
+├ ƒ /api/objections/reviews/[reviewId]/extract
+├ ƒ /api/objections/reviews/[reviewId]/meet-and-confer
+├ ƒ /api/objections/reviews/[reviewId]/meet-and-confer/send
+├ ƒ /api/quick-resolve/analyze
+├ ƒ /api/quick-resolve/entity-lookup
+├ ƒ /api/quick-resolve/send-letter
+├ ƒ /api/referrals
+├ ƒ /api/reminder-escalations/[id]/acknowledge
+├ ƒ /api/search
+├ ƒ /api/tasks/[id]
+├ ƒ /api/user-preferences
+├ ƒ /api/webhooks/lob
+├ ƒ /api/webhooks/stripe
+├ ƒ /assess/[disputeType]
+├ ƒ /case/[id]
+├ ƒ /case/[id]/activity
+├ ƒ /case/[id]/binders
+├ ƒ /case/[id]/case-file
+├ ƒ /case/[id]/deadlines
+├ ƒ /case/[id]/discovery
+├ ƒ /case/[id]/discovery/packs/[packId]
+├ ƒ /case/[id]/discovery/packs/[packId]/objections/[reviewId]
+├ ƒ /case/[id]/emails
+├ ƒ /case/[id]/evidence
+├ ƒ /case/[id]/exhibits
+├ ƒ /case/[id]/health
+├ ƒ /case/[id]/meetings/discovery-plan
+├ ƒ /case/[id]/meetings/mediation-agenda
+├ ƒ /case/[id]/meetings/meet-and-confer
+├ ƒ /case/[id]/meetings/pretrial-checklist
+├ ƒ /case/[id]/meetings/rule-26f-agenda
+├ ƒ /case/[id]/meetings/settlement-prep
+├ ƒ /case/[id]/meetings/summary
+├ ƒ /case/[id]/motions
+├ ƒ /case/[id]/motions/[motionKey]
+├ ƒ /case/[id]/research
+├ ƒ /case/[id]/research/ask
+├ ƒ /case/[id]/research/authorities
+├ ƒ /case/[id]/research/history
+├ ƒ /case/[id]/research/search
+├ ƒ /case/[id]/step
+├ ƒ /case/[id]/step/[taskId]
+├ ƒ /cases
+├ ○ /courts
+├ ○ /help
+├ ○ /learn
+├ ○ /learn-more/debt-collection
+├ ○ /learn-more/eviction
+├ ○ /learn-more/personal-injury
+├ ● /learn/[topic]
+│ ├ /learn/basics
+│ ├ /learn/filing
+│ ├ /learn/service
+│ └ [+3 more paths]
+├ ○ /login
+├ ○ /pricing
+├ ○ /quick-resolve
+├ ○ /reset-password
+├ ○ /settings
+├ ƒ /shared/[token]
+└ ○ /signup
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
