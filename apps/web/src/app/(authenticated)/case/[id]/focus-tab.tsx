@@ -101,7 +101,7 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
   return (
     <div className="space-y-6">
       <NextStepCard caseId={caseId} nextTask={dashboard.next_task} taskDescription={taskDescription} />
-      <LienWarningCard caseId={caseId} disputeType={disputeType} nextTaskKey={dashboard.next_task?.task_key ?? null} />
+      <LienWarningCard caseId={caseId} disputeType={disputeType} jurisdiction={jurisdiction} nextTaskKey={dashboard.next_task?.task_key ?? null} />
       <PriorityAlertsSection caseId={caseId} alerts={alerts} />
       <PriorityBanners
         caseId={caseId}
