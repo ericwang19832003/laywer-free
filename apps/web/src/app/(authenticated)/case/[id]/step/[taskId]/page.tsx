@@ -114,6 +114,12 @@ import { piInsuranceCommunicationCaConfig } from '@lawyer-free/shared/guided-ste
 import { piTortClaimsNoticeCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-ca'
 import { piTortClaimsTrackingCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-ca'
 import { preparePiPetitionCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-ca'
+import { piIntakePaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-intake-pa'
+import { piMedicalRecordsPaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-medical-records-pa'
+import { piInsuranceCommunicationPaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-insurance-communication-pa'
+import { piTortClaimsNoticePaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-pa'
+import { piTortClaimsTrackingPaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-pa'
+import { preparePiPetitionPaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-pa'
 import { piCourtSelectionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-court-selection'
 import { piDisclosuresGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-disclosures-guide'
 import { piPretrialPreparationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pretrial-preparation'
@@ -1163,12 +1169,16 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={piExpertWitnessGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'pi_tort_claims_notice': {
       const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
-      const tortNoticeConfig = caseRow?.state === 'California' ? piTortClaimsNoticeCaConfig : piTortClaimsNoticeConfig
+      const tortNoticeConfig = caseRow?.state === 'California' ? piTortClaimsNoticeCaConfig
+        : caseRow?.state === 'Pennsylvania' ? piTortClaimsNoticePaConfig
+        : piTortClaimsNoticeConfig
       return <GuidedStep caseId={id} taskId={taskId} config={tortNoticeConfig} existingAnswers={task.metadata?.guided_answers} />
     }
     case 'pi_tort_claims_tracking': {
       const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
-      const tortTrackingConfig = caseRow?.state === 'California' ? piTortClaimsTrackingCaConfig : piTortClaimsTrackingConfig
+      const tortTrackingConfig = caseRow?.state === 'California' ? piTortClaimsTrackingCaConfig
+        : caseRow?.state === 'Pennsylvania' ? piTortClaimsTrackingPaConfig
+        : piTortClaimsTrackingConfig
       return <GuidedStep caseId={id} taskId={taskId} config={tortTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
     }
     case 'pi_court_selection':
@@ -1317,6 +1327,9 @@ export default async function StepPage({
         supabase.from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle(),
         supabase.from('cases').select('state').eq('id', id).single(),
       ])
+      if (caseRow?.state === 'Pennsylvania') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piIntakePaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       return (
         <PIIntakeStep
           caseId={id}
@@ -1335,6 +1348,9 @@ export default async function StepPage({
       if (caseRow?.state === 'California') {
         return <GuidedStep caseId={id} taskId={taskId} config={piMedicalRecordsCaConfig} existingAnswers={task.metadata?.guided_answers} />
       }
+      if (caseRow?.state === 'Pennsylvania') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piMedicalRecordsPaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
     case 'pi_insurance_communication': {
@@ -1344,6 +1360,9 @@ export default async function StepPage({
       ])
       if (caseRow?.state === 'California') {
         return <GuidedStep caseId={id} taskId={taskId} config={piInsuranceCommunicationCaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'Pennsylvania') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piInsuranceCommunicationPaConfig} existingAnswers={task.metadata?.guided_answers} />
       }
       return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
@@ -1373,6 +1392,9 @@ export default async function StepPage({
         .from('cases').select('county, court_type, state').eq('id', id).single()
       if (caseRow?.state === 'California') {
         return <GuidedStep caseId={id} taskId={taskId} config={preparePiPetitionCaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
+      if (caseRow?.state === 'Pennsylvania') {
+        return <GuidedStep caseId={id} taskId={taskId} config={preparePiPetitionPaConfig} existingAnswers={task.metadata?.guided_answers} />
       }
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('*').eq('case_id', id).maybeSingle()
