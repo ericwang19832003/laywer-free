@@ -229,6 +229,42 @@ function buildDisputeSpecificRules(): DeadlineRule[] {
       condition_metadata_field: 'guided_answers.at_fault_has_insurance',
       condition_metadata_values: ['no', 'unknown'],
     },
+    // PA: Service deadline (30 days — must reissue if not served)
+    {
+      trigger_task: 'pi_file_with_court',
+      deadline_key: 'pa_service_deadline',
+      deadline_label: 'Deadline to Serve (Pennsylvania)',
+      offset_days: 30,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If not served within 30 days, you must file a praecipe to reissue/reinstate (Pa.R.C.P. 401). Failure to reissue may bar refiling if SOL expires.',
+      condition_state: 'Pennsylvania',
+    },
+    // PA: Answer deadline (20 days)
+    {
+      trigger_task: 'pi_serve_defendant',
+      deadline_key: 'pa_answer_deadline',
+      deadline_label: 'Defendant Answer Deadline (Pennsylvania)',
+      offset_days: 20,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If defendant does not respond within 20 days, you may seek default judgment after 10-day notice (Pa.R.C.P. 237.1).',
+      condition_state: 'Pennsylvania',
+    },
+    // PA: Political subdivision notice (6 months)
+    {
+      trigger_task: 'pi_intake',
+      deadline_key: 'pa_govt_notice_deadline',
+      deadline_label: 'Political Subdivision Notice Deadline',
+      offset_days: 180,
+      reference: 'metadata_field' as const,
+      metadata_field: 'incident_date',
+      apply_rule_4: false,
+      consequence: 'Written notice to political subdivision must be given within 6 months of injury (42 Pa.C.S. §8528). Failure is fatal to the claim.',
+      condition_state: 'Pennsylvania',
+      condition_metadata_field: 'government_entity_detected',
+      condition_metadata_values: ['true'],
+    },
   ]
 }
 

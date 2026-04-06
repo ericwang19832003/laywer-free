@@ -110,6 +110,16 @@ export function PIIntakeStep({
   const prop213Applies = hadValidInsurance === 'no' && (prop213Exception === 'none' || prop213Exception === '')
   const isCalifornia = state === 'California'
 
+  // Limited tort (PA only)
+  const [tortElection, setTortElection] = useState(
+    (meta.tort_election as string) ?? ''
+  )
+  const [limitedTortException, setLimitedTortException] = useState(
+    (meta.limited_tort_exception as string) ?? ''
+  )
+  const limitedTortApplies = tortElection === 'limited_tort' && (limitedTortException === 'none' || limitedTortException === '')
+  const isPennsylvania = state === 'Pennsylvania'
+
   // Derived
   const isGovEntity = govEmployeeOnDuty === 'yes' || govProperty === 'yes' || govVehicle === 'yes'
 
@@ -167,6 +177,9 @@ export function PIIntakeStep({
       had_valid_insurance: isCalifornia ? hadValidInsurance || null : null,
       prop_213_exception: isCalifornia && hadValidInsurance === 'no' ? prop213Exception || null : null,
       prop_213_applies: isCalifornia ? prop213Applies : null,
+      tort_election: isPennsylvania ? tortElection || null : null,
+      limited_tort_exception: isPennsylvania && tortElection === 'limited_tort' ? limitedTortException || null : null,
+      limited_tort_applies: isPennsylvania ? limitedTortApplies : null,
       guided_answers: { case_stage: caseStage },
     }
   }
@@ -807,6 +820,96 @@ export function PIIntakeStep({
           </div>
         )}
 
+        {/* Limited Tort — PA only */}
+        {isPennsylvania && (
+          <div className="space-y-4">
+            <label className="text-sm font-medium text-warm-text">
+              Pennsylvania Tort Election
+            </label>
+            <p className="text-xs text-warm-muted">
+              Pennsylvania drivers choose between &quot;full tort&quot; and
+              &quot;limited tort&quot; coverage on their auto insurance policy.
+              Your election affects what damages you can recover.
+            </p>
+
+            <select
+              value={tortElection}
+              onChange={(e) => setTortElection(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Select your tort election...</option>
+              <option value="full_tort">Full Tort</option>
+              <option value="limited_tort">Limited Tort</option>
+              <option value="unknown">I don&apos;t know</option>
+            </select>
+
+            {tortElection === 'limited_tort' && (
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-warm-text">
+                  Do any of the following exceptions apply?
+                </label>
+                <p className="text-xs text-warm-muted">
+                  Even under limited tort, you can still recover pain and
+                  suffering if your injury qualifies as a &quot;serious
+                  injury&quot; under 75 Pa.C.S. &sect;1705(d).
+                </p>
+                <select
+                  value={limitedTortException}
+                  onChange={(e) => setLimitedTortException(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Select...</option>
+                  <option value="none">None of these apply</option>
+                  <option value="serious_injury">
+                    Serious injury (death, serious impairment of body function,
+                    or permanent serious disfigurement)
+                  </option>
+                  <option value="drunk_driver">
+                    Other driver was convicted of DUI
+                  </option>
+                  <option value="out_of_state">
+                    Other driver was from out of state
+                  </option>
+                  <option value="commercial_vehicle">
+                    Other vehicle was a commercial vehicle
+                  </option>
+                  <option value="pedestrian_cyclist">
+                    I was a pedestrian or cyclist (not in a vehicle)
+                  </option>
+                </select>
+
+                {limitedTortApplies && (
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                    <p className="text-sm font-medium text-warm-text">
+                      &#x26A0; Limited Tort Restriction
+                    </p>
+                    <p className="text-xs text-warm-muted mt-1">
+                      Under 75 Pa.C.S. &sect;1705, limited tort policyholders
+                      generally cannot recover non-economic damages (pain and
+                      suffering) unless the injury meets the &quot;serious
+                      injury&quot; threshold. You may still recover economic
+                      damages (medical bills, lost wages, property damage).
+                    </p>
+                  </div>
+                )}
+
+                {limitedTortException && limitedTortException !== 'none' && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                    <p className="text-sm font-medium text-warm-text">
+                      Limited tort exception may apply
+                    </p>
+                    <p className="text-xs text-warm-muted mt-1">
+                      Based on your answer, you may qualify for an exception to
+                      the limited tort restriction. We&apos;ll factor this into
+                      your case strategy.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Government Entity Check */}
         <div className="space-y-4">
           <label className="text-sm font-medium text-warm-text">
@@ -952,7 +1055,9 @@ export function PIIntakeStep({
 
               <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3">
                 <p className="text-sm font-medium text-warm-text">
-                  &#x26A0; {isCalifornia ? 'California Government Tort Claims Act Applies' : 'Texas Tort Claims Act Applies'}
+                  &#x26A0; {isCalifornia ? 'California Government Tort Claims Act Applies'
+                    : isPennsylvania ? 'Pennsylvania Government Immunity Applies'
+                    : 'Texas Tort Claims Act Applies'}
                 </p>
                 <p className="text-xs text-warm-muted mt-1">
                   {isCalifornia ? (
@@ -962,6 +1067,17 @@ export function PIIntakeStep({
                       You must file a written claim with the government entity within
                       6 months of the incident. If the deadline has passed, you may
                       apply for late claim relief under Gov. Code &sect;911.4.
+                      We&apos;ll add the required steps to your case automatically.
+                    </>
+                  ) : isPennsylvania ? (
+                    <>
+                      Pennsylvania has two separate government immunity schemes.
+                      State agencies are protected by Sovereign Immunity (1 Pa.C.S.
+                      &sect;2310), and local governments (cities, counties, school
+                      districts) are protected by Political Subdivision Tort Claims
+                      Act (42 Pa.C.S. &sect;&sect;8541-8564). For political
+                      subdivisions, you must provide written notice within 6 months
+                      of the injury. Recovery is capped at $500,000 per occurrence.
                       We&apos;ll add the required steps to your case automatically.
                     </>
                   ) : (
@@ -1087,9 +1203,13 @@ export function PIIntakeStep({
               ? isPropertyDamage
                 ? 'California statute of limitations for property damage'
                 : 'California statute of limitations for personal injury'
-              : isPropertyDamage
-                ? 'Texas statute of limitations for property damage'
-                : 'Texas statute of limitations for personal injury'}
+              : isPennsylvania
+                ? isPropertyDamage
+                  ? 'Pennsylvania statute of limitations for property damage'
+                  : 'Pennsylvania statute of limitations for personal injury'
+                : isPropertyDamage
+                  ? 'Texas statute of limitations for property damage'
+                  : 'Texas statute of limitations for personal injury'}
           </p>
           <p className="text-xs text-warm-muted mt-0.5">
             {isCalifornia ? (
@@ -1100,6 +1220,15 @@ export function PIIntakeStep({
                 {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
                 (Cal. Civ. Proc. Code &sect; 335.1). Filing after this deadline
                 can result in your case being dismissed.
+              </>
+            ) : isPennsylvania ? (
+              <>
+                In Pennsylvania, the statute of limitations for{' '}
+                {isPropertyDamage ? 'property damage' : 'personal injury'} claims
+                is 2 years from the{' '}
+                {isPropertyDamage ? 'date of the incident' : 'date of injury'}{' '}
+                (42 Pa.C.S. &sect; 5524). Filing after this deadline can result in
+                your case being dismissed.
               </>
             ) : (
               <>
@@ -1125,6 +1254,18 @@ export function PIIntakeStep({
               can recover damages even if you are partially at fault. Your
               recovery is reduced by your percentage of fault. For example, if
               you are 30% at fault, you can still recover 70% of your damages.
+            </p>
+          </div>
+        ) : isPennsylvania ? (
+          <div className="rounded-md border border-calm-indigo/30 bg-calm-indigo/5 px-3 py-2">
+            <p className="text-xs font-medium text-warm-text">
+              Pennsylvania 51% Rule (Modified Comparative Fault)
+            </p>
+            <p className="text-xs text-warm-muted mt-0.5">
+              Under Pennsylvania law (42 Pa.C.S. &sect; 7102), you cannot recover
+              damages if you are found to be more than 50% responsible for the
+              incident. If your responsibility is 50% or less, your recovery is
+              reduced by your percentage of fault.
             </p>
           </div>
         ) : (
