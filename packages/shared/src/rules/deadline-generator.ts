@@ -30,6 +30,8 @@ export interface GenerateDeadlinesInput {
   taskMetadata: Record<string, unknown>
   /** Deadline keys that already exist for this case (for deduplication) */
   existingDeadlineKeys: string[]
+  /** State of the case (e.g. 'California', 'Texas') for state-specific rules */
+  caseState?: string
 }
 
 export interface GeneratedDeadline {
@@ -240,6 +242,11 @@ export function generateDeadlines(
   for (const rule of rules) {
     // --- Deduplication: skip if this deadline already exists for the case ---
     if (input.existingDeadlineKeys.includes(rule.deadline_key)) {
+      continue
+    }
+
+    // --- State condition: skip if rule is for a different state ---
+    if (rule.condition_state && input.caseState !== rule.condition_state) {
       continue
     }
 
