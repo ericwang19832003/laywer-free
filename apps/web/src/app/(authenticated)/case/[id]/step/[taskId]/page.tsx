@@ -93,6 +93,8 @@ import { debtSolCheckFlConfig } from '@lawyer-free/shared/guided-steps/debt-defe
 import { debtAnswerPrepFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-answer-prep-fl'
 import { fdcpaCheckFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-check-fl'
 import { debtPostJudgmentFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-fl'
+import { debtDiscoveryNyConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-discovery-ny'
+import { debtDiscoveryFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-discovery-fl'
 import { fdcpaCounterclaimGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-counterclaim-guide'
 import { debtMotionToDismissConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-motion-to-dismiss'
 import { debtDefaultJudgmentRecoveryConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-default-judgment-recovery'
@@ -1358,8 +1360,13 @@ export default async function StepPage({
         : debtPostJudgmentGuideConfig
       return <GuidedStep caseId={id} taskId={taskId} config={postJudgmentConfig} existingAnswers={task.metadata?.guided_answers} />
     }
-    case 'debt_discovery':
-      return <GuidedStep caseId={id} taskId={taskId} config={debtDiscoveryCaConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'debt_discovery': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const discoveryConfig = caseRow?.state === 'New York' ? debtDiscoveryNyConfig
+        : caseRow?.state === 'Florida' ? debtDiscoveryFlConfig
+        : debtDiscoveryCaConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={discoveryConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    }
     case 'debt_confession_judgment':
       return <GuidedStep caseId={id} taskId={taskId} config={debtConfessionJudgmentPaConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'fdcpa_counterclaim_guide':
