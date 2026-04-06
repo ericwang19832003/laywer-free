@@ -95,6 +95,10 @@ import { fdcpaCheckFlConfig } from '@lawyer-free/shared/guided-steps/debt-defens
 import { debtPostJudgmentFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-post-judgment-fl'
 import { debtDiscoveryNyConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-discovery-ny'
 import { debtDiscoveryFlConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-discovery-fl'
+import { ltEvictionDefenseCaConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-defense-ca'
+import { ltEvictionDefensePaConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-defense-pa'
+import { ltEvictionDefenseNyConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-defense-ny'
+import { ltEvictionDefenseFlConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-defense-fl'
 import { fdcpaCounterclaimGuideConfig } from '@lawyer-free/shared/guided-steps/debt-defense/fdcpa-counterclaim-guide'
 import { debtMotionToDismissConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-motion-to-dismiss'
 import { debtDefaultJudgmentRecoveryConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-default-judgment-recovery'
@@ -1229,8 +1233,15 @@ export default async function StepPage({
     // Landlord-tenant depth steps
     case 'lt_repair_request':
       return <GuidedStep caseId={id} taskId={taskId} config={ltRepairRequestConfig} existingAnswers={task.metadata?.guided_answers} skippable />
-    case 'lt_eviction_response':
-      return <GuidedStep caseId={id} taskId={taskId} config={ltEvictionResponseConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'lt_eviction_response': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const ltEvictionConfig = caseRow?.state === 'California' ? ltEvictionDefenseCaConfig
+        : caseRow?.state === 'Pennsylvania' ? ltEvictionDefensePaConfig
+        : caseRow?.state === 'New York' ? ltEvictionDefenseNyConfig
+        : caseRow?.state === 'Florida' ? ltEvictionDefenseFlConfig
+        : ltEvictionResponseConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={ltEvictionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    }
     case 'lt_habitability_checklist':
       return <GuidedStep caseId={id} taskId={taskId} config={ltHabitabilityChecklistConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'lt_security_deposit_demand':
