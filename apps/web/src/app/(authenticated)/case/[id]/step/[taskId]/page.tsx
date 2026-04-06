@@ -108,6 +108,12 @@ import { piLienResolutionConfig } from '@lawyer-free/shared/guided-steps/persona
 import { piExpertWitnessGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-expert-witness-guide'
 import { piTortClaimsNoticeConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice'
 import { piTortClaimsTrackingConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking'
+import { piIntakeCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-intake-ca'
+import { piMedicalRecordsCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-medical-records-ca'
+import { piInsuranceCommunicationCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-insurance-communication-ca'
+import { piTortClaimsNoticeCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-ca'
+import { piTortClaimsTrackingCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-ca'
+import { preparePiPetitionCaConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-ca'
 // Small claims depth guided-step configs
 import { scJpCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
 import { scFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
@@ -1151,10 +1157,16 @@ export default async function StepPage({
       return <GuidedStep caseId={id} taskId={taskId} config={piLienResolutionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'pi_expert_witness_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={piExpertWitnessGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
-    case 'pi_tort_claims_notice':
-      return <GuidedStep caseId={id} taskId={taskId} config={piTortClaimsNoticeConfig} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_tort_claims_tracking':
-      return <GuidedStep caseId={id} taskId={taskId} config={piTortClaimsTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_tort_claims_notice': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const tortNoticeConfig = caseRow?.state === 'California' ? piTortClaimsNoticeCaConfig : piTortClaimsNoticeConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={tortNoticeConfig} existingAnswers={task.metadata?.guided_answers} />
+    }
+    case 'pi_tort_claims_tracking': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const tortTrackingConfig = caseRow?.state === 'California' ? piTortClaimsTrackingCaConfig : piTortClaimsTrackingConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={tortTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
+    }
 
     // Landlord-tenant depth steps
     case 'lt_repair_request':
@@ -1289,25 +1301,38 @@ export default async function StepPage({
 
     // Personal injury task chain steps
     case 'pi_intake': {
-      const { data: piDetails } = await supabase
-        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      const [{ data: piDetails }, { data: caseRow }] = await Promise.all([
+        supabase.from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle(),
+        supabase.from('cases').select('state').eq('id', id).single(),
+      ])
       return (
         <PIIntakeStep
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
           piSubType={piDetails?.pi_sub_type ?? undefined}
+          state={caseRow?.state ?? undefined}
         />
       )
     }
     case 'pi_medical_records': {
-      const { data: piDetails } = await supabase
-        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      const [{ data: piDetails }, { data: caseRow }] = await Promise.all([
+        supabase.from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle(),
+        supabase.from('cases').select('state').eq('id', id).single(),
+      ])
+      if (caseRow?.state === 'California') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piMedicalRecordsCaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       return <PIMedicalRecordsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
     case 'pi_insurance_communication': {
-      const { data: piDetails } = await supabase
-        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      const [{ data: piDetails }, { data: caseRow }] = await Promise.all([
+        supabase.from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle(),
+        supabase.from('cases').select('state').eq('id', id).single(),
+      ])
+      if (caseRow?.state === 'California') {
+        return <GuidedStep caseId={id} taskId={taskId} config={piInsuranceCommunicationCaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       return <PIInsuranceCommunicationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
     case 'prepare_pi_demand_letter': {
@@ -1334,6 +1359,9 @@ export default async function StepPage({
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
+      if (caseRow?.state === 'California') {
+        return <GuidedStep caseId={id} taskId={taskId} config={preparePiPetitionCaConfig} existingAnswers={task.metadata?.guided_answers} />
+      }
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('*').eq('case_id', id).maybeSingle()
       return (
