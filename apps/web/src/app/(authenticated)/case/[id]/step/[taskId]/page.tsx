@@ -163,6 +163,10 @@ import { piJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/personal
 // Small claims depth guided-step configs
 import { scJpCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
 import { scFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
+import { scFilingGuideCaConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide-ca'
+import { scFilingGuidePaConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide-pa'
+import { scFilingGuideNyConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide-ny'
+import { scFilingGuideFlConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide-fl'
 import { scServiceGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-service-guide'
 import { scCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-courtroom-guide'
 import { scEvidenceRulesConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-evidence-rules'
@@ -1079,8 +1083,15 @@ export default async function StepPage({
     // Small claims depth steps
     case 'sc_jp_court_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={scJpCourtGuideConfig} existingAnswers={task.metadata?.guided_answers} />
-    case 'sc_filing_guide':
-      return <GuidedStep caseId={id} taskId={taskId} config={scFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
+    case 'sc_filing_guide': {
+      const { data: caseRow } = await supabase.from('cases').select('state').eq('id', id).single()
+      const scFiling = caseRow?.state === 'California' ? scFilingGuideCaConfig
+        : caseRow?.state === 'Pennsylvania' ? scFilingGuidePaConfig
+        : caseRow?.state === 'New York' ? scFilingGuideNyConfig
+        : caseRow?.state === 'Florida' ? scFilingGuideFlConfig
+        : scFilingGuideConfig
+      return <GuidedStep caseId={id} taskId={taskId} config={scFiling} existingAnswers={task.metadata?.guided_answers} />
+    }
     case 'sc_service_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={scServiceGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'sc_courtroom_guide':
