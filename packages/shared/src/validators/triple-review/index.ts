@@ -3,3 +3,4 @@ export type { TripleReviewResult, ReviewAgentResult, ReviewCheckResult } from '.
 export { buildLegalCorrectnessPrompt, parseLegalCorrectnessResponse } from './legal-correctness'
 export { buildJurisdictionCompliancePrompt, parseJurisdictionComplianceResponse } from './jurisdiction-compliance'
 export { buildPlainLanguagePrompt, parsePlainLanguageResponse } from './plain-language'
+export { buildAutoFixPrompt } from './auto-fix'
