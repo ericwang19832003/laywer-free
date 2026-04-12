@@ -25,7 +25,8 @@
     "./api-client": "./src/api-client/index.ts",
     "./api-client/*": "./src/api-client/*",
     "./jurisdiction-rules": "./src/jurisdiction-rules/index.ts",
-    "./jurisdiction-rules/*": "./src/jurisdiction-rules/*"
+    "./jurisdiction-rules/*": "./src/jurisdiction-rules/*",
+    "./jurisdiction-rules/tx": "./src/jurisdiction-rules/tx/index.ts"
   },
   "dependencies": {
     "zod": "^4.3.6"
