@@ -28,7 +28,8 @@
     "./jurisdiction-rules/*": "./src/jurisdiction-rules/*",
     "./jurisdiction-rules/tx": "./src/jurisdiction-rules/tx/index.ts",
     "./validators": "./src/validators/index.ts",
-    "./validators/*": "./src/validators/*"
+    "./validators/*": "./src/validators/*",
+    "./validators/triple-review": "./src/validators/triple-review/index.ts"
   },
   "dependencies": {
     "zod": "^4.3.6"
