@@ -1,0 +1,97 @@
+{
+  "$comment": "Jurisdiction Rule Config Template. Copy this file, fill in all fields, and validate against jurisdictionRuleConfigSchema.",
+  "state": "TX",
+  "disputeType": "CHANGE_ME",
+  "subType": null,
+
+  "requiredSections": [
+    {
+      "id": "caption",
+      "label": "Caption",
+      "description": "Case caption identifying the court, parties, and cause number.",
+      "legalElements": [
+        "Court name",
+        "Plaintiff name",
+        "Defendant name",
+        "Cause number placeholder"
+      ],
+      "minParagraphs": 1
+    },
+    {
+      "$comment": "Add substantive sections here. Each must have legalElements with statute cites.",
+      "id": "SECTION_ID",
+      "label": "Section Label",
+      "description": "What this section is and why it matters, written for self-represented litigants.",
+      "legalElements": [
+        "Legal element 1 -- description (STATUTE_CITE)",
+        "Legal element 2 -- description (STATUTE_CITE)"
+      ],
+      "minParagraphs": 1
+    },
+    {
+      "id": "certificate_of_service",
+      "label": "Certificate of Service",
+      "description": "Certification that a copy was delivered to the opposing party.",
+      "legalElements": [
+        "Date of service",
+        "Method of service",
+        "Name and address of party served"
+      ],
+      "minParagraphs": 1
+    }
+  ],
+
+  "filingRules": {
+    "courtName": "FULL COURT NAME (with jurisdictional amounts)",
+    "maxPages": null,
+    "fontRequirements": null,
+    "marginRequirements": null,
+    "serviceRequirements": "How to serve the opposing party, citing the governing rule.",
+    "filingFee": null,
+    "copies": null,
+    "localFormUrl": null
+  },
+
+  "rejectionReasons": [
+    {
+      "reason": "Common clerk rejection reason",
+      "howToAvoid": "Actionable instruction to prevent this rejection.",
+      "wizardStep": "review"
+    }
+  ],
+
+  "stepValidations": {
+    "parties": {
+      "required": [],
+      "warnings": []
+    },
+    "venue": {
+      "required": [],
+      "warnings": []
+    },
+    "facts": {
+      "required": [],
+      "warnings": [
+        {
+          "condition": "CONDITION_ID",
+          "message": "Warning message explaining why this matters and what to do."
+        }
+      ]
+    },
+    "claims": {
+      "required": [],
+      "warnings": []
+    },
+    "review": {
+      "required": [],
+      "warnings": []
+    }
+  },
+
+  "glossary": [
+    {
+      "term": "Legal Term",
+      "plainEnglish": "Plain English definition at 8th-grade reading level. Include statute cite and practical example."
+    }
+  ]
+}
