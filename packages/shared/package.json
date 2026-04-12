@@ -23,7 +23,9 @@
     "./types": "./src/types/index.ts",
     "./types/*": "./src/types/*",
     "./api-client": "./src/api-client/index.ts",
-    "./api-client/*": "./src/api-client/*"
+    "./api-client/*": "./src/api-client/*",
+    "./jurisdiction-rules": "./src/jurisdiction-rules/index.ts",
+    "./jurisdiction-rules/*": "./src/jurisdiction-rules/*"
   },
   "dependencies": {
     "zod": "^4.3.6"
