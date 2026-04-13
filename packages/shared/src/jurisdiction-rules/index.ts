@@ -10,5 +10,6 @@ export {
 } from './schema'
 
 export { txDebtCollection } from './tx'
+export { caDebtCollection } from './ca'
 
 export { loadJurisdictionRules } from './loader'
