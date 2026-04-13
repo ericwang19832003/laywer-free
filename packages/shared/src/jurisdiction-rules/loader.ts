@@ -21,6 +21,17 @@ import {
   caFamily,
   caSmallClaims,
 } from './ca'
+import {
+  nyDebtCollection,
+  nyLandlordTenant,
+  nyPersonalInjury,
+  nyContract,
+  nyProperty,
+  nyRealEstate,
+  nyBusiness,
+  nyFamily,
+  nySmallClaims,
+} from './ny'
 
 const REGISTRY: Record<string, JurisdictionRuleConfig> = {
   'TX:debt_collection': txDebtCollection,
@@ -41,6 +52,15 @@ const REGISTRY: Record<string, JurisdictionRuleConfig> = {
   'CA:business': caBusiness,
   'CA:family': caFamily,
   'CA:small_claims': caSmallClaims,
+  'NY:debt_collection': nyDebtCollection,
+  'NY:landlord_tenant': nyLandlordTenant,
+  'NY:personal_injury': nyPersonalInjury,
+  'NY:contract': nyContract,
+  'NY:property': nyProperty,
+  'NY:real_estate': nyRealEstate,
+  'NY:business': nyBusiness,
+  'NY:family': nyFamily,
+  'NY:small_claims': nySmallClaims,
 }
 
 export function loadJurisdictionRules(
