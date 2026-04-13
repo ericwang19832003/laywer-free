@@ -43,6 +43,17 @@ import {
   flFamily,
   flSmallClaims,
 } from './fl'
+import {
+  paDebtCollection,
+  paLandlordTenant,
+  paPersonalInjury,
+  paContract,
+  paProperty,
+  paRealEstate,
+  paBusiness,
+  paFamily,
+  paSmallClaims,
+} from './pa'
 
 const REGISTRY: Record<string, JurisdictionRuleConfig> = {
   'TX:debt_collection': txDebtCollection,
@@ -81,6 +92,15 @@ const REGISTRY: Record<string, JurisdictionRuleConfig> = {
   'FL:business': flBusiness,
   'FL:family': flFamily,
   'FL:small_claims': flSmallClaims,
+  'PA:debt_collection': paDebtCollection,
+  'PA:landlord_tenant': paLandlordTenant,
+  'PA:personal_injury': paPersonalInjury,
+  'PA:contract': paContract,
+  'PA:property': paProperty,
+  'PA:real_estate': paRealEstate,
+  'PA:business': paBusiness,
+  'PA:family': paFamily,
+  'PA:small_claims': paSmallClaims,
 }
 
 export function loadJurisdictionRules(
