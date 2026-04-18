@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email/provider'
 import { buildReminderEmail } from '@/lib/email/reminder-templates'
+import { sendSms } from '@/lib/sms/provider'
+import { buildReminderSms } from '@/lib/sms/reminder-templates'
 import { safeEquals } from '@/lib/security/timing-safe'
+import { shouldSendSms } from './sms-helpers'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -92,6 +95,20 @@ export async function GET(request: NextRequest) {
     })
   }
 
+  // 2b. Fetch SMS preferences for all users in batch
+  const { data: smsPrefs } = await supabase
+    .from('user_preferences')
+    .select('user_id, phone_number, sms_opt_in')
+    .in('user_id', userIds)
+
+  const phoneMap = new Map<string, { phone: string; smsOptIn: boolean }>()
+  for (const pref of smsPrefs ?? []) {
+    phoneMap.set(pref.user_id, {
+      phone: pref.phone_number ?? '',
+      smsOptIn: pref.sms_opt_in ?? false,
+    })
+  }
+
   let sent = 0
   let failed = 0
   let skipped = 0
@@ -132,6 +149,34 @@ export async function GET(request: NextRequest) {
     if (user.preferences?.timing?.[timingKey] === false) {
       skippedIds.push(reminder.id)
       skipped++
+      continue
+    }
+
+    // SMS branch — handle before email path
+    if (reminder.channel === 'sms') {
+      const smsPref = phoneMap.get(userId)
+      if (!shouldSendSms({ smsOptIn: smsPref?.smsOptIn ?? false, phone: smsPref?.phone })) {
+        skippedIds.push(reminder.id)
+        skipped++
+        continue
+      }
+      const daysUntilSms = Math.max(0, Math.round(
+        (dueDate.getTime() - now.getTime()) / 86400000
+      ))
+      const deadlineLabelSms = formatDeadlineKey(reminder.deadlines.key)
+      const caseUrlSms = `${appUrl}/case/${reminder.case_id}/deadlines`
+      const smsResult = await sendSms({
+        to: smsPref!.phone,
+        body: buildReminderSms({ deadlineLabel: deadlineLabelSms, daysUntil: daysUntilSms, caseUrl: caseUrlSms }),
+      })
+      if (smsResult.success) {
+        sentIds.push(reminder.id)
+        sent++
+      } else {
+        failedIds.push(reminder.id)
+        failed++
+        console.error(`[SEND-REMINDERS] SMS failed for reminder ${reminder.id}: ${smsResult.error}`)
+      }
       continue
     }
 
