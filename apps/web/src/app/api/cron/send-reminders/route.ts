@@ -135,24 +135,10 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    // Check user preferences — skip if email channel disabled
-    if (user.preferences?.channels?.email === false) {
-      skippedIds.push(reminder.id)
-      skipped++
-      continue
-    }
-
-    // Check timing preference
     const dueDate = new Date(reminder.deadlines.due_at)
     const daysUntil = Math.max(0, Math.ceil((dueDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)))
-    const timingKey = daysUntil <= 1 ? 'days_1' : daysUntil <= 3 ? 'days_3' : 'days_7'
-    if (user.preferences?.timing?.[timingKey] === false) {
-      skippedIds.push(reminder.id)
-      skipped++
-      continue
-    }
 
-    // SMS branch — handle before email path
+    // SMS branch — handle before email-specific checks
     if (reminder.channel === 'sms') {
       const smsPref = phoneMap.get(userId)
       if (!shouldSendSms({ smsOptIn: smsPref?.smsOptIn ?? false, phone: smsPref?.phone })) {
@@ -160,14 +146,11 @@ export async function GET(request: NextRequest) {
         skipped++
         continue
       }
-      const daysUntilSms = Math.max(0, Math.round(
-        (dueDate.getTime() - now.getTime()) / 86400000
-      ))
       const deadlineLabelSms = formatDeadlineKey(reminder.deadlines.key)
       const caseUrlSms = `${appUrl}/case/${reminder.case_id}/deadlines`
       const smsResult = await sendSms({
         to: smsPref!.phone,
-        body: buildReminderSms({ deadlineLabel: deadlineLabelSms, daysUntil: daysUntilSms, caseUrl: caseUrlSms }),
+        body: buildReminderSms({ deadlineLabel: deadlineLabelSms, daysUntil, caseUrl: caseUrlSms }),
       })
       if (smsResult.success) {
         sentIds.push(reminder.id)
@@ -177,6 +160,20 @@ export async function GET(request: NextRequest) {
         failed++
         console.error(`[SEND-REMINDERS] SMS failed for reminder ${reminder.id}: ${smsResult.error}`)
       }
+      continue
+    }
+
+    // Email-only preference checks
+    if (user.preferences?.channels?.email === false) {
+      skippedIds.push(reminder.id)
+      skipped++
+      continue
+    }
+
+    const timingKey = daysUntil <= 1 ? 'days_1' : daysUntil <= 3 ? 'days_3' : 'days_7'
+    if (user.preferences?.timing?.[timingKey] === false) {
+      skippedIds.push(reminder.id)
+      skipped++
       continue
     }
 
