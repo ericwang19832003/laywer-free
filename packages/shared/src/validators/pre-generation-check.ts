@@ -50,7 +50,7 @@ export function checkPreGeneration(
 
   for (const section of config.requiredSections) {
     const checker = SECTION_TO_DATA_CHECK[section.id]
-    if (checker && !checker(wizardData)) {
+    if (!checker || !checker(wizardData)) {
       gaps.push({
         sectionId: section.id,
         sectionLabel: section.label,

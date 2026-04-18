@@ -197,10 +197,14 @@ export function PetitionWizard({
 
     const fieldValues: Record<string, string> = {}
     if (stepId === 'facts') {
+      // Populate both date field names — configs use either key depending on dispute type
       if (incidentDate) fieldValues.debt_origination_date = incidentDate
+      if (incidentDate) fieldValues.incident_date = incidentDate
       if (description) fieldValues.description = description
     } else if (stepId === 'claims') {
+      // Populate both claim field names — configs use either key depending on dispute type
       if (claimDetails) fieldValues.defense_type = claimDetails
+      if (claimDetails) fieldValues.negligence_basis = claimDetails
     } else if (stepId === 'parties') {
       if (opposingParties[0]?.address) fieldValues.opposing_party_address = opposingParties[0].address
     }

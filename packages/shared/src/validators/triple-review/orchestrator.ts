@@ -35,7 +35,7 @@ export async function runTripleReview(
   const plainLanguage = toAgentResult('Plain Language', parsePlainLanguageResponse(languageRaw))
 
   const allPassed = [legalCorrectness, jurisdictionCompliance, plainLanguage]
-    .every(r => r.checks.every(c => c.passed))
+    .every(r => r.totalCount > 0 && r.checks.every(c => c.passed))
 
   return { legalCorrectness, jurisdictionCompliance, plainLanguage, allPassed }
 }
