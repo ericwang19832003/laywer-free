@@ -43,6 +43,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [role, setRole] = useState<'plaintiff' | 'defendant' | ''>('')
   const [selectedState, setSelectedState] = useState('')
   const [selectedType, setSelectedType] = useState<string | undefined>()
+  const [phone, setPhone] = useState('')
+  const [smsOptIn, setSmsOptIn] = useState(false)
 
   function handleRoleContinue() {
     if (role && selectedState) {
@@ -57,9 +59,21 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     setStep(4)
   }
 
-  // Screen 4: persist preference then complete
+  async function handleComplete() {
+    const e164 = /^\+[1-9]\d{1,14}$/
+    if (phone && smsOptIn && e164.test(phone)) {
+      await fetch('/api/user-preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_number: phone, sms_opt_in: true }),
+      })
+    }
+    setStep(5)
+  }
+
+  // Screen 5: persist preference then complete
   useEffect(() => {
-    if (step !== 4) return
+    if (step !== 5) return
     let cancelled = false
 
     async function finish() {
@@ -237,7 +251,51 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     )
   }
 
-  // Screen 4: Loading / transition
+  if (step === 4) {
+    return (
+      <div className="max-w-lg mx-auto py-12 px-4">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold text-warm-text">Get deadline alerts by text?</h2>
+            <p className="text-warm-muted text-sm mt-1">
+              Optional — we&apos;ll text you 3 days, 1 day, and the day of each deadline. No spam.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="onboarding-phone" className="block text-sm font-medium text-warm-text">
+              Mobile number
+            </label>
+            <input
+              id="onboarding-phone"
+              type="tel"
+              placeholder="+1 555 000 0000"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full rounded-lg border border-warm-border bg-white px-3 py-2.5 text-sm text-warm-text focus:border-calm-indigo focus:ring-1 focus:ring-calm-indigo outline-none"
+            />
+            <p className="text-xs text-warm-muted">Format: +1XXXXXXXXXX</p>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={smsOptIn}
+              disabled={!phone}
+              onChange={(e) => setSmsOptIn(e.target.checked)}
+            />
+            <span className="text-sm text-warm-text">Send me SMS deadline alerts</span>
+          </label>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={handleComplete}>Skip for now</Button>
+            <Button onClick={handleComplete} disabled={smsOptIn && !phone}>
+              {smsOptIn ? 'Save and continue' : 'Continue'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Screen 5: Loading / transition
   return (
     <div className="max-w-lg mx-auto py-20 px-4 text-center">
       <Loader2 className="h-8 w-8 text-calm-indigo animate-spin mx-auto mb-4" />
