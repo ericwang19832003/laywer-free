@@ -12,6 +12,16 @@ const DISPUTE_LABELS: Record<string, string> = {
   real_estate: 'Real Estate',
   business: 'Business',
   employment: 'Employment',
+  debt_collection: 'Debt Defense',
+  family: 'Family Law',
+  small_claims: 'Small Claims',
+  property_damage: 'Property Damage',
+  property_damage_negligence: 'Property Damage',
+  auto_accident: 'Auto Accident',
+  slip_and_fall: 'Slip and Fall',
+  dog_bite: 'Dog Bite',
+  vehicle_damage: 'Vehicle Damage',
+  vandalism: 'Vandalism',
   other: 'Other',
 }
 
@@ -78,7 +88,7 @@ export function CasesTableView({ cases }: CasesTableViewProps) {
             {cases.map((c) => {
               const progress = c.progress ?? 0
               const disputeLabel = DISPUTE_LABELS[c.dispute_type] || c.dispute_type || 'Case'
-              const caseName = c.description || (c.county ? `${c.county} County` : 'Untitled Case')
+              const caseName = c.description || (c.county ? `${c.county} County ${disputeLabel}` : disputeLabel)
 
               return (
                 <tr
