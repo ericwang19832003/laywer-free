@@ -25,5 +25,8 @@
     "@lawyer-free/web": {
       "tailwindcss": "^4"
     }
+  },
+  "dependencies": {
+    "twilio": "^5.13.1"
   }
 }
