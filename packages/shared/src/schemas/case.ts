@@ -172,6 +172,7 @@ export const ALL_COURT_TYPES = [
 export const createCaseSchema = z.object({
   state: z.enum(STATES).optional().default('TX'),
   role: z.enum(['plaintiff', 'defendant']),
+  title: z.string().max(120).optional(),
   county: z.string().optional(),
   court_type: z.enum(ALL_COURT_TYPES).optional().default('unknown'),
   dispute_type: z.enum(DISPUTE_TYPES).optional(),

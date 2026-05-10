@@ -32,6 +32,7 @@ export function PaginatedCaseList({
       const data = await res.json()
       const newCases: CaseCardData[] = (data.cases ?? []).map((c: Record<string, unknown>) => ({
         id: c.id as string,
+        title: (c.title as string) || null,
         description: (c.description as string) || '',
         county: (c.county as string) || '',
         role: c.role as string,

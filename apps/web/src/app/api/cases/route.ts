@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const {
-      role, county, court_type, dispute_type, state,
+      title, role, county, court_type, dispute_type, state,
       family_sub_type, small_claims_sub_type, landlord_tenant_sub_type,
       debt_sub_type, pi_sub_type, business_sub_type, contract_sub_type,
       property_sub_type, other_sub_type, re_sub_type,
@@ -66,6 +66,11 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create case', details: rpcError.message },
         { status }
       )
+    }
+
+    // Set title if provided (create_case_atomic doesn't support it)
+    if (title?.trim()) {
+      await supabase.from('cases').update({ title: title.trim() }).eq('id', caseId)
     }
 
     // Fetch the created case

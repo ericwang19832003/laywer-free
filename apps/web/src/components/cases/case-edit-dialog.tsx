@@ -19,13 +19,15 @@ import {
 
 interface CaseEditDialogProps {
   caseId: string
+  currentTitle: string | null
   currentCounty: string | null
   currentDescription: string | null
 }
 
-export function CaseEditDialog({ caseId, currentCounty, currentDescription }: CaseEditDialogProps) {
+export function CaseEditDialog({ caseId, currentTitle, currentCounty, currentDescription }: CaseEditDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState(currentTitle ?? '')
   const [county, setCounty] = useState(currentCounty ?? '')
   const [description, setDescription] = useState(currentDescription ?? '')
   const [saving, setSaving] = useState(false)
@@ -34,6 +36,7 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription }: Ca
   function handleOpen(isOpen: boolean) {
     setOpen(isOpen)
     if (isOpen) {
+      setTitle(currentTitle ?? '')
       setCounty(currentCounty ?? '')
       setDescription(currentDescription ?? '')
       setError(null)
@@ -49,6 +52,7 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription }: Ca
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          title: title.trim() || null,
           county: county.trim() || null,
           description: description.trim() || null,
         }),
@@ -82,10 +86,21 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription }: Ca
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Case</DialogTitle>
-          <DialogDescription>Update your case county and description.</DialogDescription>
+          <DialogDescription>Update your case name, county, and description.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Case Name</Label>
+            <Input
+              id="title"
+              placeholder="e.g. Smith vs. Landlord, Auto Accident Feb 2026"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="county">County</Label>
             <Input

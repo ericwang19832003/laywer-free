@@ -8,6 +8,7 @@ import { daysUntil, formatDeadlineLabelShort } from '@/lib/deadline-utils'
 
 interface CaseRow {
   id: string
+  title: string | null
   county: string | null
   description: string | null
   role: string
@@ -72,10 +73,10 @@ export function CaseTable({ cases }: CaseTableProps) {
         </thead>
         <tbody className="divide-y divide-warm-border">
           {cases.map((c) => {
-            const displayName = c.county ? `${c.county} County` : 'County not set'
             const courtLabel = getCourtLabel(c.courtType) || null
             const roleLabel = c.role === 'plaintiff' ? 'Plaintiff' : 'Defendant'
             const disputeLabel = c.disputeType ? getDisputeLabel(c.disputeType, c.piSubType) : null
+            const displayName = c.title || (c.county ? `${c.county} County` : (disputeLabel || 'Your Case'))
             const pct = c.tasksTotal > 0 ? Math.round((c.tasksCompleted / c.tasksTotal) * 100) : 0
 
             return (
@@ -93,6 +94,7 @@ export function CaseTable({ cases }: CaseTableProps) {
                     </Link>
                     <CaseEditDialog
                       caseId={c.id}
+                      currentTitle={c.title}
                       currentCounty={c.county}
                       currentDescription={c.description}
                     />

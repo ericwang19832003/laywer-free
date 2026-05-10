@@ -1,8 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Pencil, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { CaseEditDialog } from '@/components/cases/case-edit-dialog'
 import type { CaseCardData } from '@/components/cases/case-cards'
 
 const DISPUTE_LABELS: Record<string, string> = {
@@ -60,6 +64,54 @@ interface CasesTableViewProps {
   cases: CaseCardData[]
 }
 
+function DeleteButton({ caseId }: { caseId: string }) {
+  const router = useRouter()
+  const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    setDeleting(true)
+    try {
+      await fetch(`/api/cases/${caseId}`, { method: 'DELETE' })
+      router.refresh()
+    } finally {
+      setDeleting(false)
+      setConfirming(false)
+    }
+  }
+
+  if (confirming) {
+    return (
+      <div className="flex items-center gap-1">
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="text-xs text-destructive font-medium hover:underline disabled:opacity-50"
+        >
+          {deleting ? 'Deleting…' : 'Confirm'}
+        </button>
+        <span className="text-warm-muted text-xs">/</span>
+        <button
+          onClick={() => setConfirming(false)}
+          className="text-xs text-warm-muted hover:text-warm-text"
+        >
+          Cancel
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={() => setConfirming(true)}
+      className="text-warm-muted hover:text-destructive transition-colors p-1 rounded-md hover:bg-red-50"
+      aria-label="Delete case"
+    >
+      <Trash2 className="h-3.5 w-3.5" />
+    </button>
+  )
+}
+
 export function CasesTableView({ cases }: CasesTableViewProps) {
   return (
     <Card className="overflow-hidden">
@@ -82,13 +134,16 @@ export function CasesTableView({ cases }: CasesTableViewProps) {
               <th className="text-left text-xs font-medium text-warm-muted px-5 py-3">
                 Last Activity
               </th>
+              <th className="text-left text-xs font-medium text-warm-muted px-5 py-3 w-20">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-warm-border">
             {cases.map((c) => {
               const progress = c.progress ?? 0
               const disputeLabel = DISPUTE_LABELS[c.dispute_type] || c.dispute_type || 'Case'
-              const caseName = c.description || (c.county ? `${c.county} County ${disputeLabel}` : disputeLabel)
+              const caseName = c.title || c.description || (c.county ? `${c.county} County ${disputeLabel}` : disputeLabel)
 
               return (
                 <tr
@@ -143,6 +198,17 @@ export function CasesTableView({ cases }: CasesTableViewProps) {
                     <span className="text-xs text-warm-muted">
                       {c.lastActivity ? formatRelativeDate(c.lastActivity) : '—'}
                     </span>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <CaseEditDialog
+                        caseId={c.id}
+                        currentTitle={c.title ?? null}
+                        currentCounty={c.county ?? null}
+                        currentDescription={c.description ?? null}
+                      />
+                      <DeleteButton caseId={c.id} />
+                    </div>
                   </td>
                 </tr>
               )
