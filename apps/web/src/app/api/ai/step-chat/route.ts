@@ -7,8 +7,8 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 const AI_MODEL = 'gpt-4o-mini'
 
 const glossaryTermSchema = z.object({
-  term: z.string(),
-  plain: z.string(),
+  term: z.string().max(100),
+  plain: z.string().max(500),
 })
 
 const historyItemSchema = z.object({
@@ -37,7 +37,7 @@ function buildSystemPrompt(
   const dispute = disputeType ? ` for a ${disputeType} dispute` : ''
   const glossarySection =
     glossaryTerms && glossaryTerms.length > 0
-      ? `\n\nKey terms for this step:\n${glossaryTerms.map((g) => `- ${g.term}: ${g.plain}`).join('\n')}`
+      ? `\n\nKey terms for this step:\n${glossaryTerms.map((g) => `- ${g.term.replace(/\n/g, ' ')}: ${g.plain.replace(/\n/g, ' ')}`).join('\n')}`
       : ''
 
   return `You are a plain-English legal guide helping a self-represented person navigate the "${stepName}" step of the "${taskKey}" process${dispute}${location}.
@@ -152,7 +152,6 @@ export async function POST(request: NextRequest) {
     return new Response(
       JSON.stringify({
         error: 'An unexpected error occurred',
-        message: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         status: 500,
