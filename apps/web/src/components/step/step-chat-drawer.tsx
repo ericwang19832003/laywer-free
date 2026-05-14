@@ -75,7 +75,7 @@ export function StepChatDrawer({
           disputeType,
           state,
           glossaryTerms,
-          question: trimmed,
+          message: trimmed,
           history,
         }),
       })

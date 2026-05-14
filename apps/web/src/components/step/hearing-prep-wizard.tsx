@@ -341,6 +341,12 @@ function DayOfSection({
     setSubmitting(true)
     setError(null)
     try {
+      // Advance to in_progress first (todo → in_progress → completed)
+      await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'in_progress' }),
+      })
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
