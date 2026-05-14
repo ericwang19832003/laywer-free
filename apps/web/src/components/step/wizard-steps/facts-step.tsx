@@ -79,6 +79,16 @@ export function FactsStep({
             </p>
           </div>
         </HelpTooltip>
+        <div className="mb-3 rounded-md border border-warm-border bg-warm-bg p-3">
+          <p className="text-xs font-medium text-warm-muted mb-2">What to include in your story:</p>
+          <ul className="space-y-1 text-xs text-warm-muted list-none">
+            <li>• <strong className="text-warm-text">When</strong> — the date or time period it happened</li>
+            <li>• <strong className="text-warm-text">Where</strong> — the address or location</li>
+            <li>• <strong className="text-warm-text">What</strong> — exactly what the other side did</li>
+            <li>• <strong className="text-warm-text">How</strong> — how it harmed you (money lost, damage caused)</li>
+          </ul>
+          <p className="mt-2 text-xs text-warm-muted">Write in plain English — no legal language needed here.</p>
+        </div>
         <textarea
           id="description"
           value={description}

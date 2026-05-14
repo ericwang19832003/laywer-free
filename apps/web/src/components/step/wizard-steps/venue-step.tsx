@@ -93,6 +93,9 @@ export function VenueStep({
       <div>
         <Label htmlFor="defendant-county" className="text-sm font-medium text-warm-text">
           What county does the person you&apos;re suing live in?
+          <span className="ml-1 font-normal text-xs text-warm-muted">
+            (usually the court nearest to where the dispute happened or where the other party lives)
+          </span>
         </Label>
         <HelpTooltip label="How do I find this out?">
           <p>
