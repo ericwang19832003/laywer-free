@@ -42,6 +42,21 @@ export const hearingDayConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'Knowing exactly what to expect in the courtroom removes surprises and lets you focus on presenting your case clearly.',
+    whatNext: 'After the hearing, the judge will either rule immediately or mail you a written decision.',
+    glossaryTerms: [
+      { term: 'Your Honor', plain: 'The title you always use when addressing the judge — never use their name.' },
+      { term: 'Sworn in', plain: 'You raise your right hand and promise to tell the truth. Lying after this is a crime called perjury.' },
+      { term: 'Ruling', plain: 'The judge\'s official decision on your case.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'How do I address the judge?',
+    'When do I get to speak?',
+    'What if the other side says something incorrect — can I respond?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

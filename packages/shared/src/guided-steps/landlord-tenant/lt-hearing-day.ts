@@ -38,6 +38,20 @@ export const ltHearingDayConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'Showing up prepared, on time, and knowing how to conduct yourself tells the judge you are taking this seriously.',
+    whatNext: 'After the hearing, you\'ll receive the judge\'s decision and learn your next steps — whether you won, lost, or need to appeal.',
+    glossaryTerms: [
+      { term: 'Judgment', plain: 'The court\'s final decision — for example, "judgment for plaintiff" means the person who filed the case won.' },
+      { term: 'Appeal', plain: 'Asking a higher court to review the judge\'s decision because you believe a legal error was made.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'What happens if the judge rules against me?',
+    'How long does it take to get a decision?',
+    'Can I record the hearing on my phone?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

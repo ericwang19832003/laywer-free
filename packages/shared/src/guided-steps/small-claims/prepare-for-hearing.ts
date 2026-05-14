@@ -51,6 +51,21 @@ export const prepareForHearingConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'A small claims hearing is your one chance to tell the judge your story — preparation makes you credible and dramatically improves your outcome.',
+    whatNext: 'After preparing, you\'ll attend the hearing and present your case to the judge.',
+    glossaryTerms: [
+      { term: 'Plaintiff', plain: 'The person who filed the lawsuit — that\'s you if you started this case.' },
+      { term: 'Defendant', plain: 'The person being sued — the other side in your case.' },
+      { term: 'Exhibit', plain: 'A document or item you show the judge as evidence, usually labeled Exhibit A, B, C, etc.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'What do I say when the judge asks me to speak?',
+    'What if I get nervous and forget something?',
+    'Can I bring a friend or family member for support?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

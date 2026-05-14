@@ -93,6 +93,21 @@ export const debtSolCheckConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'The statute of limitations is one of the strongest debt defenses — if it has expired, the collector may have no legal right to sue you at all.',
+    whatNext: 'After checking the statute of limitations, you\'ll know whether to raise it as a primary defense in your answer.',
+    glossaryTerms: [
+      { term: 'Statute of limitations', plain: 'A legal deadline for filing a lawsuit — once it passes, the other side generally loses the right to sue, even if the debt is real.' },
+      { term: 'Tolling', plain: 'When the statute of limitations is paused — for example, if you made a payment or acknowledged the debt in writing.' },
+      { term: 'Affirmative defense', plain: 'A legal argument you raise that, if proven, defeats the other side\'s claim even if their facts are correct.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'How do I calculate when the statute of limitations started?',
+    'Does making a partial payment restart the clock?',
+    'What if I\'m not sure when the debt originated?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

@@ -82,6 +82,21 @@ export const debtHearingPrepDeepConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'Debt collection hearings often hinge on whether the plaintiff can prove they legally own the debt — preparation helps you challenge their case effectively.',
+    whatNext: 'After preparing, you\'ll appear in court and present your defenses to the judge.',
+    glossaryTerms: [
+      { term: 'Standing', plain: 'The legal right to sue — a debt buyer must prove they actually own the debt before they can collect it.' },
+      { term: 'Statute of limitations', plain: 'A legal time limit — if too much time has passed since the debt was incurred, they may be barred from suing you.' },
+      { term: 'Chain of title', plain: 'Documentation proving ownership passed from the original lender to whoever is suing you now.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'How do I challenge whether they own the debt?',
+    'What is the statute of limitations for debt in my state?',
+    'What if I don\'t have a lawyer?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

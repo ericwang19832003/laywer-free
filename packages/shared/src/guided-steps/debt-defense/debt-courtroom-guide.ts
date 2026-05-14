@@ -66,6 +66,21 @@ export const debtCourtroomGuideConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'How you present yourself in the courtroom matters as much as the facts — judges respond well to calm, organized, respectful litigants.',
+    whatNext: 'After reviewing courtroom conduct, you\'ll be ready to appear at your hearing.',
+    glossaryTerms: [
+      { term: 'Pro se', plain: 'Latin for "on your own behalf" — representing yourself without a lawyer.' },
+      { term: 'Objection', plain: 'A formal protest to something the other side said or did in court. Say "Objection, Your Honor" and briefly state why.' },
+      { term: 'Hearsay', plain: 'A statement made outside of court being offered as evidence — generally not allowed. Example: "My friend told me they said X."' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'When can I object?',
+    'What do I do if I don\'t understand something the judge says?',
+    'Is it okay to take notes during the hearing?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 
