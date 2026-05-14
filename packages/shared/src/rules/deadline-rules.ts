@@ -265,6 +265,152 @@ function buildDisputeSpecificRules(): DeadlineRule[] {
       condition_metadata_field: 'government_entity_detected',
       condition_metadata_values: ['true'],
     },
+
+    // ── New York ──────────────────────────────────────────────────
+
+    // NY: Service deadline (120 days — CPLR §306-b)
+    {
+      trigger_task: 'pi_file_with_court',
+      deadline_key: 'ny_service_deadline',
+      deadline_label: 'Deadline to Serve (New York)',
+      offset_days: 120,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If not served within 120 days, the court may dismiss under CPLR §306-b. Extensions available for good cause or interest of justice.',
+      condition_state: 'New York',
+    },
+    // NY: Answer deadline (20 days personal service in-state, 30 days other methods)
+    {
+      trigger_task: 'pi_serve_defendant',
+      deadline_key: 'ny_answer_deadline',
+      deadline_label: 'Defendant Answer Deadline (New York)',
+      offset_days: 20,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If defendant does not answer within 20 days (personal service in NY) or 30 days (other service), you may seek default judgment (CPLR §3215).',
+      condition_state: 'New York',
+    },
+    // NY: Notice of Claim deadline (90 days — GML §50-e)
+    {
+      trigger_task: 'pi_intake',
+      deadline_key: 'ny_notice_of_claim_deadline',
+      deadline_label: 'Notice of Claim Deadline (90 days)',
+      offset_days: 90,
+      reference: 'metadata_field' as const,
+      metadata_field: 'incident_date',
+      apply_rule_4: false,
+      consequence: 'Notice of Claim must be served on the municipality within 90 days of injury (GML §50-e). This is one of the strictest deadlines in any state. Late notice petitions available but not guaranteed.',
+      condition_state: 'New York',
+      condition_metadata_field: 'government_entity_detected',
+      condition_metadata_values: ['true'],
+    },
+    // NY: Municipal SOL (1 year + 90 days — GML §50-i)
+    {
+      trigger_task: 'pi_intake',
+      deadline_key: 'ny_municipal_sol',
+      deadline_label: 'Municipal Lawsuit Filing Deadline (1yr + 90d)',
+      offset_days: 455,
+      reference: 'metadata_field' as const,
+      metadata_field: 'incident_date',
+      apply_rule_4: false,
+      consequence: 'Lawsuit against municipality must be filed within 1 year and 90 days of the incident (GML §50-i). This is shorter than the general 3-year PI SOL.',
+      condition_state: 'New York',
+      condition_metadata_field: 'government_entity_detected',
+      condition_metadata_values: ['true'],
+    },
+
+    // ── Florida ───────────────────────────────────────────────────
+
+    // FL: Service deadline (120 days — Fla. R. Civ. P. 1.070(j))
+    {
+      trigger_task: 'pi_file_with_court',
+      deadline_key: 'fl_service_deadline',
+      deadline_label: 'Deadline to Serve (Florida)',
+      offset_days: 120,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If not served within 120 days, the court must dismiss without prejudice unless good cause is shown (Fla. R. Civ. P. 1.070(j)).',
+      condition_state: 'Florida',
+    },
+    // FL: Answer deadline (20 days)
+    {
+      trigger_task: 'pi_serve_defendant',
+      deadline_key: 'fl_answer_deadline',
+      deadline_label: 'Defendant Answer Deadline (Florida)',
+      offset_days: 20,
+      reference: 'task_completed_at' as const,
+      apply_rule_4: false,
+      consequence: 'If defendant does not respond within 20 days, you may seek default judgment (Fla. R. Civ. P. 1.500).',
+      condition_state: 'Florida',
+    },
+    // FL: Government pre-suit notice (180 days before filing — §768.28(6))
+    {
+      trigger_task: 'pi_intake',
+      deadline_key: 'fl_govt_notice_deadline',
+      deadline_label: 'Government Pre-Suit Notice Deadline',
+      offset_days: 1095,
+      reference: 'metadata_field' as const,
+      metadata_field: 'incident_date',
+      apply_rule_4: false,
+      consequence: 'Pre-suit notice to government agency AND Department of Financial Services must be filed within 3 years of incident (§768.28(6)(a)). Must then wait 180 days before filing suit.',
+      condition_state: 'Florida',
+      condition_metadata_field: 'government_entity_detected',
+      condition_metadata_values: ['true'],
+    },
+
+    // ── Debt Defense: California ─────────────────────────────────
+
+    // CA: Debt answer deadline (30 days — CCP §412.20)
+    {
+      trigger_task: 'debt_defense_intake',
+      deadline_key: 'ca_debt_answer_deadline',
+      deadline_label: 'Answer Deadline (California)',
+      offset_days: 30,
+      reference: 'metadata_field' as const,
+      metadata_field: 'service_date',
+      apply_rule_4: false,
+      consequence: 'You must file your Answer within 30 days of service (CCP §412.20). Failure results in default judgment — the collector can then garnish wages and levy bank accounts.',
+      condition_state: 'California',
+    },
+
+    // ── Debt Defense: Pennsylvania ───────────────────────────────
+
+    // PA: Debt answer deadline (20 days — Pa.R.C.P. 1007.1)
+    {
+      trigger_task: 'debt_defense_intake',
+      deadline_key: 'pa_debt_answer_deadline',
+      deadline_label: 'Answer Deadline (Pennsylvania)',
+      offset_days: 20,
+      reference: 'metadata_field' as const,
+      metadata_field: 'service_date',
+      apply_rule_4: false,
+      consequence: 'You must file your Answer or Preliminary Objections within 20 days of service. After that, the plaintiff can send a 10-Day Notice (Pa.R.C.P. 237.1) and then enter default judgment.',
+      condition_state: 'Pennsylvania',
+    },
+    // NY: Debt answer deadline (20 days personal service, 30 days other — CPLR §320)
+    {
+      trigger_task: 'debt_defense_intake',
+      deadline_key: 'ny_debt_answer_deadline',
+      deadline_label: 'Answer Deadline (New York)',
+      offset_days: 20,
+      reference: 'metadata_field' as const,
+      metadata_field: 'service_date',
+      apply_rule_4: false,
+      consequence: 'You must file your Answer within 20 days of personal service in NY (30 days for other methods). Failure results in default judgment (CPLR §3215). Consumer Credit Fairness Act requires SOL affidavit for default judgments.',
+      condition_state: 'New York',
+    },
+    // FL: Debt answer deadline (20 days — Fla. R. Civ. P. 1.140)
+    {
+      trigger_task: 'debt_defense_intake',
+      deadline_key: 'fl_debt_answer_deadline',
+      deadline_label: 'Answer Deadline (Florida)',
+      offset_days: 20,
+      reference: 'metadata_field' as const,
+      metadata_field: 'service_date',
+      apply_rule_4: false,
+      consequence: 'You must file your Answer within 20 days of service (Fla. R. Civ. P. 1.140). Failure results in default judgment. No filing fee for defendants in county court.',
+      condition_state: 'Florida',
+    },
   ]
 }
 

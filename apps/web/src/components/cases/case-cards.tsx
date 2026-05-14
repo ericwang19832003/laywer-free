@@ -58,6 +58,7 @@ import { CasesTableView } from '@/components/cases/cases-table-view'
 
 export interface CaseCardData {
   id: string
+  title?: string | null
   description: string
   county: string
   role: string
@@ -338,7 +339,7 @@ function CaseCardView({ caseData, onAction, isSelected, onSelect }: { caseData: 
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold text-warm-text truncate pr-4">
-                  {caseData.description || 'Your Case'}
+                  {caseData.title || caseData.description || DISPUTE_LABELS[caseData.dispute_type] || 'Your Case'}
                 </h3>
                 {caseData.yourName && (
                   <p className="text-xs text-warm-muted mt-0.5">
@@ -524,7 +525,7 @@ function CaseListRow({ caseData, onAction, isSelected, onSelect }: { caseData: C
           </div>
           <div className="min-w-0">
             <p className="font-medium text-warm-text truncate max-w-[200px]">
-              {caseData.description || 'Your Case'}
+              {caseData.title || caseData.description || DISPUTE_LABELS[caseData.dispute_type] || 'Your Case'}
             </p>
             {caseData.county && (
               <p className="text-xs text-warm-muted">{caseData.county}</p>
@@ -617,7 +618,7 @@ function CaseTimelineView({ cases }: { cases: CaseCardData[] }) {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-warm-text">
-                        {caseData.description || 'Your Case'}
+                        {caseData.title || caseData.description || DISPUTE_LABELS[caseData.dispute_type] || 'Your Case'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         {caseData.county && (

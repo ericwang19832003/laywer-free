@@ -55,6 +55,20 @@ export const evidenceVaultConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'Courts require evidence — collecting it now prevents you from scrambling later, and sending a preservation letter right after puts the other side on legal notice.',
+    whatNext: 'After this, you\'ll send a legal letter to the other side requiring them to preserve their evidence.',
+    glossaryTerms: [
+      { term: 'Evidence', plain: 'Anything that proves your side of the story: documents, photos, messages, receipts, or witness accounts.' },
+      { term: 'Evidence preservation', plain: 'A legal notice that tells the other side they must keep all relevant documents and records — deleting them after receiving this notice can hurt their case.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'What counts as evidence?',
+    'What if I deleted some messages — is that a problem?',
+    'How should I organize my documents?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

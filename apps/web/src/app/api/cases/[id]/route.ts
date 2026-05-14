@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { INPUT_LIMITS } from '@/lib/validation/input-limits'
 
 const casePatchSchema = z.object({
+  title: z.string().max(120).nullable().optional(),
   court_type: z.enum(['jp', 'county', 'district', 'federal']).optional(),
   county: z.string().nullable().optional(),
   description: z.string().max(INPUT_LIMITS.CASE_DESCRIPTION).nullable().optional(),
@@ -71,10 +72,11 @@ export async function PATCH(
       )
     }
 
-    const { court_type, county, description, outcome } = parsed.data
+    const { title, court_type, county, description, outcome } = parsed.data
 
     // Build partial update object — only include provided fields
     const updates: Record<string, unknown> = {}
+    if (title !== undefined) updates.title = title
     if (court_type !== undefined) updates.court_type = court_type
     if (county !== undefined) updates.county = county
     if (description !== undefined) updates.description = description

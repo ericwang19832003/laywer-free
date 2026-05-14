@@ -80,7 +80,7 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
   const score7dData = raw7d && riskScoreData && raw7d.id !== riskScoreData.id ? raw7d : null
   const score30dData = raw30d && riskScoreData && raw30d.id !== riskScoreData.id ? raw30d : null
 
-  const alerts: ReminderEscalation[] = (escalationResult.data ?? []).map((row: Record<string, unknown>) => {
+  const rawAlerts: ReminderEscalation[] = (escalationResult.data ?? []).map((row: Record<string, unknown>) => {
     const deadline = row.deadlines as { due_at: string; key: string } | null
     return {
       id: row.id as string,
@@ -92,6 +92,15 @@ export async function FocusTab({ caseId, disputeType, jurisdiction, courtType, c
       due_at: deadline?.due_at ?? '',
       deadline_key: deadline?.key ?? '',
     }
+  })
+
+  // Deduplicate alerts by message + deadline_id to prevent repeated identical entries
+  const seenAlertKeys = new Set<string>()
+  const alerts = rawAlerts.filter((a) => {
+    const key = `${a.message}::${a.deadline_id ?? 'health'}`
+    if (seenAlertKeys.has(key)) return false
+    seenAlertKeys.add(key)
+    return true
   })
 
   const tasksSummary = dashboard.tasks_summary ?? {}

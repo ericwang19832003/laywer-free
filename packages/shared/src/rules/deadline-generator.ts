@@ -171,6 +171,10 @@ export interface SeedDeadlinesInput {
   serviceDate?: string
   /** Deadline keys that already exist for this case */
   existingDeadlineKeys: string[]
+  /** State code (e.g. 'CA', 'TX') — required for state-conditional deadline rules */
+  caseState?: string
+  /** Task metadata from the triggering task — required for metadata-conditional deadline rules */
+  taskMetadata?: Record<string, unknown>
 }
 
 /**
@@ -201,7 +205,8 @@ export function seedDeadlinesFromDates(
       taskKey: filingTaskKey,
       caseId: input.caseId,
       completedAt: input.filingDate,
-      taskMetadata: {},
+      taskMetadata: input.taskMetadata ?? {},
+      caseState: input.caseState,
       existingDeadlineKeys: [
         ...input.existingDeadlineKeys,
         ...results.map((d) => d.key),
@@ -216,7 +221,8 @@ export function seedDeadlinesFromDates(
       taskKey: serviceTaskKey,
       caseId: input.caseId,
       completedAt: input.serviceDate,
-      taskMetadata: {},
+      taskMetadata: input.taskMetadata ?? {},
+      caseState: input.caseState,
       existingDeadlineKeys: [
         ...input.existingDeadlineKeys,
         ...results.map((d) => d.key),
@@ -262,9 +268,10 @@ export function generateDeadlines(
           break
         }
       }
+      const valueAsString = typeof value === 'boolean' ? String(value) : value
       if (
-        typeof value !== 'string' ||
-        !rule.condition_metadata_values.includes(value)
+        typeof valueAsString !== 'string' ||
+        !rule.condition_metadata_values.includes(valueAsString)
       ) {
         continue
       }

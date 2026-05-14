@@ -23,7 +23,17 @@
     "./types": "./src/types/index.ts",
     "./types/*": "./src/types/*",
     "./api-client": "./src/api-client/index.ts",
-    "./api-client/*": "./src/api-client/*"
+    "./api-client/*": "./src/api-client/*",
+    "./jurisdiction-rules": "./src/jurisdiction-rules/index.ts",
+    "./jurisdiction-rules/*": "./src/jurisdiction-rules/*",
+    "./jurisdiction-rules/tx": "./src/jurisdiction-rules/tx/index.ts",
+    "./jurisdiction-rules/ca": "./src/jurisdiction-rules/ca/index.ts",
+    "./jurisdiction-rules/ny": "./src/jurisdiction-rules/ny/index.ts",
+    "./jurisdiction-rules/fl": "./src/jurisdiction-rules/fl/index.ts",
+    "./jurisdiction-rules/pa": "./src/jurisdiction-rules/pa/index.ts",
+    "./validators": "./src/validators/index.ts",
+    "./validators/*": "./src/validators/*",
+    "./validators/triple-review": "./src/validators/triple-review/index.ts"
   },
   "dependencies": {
     "zod": "^4.3.6"

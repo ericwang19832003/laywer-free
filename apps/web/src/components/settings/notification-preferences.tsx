@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 type TimingKey = 'days_7' | 'days_3' | 'days_1' | 'day_of'
-type ChannelKey = 'email' | 'in_app'
+type ChannelKey = 'email' | 'in_app' | 'sms'
 
 export type NotificationPreferencesData = {
   timing: Record<TimingKey, boolean>
@@ -25,6 +27,7 @@ const DEFAULT_PREFERENCES: NotificationPreferencesData = {
   channels: {
     email: true,
     in_app: true,
+    sms: false,
   },
 }
 
@@ -38,13 +41,16 @@ const TIMING_OPTIONS: { key: TimingKey; label: string }[] = [
 const CHANNEL_OPTIONS: { key: ChannelKey; label: string; description: string }[] = [
   { key: 'email', label: 'Email', description: 'Receive reminder emails' },
   { key: 'in_app', label: 'In-app', description: 'See reminders in your notification bell' },
+  { key: 'sms' as const, label: 'SMS text alerts', description: 'Get texts 3 days, 1 day, and day-of deadline' },
 ]
 
 interface NotificationPreferencesProps {
   initialPreferences?: Partial<NotificationPreferencesData>
+  initialPhone?: string
+  initialSmsOptIn?: boolean
 }
 
-export function NotificationPreferences({ initialPreferences }: NotificationPreferencesProps) {
+export function NotificationPreferences({ initialPreferences, initialPhone, initialSmsOptIn: _initialSmsOptIn }: NotificationPreferencesProps) {
   const [preferences, setPreferences] = useState<NotificationPreferencesData>(() => ({
     timing: {
       ...DEFAULT_PREFERENCES.timing,
@@ -57,6 +63,8 @@ export function NotificationPreferences({ initialPreferences }: NotificationPref
   }))
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
+  const [phone, setPhone] = useState(initialPhone ?? '')
+  const [phoneError, setPhoneError] = useState('')
 
   function handleTimingChange(key: TimingKey, checked: boolean) {
     setPreferences((prev) => ({
@@ -75,6 +83,15 @@ export function NotificationPreferences({ initialPreferences }: NotificationPref
   }
 
   async function handleSave() {
+    // Validate SMS phone before making any API calls
+    const e164 = /^\+[1-9]\d{1,14}$/
+    if (preferences.channels.sms) {
+      if (!e164.test(phone)) {
+        setPhoneError('Enter a valid number: +1XXXXXXXXXX')
+        return
+      }
+    }
+
     setSaving(true)
     try {
       const supabase = createClient()
@@ -82,6 +99,22 @@ export function NotificationPreferences({ initialPreferences }: NotificationPref
         data: { notification_preferences: preferences },
       })
       if (error) throw error
+
+      // Save SMS preferences
+      if (preferences.channels.sms) {
+        await fetch('/api/user-preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_number: phone, sms_opt_in: true }),
+        })
+      } else {
+        await fetch('/api/user-preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sms_opt_in: false }),
+        })
+      }
+
       toast.success('Notification preferences saved')
       setDirty(false)
     } catch {
@@ -136,6 +169,20 @@ export function NotificationPreferences({ initialPreferences }: NotificationPref
               </div>
             </label>
           ))}
+          {preferences.channels.sms && (
+            <div className="mt-3 space-y-1">
+              <Label htmlFor="sms-phone">Mobile number for SMS alerts</Label>
+              <Input
+                id="sms-phone"
+                type="tel"
+                placeholder="+1 555 000 0000"
+                value={phone}
+                onChange={(e) => { setPhone(e.target.value); setPhoneError('') }}
+              />
+              {phoneError && <p className="text-sm text-destructive">{phoneError}</p>}
+              <p className="text-xs text-muted-foreground">Format: +1XXXXXXXXXX</p>
+            </div>
+          )}
         </div>
 
         {/* Save Button */}

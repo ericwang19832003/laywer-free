@@ -59,6 +59,20 @@ export const ltHearingPrepConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'Landlord-tenant hearings move fast — having organized evidence and a clear narrative of what happened gives you a real advantage.',
+    whatNext: 'After preparing, you\'ll appear at your hearing and present your side to the judge.',
+    glossaryTerms: [
+      { term: 'Habitability', plain: 'The legal standard that a rental unit must be safe and livable — working heat, no pests, no leaks.' },
+      { term: 'Notice', plain: 'A formal written communication required by law before certain actions — like raising rent or filing for eviction.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'What evidence is most important in a landlord-tenant case?',
+    'What if the landlord brings witnesses I don\'t know about?',
+    'Do I need a lawyer for a landlord-tenant hearing?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

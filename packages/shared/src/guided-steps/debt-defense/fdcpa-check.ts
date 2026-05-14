@@ -138,6 +138,21 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     },
   ],
 
+  noviceExplanation: {
+    why: 'The Fair Debt Collection Practices Act gives you specific legal rights — violations by the collector can become powerful defenses or even counterclaims.',
+    whatNext: 'After identifying any FDCPA violations, you\'ll incorporate them into your defense strategy.',
+    glossaryTerms: [
+      { term: 'FDCPA', plain: 'Fair Debt Collection Practices Act — a federal law that prohibits debt collectors from using abusive, deceptive, or unfair practices.' },
+      { term: 'Counterclaim', plain: 'A lawsuit you file against the person suing you, right in the same case — for example, suing the collector for FDCPA violations.' },
+      { term: 'Debt validation', plain: 'Your legal right to demand that the collector prove the debt exists, the amount is correct, and they have the right to collect it.' },
+    ],
+  },
+  suggestedChatQuestions: [
+    'What FDCPA violations are most common?',
+    'Can I sue the debt collector back?',
+    'What counts as harassment under the FDCPA?',
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

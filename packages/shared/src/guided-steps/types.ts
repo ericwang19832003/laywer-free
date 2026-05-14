@@ -19,9 +19,20 @@ export interface SummaryItem {
   text: string
 }
 
+export interface NoviceExplanation {
+  /** One sentence: why the user is doing this step */
+  why: string
+  /** One sentence: what happens after this step */
+  whatNext: string
+  /** Legal terms defined in plain English, shown as inline tooltips */
+  glossaryTerms?: { term: string; plain: string }[]
+}
+
 export interface GuidedStepConfig {
   title: string
   reassurance: string
   questions: QuestionDef[]
   generateSummary: (answers: Record<string, string>) => SummaryItem[]
+  noviceExplanation?: NoviceExplanation
+  suggestedChatQuestions?: string[]
 }

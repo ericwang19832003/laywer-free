@@ -27,7 +27,7 @@ export default async function CasesPage() {
   const PAGE_SIZE = 12
   const { data: allCasesFetched, count: totalCaseCount } = await supabase
     .from('cases')
-    .select('id, county, role, court_type, dispute_type, description, created_at', { count: 'exact' })
+    .select('id, title, county, role, court_type, dispute_type, description, created_at', { count: 'exact' })
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE + 1)
@@ -118,6 +118,7 @@ export default async function CasesPage() {
     const taskData = tasksByCase.get(c.id) ?? { completed: 0, total: 0 }
     return {
       id: c.id,
+      title: (c as Record<string, unknown>).title as string | null ?? null,
       county: c.county,
       description: c.description ?? null,
       role: c.role,
@@ -167,6 +168,7 @@ export default async function CasesPage() {
             <PaginatedCaseList
               initialCases={caseRows.map(row => ({
                 id: row.id,
+                title: row.title || null,
                 description: row.description || '',
                 county: row.county || '',
                 role: row.role,

@@ -13,6 +13,35 @@ export interface TodaysAction {
   daysOverdue?: number
 }
 
+const DISPUTE_LABELS: Record<string, string> = {
+  personal_injury: 'Personal Injury',
+  contract: 'Contract',
+  landlord_tenant: 'Landlord-Tenant',
+  debt_collection: 'Debt Defense',
+  real_estate: 'Real Estate',
+  business: 'Business',
+  employment: 'Employment',
+  family: 'Family Law',
+  small_claims: 'Small Claims',
+  property_damage: 'Property Damage',
+  other: 'Other',
+}
+
+const PI_SUB_TYPE_LABELS: Record<string, string> = {
+  auto_accident: 'Auto Accident',
+  pedestrian_cyclist: 'Pedestrian/Cyclist',
+  rideshare: 'Rideshare Accident',
+  uninsured_motorist: 'Uninsured/Underinsured Motorist',
+  slip_and_fall: 'Slip and Fall',
+  dog_bite: 'Dog Bite',
+  product_liability: 'Product Liability',
+  vehicle_damage: 'Vehicle Damage',
+  property_damage_negligence: 'Property Damage',
+  vandalism: 'Vandalism',
+  other_property_damage: 'Property Damage',
+  other: 'Other Personal Injury',
+}
+
 export async function GET() {
   try {
     const auth = await getAuthenticatedClient()
@@ -35,6 +64,19 @@ export async function GET() {
 
     const caseIds = cases.map((c) => c.id)
     const caseMap = new Map(cases.map((c) => [c.id, c]))
+
+    // Fetch pi_sub_type for PI cases to show accurate labels
+    const piCaseIds = cases.filter(c => c.dispute_type === 'personal_injury').map(c => c.id)
+    const piSubTypeMap = new Map<string, string>()
+    if (piCaseIds.length > 0) {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details')
+        .select('case_id, pi_sub_type')
+        .in('case_id', piCaseIds)
+      for (const pd of piDetails ?? []) {
+        if (pd.pi_sub_type) piSubTypeMap.set(pd.case_id, pd.pi_sub_type)
+      }
+    }
     const now = Date.now()
 
     // Fetch deadlines and incomplete tasks in parallel
@@ -67,10 +109,14 @@ export async function GET() {
       extra: Partial<TodaysAction>,
     ): TodaysAction {
       const c = caseMap.get(caseId)
+      const piSubType = piSubTypeMap.get(caseId)
+      const caseName = piSubType
+        ? PI_SUB_TYPE_LABELS[piSubType] ?? DISPUTE_LABELS[c?.dispute_type ?? ''] ?? 'Case'
+        : DISPUTE_LABELS[c?.dispute_type ?? ''] ?? 'Case'
       return {
         type,
         caseId,
-        caseName: c?.dispute_type?.replace(/_/g, ' ') ?? 'Case',
+        caseName,
         county: c?.county ?? undefined,
         ...extra,
       }

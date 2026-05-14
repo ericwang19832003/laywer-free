@@ -15,6 +15,61 @@ import type { GeneratedDeadline } from '@lawyer-free/shared/rules/deadline-gener
 // Public API
 // ---------------------------------------------------------------------------
 
+type ReminderRow = {
+  case_id: string
+  deadline_id: string
+  channel: 'email' | 'sms'
+  send_at: string
+  status: 'scheduled'
+}
+
+/**
+ * Build the reminder rows for a deadline without hitting the database.
+ * Exported for unit testing and reuse.
+ */
+export function buildReminderRows(params: {
+  deadlineId: string
+  caseId: string
+  dueAt: Date
+  now: Date
+  smsPhone: string | undefined
+}): ReminderRow[] {
+  const { deadlineId, caseId, dueAt, now, smsPhone } = params
+  const rows: ReminderRow[] = []
+
+  // Email: T-7, T-3, T-1
+  for (const days of [7, 3, 1]) {
+    const sendAt = new Date(dueAt.getTime() - days * 24 * 60 * 60 * 1000)
+    if (sendAt > now) {
+      rows.push({
+        case_id: caseId,
+        deadline_id: deadlineId,
+        channel: 'email',
+        send_at: sendAt.toISOString(),
+        status: 'scheduled',
+      })
+    }
+  }
+
+  // SMS: T-3, T-1, T-0 (only if phone provided)
+  if (smsPhone) {
+    for (const days of [3, 1, 0]) {
+      const sendAt = new Date(dueAt.getTime() - days * 24 * 60 * 60 * 1000)
+      if (sendAt > now) {
+        rows.push({
+          case_id: caseId,
+          deadline_id: deadlineId,
+          channel: 'sms',
+          send_at: sendAt.toISOString(),
+          status: 'scheduled',
+        })
+      }
+    }
+  }
+
+  return rows
+}
+
 /**
  * Insert a single deadline row and create associated reminders, audit event,
  * and in-app notification.
@@ -29,6 +84,8 @@ export async function insertDeadlineWithReminders(
     triggerSource: string
     /** Case owner user_id (for notification). Fetched internally if not provided. */
     userId?: string
+    /** When provided, SMS reminder rows are created at T-3, T-1, T-0. */
+    smsPhone?: string
   }
 ): Promise<string | null> {
   // --- Insert deadline row ---
@@ -55,21 +112,14 @@ export async function insertDeadlineWithReminders(
     return null
   }
 
-  // --- Create reminders at -7d, -3d, -1d (skip past dates) ---
-  const dueDate = new Date(deadline.due_at)
-  const now = new Date()
-  const remindersToInsert = [7, 3, 1]
-    .map(
-      (days) => new Date(dueDate.getTime() - days * 24 * 60 * 60 * 1000)
-    )
-    .filter((sendAt) => sendAt > now)
-    .map((sendAt) => ({
-      case_id: deadline.case_id,
-      deadline_id: inserted.id,
-      channel: 'email' as const,
-      send_at: sendAt.toISOString(),
-      status: 'scheduled' as const,
-    }))
+  // --- Create reminders (email T-7/T-3/T-1; SMS T-3/T-1/T-0 if phone given) ---
+  const remindersToInsert = buildReminderRows({
+    deadlineId: inserted.id,
+    caseId: deadline.case_id,
+    dueAt: new Date(deadline.due_at),
+    now: new Date(),
+    smsPhone: opts?.smsPhone,
+  })
 
   if (remindersToInsert.length > 0) {
     await supabase.from('reminders').insert(remindersToInsert)

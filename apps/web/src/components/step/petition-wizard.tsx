@@ -19,6 +19,14 @@ import Link from 'next/link'
 import type { FilingFacts } from '@lawyer-free/shared/schemas/filing'
 import { FilingMethodStep } from '@/components/step/filing-method-step'
 import { FILING_CONFIGS } from '@/lib/filing-configs'
+import { loadJurisdictionRules } from '@lawyer-free/shared/jurisdiction-rules'
+import { validateStep } from '@lawyer-free/shared/validators'
+import { checkPreGeneration } from '@lawyer-free/shared/validators'
+import { StepValidationBar } from '@/components/step/petition-wizard/step-validation-bar'
+import { PreGenChecklist } from '@/components/step/petition-wizard/pre-gen-checklist'
+import { ReviewPanel } from '@/components/step/petition-wizard/review-panel'
+import type { TripleReviewResult, ReviewCheckResult } from '@lawyer-free/shared/validators/triple-review'
+import { buildAutoFixPrompt } from '@lawyer-free/shared/validators/triple-review/auto-fix'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -162,6 +170,17 @@ export function PetitionWizard({
     (meta.filing_method as 'online' | 'in_person' | '') ?? ''
   )
 
+  /* ---- Triple review state ---- */
+  const [reviewResult, setReviewResult] = useState<TripleReviewResult | null>(null)
+  const [reviewing, setReviewing] = useState(false)
+  const [autoFixing, setAutoFixing] = useState(false)
+
+  /* ---- Jurisdiction rule config ---- */
+  const jurisdictionConfig = useMemo(
+    () => loadJurisdictionRules(caseData.state ?? 'TX', caseData.dispute_type ?? ''),
+    [caseData.state, caseData.dispute_type],
+  )
+
   /* ---- Jurisdiction check ---- */
   const jurisdictionCheck = useMemo(() => {
     const amount = amountSought ? parseFloat(amountSought) : 0
@@ -169,6 +188,42 @@ export function PetitionWizard({
     const check = validateJurisdiction({ courtType: caseData.court_type, amountSought: amount })
     return check.valid ? null : check.warning ?? null
   }, [amountSought, caseData.court_type])
+
+  /* ---- Step validation (Layer 1) ---- */
+  const stepValidation = useMemo(() => {
+    if (!jurisdictionConfig) return null
+    const stepId = WIZARD_STEPS[currentStep]?.id
+    if (!stepId) return null
+
+    const fieldValues: Record<string, string> = {}
+    if (stepId === 'facts') {
+      // Populate both date field names — configs use either key depending on dispute type
+      if (incidentDate) fieldValues.debt_origination_date = incidentDate
+      if (incidentDate) fieldValues.incident_date = incidentDate
+      if (description) fieldValues.description = description
+    } else if (stepId === 'claims') {
+      // Populate both claim field names — configs use either key depending on dispute type
+      if (claimDetails) fieldValues.defense_type = claimDetails
+      if (claimDetails) fieldValues.negligence_basis = claimDetails
+    } else if (stepId === 'parties') {
+      if (opposingParties[0]?.address) fieldValues.opposing_party_address = opposingParties[0].address
+    }
+
+    return validateStep(jurisdictionConfig, stepId, fieldValues)
+  }, [jurisdictionConfig, currentStep, incidentDate, description, claimDetails, opposingParties])
+
+  /* ---- Pre-generation check (Layer 2) ---- */
+  const preGenResult = useMemo(() => {
+    if (!jurisdictionConfig) return null
+    return checkPreGeneration(jurisdictionConfig, {
+      yourInfo,
+      opposingParties,
+      venue: { county: caseData.county, courtType: caseData.court_type },
+      description,
+      claimDetails,
+      reliefRequested: amountSought || otherRelief || undefined,
+    })
+  }, [jurisdictionConfig, yourInfo, opposingParties, caseData.county, caseData.court_type, description, claimDetails, amountSought, otherRelief])
 
   /* ---- Build helpers ---- */
 
@@ -241,6 +296,7 @@ export function PetitionWizard({
   async function generateDraft() {
     setGenerating(true)
     setGenError(null)
+    setReviewResult(null)
     try {
       const res = await fetch(`/api/cases/${caseId}/generate-filing`, {
         method: 'POST',
@@ -254,10 +310,66 @@ export function PetitionWizard({
       const data = await res.json()
       setDraft(data.draft)
       setDraftPhase(true)
+
+      // Trigger triple review in background if config exists
+      if (jurisdictionConfig && data.draft) {
+        runReview(data.draft)
+      }
     } catch (err) {
       setGenError(err instanceof Error ? err.message : 'Failed to generate document')
     } finally {
       setGenerating(false)
+    }
+  }
+
+  async function runReview(draftText: string) {
+    setReviewing(true)
+    try {
+      const res = await fetch(`/api/cases/${caseId}/review-filing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          petitionDraft: draftText,
+          state: caseData.state ?? 'TX',
+          disputeType: caseData.dispute_type ?? '',
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setReviewResult(data)
+      }
+    } catch {
+      // Review is non-blocking — silently ignore failures
+    } finally {
+      setReviewing(false)
+    }
+  }
+
+  async function handleAutoFix(failedChecks: ReviewCheckResult[]) {
+    if (!draft) return
+    setAutoFixing(true)
+    setGenError(null)
+    try {
+      const { system, user } = buildAutoFixPrompt(draft, failedChecks, caseData.state ?? 'TX')
+      const res = await fetch(`/api/cases/${caseId}/generate-filing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          facts: buildFacts(),
+          autofix_system_prompt: system,
+          autofix_user_prompt: user,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setDraft(data.draft)
+        // Re-run review on the fixed draft
+        runReview(data.draft)
+      }
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : 'Auto-fix failed')
+    } finally {
+      setAutoFixing(false)
     }
   }
 
@@ -346,8 +458,23 @@ export function PetitionWizard({
 
   /* ---- Step rendering ---- */
 
+  /* ---- Step-to-index lookup for PreGenChecklist navigation ---- */
+  const stepNameToIndex = useMemo(() => {
+    const map: Record<string, number> = {}
+    WIZARD_STEPS.forEach((s, i) => { map[s.id] = i })
+    return map
+  }, [])
+
   function renderStep() {
     const stepId = WIZARD_STEPS[currentStep]?.id
+    const validationBar = stepValidation ? (
+      <StepValidationBar
+        blocks={stepValidation.blocks}
+        warnings={stepValidation.warnings}
+        glossaryHits={stepValidation.glossaryHits}
+      />
+    ) : null
+
     switch (stepId) {
       case 'preflight':
         return (
@@ -358,12 +485,15 @@ export function PetitionWizard({
         )
       case 'parties':
         return (
-          <PartiesStep
-            yourInfo={yourInfo}
-            opposingParties={opposingParties}
-            onYourInfoChange={setYourInfo}
-            onOpposingPartiesChange={setOpposingParties}
-          />
+          <>
+            <PartiesStep
+              yourInfo={yourInfo}
+              opposingParties={opposingParties}
+              onYourInfoChange={setYourInfo}
+              onOpposingPartiesChange={setOpposingParties}
+            />
+            {validationBar}
+          </>
         )
       case 'venue':
         return (
@@ -383,23 +513,29 @@ export function PetitionWizard({
         )
       case 'facts':
         return (
-          <FactsStep
-            description={description}
-            onDescriptionChange={setDescription}
-            incidentDate={incidentDate}
-            onIncidentDateChange={setIncidentDate}
-            incidentLocation={incidentLocation}
-            onIncidentLocationChange={setIncidentLocation}
-            disputeType={caseData.dispute_type}
-          />
+          <>
+            <FactsStep
+              description={description}
+              onDescriptionChange={setDescription}
+              incidentDate={incidentDate}
+              onIncidentDateChange={setIncidentDate}
+              incidentLocation={incidentLocation}
+              onIncidentLocationChange={setIncidentLocation}
+              disputeType={caseData.dispute_type}
+            />
+            {validationBar}
+          </>
         )
       case 'claims':
         return (
-          <ClaimsStep
-            disputeType={caseData.dispute_type}
-            claimDetails={claimDetails}
-            onClaimDetailsChange={setClaimDetails}
-          />
+          <>
+            <ClaimsStep
+              disputeType={caseData.dispute_type}
+              claimDetails={claimDetails}
+              onClaimDetailsChange={setClaimDetails}
+            />
+            {validationBar}
+          </>
         )
       case 'relief':
         return (
@@ -429,11 +565,25 @@ export function PetitionWizard({
         )
       case 'review':
         return (
-          <ReviewStep
-            formData={formDataForReview}
-            caseData={caseData}
-            onEditStep={(stepIndex) => setCurrentStep(stepIndex)}
-          />
+          <>
+            <ReviewStep
+              formData={formDataForReview}
+              caseData={caseData}
+              onEditStep={(stepIndex) => setCurrentStep(stepIndex)}
+            />
+            {preGenResult && (
+              <div className="mt-6">
+                <PreGenChecklist
+                  gaps={preGenResult.gaps}
+                  onGenerate={handleComplete}
+                  onGoToStep={(step) => {
+                    const idx = stepNameToIndex[step]
+                    if (idx !== undefined) setCurrentStep(idx)
+                  }}
+                />
+              </div>
+            )}
+          </>
         )
       default:
         return null
@@ -468,6 +618,17 @@ export function PetitionWizard({
 
         {draft ? (
           <>
+            {/* Triple Review Panel */}
+            {(reviewing || reviewResult) && (
+              <div className="mb-6">
+                <ReviewPanel
+                  result={reviewResult}
+                  loading={reviewing}
+                  onAutoFix={handleAutoFix}
+                />
+              </div>
+            )}
+
             <DraftViewer
               draft={draft}
               onDraftChange={setDraft}
@@ -475,7 +636,7 @@ export function PetitionWizard({
                 setDraftPhase(false)
                 await generateDraft()
               }}
-              regenerating={generating}
+              regenerating={generating || autoFixing}
               acknowledged={acknowledged}
               onAcknowledgeChange={setAcknowledged}
               documentTitle={isDefendant ? 'Answer' : 'Petition'}
