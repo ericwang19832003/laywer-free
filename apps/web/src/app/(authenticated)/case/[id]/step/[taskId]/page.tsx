@@ -43,6 +43,7 @@ import { DemandLetterStep } from '@/components/step/small-claims/demand-letter-s
 import { SmallClaimsWizard } from '@/components/step/small-claims-wizard'
 import { ServeDefendantStep } from '@/components/step/small-claims/serve-defendant-step'
 import { PrepareForHearingStep } from '@/components/step/small-claims/prepare-for-hearing-step'
+import { HearingPrepWizard } from '@/components/step/hearing-prep-wizard'
 import { HearingDayStep } from '@/components/step/small-claims/hearing-day-step'
 import { scEvidenceVaultConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-evidence-vault'
 import { scFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-file-with-court'
@@ -1038,7 +1039,14 @@ export default async function StepPage({
     case 'sc_serve_defendant':
       return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'sc_prepare_for_hearing':
-      return <PrepareForHearingStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <HearingPrepWizard
+        caseId={id}
+        taskId={taskId}
+        disputeType={case_?.dispute_type ?? undefined}
+        yourName={task.metadata?.your_name ?? task.metadata?.yourName ?? undefined}
+        opponentName={task.metadata?.opposing_party_name ?? task.metadata?.opponentName ?? undefined}
+        amountSought={task.metadata?.amount_sought ?? task.metadata?.amountSought ?? undefined}
+      />
     case 'sc_hearing_day':
       return <HearingDayStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
 
@@ -1095,7 +1103,14 @@ export default async function StepPage({
     case 'lt_discovery':
       return <GuidedStep caseId={id} taskId={taskId} config={ltDiscoveryConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_prepare_for_hearing':
-      return <GuidedStep caseId={id} taskId={taskId} config={ltHearingPrepConfig} existingAnswers={task.metadata?.guided_answers} />
+      return <HearingPrepWizard
+        caseId={id}
+        taskId={taskId}
+        disputeType={case_?.dispute_type ?? undefined}
+        yourName={task.metadata?.your_name ?? task.metadata?.yourName ?? undefined}
+        opponentName={task.metadata?.opposing_party_name ?? task.metadata?.opponentName ?? undefined}
+        amountSought={task.metadata?.amount_sought ?? task.metadata?.amountSought ?? undefined}
+      />
     case 'lt_mediation':
       return <GuidedStep caseId={id} taskId={taskId} config={ltMediationConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'lt_hearing_day':
