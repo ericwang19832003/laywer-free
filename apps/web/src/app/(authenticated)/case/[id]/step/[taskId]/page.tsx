@@ -11,6 +11,7 @@ import { PetitionWizard } from '@/components/step/petition-wizard'
 import { PetitionWizardEnhanced } from '@/components/step/petition-wizard-enhanced'
 import { FileWithCourtStep } from '@/components/step/file-with-court-step'
 import { DiscoveryStarterPackStep } from '@/components/step/discovery-starter-pack-step'
+import { NoviceDiscoveryWizard } from '@/components/step/novice-discovery-wizard'
 import { UnderstandRemovalStep } from '@/components/step/understand-removal-step'
 import { ChooseRemovalStrategyStep } from '@/components/step/choose-removal-strategy-step'
 import { PrepareAmendedComplaintStep } from '@/components/step/prepare-amended-complaint-step'
@@ -578,10 +579,11 @@ export default async function StepPage({
       )
     case 'discovery_starter_pack':
       return (
-        <DiscoveryStarterPackStep
+        <NoviceDiscoveryWizard
           caseId={id}
           taskId={taskId}
-          existingAnswers={task.metadata?.guided_answers}
+          disputeType={case_?.dispute_type ?? undefined}
+          state={case_?.state ?? undefined}
         />
       )
     case 'understand_removal':
