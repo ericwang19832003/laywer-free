@@ -316,6 +316,17 @@ export function PreservationLetterStep({
             </div>
           )}
 
+          {sendResult === 'sent' && (
+            <div className="mt-4 rounded-lg border border-calm-amber/20 bg-calm-amber/5 p-4">
+              <p className="text-sm font-medium text-calm-amber mb-1">What if they don't respond?</p>
+              <p className="text-sm text-warm-muted">
+                They don't need to reply — this letter is a legal notice, not a request for a conversation.
+                If they destroy evidence after receiving it, you can ask the court to penalize them (called a
+                spoliation sanction). Keep the email in your Sent folder as proof you sent it.
+              </p>
+            </div>
+          )}
+
           {sendResult === 'failed' && (
             <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
               <p className="text-sm text-destructive">
@@ -380,6 +391,19 @@ export function PreservationLetterStep({
           </ul>
         </div>
 
+        {/* Why this matters */}
+        <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4 mb-6">
+          <p className="text-sm font-medium text-calm-indigo mb-1">Why send this letter?</p>
+          <p className="text-sm text-warm-muted">
+            This letter puts the other side on legal notice to preserve all evidence related to your case.
+            If they destroy evidence after receiving this, it can hurt their case and help yours —
+            courts call this <strong>spoliation</strong> (destroying evidence you were told to keep).
+          </p>
+          <p className="text-sm text-warm-muted mt-2">
+            Send it as early as possible. It takes 2 minutes and creates a legal timestamp.
+          </p>
+        </div>
+
         {/* Opponent info */}
         <div className="space-y-4">
           <div className="space-y-2">
@@ -397,6 +421,9 @@ export function PreservationLetterStep({
           <div className="space-y-2">
             <Label htmlFor="opponent-email">
               Opponent email <span className="text-warm-muted font-normal">(optional)</span>
+              <span className="ml-1 font-normal text-xs text-warm-muted">
+                (the person or company you're filing against)
+              </span>
             </Label>
             <Input
               id="opponent-email"
