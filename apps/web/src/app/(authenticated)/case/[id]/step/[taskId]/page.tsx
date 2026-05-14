@@ -156,7 +156,7 @@ import { piInsuranceCommunicationFlConfig } from '@lawyer-free/shared/guided-ste
 import { piTortClaimsNoticeFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-notice-fl'
 import { piTortClaimsTrackingFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-tort-claims-tracking-fl'
 import { preparePiPetitionFlConfig } from '@lawyer-free/shared/guided-steps/personal-injury/prepare-pi-petition-fl'
-import { piCourtSelectionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-court-selection'
+import { PiCourtSelectionStep } from '@/components/step/personal-injury/pi-court-selection-step'
 import { piDisclosuresGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-disclosures-guide'
 import { piPretrialPreparationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pretrial-preparation'
 import { piJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-judgment-guide'
@@ -348,6 +348,7 @@ import { otherPostResolutionConfig } from '@lawyer-free/shared/guided-steps/othe
 import { MOTION_CONFIGS } from '@lawyer-free/shared/motions/registry'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
+import { StepChatDrawer } from '@/components/step/step-chat-drawer'
 
 export default async function StepPage({
   params,
@@ -453,6 +454,13 @@ export default async function StepPage({
     task.metadata = merged
   }
 
+  const { data: case_ } = await supabase
+    .from('cases')
+    .select('dispute_type, state')
+    .eq('id', id)
+    .single()
+
+  async function getStepComponent() {
   switch (task.task_key) {
     case 'welcome':
       return <WelcomeStep caseId={id} taskId={taskId} />
@@ -1276,8 +1284,14 @@ export default async function StepPage({
         : piTortClaimsTrackingConfig
       return <GuidedStep caseId={id} taskId={taskId} config={tortTrackingConfig} existingAnswers={task.metadata?.guided_answers} />
     }
-    case 'pi_court_selection':
-      return <GuidedStep caseId={id} taskId={taskId} config={piCourtSelectionConfig} existingAnswers={task.metadata?.guided_answers} skippable />
+    case 'pi_court_selection': {
+      const { data: piDetailsForCourt } = await supabase
+        .from('personal_injury_details')
+        .select('pi_sub_type')
+        .eq('case_id', id)
+        .maybeSingle()
+      return <PiCourtSelectionStep caseId={id} taskId={taskId} piSubType={piDetailsForCourt?.pi_sub_type ?? undefined} existingAnswers={task.metadata?.guided_answers} />
+    }
     case 'pi_disclosures_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={piDisclosuresGuideConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'pi_pretrial_preparation':
@@ -1963,4 +1977,18 @@ export default async function StepPage({
         </div>
       )
   }
+  } // end getStepComponent
+
+  const stepComponent = await getStepComponent()
+  return (
+    <>
+      {stepComponent}
+      <StepChatDrawer
+        taskKey={task.task_key}
+        stepName={task.title}
+        disputeType={case_?.dispute_type ?? undefined}
+        state={case_?.state ?? undefined}
+      />
+    </>
+  )
 }
