@@ -52,9 +52,14 @@ export function ResearchAnswer({ answer, citations, notice }: ResearchAnswerProp
         </div>
       )}
 
-      <p className="text-xs" style={{ color: '#A8A29E' }}>
-        This analysis is based on case law excerpts and is for educational purposes only. It is not legal advice.
-      </p>
+      <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 space-y-1">
+        <p className="font-medium">Important: Case law may have changed.</p>
+        <p>
+          Always verify the current status of any cited authority before relying on it.
+          Cases can be overruled, distinguished, or superseded by new legislation.
+          This analysis is for educational purposes only — not legal advice.
+        </p>
+      </div>
     </div>
   )
 }
