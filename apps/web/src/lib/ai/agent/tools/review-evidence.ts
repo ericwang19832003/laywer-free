@@ -34,7 +34,7 @@ export function createReviewEvidenceTool({ evidenceCount, disputeType }: ReviewE
     {
       name: 'review_evidence',
       description:
-        'Review the evidence vault to assess case strength and identify gaps. Use when the user asks how strong their case is or what evidence they should gather.',
+        'Review the evidence vault to assess case strength and identify gaps. Use when the user asks how strong their case is or what evidence they should gather. Call for any strength question — the health score in the context summary is not a substitute for this tool.',
       schema: z.object({}),
     }
   )
