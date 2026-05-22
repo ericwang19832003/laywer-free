@@ -40,4 +40,14 @@ describe('createSearchCaseLawTool', () => {
     const result = await tool.invoke({ query: 'something obscure' })
     expect(result).toBe('No relevant case law found for this query.')
   })
+
+  it('handles docs with missing metadata gracefully', async () => {
+    mockInvoke.mockResolvedValueOnce([
+      { pageContent: 'Some relevant legal text', metadata: {} },
+    ])
+    const tool = createSearchCaseLawTool({ disputeType: 'landlord_tenant', supabaseClient: {} as any })
+    const result = await tool.invoke({ query: 'eviction notice' })
+    expect(result).toContain('Unknown case')
+    expect(result).toContain('Some relevant legal text')
+  })
 })
