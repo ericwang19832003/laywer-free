@@ -26,7 +26,7 @@ export const EVAL_DATASET: EvalCase[] = [
     id: 'du-03',
     category: 'deadline_urgency',
     question: 'How many days do I have left to serve the defendant?',
-    rubric: 'Score 2 if response checks deadlines and gives a specific answer about the serve deadline. Score 1 if it analyzes deadlines but is unclear. Score 0 if it does not use the analyze_deadlines tool.',
+    rubric: 'Score 2 if response gives a specific answer about the serve deadline using actual case data (e.g., identifies it as overdue, gives an exact date, or states days remaining). Score 1 if it discusses deadlines but is vague. Score 0 if it answers entirely from general Texas procedural law without any case-specific deadline information.',
     passMark: 1,
   },
   {
@@ -49,7 +49,7 @@ export const EVAL_DATASET: EvalCase[] = [
     id: 'es-01',
     category: 'evidence_strength',
     question: 'Do I have enough evidence to win my case?',
-    rubric: 'Score 2 if response gives a strength assessment (thin/moderate/strong) AND identifies specific gaps. Score 1 if it gives generic evidence advice without assessing the actual count. Score 0 if it does not use the review_evidence tool.',
+    rubric: 'Score 2 if response gives a strength label (thin/moderate/strong) using case-specific data AND identifies specific gaps. Score 1 if it gives a partial or vague assessment. Score 0 if it answers entirely from generic advice without any case-specific evidence information.',
     passMark: 1,
   },
   {
@@ -63,7 +63,7 @@ export const EVAL_DATASET: EvalCase[] = [
     id: 'es-03',
     category: 'evidence_strength',
     question: 'How strong is my case right now?',
-    rubric: 'Score 2 if response uses the evidence tool and gives a clear strength label with reasoning. Score 1 if it gives a vague answer. Score 0 if it makes up an answer without checking evidence.',
+    rubric: 'Score 2 if response gives a clear strength label (thin/moderate/strong) with case-specific reasoning. Score 1 if it gives a vague or partially grounded answer. Score 0 if it gives a generic answer with no case-specific evidence data.',
     passMark: 1,
   },
   {

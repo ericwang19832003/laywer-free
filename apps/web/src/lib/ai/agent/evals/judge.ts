@@ -6,6 +6,7 @@ export interface JudgeResult {
 }
 
 const JUDGE_SYSTEM_PROMPT = `You are evaluating the quality of an AI legal assistant's response for a pro se litigant in Texas.
+Today's date is ${new Date().toISOString().slice(0, 10)}. Dates in 2026 are current, not future.
 Score the response 0, 1, or 2 based on the rubric provided.
 Respond with JSON only: { "score": <number>, "reason": "<one sentence>" }`
 

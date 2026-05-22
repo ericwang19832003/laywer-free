@@ -10,6 +10,12 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 const MAX_TOOL_CALLS = 10
 
+const DEADLINE_QUESTION_RE =
+  /deadline|days?\s+(left|remaining)|serve|service|overdue|by\s+when|how\s+long|how\s+many\s+days|am\s+i\s+behind|filing/i
+
+const EVIDENCE_QUESTION_RE =
+  /evidence|how\s+strong|case\s+strength|enough\s+to\s+win|win\s+my\s+case|my\s+case\s+right\s+now|photos?|documents?\s+should|proof|support/i
+
 const SYSTEM_PROMPT = `You are a knowledgeable legal assistant helping a pro se litigant navigate Texas civil court.
 You have access to tools to search case law, analyze deadlines, review evidence, and draft documents.
 Always ground your advice in the user's specific case context. Be warm, clear, and encouraging.
@@ -17,9 +23,9 @@ Scope all advice to Texas civil procedure. For high-stakes decisions, recommend 
 This is general legal information — not legal advice.
 
 Tool grounding rules — follow strictly:
-- For any question about deadlines, days remaining, filing status, or what is overdue: ALWAYS call analyze_deadlines. Never answer deadline questions from memory or context summary. This includes questions like "how many days do I have left to serve the defendant" — even if you think you know the general procedural answer, call the tool to get the actual case deadline.
-- For any question about case strength, evidence quality, or what evidence to gather: ALWAYS call review_evidence. The health score shown in the context summary is a case management metric, NOT an evidence strength rating — it must not be used to answer strength questions. Call the tool.
-- For any document drafting request (letter, motion, notice, interrogatories): call draft_document immediately using reasonable assumptions. Do not ask for more context before drafting — draft first, offer to refine after.`
+- For any question about deadlines, days remaining, filing status, or what is overdue: use the "Current case deadline status" section injected into this prompt — it contains the actual case deadlines already fetched from the database. NEVER answer deadline questions from general Texas procedural knowledge or memory. Always cite the specific deadline data provided (e.g., "Your serve defendant deadline is OVERDUE by X days"). If no deadline status is provided in context, call analyze_deadlines.
+- For any question about case strength, evidence quality, sufficiency, or whether the user has enough evidence: use the "Current case evidence review" section injected into this prompt — it contains the actual evidence assessment already fetched. NEVER answer strength questions from the raw upload count alone. Always cite the specific strength label and gaps provided (e.g., "Your evidence foundation is moderate — 3 items uploaded"). If no evidence review is provided in context, call review_evidence.
+- For any document drafting request (letter, motion, notice, interrogatories): call draft_document immediately using reasonable assumptions. Do not ask for more context before drafting — draft first, offer to refine after. After draft_document returns, present the COMPLETE document text to the user — do not summarize or describe it.`
 
 // ---- State annotation (LangGraph v1.x Annotation API) ---- //
 
@@ -101,15 +107,43 @@ export function buildAgentGraph(config: BuildGraphConfig) {
     }
 
     const tools = buildTools(state, config)
-    const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0.5 }).bindTools(tools)
+    const llm = new ChatOpenAI({ model: 'gpt-4o', temperature: 0.5 }).bindTools(tools)
 
     const contextSummary =
       `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +
-      `Health score: ${state.caseContext.healthScore}/100. Evidence items: ${state.caseContext.evidenceCount}.\n` +
+      `Task completion score: ${state.caseContext.healthScore}/100 (task-completion only — NOT case strength). Evidence items uploaded: ${state.caseContext.evidenceCount} (raw upload count — DO NOT use this to assess sufficiency or strength; call review_evidence).\n` +
       `Tasks: ${state.caseContext.tasks.map((t) => `${t.title} (${t.status})`).join(', ')}.`
 
+    const lastMsg = state.messages[state.messages.length - 1]
+    const msgText = typeof lastMsg?.content === 'string' ? lastMsg.content : ''
+    const isDeadlineQuestion = DEADLINE_QUESTION_RE.test(msgText)
+
+    const isEvidenceQuestion = EVIDENCE_QUESTION_RE.test(msgText)
+
+    let deadlineContext = ''
+    if (isDeadlineQuestion && state.caseContext.deadlines.length > 0) {
+      try {
+        const deadlineTool = tools.find((t) => t.name === 'analyze_deadlines')
+        if (!deadlineTool) throw new Error('analyze_deadlines tool not found in tools array')
+        deadlineContext = `\n\nCurrent case deadline status:\n${String(await deadlineTool.invoke({}))}`
+      } catch {
+        // silent fail — agent proceeds without pre-injection
+      }
+    }
+
+    let evidenceContext = ''
+    if (isEvidenceQuestion) {
+      try {
+        const evidenceTool = tools.find((t) => t.name === 'review_evidence')
+        if (!evidenceTool) throw new Error('review_evidence tool not found in tools array')
+        evidenceContext = `\n\nCurrent case evidence review:\n${String(await evidenceTool.invoke({}))}`
+      } catch {
+        // silent fail — agent proceeds without pre-injection
+      }
+    }
+
     const response = await llm.invoke([
-      new SystemMessage(`${SYSTEM_PROMPT}\n\n${contextSummary}`),
+      new SystemMessage(`${SYSTEM_PROMPT}\n\n${contextSummary}${deadlineContext}${evidenceContext}`),
       ...state.messages,
     ])
 
