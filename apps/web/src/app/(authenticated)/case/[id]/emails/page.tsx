@@ -69,6 +69,15 @@ export default async function CaseEmailsPage({
                   ? 'The Gmail MCP server is configured but not responding. Check your MCP server setup.'
                   : 'Email monitoring requires a Gmail MCP server. Check the settings page for setup instructions.'}
               </p>
+              <div className="rounded-lg border border-warm-border bg-warm-bg p-4 space-y-3 mb-4 text-left max-w-md mx-auto">
+                <p className="text-sm font-medium text-warm-text">Before connecting Gmail</p>
+                <ul className="text-xs text-warm-muted space-y-1 list-disc pl-4">
+                  <li>Lawyer Free will read your Gmail messages to help identify case-related emails.</li>
+                  <li>We access only messages — we do not send emails on your behalf.</li>
+                  <li>You can disconnect Gmail at any time from your account settings.</li>
+                  <li>Email content may be processed by OpenAI to generate summaries.</li>
+                </ul>
+              </div>
               <Link
                 href="/settings"
                 className="inline-flex items-center justify-center rounded-md bg-calm-indigo px-4 py-2 text-sm font-medium text-white hover:bg-calm-indigo/90 transition-colors"
