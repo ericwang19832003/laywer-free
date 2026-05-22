@@ -81,6 +81,12 @@ export default async function DeadlinesPage({
           </Button>
         </div>
 
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 mb-4 text-xs text-amber-900">
+          <strong>Verify with the court:</strong> Deadline calculations are estimates based on standard rules.
+          Always confirm deadlines directly with the clerk of court — local rules, holidays, and
+          judge-specific orders may affect your actual deadlines.
+        </div>
+
         <DeadlineViews deadlines={deadlineList as Deadline[]} />
 
         <LegalDisclaimer />
