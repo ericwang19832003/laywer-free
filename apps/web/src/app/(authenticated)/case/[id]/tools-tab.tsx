@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { AgentAdvisorCard } from '@/components/dashboard/agent-advisor-card'
 import { CaseFileCard } from '@/components/dashboard/case-file-card'
 import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { ResearchCard } from '@/components/dashboard/research-card'
@@ -56,6 +57,7 @@ export async function ToolsTab({ caseId }: ToolsTabProps) {
 
   return (
     <div className="space-y-6">
+      <AgentAdvisorCard caseId={caseId} isPro={false} />
       <CaseFileCard
         caseId={caseId}
         evidenceCount={evidenceResult.count ?? 0}
