@@ -108,9 +108,10 @@ export function buildAgentGraph(config: BuildGraphConfig) {
       ...state.messages,
     ])
 
+    const hasCalls = (response as any)?.tool_calls?.length > 0
     return {
       messages: [response],
-      toolCallCount: state.toolCallCount + 1,
+      toolCallCount: hasCalls ? state.toolCallCount + 1 : state.toolCallCount,
     }
   })
 
@@ -127,7 +128,14 @@ export function buildAgentGraph(config: BuildGraphConfig) {
 
     for (const call of toolCalls) {
       const t = toolMap[call.name]
-      if (!t) continue
+      if (!t) {
+        results.push({
+          role: 'tool',
+          tool_call_id: call.id,
+          content: `Error: unknown tool "${call.name}"`,
+        })
+        continue
+      }
       const result = await t.invoke(call.args)
       results.push({ role: 'tool', tool_call_id: call.id, content: String(result) })
     }
