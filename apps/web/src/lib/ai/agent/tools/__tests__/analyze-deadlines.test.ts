@@ -27,4 +27,29 @@ describe('createAnalyzeDeadlinesTool', () => {
     const result = await tool.invoke({})
     expect(result).toBe('No deadlines found for this case.')
   })
+
+  it('handles deadline exactly today (daysUntil = 0) as URGENT', async () => {
+    const today = new Date()
+    today.setHours(23, 59, 0, 0)
+    const tool = createAnalyzeDeadlinesTool({
+      deadlines: [{ key: 'file', due_at: today.toISOString(), label: 'File motion' }],
+    })
+    const result = await tool.invoke({})
+    expect(result).toContain('URGENT')
+    expect(result).toContain('File motion')
+  })
+
+  it('handles multiple deadlines with mixed statuses', async () => {
+    const tool = createAnalyzeDeadlinesTool({
+      deadlines: [
+        { key: 'a', due_at: new Date(Date.now() - 86400000).toISOString(), label: 'Past deadline' },
+        { key: 'b', due_at: new Date(Date.now() + 2 * 86400000).toISOString(), label: 'Urgent deadline' },
+        { key: 'c', due_at: new Date(Date.now() + 20 * 86400000).toISOString(), label: 'Future deadline' },
+      ],
+    })
+    const result = await tool.invoke({})
+    expect(result).toContain('OVERDUE')
+    expect(result).toContain('URGENT')
+    expect(result).toContain('due in 20')
+  })
 })
