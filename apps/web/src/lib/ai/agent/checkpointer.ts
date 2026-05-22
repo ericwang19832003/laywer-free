@@ -11,12 +11,14 @@ export async function loadCheckpoint(
   caseId: string,
   userId: string
 ): Promise<CheckpointData | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('agent_threads')
     .select('checkpoint')
     .eq('case_id', caseId)
     .eq('user_id', userId)
     .maybeSingle()
+
+  if (error) throw new Error(`Failed to load agent checkpoint: ${error.message}`)
 
   return (data?.checkpoint as CheckpointData) ?? null
 }
@@ -27,7 +29,7 @@ export async function saveCheckpoint(
   userId: string,
   checkpoint: CheckpointData
 ): Promise<void> {
-  await supabase.from('agent_threads').upsert(
+  const { error } = await supabase.from('agent_threads').upsert(
     {
       case_id: caseId,
       user_id: userId,
@@ -37,4 +39,6 @@ export async function saveCheckpoint(
     },
     { onConflict: 'case_id,user_id' }
   )
+
+  if (error) throw new Error(`Failed to save agent checkpoint: ${error.message}`)
 }

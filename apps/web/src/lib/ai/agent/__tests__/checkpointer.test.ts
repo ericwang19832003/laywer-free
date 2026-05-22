@@ -43,3 +43,25 @@ describe('saveCheckpoint', () => {
     )
   })
 })
+
+describe('loadCheckpoint error handling', () => {
+  it('throws when Supabase returns an error', async () => {
+    const chain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: { message: 'RLS violation' } }),
+    }
+    const supabase = { from: vi.fn(() => chain) } as any
+    await expect(loadCheckpoint(supabase, 'case-1', 'user-1')).rejects.toThrow('RLS violation')
+  })
+})
+
+describe('saveCheckpoint error handling', () => {
+  it('throws when upsert fails', async () => {
+    const chain = {
+      upsert: vi.fn().mockResolvedValue({ error: { message: 'constraint violation' } }),
+    }
+    const supabase = { from: vi.fn(() => chain) } as any
+    await expect(saveCheckpoint(supabase, 'case-1', 'user-1', { messages: [], toolCallCount: 0 })).rejects.toThrow('constraint violation')
+  })
+})
