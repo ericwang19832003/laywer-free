@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
       const { content: rawContent, usage } = await aiClient.complete({
         systemPrompt,
         userPrompt,
-        temperature: 0.7,
+        temperature: 0.3,
         maxTokens: 4000,
         caller: 'document-generation',
       })
