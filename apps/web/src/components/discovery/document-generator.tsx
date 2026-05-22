@@ -7,6 +7,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { AlertTriangle, Copy, Download, FileText, Loader2, Check, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DOCUMENT_TYPES, type DocumentType } from '@/lib/ai/document-generation'
@@ -23,6 +31,9 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
   const [generatedDocument, setGeneratedDocument] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [showGenerateConfirm, setShowGenerateConfirm] = useState(false)
+  const [generateConsentChecked, setGenerateConsentChecked] = useState(false)
+  const [showDownloadConfirm, setShowDownloadConfirm] = useState(false)
 
   const [documentType, setDocumentType] = useState<DocumentType>('letter')
   const [recipientName, setRecipientName] = useState('')
@@ -258,7 +269,10 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
             </div>
 
             <Button
-              onClick={handleGenerate}
+              onClick={() => {
+                setGenerateConsentChecked(false)
+                setShowGenerateConfirm(true)
+              }}
               disabled={generating || !facts.trim()}
               className="w-full"
             >
@@ -293,7 +307,7 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
                       </>
                     )}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
+                  <Button variant="outline" size="sm" onClick={() => setShowDownloadConfirm(true)}>
                     <Download className="h-4 w-4 mr-1" />
                     Download
                   </Button>
@@ -319,6 +333,86 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
             )}
           </TabsContent>
         </Tabs>
+
+        <Dialog open={showGenerateConfirm} onOpenChange={setShowGenerateConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Before You Generate</DialogTitle>
+              <DialogDescription>
+                AI-generated legal documents have important limitations.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-2">
+              <ul className="text-sm text-warm-text space-y-2 list-disc pl-4">
+                <li>This document is a <strong>draft only</strong> — it has not been reviewed by a licensed attorney.</li>
+                <li>Do not file this document in any court without independent legal review.</li>
+                <li>AI may make errors. Verify every factual statement and legal reference.</li>
+                <li>Your case facts will be sent to OpenAI to generate this document.</li>
+              </ul>
+              <div className="flex items-start gap-2 pt-1">
+                <input
+                  id="generate-consent"
+                  type="checkbox"
+                  checked={generateConsentChecked}
+                  onChange={(e) => setGenerateConsentChecked(e.target.checked)}
+                  className="mt-1 h-4 w-4 shrink-0 rounded border-warm-border accent-calm-indigo"
+                />
+                <label htmlFor="generate-consent" className="text-xs text-warm-muted leading-relaxed">
+                  I understand this is an unreviewed AI draft and I will not file it without independent review.
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateConfirm(false)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={!generateConsentChecked}
+                onClick={() => {
+                  setShowGenerateConfirm(false)
+                  handleGenerate()
+                }}
+              >
+                Generate Document
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showDownloadConfirm} onOpenChange={setShowDownloadConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Download Draft Document</DialogTitle>
+              <DialogDescription>
+                Before downloading, please confirm you understand the following.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-2 text-sm text-warm-text">
+              <p>This AI-generated document:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Has <strong>NOT</strong> been reviewed by a licensed attorney</li>
+                <li>Should be treated as a starting draft, not a finished document</li>
+                <li>May contain errors in law, facts, or formatting</li>
+              </ul>
+              <p className="pt-1 text-warm-muted text-xs">
+                Always have a qualified attorney review before filing or sending.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDownloadConfirm(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowDownloadConfirm(false)
+                  handleDownload()
+                }}
+              >
+                Download Anyway
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
