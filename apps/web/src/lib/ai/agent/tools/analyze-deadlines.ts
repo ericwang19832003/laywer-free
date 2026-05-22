@@ -32,7 +32,7 @@ export function createAnalyzeDeadlinesTool({ deadlines }: { deadlines: Deadline[
     {
       name: 'analyze_deadlines',
       description:
-        'Analyze the case deadlines to identify what is overdue or urgent. Use when the user asks about timing, what to do next, or whether they are behind.',
+        'Analyze the case deadlines to identify what is overdue or urgent. Use when the user asks about timing, what to do next, or whether they are behind. Also call for any question naming a specific deadline (e.g., "serve the defendant", "file an answer", "how many days") — do not answer deadline questions from prior knowledge.',
       schema: z.object({}),
     }
   )
