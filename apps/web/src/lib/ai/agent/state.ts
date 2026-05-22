@@ -20,7 +20,7 @@ export interface AgentState {
 export interface InitialStateInput {
   caseId: string
   disputeType: string
-  role: string
+  role: 'plaintiff' | 'defendant'
   county: string
   healthScore: number
   tasks: CaseContext['tasks']
@@ -35,7 +35,7 @@ export function createInitialState(input: InitialStateInput): AgentState {
     toolCallCount: 0,
     caseContext: {
       disputeType: input.disputeType,
-      role: input.role as 'plaintiff' | 'defendant',
+      role: input.role,
       county: input.county,
       healthScore: input.healthScore,
       tasks: input.tasks,
