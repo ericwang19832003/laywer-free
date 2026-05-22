@@ -1,10 +1,16 @@
 export function LegalDisclaimer() {
   return (
-    <footer className="mt-12 border-t border-warm-border pt-4 pb-8">
-      <p className="text-xs text-warm-muted text-center">
-        This tool provides general legal information and organization — not legal advice.
-        For legal advice, please consult a licensed attorney.
-      </p>
+    <footer className="mt-12 border-t border-warm-border pt-6 pb-8">
+      <div className="max-w-2xl mx-auto text-center space-y-1">
+        <p className="text-sm font-medium text-warm-text">
+          Lawyer Free is not a law firm.
+        </p>
+        <p className="text-sm text-warm-muted">
+          This tool provides general legal information and self-help organization — not legal advice.
+          No attorney-client relationship is created by using this service.
+          For advice specific to your situation, consult a licensed attorney.
+        </p>
+      </div>
     </footer>
   )
 }
