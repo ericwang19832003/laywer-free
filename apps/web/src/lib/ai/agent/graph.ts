@@ -101,11 +101,11 @@ export function buildAgentGraph(config: BuildGraphConfig) {
     }
 
     const tools = buildTools(state, config)
-    const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0.1 }).bindTools(tools)
+    const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0.5 }).bindTools(tools)
 
     const contextSummary =
       `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +
-      `Health score: ${state.caseContext.healthScore}/100.\n` +
+      `Health score: ${state.caseContext.healthScore}/100. Evidence items: ${state.caseContext.evidenceCount}.\n` +
       `Tasks: ${state.caseContext.tasks.map((t) => `${t.title} (${t.status})`).join(', ')}.`
 
     const response = await llm.invoke([
