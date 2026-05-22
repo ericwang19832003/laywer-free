@@ -14,6 +14,9 @@ export function WelcomePanel() {
       >
         Facing a legal matter without a lawyer?
       </h1>
+      <p className="text-sm text-warm-muted mt-1">
+        Legal self-help tools for pro se litigants
+      </p>
       <p
         className="text-lg lg:text-xl mb-10 leading-relaxed text-warm-muted"
       >

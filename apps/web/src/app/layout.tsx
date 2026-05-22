@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Lawyer Free",
-  description: "Organize your legal situation with calm, structured guidance",
+  description: "Legal self-help tools for pro se litigants — not a law firm, not legal advice.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Lawyer Free",
     title: "Lawyer Free",
-    description: "Organize your legal situation with calm, structured guidance",
+    description: "Legal self-help tools for pro se litigants — not a law firm, not legal advice.",
   },
 };
 
