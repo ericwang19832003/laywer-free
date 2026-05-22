@@ -128,7 +128,10 @@ export function DocumentGenerator({ caseId, caseName, caseNumber }: DocumentGene
           AI Document Generator
         </CardTitle>
         <CardDescription>
-          Generate professional legal documents using AI. Always review and consult an attorney before using.
+          Generate professional legal documents using AI. Always review and consult an attorney before using.{' '}
+          <span className="text-warm-muted/70">
+            Facts you enter are processed by OpenAI to generate the document.
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -10,6 +10,18 @@ export function LegalDisclaimer() {
           No attorney-client relationship is created by using this service.
           For advice specific to your situation, consult a licensed attorney.
         </p>
+        <p className="text-xs text-warm-muted">
+          Need a lawyer?{' '}
+          <a
+            href="https://www.texasbar.com/AM/Template.cfm?Section=Lawyer_Referral_Service1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-calm-indigo underline"
+          >
+            Texas State Bar Lawyer Referral Service
+          </a>
+          {' '}— $20 for a 30-minute consultation.
+        </p>
       </div>
     </footer>
   )
