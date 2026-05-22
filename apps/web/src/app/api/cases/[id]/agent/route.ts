@@ -32,7 +32,15 @@ export async function POST(
     supabase.from('evidence_items').select('id', { count: 'exact', head: true }).eq('case_id', caseId),
   ])
 
-  if (caseResult.error || !caseResult.data) {
+  if (caseResult.error) {
+    // PGRST116 = "not found" (0 rows for .single()); anything else is a DB error
+    const isNotFound = caseResult.error.code === 'PGRST116'
+    return new Response(JSON.stringify({ error: isNotFound ? 'Case not found' : 'Failed to load case' }), {
+      status: isNotFound ? 404 : 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+  if (!caseResult.data) {
     return new Response(JSON.stringify({ error: 'Case not found' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' },
@@ -82,40 +90,34 @@ export async function POST(
 
   const stream = new ReadableStream({
     async start(controller) {
+      const abortController = new AbortController()
       const timeout = setTimeout(() => {
-        try {
-          controller.enqueue(encoder.encode('data: {"type":"error","content":"Request timed out"}\n\n'))
-          controller.close()
-        } catch { /* already closed */ }
+        abortController.abort()
       }, TIMEOUT_MS)
 
       try {
-        const eventStream = await graph.stream(state, { streamMode: 'updates' })
+        const msgStream = await graph.stream(state, {
+          streamMode: 'messages',
+          signal: abortController.signal,
+        })
 
-        for await (const update of eventStream) {
-          if (update.agent) {
-            const msgs: BaseMessage[] = update.agent.messages ?? []
-            const lastMsg = msgs[msgs.length - 1] as BaseMessage & {
-              tool_calls?: Array<{ id: string; name: string; args: Record<string, unknown> }>
-              content?: string
-            }
-            // Accumulate agent messages for checkpoint
-            accumulatedMessages.push(...msgs)
-
-            if (lastMsg?.tool_calls?.length) {
-              for (const call of lastMsg.tool_calls) {
-                const evt = JSON.stringify({ type: 'tool_start', tool: call.name })
-                controller.enqueue(encoder.encode(`data: ${evt}\n\n`))
-              }
-            } else if (lastMsg?.content) {
-              const evt = JSON.stringify({ type: 'token', content: lastMsg.content })
-              controller.enqueue(encoder.encode(`data: ${evt}\n\n`))
+        for await (const [message, _metadata] of msgStream) {
+          const msg = message as any
+          // Streaming text token (AIMessageChunk with text content, no tool calls)
+          if (msg?.content && typeof msg.content === 'string' && msg.content.length > 0 && !msg.tool_calls?.length) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', content: msg.content })}\n\n`))
+            accumulatedMessages.push(msg)
+          }
+          // Tool call starting
+          if (msg?.tool_calls?.length) {
+            for (const call of msg.tool_calls) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_start', tool: call.name })}\n\n`))
             }
           }
-          if (update.tools) {
-            const toolMsgs: BaseMessage[] = update.tools.messages ?? []
-            accumulatedMessages.push(...toolMsgs)
+          // Tool result (ToolMessage)
+          if (msg?.type === 'tool' || msg?.constructor?.name === 'ToolMessage') {
             controller.enqueue(encoder.encode('data: {"type":"tool_end"}\n\n'))
+            accumulatedMessages.push(msg)
           }
         }
 
@@ -129,7 +131,10 @@ export async function POST(
 
         controller.enqueue(encoder.encode('data: {"type":"done"}\n\n'))
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unknown error'
+        const isAbort = err instanceof Error && (err.name === 'AbortError' || err.message.includes('abort'))
+        const msg = isAbort
+          ? 'Request timed out after 60 seconds'
+          : (err instanceof Error ? err.message : 'Unknown error')
         try {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', content: msg })}\n\n`))
         } catch { /* controller already closed */ }
