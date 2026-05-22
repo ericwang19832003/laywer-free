@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 
 const PHONE_REGEX = /^\+1\d{10}$/
 
-export function PhoneOtpForm() {
+export function PhoneOtpForm({ disabled: consentDisabled }: { disabled?: boolean }) {
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
@@ -125,7 +125,7 @@ export function PhoneOtpForm() {
         <Button
           type="button"
           className="w-full"
-          disabled={loading || otp.length !== 6}
+          disabled={loading || otp.length !== 6 || !!consentDisabled}
           onClick={handleVerify}
         >
           {loading ? 'Verifying...' : 'Verify'}
@@ -181,7 +181,7 @@ export function PhoneOtpForm() {
       <Button
         type="button"
         className="w-full"
-        disabled={loading || !phone}
+        disabled={loading || !phone || !!consentDisabled}
         onClick={handleSendCode}
       >
         {loading ? 'Sending...' : 'Send Code'}

@@ -281,7 +281,7 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
                 </form>
               )
             ) : (
-              <PhoneOtpForm />
+              <PhoneOtpForm disabled={mode === 'signup' && !consentChecked} />
             )}
           </AuthTabs>
           </>
