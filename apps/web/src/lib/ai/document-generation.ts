@@ -79,7 +79,7 @@ REQUIRED ELEMENTS (apply to ALL documents):
 - Begin every document with today's date in the format: Month Day, Year.
 - Include the sender's full name and address at the top of the document. Use [Your Address] as placeholder if not provided.
 - When referencing a court, use the full official name (e.g., "Superior Court of California, County of Los Angeles") not shorthand.
-- Reference at least one specific legal statute, code section, or regulation relevant to this dispute type and jurisdiction.
+- If specific statutes or code sections are provided in the case data, reference them precisely. If no specific statutes are provided, use general language only (e.g., "applicable state law", "relevant provisions of the Texas Property Code") — never invent a statute or section number.
 - End every document with a signature block containing: a line for signature (use underscores: ____________________), printed name below, date line, and address.
 - For letters: begin with "Dear [recipient name]:" or "To Whom It May Concern:". For court filings: begin with "IN THE [COURT NAME]" caption.
 - Include the sender's contact information (address, phone, or email) in the header or signature block.`
