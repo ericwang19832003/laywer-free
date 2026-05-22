@@ -136,8 +136,13 @@ export function buildAgentGraph(config: BuildGraphConfig) {
         })
         continue
       }
-      const result = await t.invoke(call.args)
-      results.push({ role: 'tool', tool_call_id: call.id, content: String(result) })
+      let content: string
+      try {
+        content = String(await t.invoke(call.args))
+      } catch (err) {
+        content = `Tool error: ${err instanceof Error ? err.message : String(err)}`
+      }
+      results.push({ role: 'tool', tool_call_id: call.id, content })
     }
 
     return { messages: results as unknown as BaseMessage[], toolCallCount: state.toolCallCount }

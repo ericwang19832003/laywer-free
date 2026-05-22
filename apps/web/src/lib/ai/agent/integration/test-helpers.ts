@@ -1,10 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
 export function getTestSupabase() {
-  return createClient(
-    process.env.SUPABASE_TEST_URL!,
-    process.env.SUPABASE_TEST_SERVICE_KEY!
-  )
+  const url = process.env.SUPABASE_TEST_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_TEST_SERVICE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  return createClient(url!, key!)
 }
 
 export interface SeededCase {

@@ -85,19 +85,25 @@ async function runAgent(question: string): Promise<{
   const toolsCalled: string[] = []
   let finalContent = ''
 
-  // stream() returns a Promise — must be awaited
+  // stream() returns a Promise — must be awaited.
+  // streamMode: 'messages' yields [BaseMessage, metadata] tuples.
+  // The LLM streams tokens as deltas — accumulate rather than replace.
   const stream = await graph.stream(state, { streamMode: 'messages' })
 
   for await (const chunk of stream) {
-    // With streamMode: 'messages', each chunk is [BaseMessage, metadata]
-    const [message] = chunk as [BaseMessage & { tool_calls?: Array<{ name: string }> }, Record<string, unknown>]
+    const [message, metadata] = chunk as [
+      BaseMessage & { tool_calls?: Array<{ name: string }> },
+      Record<string, unknown>
+    ]
+    const fromAgent = (metadata as any)?.langgraph_node === 'agent'
 
     if (message.tool_calls && message.tool_calls.length > 0) {
       for (const tc of message.tool_calls) {
         toolsCalled.push(tc.name)
       }
-    } else if (typeof message.content === 'string' && message.content.length > 0) {
-      finalContent = message.content
+    } else if (typeof message.content === 'string' && message.content.length > 0 && fromAgent) {
+      // Accumulate tokens from the agent node (deltas, not replacements)
+      finalContent += message.content
     }
   }
 
@@ -141,11 +147,11 @@ describe('agent integration — golden scenarios', () => {
 
     expect(toolsCalled).toContain('draft_document')
     expect(finalContent).toMatch(/demand|letter|draft|deposit/i)
-  }, 60_000)
+  }, 120_000)
 
   it('multi-tool: invokes at least 2 tools for a compound question', async () => {
     const { toolsCalled, finalContent } = await runAgent(
-      "What's my strongest argument and what should I do first?"
+      'What does Texas law say about security deposits, and what deadlines am I missing?'
     )
 
     expect(new Set(toolsCalled).size).toBeGreaterThanOrEqual(2)

@@ -6,12 +6,19 @@ import { EVAL_DATASET, type EvalCase } from './dataset'
 import { judgeResponse } from './judge'
 
 // ---- Validate env vars ----
-const requiredEnv = ['OPENAI_API_KEY', 'SUPABASE_TEST_URL', 'SUPABASE_TEST_SERVICE_KEY']
-for (const key of requiredEnv) {
-  if (!process.env[key]) {
-    console.error(`Missing required env var: ${key}`)
-    process.exit(1)
-  }
+// Accepts test-specific vars (SUPABASE_TEST_URL / SUPABASE_TEST_SERVICE_KEY)
+// or the production vars in .env.local (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).
+if (!process.env.OPENAI_API_KEY) {
+  console.error('Missing required env var: OPENAI_API_KEY')
+  process.exit(1)
+}
+if (!process.env.SUPABASE_TEST_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  console.error('Missing env var: set SUPABASE_TEST_URL or NEXT_PUBLIC_SUPABASE_URL')
+  process.exit(1)
+}
+if (!process.env.SUPABASE_TEST_SERVICE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing env var: set SUPABASE_TEST_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY')
+  process.exit(1)
 }
 
 const PASS_THRESHOLD = 0.7
@@ -74,8 +81,8 @@ async function main() {
   console.log('\n=== Running Agent Evals ===\n')
 
   const supabase = createClient(
-    process.env.SUPABASE_TEST_URL!,
-    process.env.SUPABASE_TEST_SERVICE_KEY!
+    (process.env.SUPABASE_TEST_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)!,
+    (process.env.SUPABASE_TEST_SERVICE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY)!
   )
 
   const saveDraft = async (_params: { caseId: string; documentType: string; content: string }) =>
