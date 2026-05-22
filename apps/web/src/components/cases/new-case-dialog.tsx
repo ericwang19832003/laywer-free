@@ -67,6 +67,7 @@ function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: st
 interface WizardState {
   step: number
   selectedState: State | ''
+  pendingState: State | ''
   role: 'plaintiff' | 'defendant' | ''
   disputeType: DisputeType | ''
   familySubType: FamilySubType | ''
@@ -83,6 +84,7 @@ interface WizardState {
 
 type WizardAction =
   | { type: 'SET_STATE'; selectedState: State }
+  | { type: 'SET_PENDING_STATE'; pendingState: State | '' }
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
   | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
@@ -102,6 +104,7 @@ type WizardAction =
 const initialState: WizardState = {
   step: 1,
   selectedState: '',
+  pendingState: '',
   role: '',
   disputeType: '',
   familySubType: '',
@@ -124,7 +127,9 @@ const initialState: WizardState = {
 function reducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
     case 'SET_STATE':
-      return { ...state, selectedState: action.selectedState, step: 2 }
+      return { ...state, selectedState: action.selectedState, pendingState: '', step: 2 }
+    case 'SET_PENDING_STATE':
+      return { ...state, pendingState: action.pendingState }
     case 'SET_ROLE':
       return { ...state, role: action.role, step: 3 }
     case 'SET_DISPUTE_TYPE':
@@ -599,11 +604,39 @@ export function NewCaseDialog() {
             style={{ maxHeight: 'calc(95vh - 180px)' }}
           >
 
-        {state.step === 1 && (
+        {state.step === 1 && !state.pendingState && (
           <StateStep
             value={state.selectedState}
-            onSelect={(s) => dispatch({ type: 'SET_STATE', selectedState: s })}
+            onSelect={(s) => dispatch({ type: 'SET_PENDING_STATE', pendingState: s })}
           />
+        )}
+
+        {state.step === 1 && state.pendingState && (
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4 space-y-2">
+              <p className="text-sm font-medium text-warm-text">
+                You selected: <strong>{state.pendingState}</strong>
+              </p>
+              <p className="text-sm text-warm-muted">
+                All guidance, court rules, and deadlines will be based on <strong>{state.pendingState}</strong> law.
+                If your case is in a different state, go back and select the correct state.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => dispatch({ type: 'SET_PENDING_STATE', pendingState: '' })}
+              >
+                Go Back
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => dispatch({ type: 'SET_STATE', selectedState: state.pendingState as State })}
+              >
+                Yes, this is correct →
+              </Button>
+            </div>
+          </div>
         )}
 
         {state.step === 2 && (
