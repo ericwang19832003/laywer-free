@@ -105,6 +105,7 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
     }
 
     if (data.session) {
+      setConsentChecked(false)
       router.push('/cases')
       router.refresh()
     } else {
@@ -186,6 +187,24 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
         ) : showForgotPassword ? (
           <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
         ) : (
+          <>
+          {mode === 'signup' && (
+            <div className="flex items-start gap-2 mb-4">
+              <input
+                id="consent"
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 rounded border-warm-border accent-calm-indigo"
+              />
+              <label htmlFor="consent" className="text-xs text-warm-muted leading-relaxed">
+                I understand that Lawyer Free provides general legal information and self-help tools — not legal advice — and that no attorney-client relationship is formed by using this service. My case data will be processed by OpenAI to generate AI responses.{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-calm-indigo underline">
+                  Terms of Service
+                </a>
+              </label>
+            </div>
+          )}
           <AuthTabs activeTab={authTab} onTabChange={setAuthTab}>
             {authTab === 'email' ? (
               mode === 'login' ? (
@@ -253,27 +272,10 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
                     />
                     <PasswordStrengthIndicator password={password} />
                   </div>
-                  {mode === 'signup' && (
-                    <div className="flex items-start gap-2">
-                      <input
-                        id="consent"
-                        type="checkbox"
-                        checked={consentChecked}
-                        onChange={(e) => setConsentChecked(e.target.checked)}
-                        className="mt-1 h-4 w-4 shrink-0 rounded border-warm-border accent-calm-indigo"
-                      />
-                      <label htmlFor="consent" className="text-xs text-warm-muted leading-relaxed">
-                        I understand that Lawyer Free provides general legal information and self-help tools — not legal advice — and that no attorney-client relationship is formed by using this service. My case data will be processed by OpenAI to generate AI responses.{' '}
-                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-calm-indigo underline">
-                          Terms of Service
-                        </a>
-                      </label>
-                    </div>
-                  )}
                   {error && (
                     <p className="text-sm text-destructive">{error}</p>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading || (mode === 'signup' && !consentChecked)}>
+                  <Button type="submit" className="w-full" disabled={loading || !consentChecked}>
                     {loading ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>
@@ -282,6 +284,7 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
               <PhoneOtpForm />
             )}
           </AuthTabs>
+          </>
         )}
       </CardContent>
     </Card>
