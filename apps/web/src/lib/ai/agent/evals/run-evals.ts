@@ -1,4 +1,8 @@
+import { config as loadDotenv } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+
+// Load .env.local when running via tsx (vitest handles this via vite; tsx does not)
+loadDotenv({ path: '.env.local', override: false })
 import { HumanMessage } from '@langchain/core/messages'
 import { buildAgentGraph } from '../graph'
 import { createInitialState } from '../state'
@@ -57,9 +61,17 @@ async function runSingleEval(evalCase: EvalCase, graph: ReturnType<typeof buildA
   try {
     const stream = await graph.stream(state, { streamMode: 'messages' })
     for await (const chunk of stream) {
-      const [message] = chunk as [any, Record<string, unknown>]
-      if (message?.content && typeof message.content === 'string' && !message?.tool_calls?.length) {
-        agentResponse = message.content
+      // streamMode: 'messages' yields [BaseMessage, metadata] tuples.
+      // Tokens arrive as deltas — accumulate from agent node only.
+      const [message, metadata] = chunk as [any, Record<string, unknown>]
+      const fromAgent = (metadata as any)?.langgraph_node === 'agent'
+      if (
+        message?.content &&
+        typeof message.content === 'string' &&
+        !message?.tool_calls?.length &&
+        fromAgent
+      ) {
+        agentResponse += message.content
       }
     }
   } catch (err) {
