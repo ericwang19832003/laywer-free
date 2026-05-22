@@ -91,6 +91,18 @@ export function DebtSubTypeStep({ value, side = 'defendant', onSelect }: DebtSub
 
   return (
     <div className="space-y-3">
+      {side === 'defendant' && (
+        <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4 mb-4 space-y-2">
+          <p className="text-sm font-semibold text-warm-text">Federal Law May Apply</p>
+          <p className="text-xs text-warm-muted leading-relaxed">
+            If you are being sued for a consumer debt, you may have rights under the federal
+            Fair Debt Collection Practices Act (FDCPA) regardless of which state you are in.
+            Federal FDCPA claims can be filed in federal court and may entitle you to statutory
+            damages. This platform covers state court procedures — consult an attorney or
+            visit consumerfinance.gov for FDCPA information.
+          </p>
+        </div>
+      )}
       <p className="text-sm font-medium text-warm-text">
         What type of debt is involved?
       </p>
