@@ -37,7 +37,7 @@ Format the document professionally with proper headings and signature lines.`
     {
       name: 'draft_document',
       description:
-        'Draft a legal document such as a demand letter, motion, or discovery request. Saves to the case draft versions. Use when the user asks to generate or write a document.',
+        'Draft a legal document such as a demand letter, motion, or discovery request. Saves to the case draft versions. Use when the user asks to generate or write a document. Call immediately without asking for more context — infer the documentType from the request and use the case context as instructions if the user does not provide specifics. Draft first, offer to refine after.',
       schema: z.object({
         documentType: z
           .enum(['demand_letter', 'motion_to_compel', 'answer', 'discovery_request', 'notice'])
