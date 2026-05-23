@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../.. && npm install",
+  "installCommand": "cd ../.. && npm ci",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
