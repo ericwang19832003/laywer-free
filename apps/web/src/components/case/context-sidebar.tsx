@@ -5,9 +5,11 @@ import {
   Clock,
   Shield,
   Lightbulb,
+  Settings,
 } from 'lucide-react'
 import { STEP_GUIDANCE } from '@/lib/step-guidance'
 import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
+import { CaseEditDialog } from '@/components/cases/case-edit-dialog'
 
 interface ContextSidebarProps {
   caseId: string
@@ -24,6 +26,9 @@ interface ContextSidebarProps {
   } | null
   disputeType?: string
   piSubType?: string
+  courtType?: string | null
+  county?: string | null
+  jurisdiction?: string | null
 }
 
 function formatDeadlineKey(key: string): string {
@@ -48,7 +53,7 @@ function getRiskColor(level: string): string {
   }
 }
 
-export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskScore, disputeType, piSubType }: ContextSidebarProps) {
+export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskScore, disputeType, piSubType, courtType, county, jurisdiction }: ContextSidebarProps) {
   const params = useParams()
   const taskId = params?.taskId as string | undefined
 
@@ -140,6 +145,23 @@ export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskS
         ) : (
           <p className="text-xs text-warm-muted pl-5">Complete more steps to unlock insights.</p>
         )}
+      </div>
+
+      {/* Case Settings */}
+      <div className="pt-1 border-t border-warm-border/50">
+        <CaseEditDialog
+          caseId={caseId}
+          currentCounty={county ?? null}
+          currentDescription={null}
+          currentCourtType={courtType ?? null}
+          jurisdiction={jurisdiction ?? 'TX'}
+          trigger={
+            <button className="flex items-center gap-1.5 text-xs text-warm-muted hover:text-warm-text transition-colors w-full px-1 py-1.5 rounded-md hover:bg-warm-border/30">
+              <Settings className="h-3.5 w-3.5 shrink-0" />
+              Edit filing details
+            </button>
+          }
+        />
       </div>
     </div>
   )

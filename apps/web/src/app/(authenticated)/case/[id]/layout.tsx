@@ -26,7 +26,7 @@ export default async function CaseLayout({
         .order('created_at', { ascending: true }),
       supabase
         .from('cases')
-        .select('dispute_type')
+        .select('dispute_type, court_type, county, jurisdiction')
         .eq('id', id)
         .single(),
       supabase
@@ -69,6 +69,9 @@ export default async function CaseLayout({
   }))
 
   const disputeType = caseRow?.dispute_type ?? 'civil'
+  const courtType = caseRow?.court_type ?? null
+  const county = caseRow?.county ?? null
+  const jurisdiction = caseRow?.jurisdiction ?? 'TX'
   const phaseKey = disputeType === 'business' && businessDetails?.business_sub_type
     ? businessDetails.business_sub_type
     : disputeType === 'family' && familyDetails?.family_sub_type
@@ -103,6 +106,9 @@ export default async function CaseLayout({
             riskScore={riskScore}
             disputeType={disputeType}
             piSubType={piDetails?.pi_sub_type ?? undefined}
+            courtType={courtType}
+            county={county}
+            jurisdiction={jurisdiction}
           />
         </aside>
 

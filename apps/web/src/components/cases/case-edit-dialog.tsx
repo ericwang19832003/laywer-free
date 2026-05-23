@@ -16,26 +16,72 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+const COURT_TYPE_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  TX: [
+    { value: 'jp', label: 'JP Court (Small Claims)' },
+    { value: 'county', label: 'County Court' },
+    { value: 'district', label: 'District Court' },
+    { value: 'federal', label: 'Federal Court' },
+  ],
+  CA: [
+    { value: 'small_claims', label: 'Small Claims Court' },
+    { value: 'limited_civil', label: 'Limited Civil Court' },
+    { value: 'unlimited_civil', label: 'Unlimited Civil Court' },
+    { value: 'federal', label: 'Federal Court' },
+  ],
+  NY: [
+    { value: 'ny_small_claims', label: 'Small Claims Court' },
+    { value: 'ny_civil', label: 'Civil Court' },
+    { value: 'ny_supreme', label: 'Supreme Court' },
+    { value: 'federal', label: 'Federal Court' },
+  ],
+  FL: [
+    { value: 'fl_small_claims', label: 'Small Claims Court' },
+    { value: 'fl_county', label: 'County Court' },
+    { value: 'fl_circuit', label: 'Circuit Court' },
+    { value: 'federal', label: 'Federal Court' },
+  ],
+  PA: [
+    { value: 'pa_magisterial', label: 'Magisterial District Court' },
+    { value: 'pa_common_pleas', label: 'Court of Common Pleas' },
+    { value: 'federal', label: 'Federal Court' },
+  ],
+}
 
 interface CaseEditDialogProps {
   caseId: string
   currentCounty: string | null
   currentDescription: string | null
+  currentCourtType?: string | null
+  jurisdiction?: string | null
+  trigger?: React.ReactNode
 }
 
-export function CaseEditDialog({ caseId, currentCounty, currentDescription }: CaseEditDialogProps) {
+export function CaseEditDialog({ caseId, currentCounty, currentDescription, currentCourtType, jurisdiction, trigger }: CaseEditDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [county, setCounty] = useState(currentCounty ?? '')
   const [description, setDescription] = useState(currentDescription ?? '')
+  const [courtType, setCourtType] = useState(currentCourtType ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const courtOptions = COURT_TYPE_OPTIONS[jurisdiction ?? 'TX'] ?? COURT_TYPE_OPTIONS.TX
 
   function handleOpen(isOpen: boolean) {
     setOpen(isOpen)
     if (isOpen) {
       setCounty(currentCounty ?? '')
       setDescription(currentDescription ?? '')
+      setCourtType(currentCourtType ?? '')
       setError(null)
     }
   }
@@ -51,6 +97,7 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription }: Ca
         body: JSON.stringify({
           county: county.trim() || null,
           description: description.trim() || null,
+          ...(courtType ? { court_type: courtType } : {}),
         }),
       })
 
@@ -72,20 +119,38 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription }: Ca
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <button
-          className="text-warm-muted hover:text-warm-text transition-colors p-1 rounded-md hover:bg-gray-100"
-          aria-label="Edit case"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
+        {trigger ?? (
+          <button
+            className="text-warm-muted hover:text-warm-text transition-colors p-1 rounded-md hover:bg-gray-100"
+            aria-label="Edit case"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Case</DialogTitle>
-          <DialogDescription>Update your case county and description.</DialogDescription>
+          <DialogTitle>Edit Case Details</DialogTitle>
+          <DialogDescription>Update your filing type, county, and description.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="court-type">Filing Type</Label>
+            <Select value={courtType} onValueChange={setCourtType}>
+              <SelectTrigger id="court-type">
+                <SelectValue placeholder="Select court type" />
+              </SelectTrigger>
+              <SelectContent>
+                {courtOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="county">County</Label>
             <Input

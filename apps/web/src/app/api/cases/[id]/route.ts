@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { INPUT_LIMITS } from '@/lib/validation/input-limits'
 
 const casePatchSchema = z.object({
-  court_type: z.enum(['jp', 'county', 'district', 'federal']).optional(),
+  court_type: z.enum(['jp', 'county', 'district', 'federal', 'small_claims', 'limited_civil', 'unlimited_civil', 'ny_small_claims', 'ny_civil', 'ny_supreme', 'fl_small_claims', 'fl_county', 'fl_circuit', 'pa_magisterial', 'pa_common_pleas']).optional(),
   county: z.string().nullable().optional(),
   description: z.string().max(INPUT_LIMITS.CASE_DESCRIPTION).nullable().optional(),
   outcome: z.enum(['won', 'lost', 'settled', 'dismissed', 'continued']).optional(),
