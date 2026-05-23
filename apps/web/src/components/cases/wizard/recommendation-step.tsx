@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CITY_COUNTY_MAP } from '@/lib/courts/city-county-map'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -76,6 +77,8 @@ export function RecommendationStep({
   const [showOverride, setShowOverride] = useState(false)
   const [override, setOverride] = useState('')
   const [showCourtBrowser, setShowCourtBrowser] = useState(false)
+  const [showCityLookup, setShowCityLookup] = useState(false)
+  const [cityQuery, setCityQuery] = useState('')
 
   const courtLabels = getCourtLabels(selectedState)
   const config = getStateConfig(selectedState)
@@ -90,6 +93,13 @@ export function RecommendationStep({
           : 'e.g. Travis County'
 
   const recommendedLabel = courtLabels[recommendation.recommended] ?? recommendation.recommended
+
+  const cityResults = cityQuery.length >= 2
+    ? Object.entries(CITY_COUNTY_MAP[selectedState] ?? {})
+        .filter(([city]) => city.includes(cityQuery.toLowerCase()))
+        .slice(0, 5)
+        .map(([city, county]) => ({ city: city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), county }))
+    : []
 
   return (
     <div className="space-y-4">
@@ -128,13 +138,70 @@ export function RecommendationStep({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="county">Which county will you file in? (optional)</Label>
+        <Label htmlFor="county">Which county will you file in? <span className="font-normal text-warm-muted">(optional)</span></Label>
+        <p className="text-xs text-warm-muted -mt-1">
+          Usually where the defendant lives or the incident occurred.
+        </p>
         <Input
           id="county"
           value={county}
-          onChange={(e) => onCountyChange(e.target.value)}
+          onChange={(e) => {
+            onCountyChange(e.target.value)
+            setCityQuery('')
+            setShowCityLookup(false)
+          }}
           placeholder={countyPlaceholder}
         />
+        {!showCityLookup ? (
+          <button
+            type="button"
+            className="text-xs text-calm-indigo hover:underline"
+            onClick={() => setShowCityLookup(true)}
+          >
+            Not sure? Find by city →
+          </button>
+        ) : (
+          <div className="space-y-2 rounded-md border border-warm-border bg-warm-bg p-3">
+            <p className="text-xs font-medium text-warm-text">Enter the city where the defendant lives or the incident occurred:</p>
+            <Input
+              autoFocus
+              placeholder="e.g. Houston"
+              value={cityQuery}
+              onChange={(e) => setCityQuery(e.target.value)}
+              className="text-sm"
+            />
+            {cityResults.length > 0 && (
+              <ul className="space-y-1">
+                {cityResults.map(({ city, county: c }) => (
+                  <li key={city}>
+                    <button
+                      type="button"
+                      className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-warm-border transition-colors"
+                      onClick={() => {
+                        onCountyChange(c)
+                        setShowCityLookup(false)
+                        setCityQuery('')
+                      }}
+                    >
+                      <span className="font-medium">{city}</span>
+                      <span className="text-warm-muted"> → {c} County</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {cityQuery.length >= 2 && cityResults.length === 0 && (
+              <p className="text-xs text-warm-muted">No match found. Try a nearby city or enter the county manually above.</p>
+            )}
+            <button
+              type="button"
+              className="text-xs text-warm-muted hover:text-warm-text"
+              onClick={() => { setShowCityLookup(false); setCityQuery('') }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {!showOverride && !showCourtBrowser ? (
