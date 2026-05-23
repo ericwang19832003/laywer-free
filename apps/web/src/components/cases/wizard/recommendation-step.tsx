@@ -97,8 +97,12 @@ export function RecommendationStep({
   const cityResults = cityQuery.length >= 2
     ? Object.entries(CITY_COUNTY_MAP[selectedState] ?? {})
         .filter(([city]) => city.includes(cityQuery.toLowerCase()))
+        .map(([city, county]) => ({
+          city: city.replace(/(^|[\s-])(.)/g, (_, sep, ch) => sep + ch.toUpperCase()),
+          county,
+        }))
+        .filter((result, idx, arr) => arr.findIndex(r => r.county === result.county) === idx)
         .slice(0, 5)
-        .map(([city, county]) => ({ city: city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '), county }))
     : []
 
   return (
