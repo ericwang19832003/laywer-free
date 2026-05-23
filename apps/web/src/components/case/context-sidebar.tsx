@@ -10,6 +10,7 @@ import {
 import { STEP_GUIDANCE } from '@/lib/step-guidance'
 import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
 import { CaseEditDialog } from '@/components/cases/case-edit-dialog'
+import { ChangeCaseTypeDialog } from '@/components/case/change-case-type-dialog'
 
 interface ContextSidebarProps {
   caseId: string
@@ -148,7 +149,7 @@ export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskS
       </div>
 
       {/* Case Settings */}
-      <div className="pt-1 border-t border-warm-border/50">
+      <div className="pt-1 border-t border-warm-border/50 space-y-0.5">
         <CaseEditDialog
           caseId={caseId}
           currentCounty={county ?? null}
@@ -163,6 +164,10 @@ export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskS
               Edit filing details
             </button>
           }
+        />
+        <ChangeCaseTypeDialog
+          caseId={caseId}
+          currentDisputeType={disputeType ?? 'other'}
         />
       </div>
     </div>
