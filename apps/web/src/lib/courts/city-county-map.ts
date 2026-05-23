@@ -1,3 +1,4 @@
+// Lookups must always be scoped by state — city names can collide across states.
 export const CITY_COUNTY_MAP: Record<string, Record<string, string>> = {
   TX: {
     houston: "Harris",
@@ -154,9 +155,11 @@ export const CITY_COUNTY_MAP: Record<string, Record<string, string>> = {
     tampa: "Hillsborough",
     orlando: "Orange",
     "st. petersburg": "Pinellas",
+    "st petersburg": "Pinellas",
     hialeah: "Miami-Dade",
     tallahassee: "Leon",
     "port st. lucie": "St. Lucie",
+    "port st lucie": "St. Lucie",
     "cape coral": "Lee",
     "fort lauderdale": "Broward",
     "pembroke pines": "Broward",
@@ -203,6 +206,7 @@ export const CITY_COUNTY_MAP: Record<string, Record<string, string>> = {
     altoona: "Blair",
     york: "York",
     "wilkes-barre": "Luzerne",
+    "wilkes barre": "Luzerne",
     chester: "Delaware",
     easton: "Northampton",
     norristown: "Montgomery",
