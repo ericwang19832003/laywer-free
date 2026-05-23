@@ -3,7 +3,7 @@ import type { GuidedStepConfig } from './types'
 export const understandRemovalConfig: GuidedStepConfig = {
   title: 'Understand the Removal',
   reassurance:
-    'Understanding removal helps you decide your best strategy.',
+    'Understanding removal helps you compare available response options.',
 
   questions: [
     {
@@ -46,7 +46,7 @@ export const understandRemovalConfig: GuidedStepConfig = {
     {
       id: 'chosen_strategy',
       type: 'single_choice',
-      prompt: 'Which strategy are you leaning toward?',
+      prompt: 'Which response option are you leaning toward?',
       options: [
         { value: 'remand_motion', label: 'File a motion to remand' },
         { value: 'continue_federal', label: 'Continue in federal court' },

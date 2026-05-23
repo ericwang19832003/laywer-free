@@ -40,6 +40,7 @@ async function reachConfirmationScreen() {
   fireEvent.change(screen.getByLabelText('Password'), {
     target: { value: 'securepass123' },
   })
+  fireEvent.click(screen.getByRole('checkbox'))
 
   const submitBtn = screen.getAllByRole('button', { name: 'Create Account' })
     .find(btn => btn.getAttribute('type') === 'submit')!
@@ -79,6 +80,7 @@ describe('Email confirmation resend', () => {
     fireEvent.change(screen.getByLabelText('Password'), {
       target: { value: 'securepass123' },
     })
+    fireEvent.click(screen.getByRole('checkbox'))
 
     // Submit signup
     const submitBtn = screen.getAllByRole('button', { name: 'Create Account' })

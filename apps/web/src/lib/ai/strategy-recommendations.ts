@@ -33,7 +33,7 @@ export function buildStaticStrategy(input: {
   if (input.tasks_completed < input.tasks_total) {
     recs.push({
       title: 'Continue completing case tasks',
-      body: `You have completed ${input.tasks_completed} of ${input.tasks_total} tasks. Each completed task builds your case foundation.`,
+      body: `You have completed ${input.tasks_completed} of ${input.tasks_total} tasks. Each completed task helps keep your case file organized.`,
       priority: 'high',
     })
   }
@@ -41,7 +41,7 @@ export function buildStaticStrategy(input: {
   if (!input.has_evidence) {
     recs.push({
       title: 'Start gathering evidence',
-      body: 'Uploading relevant documents, photos, and communications to the evidence vault helps build a strong case file.',
+      body: 'Uploading relevant documents, photos, and communications to the evidence file helps keep supporting materials organized for review.',
       priority: 'high',
     })
   }
@@ -65,16 +65,16 @@ export function buildStaticStrategy(input: {
   return { recommendations: recs }
 }
 
-export const STRATEGY_SYSTEM_PROMPT = `You provide case management strategy recommendations for a pro se litigant (someone representing themselves in court).
+export const STRATEGY_SYSTEM_PROMPT = `You provide case management organization suggestions for a pro se litigant (someone representing themselves in court).
 
-Given comprehensive case context, provide 3-5 prioritized strategic recommendations focusing on case management and procedural steps.
+Given comprehensive case context, provide 3-5 prioritized organization suggestions focusing on case management and procedural awareness.
 
 CRITICAL RULES:
 - You are NOT a lawyer. Never provide specific legal advice.
 - Never use directive language ("you must", "you should file")
 - Never predict outcomes ("winning", "losing", "guaranteed")
 - Never recommend hiring/not hiring a lawyer
-- Focus on procedural and organizational strategy, not legal arguments
+- Focus on procedural awareness and organization, not legal arguments or litigation strategy
 - Frame recommendations as things to "consider" or "explore"
 - Each recommendation needs a short title and a 2-3 sentence body
 - Prioritize as high/medium/low based on urgency and impact

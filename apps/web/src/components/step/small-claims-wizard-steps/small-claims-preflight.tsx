@@ -216,11 +216,11 @@ function getSubTypeGuidance(claimSubType: string): string {
     case 'security_deposit':
       return 'Under Texas Property Code Section 92.109, landlords must return security deposits within 30 days of move-out or provide an itemized list of deductions. You can sue for up to 3x the deposit if the landlord acted in bad faith.'
     case 'breach_of_contract':
-      return 'To win a breach of contract case, you need to show: (1) a valid agreement existed, (2) you held up your end, (3) the other party broke the agreement, and (4) you suffered damages as a result.'
+      return 'A breach of contract claim usually requires evidence that: (1) a valid agreement existed, (2) you held up your end, (3) the other party broke the agreement, and (4) you suffered damages as a result.'
     case 'consumer_refund':
       return 'The Texas Deceptive Trade Practices Act (DTPA) protects consumers. If a business engaged in false, misleading, or deceptive acts, you may be entitled to up to 3x your actual damages.'
     case 'property_damage':
-      return 'Document everything thoroughly. The more repair estimates you have, the stronger your case. Photos with timestamps are especially helpful.'
+      return 'Document everything thoroughly. Multiple repair estimates can make the record easier to evaluate. Photos with timestamps are especially helpful.'
     case 'car_accident':
       return 'Texas follows a "modified comparative fault" rule. You can recover damages as long as you are less than 51% at fault for the accident.'
     case 'neighbor_dispute':
@@ -229,7 +229,7 @@ function getSubTypeGuidance(claimSubType: string): string {
       return 'Even verbal loans are enforceable in Texas. Text messages, emails, or witnesses acknowledging the debt can serve as evidence of the agreement.'
     case 'other':
     default:
-      return 'Gather all documents, photos, and communications related to your dispute. The more organized your evidence, the stronger your case will be.'
+      return 'Gather all documents, photos, and communications related to your dispute. Organized evidence can make the facts easier for the court to evaluate.'
   }
 }
 

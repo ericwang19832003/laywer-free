@@ -1,8 +1,8 @@
 import { ClipboardList, Calendar, FileText } from 'lucide-react'
 
 const BENEFITS = [
-  { icon: ClipboardList, text: 'AI-drafted legal documents in minutes' },
-  { icon: Calendar, text: 'Automatic deadline tracking based on your court rules' },
+  { icon: ClipboardList, text: 'AI-assisted legal document drafts you review' },
+  { icon: Calendar, text: 'Deadline tracking you verify with court notices and rules' },
   { icon: FileText, text: 'Step-by-step guidance from intake to resolution' },
 ]
 
@@ -20,8 +20,9 @@ export function WelcomePanel() {
       <p
         className="text-lg lg:text-xl mb-10 leading-relaxed text-warm-muted"
       >
-        Lawyer Free guides you step-by-step through filing, deadlines, evidence,
-        and legal documents — so you can handle your case with confidence.
+        Lawyer Free helps self-represented users organize filings, deadlines,
+        evidence, and document drafts. It provides legal information and
+        self-help tools, not legal advice.
       </p>
 
       <div className="space-y-5">
@@ -42,7 +43,8 @@ export function WelcomePanel() {
       <p
         className="mt-12 text-sm text-stone-400"
       >
-        Free to start. No lawyers required. Your data stays private.
+        Free to start. Review everything before using it in court. For
+        situation-specific advice, consult a licensed attorney.
       </p>
     </div>
   )

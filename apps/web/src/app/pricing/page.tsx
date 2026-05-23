@@ -3,7 +3,7 @@ import { PricingCards } from '@/components/pricing/pricing-cards'
 
 export const metadata = {
   title: 'Pricing | Lawyer Free',
-  description: 'Affordable legal help for self-represented litigants in Texas. First case free.',
+  description: 'Affordable legal self-help tools for self-represented litigants in Texas. First case free.',
 }
 
 const alwaysFreeFeatures = [
@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     q: 'Is my data safe?',
-    a: "Your data is encrypted, protected by row-level security, and never shared. We're built on Supabase with enterprise-grade security.",
+    a: 'We use Supabase access controls, row-level security, and transport security, but no online service can guarantee absolute security. Your data may be processed by AI, payment, email, analytics, and storage providers as described in our Privacy Policy.',
   },
 ]
 
@@ -44,14 +44,14 @@ export default function PricingPage() {
       {/* Trust-first hero */}
       <section className="text-center mb-6">
         <p className="text-sm font-medium tracking-wide uppercase text-calm-indigo mb-3">
-          For self-represented litigants who need guidance, not a lawyer&apos;s fee
+          For self-represented litigants who need organization, not legal advice
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-warm-text mb-4">
           Your first case is completely free
         </h1>
         <p className="text-lg text-warm-muted max-w-2xl mx-auto">
-          No credit card. No catch. File your first case with guided steps,
-          AI-drafted documents, and deadline tracking — at zero cost.
+          No credit card. No catch. Organize your first case with guided steps,
+          AI-assisted document drafts you review, and deadline reminders you verify — at zero cost.
         </p>
       </section>
 
@@ -62,8 +62,9 @@ export default function PricingPage() {
             &ldquo;First case free&rdquo; means exactly what it says
           </p>
           <p className="text-sm text-warm-muted">
-            Sign up, open your first case, and use every feature — guided wizards, AI documents,
-            deadline alerts — without paying a cent. When you need a second case, pick a plan.
+            Sign up, open your first case, and use every feature — guided wizards,
+            document draft assistance, deadline reminders — without paying a cent. When you need
+            a second case, pick a plan.
           </p>
         </div>
       </section>
@@ -81,7 +82,7 @@ export default function PricingPage() {
         <ComparisonTable />
       </section>
 
-      {/* Testimonial */}
+      {/* Court-use reminder */}
       <section className="mb-20">
         <div className="max-w-2xl mx-auto rounded-xl border border-warm-border bg-warm-bg px-8 py-8 text-center">
           <svg
@@ -92,10 +93,11 @@ export default function PricingPage() {
             <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
           </svg>
           <blockquote className="text-lg font-medium text-warm-text mb-3">
-            I filed my small claims case in 2 hours instead of 2 weeks.
+            Review every draft, deadline, and court instruction before you use it.
           </blockquote>
           <p className="text-sm text-warm-muted">
-            &mdash; Sarah T., small claims filer in Texas
+            Lawyer Free provides legal information and self-help organization tools. It does not
+            decide what you should file, predict outcomes, or replace a licensed attorney.
           </p>
         </div>
       </section>

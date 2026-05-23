@@ -10,8 +10,18 @@ describe('WelcomePanel', () => {
 
   it('renders three benefit items', () => {
     render(<WelcomePanel />)
-    expect(screen.getByText(/ai-drafted legal documents in minutes/i)).toBeDefined()
-    expect(screen.getByText(/automatic deadline tracking/i)).toBeDefined()
+    expect(screen.getByText(/ai-assisted legal document drafts/i)).toBeDefined()
+    expect(screen.getByText(/deadline tracking you verify/i)).toBeDefined()
     expect(screen.getByText(/step-by-step guidance from intake/i)).toBeDefined()
+  })
+
+  it('does not use absolute legal or privacy claims', () => {
+    const { container } = render(<WelcomePanel />)
+    const text = container.textContent?.toLowerCase() ?? ''
+
+    expect(text).not.toContain('no lawyers required')
+    expect(text).not.toContain('automatic deadline tracking')
+    expect(text).not.toContain('your data stays private')
+    expect(text).toContain('not legal advice')
   })
 })

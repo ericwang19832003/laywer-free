@@ -11,6 +11,11 @@ export function LegalDisclaimer() {
           For advice specific to your situation, consult a licensed attorney.
         </p>
         <p className="text-xs text-warm-muted">
+          Review our{' '}
+          <a href="/privacy" className="text-calm-indigo underline">
+            Privacy Policy
+          </a>
+          {' '}before entering case details.{' '}
           Need a lawyer?{' '}
           <a
             href="https://www.texasbar.com/AM/Template.cfm?Section=Lawyer_Referral_Service1"

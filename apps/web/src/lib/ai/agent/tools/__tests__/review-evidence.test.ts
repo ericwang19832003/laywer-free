@@ -2,17 +2,19 @@ import { describe, it, expect } from 'vitest'
 import { createReviewEvidenceTool } from '../review-evidence'
 
 describe('createReviewEvidenceTool', () => {
-  it('reports strong case when evidence count is high', async () => {
+  it('reports a more complete organization record when evidence count is high', async () => {
     const tool = createReviewEvidenceTool({ evidenceCount: 8, disputeType: 'landlord_tenant' })
     const result = await tool.invoke({})
-    expect(result).toContain('8 items')
-    expect(result).toContain('strong')
+    expect(result).toContain('8 item(s)')
+    expect(result).toContain('more complete')
+    expect(result).not.toContain('strong')
   })
 
-  it('flags weak evidence when count is low', async () => {
+  it('reports a limited organization record when count is low', async () => {
     const tool = createReviewEvidenceTool({ evidenceCount: 1, disputeType: 'landlord_tenant' })
     const result = await tool.invoke({})
-    expect(result).toContain('thin')
+    expect(result).toContain('limited')
+    expect(result).not.toContain('thin')
   })
 
   it('includes dispute-type guidance', async () => {
@@ -21,10 +23,10 @@ describe('createReviewEvidenceTool', () => {
     expect(result).toContain('lease')
   })
 
-  it('shows action-needed message when evidence is thin', async () => {
+  it('suggests adding documents when evidence file is limited', async () => {
     const tool = createReviewEvidenceTool({ evidenceCount: 1, disputeType: 'landlord_tenant' })
     const result = await tool.invoke({})
-    expect(result).toContain('upload more')
+    expect(result).toContain('Consider adding more supporting documents')
   })
 
   it('uses fallback guidance for unknown dispute type', async () => {
@@ -33,9 +35,10 @@ describe('createReviewEvidenceTool', () => {
     expect(result).toContain('communications')
   })
 
-  it('reports moderate strength for 3-4 items', async () => {
+  it('reports developing organization record for 3-4 items', async () => {
     const tool = createReviewEvidenceTool({ evidenceCount: 4, disputeType: 'debt_defense' })
     const result = await tool.invoke({})
-    expect(result).toContain('moderate')
+    expect(result).toContain('developing')
+    expect(result).not.toContain('moderate')
   })
 })

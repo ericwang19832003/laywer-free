@@ -198,7 +198,11 @@ export function WelcomeAuthCard({ initialMode }: WelcomeAuthCardProps) {
                 className="mt-1 h-4 w-4 shrink-0 rounded border-warm-border accent-calm-indigo"
               />
               <label htmlFor="consent" className="text-xs text-warm-muted leading-relaxed">
-                I understand that Lawyer Free provides general legal information and self-help tools — not legal advice — and that no attorney-client relationship is formed by using this service. My case data will be processed by OpenAI to generate AI responses.{' '}
+                I understand that Lawyer Free provides general legal information and self-help tools — not legal advice — and that no attorney-client relationship is formed by using this service. My case data may be processed by AI providers, including OpenAI and Anthropic, and other infrastructure providers described in the{' '}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-calm-indigo underline">
+                  Privacy Policy
+                </a>
+                .{' '}
                 <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-calm-indigo underline">
                   Terms of Service
                 </a>

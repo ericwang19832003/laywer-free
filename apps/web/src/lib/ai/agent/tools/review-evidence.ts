@@ -15,18 +15,19 @@ const EVIDENCE_GUIDANCE: Record<string, string[]> = {
 export function createReviewEvidenceTool({ evidenceCount, disputeType }: ReviewEvidenceConfig) {
   return tool(
     async (_input: Record<string, never>) => {
-      const strength = evidenceCount >= 5 ? 'strong' : evidenceCount >= 3 ? 'moderate' : 'thin'
+      const completeness =
+        evidenceCount >= 5 ? 'more complete' : evidenceCount >= 3 ? 'developing' : 'limited'
       const guidance = EVIDENCE_GUIDANCE[disputeType] ?? ['Document all relevant communications', 'Preserve all records']
 
       const lines = [
-        `Evidence vault: ${evidenceCount} items uploaded — ${strength} foundation.`,
+        `Evidence file: ${evidenceCount} item(s) uploaded — ${completeness} organization record.`,
         '',
         'Recommended evidence for this dispute type:',
         ...guidance.map((g) => `• ${g}`),
       ]
 
       if (evidenceCount < 3) {
-        lines.push('', 'Action needed: upload more supporting documents before your hearing.')
+        lines.push('', 'Consider adding more supporting documents before your hearing.')
       }
 
       return lines.join('\n')
@@ -34,7 +35,7 @@ export function createReviewEvidenceTool({ evidenceCount, disputeType }: ReviewE
     {
       name: 'review_evidence',
       description:
-        'Review the evidence vault to assess case strength and identify gaps. Use when the user asks how strong their case is or what evidence they should gather. Call for any strength question — the health score in the context summary is not a substitute for this tool.',
+        'Review the evidence file to identify organization gaps and suggested document categories. Use when the user asks what evidence they have organized or what evidence they should gather. Do not predict outcomes or assess whether the user will win.',
       schema: z.object({}),
     }
   )

@@ -56,7 +56,7 @@ export const settlementConferencePrepConfig: GuidedStepConfig = {
     {
       id: 'BATNA_info',
       type: 'info',
-      prompt: 'Your BATNA is what happens if settlement fails. Consider: trial costs, time, stress, and likelihood of winning.',
+      prompt: 'Your BATNA is what happens if settlement fails. Consider: trial costs, time, stress, evidence gaps, and procedural risk.',
       showIf: (answers) => answers.BATNA_considered === 'no',
     },
     {

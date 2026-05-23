@@ -1,4 +1,4 @@
-import { Annotation, END, StateGraph } from '@langchain/langgraph'
+import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { BaseMessage, SystemMessage } from '@langchain/core/messages'
 import type { CaseContext } from './state'
@@ -24,8 +24,12 @@ This is general legal information — not legal advice.
 
 Tool grounding rules — follow strictly:
 - For any question about deadlines, days remaining, filing status, or what is overdue: use the "Current case deadline status" section injected into this prompt — it contains the actual case deadlines already fetched from the database. NEVER answer deadline questions from general Texas procedural knowledge or memory. Always cite the specific deadline data provided (e.g., "Your serve defendant deadline is OVERDUE by X days"). If no deadline status is provided in context, call analyze_deadlines.
-- For any question about case strength, evidence quality, sufficiency, or whether the user has enough evidence: use the "Current case evidence review" section injected into this prompt — it contains the actual evidence assessment already fetched. NEVER answer strength questions from the raw upload count alone. Always cite the specific strength label and gaps provided (e.g., "Your evidence foundation is moderate — 3 items uploaded"). If no evidence review is provided in context, call review_evidence.
+- For any question about evidence organization, evidence quality, or whether the user has documents for a court presentation: use the "Current case evidence review" section injected into this prompt. Do not predict outcomes, evaluate whether the user will win, or give a legal sufficiency opinion. If no evidence review is provided in context, call review_evidence.
 - For any document drafting request (letter, motion, notice, interrogatories): call draft_document immediately using reasonable assumptions. Do not ask for more context before drafting — draft first, offer to refine after. After draft_document returns, present the COMPLETE document text to the user — do not summarize or describe it.`
+
+type InvokableTool = {
+  invoke: (input: Record<string, unknown>) => Promise<unknown>
+}
 
 // ---- State annotation (LangGraph v1.x Annotation API) ---- //
 
@@ -96,7 +100,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
   const graph = new StateGraph(AgentAnnotation)
 
   // ---- agent node ---- //
-  graph.addNode('agent', async (state: GraphState) => {
+  const graphWithAgent = graph.addNode('agent', async (state: GraphState) => {
     if (state.toolCallCount >= MAX_TOOL_CALLS) {
       return {
         messages: [
@@ -155,7 +159,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
   })
 
   // ---- tools node ---- //
-  graph.addNode('tools', async (state: GraphState) => {
+  const graphWithTools = graphWithAgent.addNode('tools', async (state: GraphState) => {
     const lastMessage = state.messages[state.messages.length - 1] as BaseMessage & {
       tool_calls?: Array<{ id: string; name: string; args: Record<string, unknown> }>
     }
@@ -177,7 +181,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
       }
       let content: string
       try {
-        content = String(await t.invoke(call.args))
+        content = String(await (t as InvokableTool).invoke(call.args))
       } catch (err) {
         content = `Tool error: ${err instanceof Error ? err.message : String(err)}`
       }
@@ -188,9 +192,9 @@ export function buildAgentGraph(config: BuildGraphConfig) {
   })
 
   // ---- edges ---- //
-  graph.setEntryPoint('agent')
+  graphWithTools.addEdge(START, 'agent')
 
-  graph.addConditionalEdges('agent', (state: GraphState) => {
+  graphWithTools.addConditionalEdges('agent', (state: GraphState) => {
     const last = state.messages[state.messages.length - 1] as BaseMessage & {
       tool_calls?: unknown[]
     }
@@ -199,7 +203,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
     return END
   })
 
-  graph.addEdge('tools', 'agent')
+  graphWithTools.addEdge('tools', 'agent')
 
-  return graph.compile()
+  return graphWithTools.compile()
 }

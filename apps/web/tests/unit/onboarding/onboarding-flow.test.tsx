@@ -13,6 +13,28 @@ describe('OnboardingFlow', () => {
     vi.clearAllMocks()
   })
 
+  function advanceToRoleScreen() {
+    render(<OnboardingFlow onComplete={mockOnComplete} />)
+    fireEvent.click(screen.getByRole('button', { name: /get started/i }))
+  }
+
+  function selectRoleAndState(role: 'plaintiff' | 'defendant' = 'defendant') {
+    const roleButtonName = role === 'plaintiff'
+      ? /i.m filing a case/i
+      : /someone filed against me/i
+
+    fireEvent.click(screen.getByRole('button', { name: roleButtonName }))
+    fireEvent.change(screen.getByLabelText(/what state is your case in/i), {
+      target: { value: 'TX' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+  }
+
+  function renderAtSituationScreen(role: 'plaintiff' | 'defendant' = 'defendant') {
+    advanceToRoleScreen()
+    selectRoleAndState(role)
+  }
+
   describe('Screen 1 — How it works', () => {
     it('renders welcome heading', () => {
       render(<OnboardingFlow onComplete={mockOnComplete} />)
@@ -27,37 +49,31 @@ describe('OnboardingFlow', () => {
     })
 
     it('has a get-started button that advances to screen 2', () => {
-      render(<OnboardingFlow onComplete={mockOnComplete} />)
-      const button = screen.getByRole('button', { name: /get started/i })
-      fireEvent.click(button)
-      expect(screen.getByText("What's your situation?")).toBeInTheDocument()
+      advanceToRoleScreen()
+      expect(screen.getByText('Tell us about your role')).toBeInTheDocument()
     })
   })
 
   describe('Screen 2 — Situation selection', () => {
-    function renderAtScreen2() {
-      render(<OnboardingFlow onComplete={mockOnComplete} />)
-      fireEvent.click(screen.getByRole('button', { name: /get started/i }))
-    }
-
     it('shows all situation cards', () => {
-      renderAtScreen2()
+      renderAtSituationScreen('defendant')
       expect(screen.getByText('Being sued')).toBeInTheDocument()
       expect(screen.getByText('Facing eviction')).toBeInTheDocument()
       expect(screen.getByText('Debt collection')).toBeInTheDocument()
       expect(screen.getByText('Family matter')).toBeInTheDocument()
-      expect(screen.getByText('Personal injury')).toBeInTheDocument()
+      expect(screen.getByText('Contract claim against me')).toBeInTheDocument()
+      expect(screen.getByText('Business claim against me')).toBeInTheDocument()
       expect(screen.getByText('Something else')).toBeInTheDocument()
     })
 
     it('shows back button that returns to screen 1', () => {
-      renderAtScreen2()
+      advanceToRoleScreen()
       fireEvent.click(screen.getByText(/back/i))
       expect(screen.getByText('Welcome to Lawyer Free')).toBeInTheDocument()
     })
 
     it('selecting a situation advances to screen 3 and calls onComplete with dispute type', async () => {
-      renderAtScreen2()
+      renderAtSituationScreen('defendant')
       fireEvent.click(screen.getByText('Being sued'))
 
       // Screen 3 shows loading state
@@ -70,7 +86,7 @@ describe('OnboardingFlow', () => {
     })
 
     it('selecting "Something else" calls onComplete with undefined', async () => {
-      renderAtScreen2()
+      renderAtSituationScreen('defendant')
       fireEvent.click(screen.getByText('Something else'))
 
       await waitFor(() => {
@@ -81,8 +97,7 @@ describe('OnboardingFlow', () => {
 
   describe('Screen 3 — Transition', () => {
     it('calls the user-preferences API', async () => {
-      render(<OnboardingFlow onComplete={mockOnComplete} />)
-      fireEvent.click(screen.getByRole('button', { name: /get started/i }))
+      renderAtSituationScreen('defendant')
       fireEvent.click(screen.getByText('Facing eviction'))
 
       await waitFor(() => {
@@ -93,8 +108,7 @@ describe('OnboardingFlow', () => {
     it('calls onComplete even if API call fails', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      render(<OnboardingFlow onComplete={mockOnComplete} />)
-      fireEvent.click(screen.getByRole('button', { name: /get started/i }))
+      renderAtSituationScreen('defendant')
       fireEvent.click(screen.getByText('Debt collection'))
 
       await waitFor(() => {

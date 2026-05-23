@@ -1,4 +1,5 @@
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Terms of Service | Lawyer Free',
@@ -23,27 +24,42 @@ export default function TermsPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-warm-text">2. AI-Generated Content</h2>
         <p className="text-sm text-warm-text leading-relaxed">
-          This platform uses artificial intelligence (powered by OpenAI) to generate documents,
-          summaries, and legal research. AI-generated content may contain errors, omissions, or
-          outdated information. You are responsible for reviewing all AI-generated content for
-          accuracy before using it in any legal proceeding. Lawyer Free makes no warranty that
-          AI-generated documents are suitable for filing in any court.
+          This platform uses artificial intelligence providers, including OpenAI and Anthropic,
+          to generate document drafts, summaries, and legal research assistance. AI-generated
+          content may contain errors, omissions, or outdated information. You are responsible
+          for reviewing all AI-generated content for accuracy before using it in any legal
+          proceeding. Lawyer Free makes no warranty that AI-generated documents are suitable
+          for filing in any court.
         </p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-warm-text">3. OpenAI Data Processing</h2>
+        <h2 className="text-lg font-semibold text-warm-text">3. Third-Party Data Processing</h2>
         <p className="text-sm text-warm-text leading-relaxed">
-          To generate AI responses, the facts and case details you enter are sent to OpenAI&apos;s
-          API. Do not enter sensitive personal information (Social Security numbers, bank account
-          numbers, medical records) that you do not want processed by a third party. Review
-          OpenAI&apos;s privacy policy at openai.com/policies/privacy-policy for details on how
-          they handle data.
+          To operate the service, the facts, case details, documents, and account information you
+          enter may be processed by third-party providers, including OpenAI, Anthropic, Supabase,
+          Stripe, Resend, Plausible, and Gmail if you connect email. Do not enter sensitive personal
+          information, including Social Security numbers, bank account numbers, full medical records,
+          government ID numbers, or other highly sensitive identifiers unless necessary for your
+          self-help use. See our{' '}
+          <Link href="/privacy" className="text-calm-indigo underline">
+            Privacy Policy
+          </Link>{' '}
+          for more detail.
         </p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-warm-text">4. Limitation of Liability</h2>
+        <h2 className="text-lg font-semibold text-warm-text">4. No Legal Confidentiality</h2>
+        <p className="text-sm text-warm-text leading-relaxed">
+          Lawyer Free is not your attorney, and communications with Lawyer Free are not protected
+          by attorney-client privilege or attorney work-product protections. Do not rely on this
+          service as a confidential substitute for speaking with a licensed attorney.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-warm-text">5. Limitation of Liability</h2>
         <p className="text-sm text-warm-text leading-relaxed">
           To the maximum extent permitted by law, Lawyer Free shall not be liable for any
           damages arising from your use of this platform, including adverse legal outcomes,
@@ -53,7 +69,7 @@ export default function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-warm-text">5. Jurisdiction</h2>
+        <h2 className="text-lg font-semibold text-warm-text">6. Jurisdiction</h2>
         <p className="text-sm text-warm-text leading-relaxed">
           This platform is designed to assist with civil cases in U.S. state courts. It is not
           designed for criminal matters, immigration proceedings, or cases outside the
@@ -63,7 +79,7 @@ export default function TermsPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-warm-text">6. Data Retention</h2>
+        <h2 className="text-lg font-semibold text-warm-text">7. Data Retention</h2>
         <p className="text-sm text-warm-text leading-relaxed">
           Your case data is stored on our servers for as long as your account is active. You
           may delete your account and all associated data by contacting support. We retain
