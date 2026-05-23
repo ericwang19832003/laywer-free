@@ -10,6 +10,7 @@ import {
   SkipForward,
   ChevronDown,
   ChevronRight,
+  PlusCircle,
 } from 'lucide-react'
 import type { WorkflowPhase } from '@/lib/workflow-phases'
 
@@ -367,6 +368,16 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
             </div>
           )
         })}
+      </div>
+
+      <div className="mt-auto pt-4 border-t border-warm-border/50 px-1">
+        <Link
+          href="/cases"
+          className="flex items-center gap-1.5 text-xs text-warm-muted hover:text-warm-text transition-colors py-1.5 px-2 rounded-md hover:bg-warm-border/30"
+        >
+          <PlusCircle className="h-3.5 w-3.5 shrink-0" />
+          Start a new case
+        </Link>
       </div>
     </nav>
   )
