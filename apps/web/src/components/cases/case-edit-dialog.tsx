@@ -24,6 +24,21 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+const PI_SUB_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'auto_accident', label: 'Auto Accident' },
+  { value: 'pedestrian_cyclist', label: 'Pedestrian / Cyclist' },
+  { value: 'rideshare', label: 'Rideshare Accident' },
+  { value: 'uninsured_motorist', label: 'Uninsured Motorist' },
+  { value: 'slip_and_fall', label: 'Slip and Fall' },
+  { value: 'dog_bite', label: 'Dog Bite' },
+  { value: 'product_liability', label: 'Product Liability' },
+  { value: 'other_injury', label: 'Other Injury' },
+  { value: 'vehicle_damage', label: 'Vehicle Damage' },
+  { value: 'property_damage_negligence', label: 'Property Damage (Negligence)' },
+  { value: 'vandalism', label: 'Vandalism' },
+  { value: 'other_property_damage', label: 'Other Property Damage' },
+]
+
 const COURT_TYPE_OPTIONS: Record<string, { value: string; label: string }[]> = {
   TX: [
     { value: 'jp', label: 'JP Court (Small Claims)' },
@@ -63,14 +78,17 @@ interface CaseEditDialogProps {
   currentCourtType?: string | null
   jurisdiction?: string | null
   trigger?: React.ReactNode
+  disputeType?: string | null
+  currentPiSubType?: string | null
 }
 
-export function CaseEditDialog({ caseId, currentCounty, currentDescription, currentCourtType, jurisdiction, trigger }: CaseEditDialogProps) {
+export function CaseEditDialog({ caseId, currentCounty, currentDescription, currentCourtType, jurisdiction, trigger, disputeType, currentPiSubType }: CaseEditDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [county, setCounty] = useState(currentCounty ?? '')
   const [description, setDescription] = useState(currentDescription ?? '')
   const [courtType, setCourtType] = useState(currentCourtType ?? '')
+  const [piSubType, setPiSubType] = useState(currentPiSubType ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -82,6 +100,7 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription, curr
       setCounty(currentCounty ?? '')
       setDescription(currentDescription ?? '')
       setCourtType(currentCourtType ?? '')
+      setPiSubType(currentPiSubType ?? '')
       setError(null)
     }
   }
@@ -98,6 +117,7 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription, curr
           county: county.trim() || null,
           description: description.trim() || null,
           ...(courtType ? { court_type: courtType } : {}),
+          ...(disputeType === 'personal_injury' && piSubType ? { pi_sub_type: piSubType } : {}),
         }),
       })
 
@@ -135,6 +155,23 @@ export function CaseEditDialog({ caseId, currentCounty, currentDescription, curr
         </DialogHeader>
 
         <div className="space-y-4">
+          {disputeType === 'personal_injury' && (
+            <div className="space-y-2">
+              <Label htmlFor="pi-sub-type">Injury Type</Label>
+              <Select value={piSubType} onValueChange={setPiSubType}>
+                <SelectTrigger id="pi-sub-type">
+                  <SelectValue placeholder="Select injury type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PI_SUB_TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="court-type">Filing Type</Label>
             <Select value={courtType} onValueChange={setCourtType}>

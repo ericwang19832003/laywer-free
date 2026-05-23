@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { z } from 'zod'
 import { INPUT_LIMITS } from '@/lib/validation/input-limits'
+import { PI_SUB_TYPES } from '@lawyer-free/shared/schemas/case'
 
 const casePatchSchema = z.object({
   court_type: z.enum(['jp', 'county', 'district', 'federal', 'small_claims', 'limited_civil', 'unlimited_civil', 'ny_small_claims', 'ny_civil', 'ny_supreme', 'fl_small_claims', 'fl_county', 'fl_circuit', 'pa_magisterial', 'pa_common_pleas']).optional(),
   county: z.string().nullable().optional(),
   description: z.string().max(INPUT_LIMITS.CASE_DESCRIPTION).nullable().optional(),
   outcome: z.enum(['won', 'lost', 'settled', 'dismissed', 'continued']).optional(),
+  pi_sub_type: z.enum(PI_SUB_TYPES).optional(),
 }).strict()
 
 export async function DELETE(
@@ -71,7 +73,7 @@ export async function PATCH(
       )
     }
 
-    const { court_type, county, description, outcome } = parsed.data
+    const { court_type, county, description, outcome, pi_sub_type } = parsed.data
 
     // Build partial update object — only include provided fields
     const updates: Record<string, unknown> = {}
@@ -79,6 +81,22 @@ export async function PATCH(
     if (county !== undefined) updates.county = county
     if (description !== undefined) updates.description = description
     if (outcome !== undefined) updates.outcome = outcome
+
+    // pi_sub_type lives in a separate table — handle independently
+    if (pi_sub_type !== undefined) {
+      const { error: piError } = await supabase
+        .from('personal_injury_details')
+        .upsert({ case_id: id, pi_sub_type }, { onConflict: 'case_id' })
+      if (piError) {
+        return NextResponse.json(
+          { error: 'Failed to update injury type', details: piError.message },
+          { status: 500 }
+        )
+      }
+      if (Object.keys(updates).length === 0) {
+        return NextResponse.json({ success: true })
+      }
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(

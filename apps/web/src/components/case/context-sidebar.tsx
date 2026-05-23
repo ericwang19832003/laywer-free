@@ -155,6 +155,8 @@ export function ContextSidebar({ caseId, tasks, fallbackTaskKey, deadline, riskS
           currentDescription={null}
           currentCourtType={courtType ?? null}
           jurisdiction={jurisdiction ?? 'TX'}
+          disputeType={disputeType}
+          currentPiSubType={piSubType ?? null}
           trigger={
             <button className="flex items-center gap-1.5 text-xs text-warm-muted hover:text-warm-text transition-colors w-full px-1 py-1.5 rounded-md hover:bg-warm-border/30">
               <Settings className="h-3.5 w-3.5 shrink-0" />
