@@ -6,6 +6,7 @@ import { InsightsCard } from '@/components/dashboard/insights-card'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { PriorityBanners } from '@/components/dashboard/priority-banners'
+import { CaseStrengthCheck } from '@/components/dashboard/case-strength-check'
 import type { SharedCaseData } from './types'
 
 export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType, county, createdAt }: Omit<SharedCaseData, 'outcome'>) {
@@ -40,6 +41,7 @@ export async function OverviewTab({ caseId, disputeType, jurisdiction, courtType
   return (
     <div className="space-y-6">
       <ConfidenceScoreCard score={confidenceResult.score} breakdown={confidenceResult.breakdown} />
+      <CaseStrengthCheck disputeType={disputeType} />
       <CaseComparisonCard
         taskCompletionRate={taskCompletionRate}
         evidenceCount={evidenceResult.count ?? 0}
