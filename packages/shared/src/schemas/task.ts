@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const updateTaskSchema = z.object({
-  status: z.enum(['todo', 'in_progress', 'needs_review', 'completed', 'skipped']),
+  status: z.enum(['todo', 'in_progress', 'needs_review', 'completed', 'skipped']).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
