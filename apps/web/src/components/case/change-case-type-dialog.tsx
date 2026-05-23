@@ -78,7 +78,7 @@ const PI_SUB_TYPES = [
 ]
 
 function needsSubType(type: string) {
-  return type === 'family' || type === 'business'
+  return type === 'family' || type === 'business' || type === 'landlord_tenant' || type === 'personal_injury'
 }
 
 function getSubTypeOptions(type: string) {
