@@ -328,6 +328,13 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      { error: 'Document generation is temporarily unavailable. Please try again later.' },
+      { status: 503 }
+    )
+  }
+
   const startTime = Date.now()
   try {
     const { id: caseId } = await params
@@ -449,12 +456,21 @@ export async function POST(
     }
 
     const anthropic = new Anthropic()
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: prompt.system,
-      messages: [{ role: 'user', content: prompt.user }],
-    })
+    let message
+    try {
+      message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: prompt.system,
+        messages: [{ role: 'user', content: prompt.user }],
+      })
+    } catch (err) {
+      console.error('[generate-filing] Anthropic API error:', err)
+      return NextResponse.json(
+        { error: 'Document generation failed. Please check your inputs and try again.' },
+        { status: 502 }
+      )
+    }
 
     const fullText = message.content
       .filter((block) => block.type === 'text')
