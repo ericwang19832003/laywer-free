@@ -114,7 +114,6 @@ import { standingOrdersConfig } from '@lawyer-free/shared/guided-steps/family/fa
 // Personal injury depth guided-step configs
 import { piDamagesCalculationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-damages-calculation'
 import { piPipClaimConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pip-claim'
-import { piMedicalImprovementConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-medical-improvement'
 import { piFilingGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-filing-guide'
 import { piServiceGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-service-guide'
 import { piCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-courtroom-guide'
@@ -202,6 +201,7 @@ import { PIDemandLetterStep } from '@/components/step/personal-injury/pi-demand-
 import { PersonalInjuryWizard } from '@/components/step/personal-injury-wizard'
 import { PIMedicalRecordsStep } from '@/components/step/personal-injury/pi-medical-records-step'
 import { PIInsuranceCommunicationStep } from '@/components/step/personal-injury/pi-insurance-communication-step'
+import { PIMedicalImprovementStep } from '@/components/step/personal-injury/pi-medical-improvement-step'
 import { PISettlementNegotiationStep } from '@/components/step/personal-injury/pi-settlement-negotiation-step'
 import { PIFileWithCourtStep } from '@/components/step/personal-injury/pi-file-with-court-step'
 import { PIServeDefendantStep } from '@/components/step/personal-injury/pi-serve-defendant-step'
@@ -1198,7 +1198,7 @@ export default async function StepPage({
     case 'pi_pip_claim':
       return <GuidedStep caseId={id} taskId={taskId} config={piPipClaimConfig} existingAnswers={task.metadata?.guided_answers} skippable />
     case 'pi_medical_improvement':
-      return <GuidedStep caseId={id} taskId={taskId} config={piMedicalImprovementConfig} existingAnswers={task.metadata?.guided_answers} />
+      return <PIMedicalImprovementStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_filing_guide':
       return <GuidedStep caseId={id} taskId={taskId} config={piFilingGuideConfig} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_service_guide':
