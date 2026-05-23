@@ -29,8 +29,8 @@ const LEVEL_CONFIG = {
     bg: 'bg-amber-50',
     iconColor: 'text-calm-amber',
     titleColor: 'text-amber-800',
-    title: 'Statute of Limitations Has Expired',
-    description: 'The deadline to file this type of claim has passed. You should consult with an attorney immediately to discuss your options.',
+    title: 'Statute of Limitations May Have Expired',
+    description: 'Your statute of limitations may be approaching or expired. We strongly recommend consulting an attorney to assess whether your claim can still proceed.',
   },
   critical: {
     icon: AlertTriangle,
@@ -39,7 +39,7 @@ const LEVEL_CONFIG = {
     iconColor: 'text-calm-amber',
     titleColor: 'text-amber-700',
     title: 'Statute of Limitations Expiring Soon',
-    description: 'You must file your case before the statute of limitations expires. Missing this deadline means you lose the right to sue.',
+    description: 'Your statute of limitations may be approaching or expired. We strongly recommend consulting an attorney to assess whether your claim can still proceed.',
   },
   warning: {
     icon: AlertTriangle,
@@ -48,7 +48,7 @@ const LEVEL_CONFIG = {
     iconColor: 'text-amber-500',
     titleColor: 'text-amber-700',
     title: 'Statute of Limitations Approaching',
-    description: 'Your filing deadline is approaching. Plan to file well before the expiration date.',
+    description: 'Note: Personal injury claims in Texas generally have a 2-year statute of limitations from the date of incident. Consult an attorney if you\'re unsure about your deadline.',
   },
   caution: {
     icon: Clock,

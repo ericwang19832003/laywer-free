@@ -122,19 +122,19 @@ function getPreflightTip(subType: string): string {
 /* ------------------------------------------------------------------ */
 
 function getStepsForSubType(subType: string): WizardStep[] {
-  const preflight: WizardStep = { id: 'preflight', title: 'Before You Start', subtitle: "Let's make sure you have what you need." }
-  const incident: WizardStep = { id: 'incident', title: 'What Happened', subtitle: 'Tell us about the incident.' }
-  const otherDriver: WizardStep = { id: 'other_driver', title: 'Other Driver Info', subtitle: 'Information about the other driver.' }
-  const premises: WizardStep = { id: 'premises', title: 'Property/Location Info', subtitle: 'Details about where it happened.' }
-  const product: WizardStep = { id: 'product', title: 'Product Information', subtitle: 'Details about the defective product.' }
+  const preflight: WizardStep = { id: 'preflight', title: 'Before You Start', subtitle: "We'll review your case timeline, court selection, and make sure you're filing in the right place." }
+  const incident: WizardStep = { id: 'incident', title: 'What Happened', subtitle: 'Describe the accident or incident. Be specific about date, location, and what happened — courts need clear facts.' }
+  const otherDriver: WizardStep = { id: 'other_driver', title: 'Other Driver Info', subtitle: 'Provide information about the party responsible. Their name and contact details help identify the defendant.' }
+  const premises: WizardStep = { id: 'premises', title: 'Property/Location Info', subtitle: 'Provide information about the party responsible. Their name and contact details help identify the defendant.' }
+  const product: WizardStep = { id: 'product', title: 'Product Information', subtitle: 'Provide information about the party responsible. Their name and contact details help identify the defendant.' }
   const damageDetails: WizardStep = { id: 'damage_details', title: 'Damage Details', subtitle: 'Describe the property damage.' }
-  const injuries: WizardStep = { id: 'injuries', title: 'Your Injuries', subtitle: 'Describe your injuries.' }
-  const medical: WizardStep = { id: 'medical', title: 'Medical Treatment', subtitle: 'Your medical providers and costs.' }
-  const damages: WizardStep = { id: 'damages', title: 'Your Damages', subtitle: 'Calculate your total damages.' }
+  const injuries: WizardStep = { id: 'injuries', title: 'Your Injuries', subtitle: 'List every injury you suffered. Include both physical and emotional impact — this forms the basis of your damages claim.' }
+  const medical: WizardStep = { id: 'medical', title: 'Medical Treatment', subtitle: "Add medical providers you've seen. Treatment records are key evidence of your injuries and costs." }
+  const damages: WizardStep = { id: 'damages', title: 'Your Damages', subtitle: 'Calculate your total losses: medical bills, lost wages, property damage, and pain and suffering.' }
   const insurance: WizardStep = { id: 'insurance', title: 'Insurance Information', subtitle: 'Your insurance details.' }
   const venue: WizardStep = { id: 'venue', title: 'Where to File', subtitle: "We'll help you pick the right court." }
   const howToFile: WizardStep = { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how to submit your petition.' }
-  const review: WizardStep = { id: 'review', title: 'Review Everything', subtitle: 'Check your information before generating.' }
+  const review: WizardStep = { id: 'review', title: 'Review Everything', subtitle: 'Review everything before we generate your petition. Make sure all facts are accurate.' }
 
   const common = [preflight, incident]
 

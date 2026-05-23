@@ -83,7 +83,7 @@ export function StepAuthoritySidebar({
   if (loading) {
     return (
       <div className="rounded-lg border border-warm-border p-4">
-        <p className="text-xs text-warm-muted">Loading saved cases...</p>
+        <p className="text-xs text-warm-muted">Loading saved case law...</p>
       </div>
     )
   }
@@ -92,10 +92,10 @@ export function StepAuthoritySidebar({
     return (
       <div className="rounded-lg border border-warm-border p-4">
         <p className="text-xs font-medium text-warm-muted uppercase tracking-wide mb-1">
-          Saved Cases
+          Saved Case Law
         </p>
         <p className="text-sm text-warm-muted">
-          No saved cases yet. Use the{' '}
+          No saved case law yet. Use the{' '}
           <a
             href={`/case/${caseId}/research`}
             className="text-calm-indigo hover:underline"
@@ -115,7 +115,7 @@ export function StepAuthoritySidebar({
         className="w-full flex items-center justify-between p-3 text-left hover:bg-warm-bg/50 transition-colors"
       >
         <span className="text-xs font-medium text-warm-muted uppercase tracking-wide">
-          {mode === 'select' ? 'Cite Saved Cases' : 'Your Saved Cases'}{' '}
+          {mode === 'select' ? 'Cite Saved Case Law' : 'Your Saved Case Law'}{' '}
           ({authorities.length})
         </span>
         {collapsed ? (
