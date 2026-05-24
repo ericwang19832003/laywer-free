@@ -1,5 +1,5 @@
 {
-  "installCommand": "rm -rf ../../node_modules && npm install --prefix=../.. --legacy-peer-deps",
+  "installCommand": "echo \"npm: $(npm --version), node: $(node --version), which: $(which npm), pwd: $(pwd)\" && npm install --prefix=../.. --legacy-peer-deps",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
