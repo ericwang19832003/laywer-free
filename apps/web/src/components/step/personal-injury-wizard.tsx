@@ -41,6 +41,7 @@ interface MedicalProvider {
 interface PersonalInjuryWizardProps {
   caseId: string
   taskId: string
+  initialTaskStatus: string
   existingMetadata?: Record<string, unknown>
   personalInjuryDetails: {
     pi_sub_type?: string
@@ -187,7 +188,7 @@ function defaultMultiplier(severity: string): number {
 /* ------------------------------------------------------------------ */
 
 function suggestCourtType(totalDamages: number): string {
-  if (totalDamages <= 20000) return 'jp'
+  if (totalDamages < 20000) return 'jp'
   if (totalDamages <= 200000) return 'county'
   return 'district'
 }
@@ -236,6 +237,7 @@ const PROVIDER_TYPES = [
 export function PersonalInjuryWizard({
   caseId,
   taskId,
+  initialTaskStatus,
   existingMetadata,
   personalInjuryDetails,
   caseData,
@@ -397,6 +399,7 @@ export function PersonalInjuryWizard({
   const [currentStep, setCurrentStep] = useState(
     typeof meta._wizard_step === 'number' ? meta._wizard_step : 0
   )
+  const [hasTransitioned, setHasTransitioned] = useState(initialTaskStatus !== 'todo')
   const [draft, setDraft] = useState<string>((meta.draft_text as string) ?? '')
   const [annotations, setAnnotations] = useState<DraftAnnotation[]>(
     (meta.annotations as DraftAnnotation[]) ?? []
@@ -615,7 +618,7 @@ export function PersonalInjuryWizard({
       injury_severity: injurySeverity || null,
       body_parts_affected: bodyPartsAffected,
       // Medical
-      medical_providers: medicalProviders,
+      medical_providers: medicalProviders.filter(p => p.name.trim() !== ''),
       // Damages
       lost_wages: lostWages || null,
       property_damage: propertyDamage || null,
@@ -703,11 +706,14 @@ export function PersonalInjuryWizard({
 
   /* ---- API helpers ---- */
 
-  async function patchTask(status: string, metadata?: Record<string, unknown>) {
+  async function patchTask(status?: string, metadata?: Record<string, unknown>) {
     const res = await fetch(`/api/tasks/${taskId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, ...(metadata ? { metadata } : {}) }),
+      body: JSON.stringify({
+        ...(status !== undefined ? { status } : {}),
+        ...(metadata ? { metadata } : {}),
+      }),
     })
     if (!res.ok) {
       const err = await res.json()
@@ -746,19 +752,36 @@ export function PersonalInjuryWizard({
   /* ---- Wizard handlers ---- */
 
   const handleSave = useCallback(async () => {
-    await patchTask('in_progress', buildMetadata())
-  }, [buildMetadata]) // eslint-disable-line react-hooks/exhaustive-deps
+    const metadata = buildMetadata()
+    if (!hasTransitioned) {
+      await patchTask('in_progress', metadata)
+      setHasTransitioned(true)
+    } else {
+      await patchTask(undefined, metadata)
+    }
+  }, [buildMetadata, hasTransitioned]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = useCallback(async () => {
-    await patchTask('in_progress', buildMetadata())
+    const metadata = buildMetadata()
+    if (!hasTransitioned) {
+      await patchTask('in_progress', metadata)
+      setHasTransitioned(true)
+    } else {
+      await patchTask(undefined, metadata)
+    }
     await generateDraft()
-  }, [buildMetadata, buildFacts]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildMetadata, buildFacts, hasTransitioned]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFinalConfirm = useCallback(async () => {
     setConfirming(true)
     try {
       const metadata = buildMetadata()
-      await patchTask('in_progress', metadata)
+      if (!hasTransitioned) {
+        await patchTask('in_progress', metadata)
+        setHasTransitioned(true)
+      } else {
+        await patchTask(undefined, metadata)
+      }
       await patchTask('completed')
       router.push(`/case/${caseId}`)
     } catch (err) {
@@ -766,7 +789,7 @@ export function PersonalInjuryWizard({
     } finally {
       setConfirming(false)
     }
-  }, [buildMetadata, caseId, router]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildMetadata, caseId, router, hasTransitioned]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---- canAdvance per step ---- */
 

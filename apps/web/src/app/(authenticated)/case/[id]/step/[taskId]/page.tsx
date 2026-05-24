@@ -1254,6 +1254,7 @@ export default async function StepPage({
         <PersonalInjuryWizard
           caseId={id}
           taskId={taskId}
+          initialTaskStatus={task.status}
           existingMetadata={task.metadata}
           personalInjuryDetails={piDetails}
           caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county', state: caseRow?.state ?? undefined }}
