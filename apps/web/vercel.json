@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm cache clean --force && npm install --prefix=../.. --legacy-peer-deps --no-package-lock",
+  "installCommand": "npm install --prefix=../.. --legacy-peer-deps",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
