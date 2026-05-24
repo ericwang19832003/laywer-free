@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { WizardShell } from '@/components/ui/wizard-shell'
 import type { WizardStep } from '@/components/ui/wizard-shell'
@@ -399,7 +399,7 @@ export function PersonalInjuryWizard({
   const [currentStep, setCurrentStep] = useState(
     typeof meta._wizard_step === 'number' ? meta._wizard_step : 0
   )
-  const [hasTransitioned, setHasTransitioned] = useState(initialTaskStatus !== 'todo')
+  const hasTransitionedRef = useRef(initialTaskStatus !== 'todo')
   const [draft, setDraft] = useState<string>((meta.draft_text as string) ?? '')
   const [annotations, setAnnotations] = useState<DraftAnnotation[]>(
     (meta.annotations as DraftAnnotation[]) ?? []
@@ -753,32 +753,32 @@ export function PersonalInjuryWizard({
 
   const handleSave = useCallback(async () => {
     const metadata = buildMetadata()
-    if (!hasTransitioned) {
+    if (!hasTransitionedRef.current) {
       await patchTask('in_progress', metadata)
-      setHasTransitioned(true)
+      hasTransitionedRef.current = true
     } else {
       await patchTask(undefined, metadata)
     }
-  }, [buildMetadata, hasTransitioned]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildMetadata]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = useCallback(async () => {
     const metadata = buildMetadata()
-    if (!hasTransitioned) {
+    if (!hasTransitionedRef.current) {
       await patchTask('in_progress', metadata)
-      setHasTransitioned(true)
+      hasTransitionedRef.current = true
     } else {
       await patchTask(undefined, metadata)
     }
     await generateDraft()
-  }, [buildMetadata, buildFacts, hasTransitioned]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildMetadata, buildFacts]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFinalConfirm = useCallback(async () => {
     setConfirming(true)
     try {
       const metadata = buildMetadata()
-      if (!hasTransitioned) {
+      if (!hasTransitionedRef.current) {
         await patchTask('in_progress', metadata)
-        setHasTransitioned(true)
+        hasTransitionedRef.current = true
       } else {
         await patchTask(undefined, metadata)
       }
@@ -789,7 +789,7 @@ export function PersonalInjuryWizard({
     } finally {
       setConfirming(false)
     }
-  }, [buildMetadata, caseId, router, hasTransitioned]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildMetadata, caseId, router]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---- canAdvance per step ---- */
 
