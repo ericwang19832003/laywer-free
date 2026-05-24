@@ -1,5 +1,5 @@
 {
-  "installCommand": "COREPACK_ENABLE_AUTO_PIN=0 npm install --prefix=../.. --legacy-peer-deps",
+  "installCommand": "npm install --prefix=../.. --legacy-peer-deps --no-workspaces",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
