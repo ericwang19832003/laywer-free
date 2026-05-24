@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       role, county, court_type, dispute_type, state,
       family_sub_type, small_claims_sub_type, landlord_tenant_sub_type,
       debt_sub_type, pi_sub_type, business_sub_type, contract_sub_type,
-      property_sub_type, other_sub_type, re_sub_type,
+      property_sub_type, other_sub_type, re_sub_type, description,
     } = parsed.data
 
     // Atomic case + detail creation via database transaction
@@ -80,6 +80,15 @@ export async function POST(request: NextRequest) {
         { error: 'Case created but failed to fetch', details: caseError.message },
         { status: 500 }
       )
+    }
+
+    // Persist the user-provided case name
+    if (description && newCase) {
+      await supabase
+        .from('cases')
+        .update({ description })
+        .eq('id', caseId)
+      newCase.description = description
     }
 
     // Fetch auto-created tasks (created by the seed_case_tasks trigger)
