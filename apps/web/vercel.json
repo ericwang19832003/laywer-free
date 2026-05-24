@@ -1,6 +1,6 @@
 {
-  "installCommand": "echo 'install handled in build'",
-  "buildCommand": "npm install --prefix=../.. --legacy-peer-deps && cd ../.. && npx turbo build --filter=@lawyer-free/web",
+  "installCommand": "rm -rf ../../node_modules && npm install --prefix=../.. --legacy-peer-deps",
+  "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
     { "path": "/api/cron/send-reminders", "schedule": "0 * * * *" },
