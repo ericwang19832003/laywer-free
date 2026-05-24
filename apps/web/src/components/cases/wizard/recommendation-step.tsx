@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ChevronRight, Scale, HelpCircle } from 'lucide-react'
+import { ChevronRight, Scale, HelpCircle, X } from 'lucide-react'
 import type { CourtRecommendation } from '@lawyer-free/shared/rules/court-recommendation'
 import type { State } from '@lawyer-free/shared/schemas/case'
 import { getStateConfig } from '@/lib/states'
@@ -62,6 +62,8 @@ interface RecommendationStepProps {
   selectedState?: State
   county: string
   onCountyChange: (county: string) => void
+  caseName: string
+  onCaseNameChange: (name: string) => void
   onAccept: (courtOverride: string | null) => void
   loading: boolean
 }
@@ -71,6 +73,8 @@ export function RecommendationStep({
   selectedState = 'TX',
   county,
   onCountyChange,
+  caseName,
+  onCaseNameChange,
   onAccept,
   loading,
 }: RecommendationStepProps) {
@@ -107,6 +111,31 @@ export function RecommendationStep({
 
   return (
     <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="case-name">Name your case</Label>
+        <div className="relative">
+          <Input
+            id="case-name"
+            value={caseName}
+            onChange={(e) => onCaseNameChange(e.target.value.slice(0, 80))}
+            placeholder="e.g. Auto Accident — May 2026"
+            className="pr-8"
+            autoFocus
+            onFocus={(e) => e.target.select()}
+          />
+          {caseName && (
+            <button
+              type="button"
+              onClick={() => onCaseNameChange('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-warm-muted hover:text-warm-text transition-colors"
+              aria-label="Clear name"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-warm-muted">{80 - caseName.length} characters remaining</p>
+      </div>
       <div className="rounded-lg border border-warm-border bg-white p-4 space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-warm-muted uppercase tracking-wide">
@@ -214,7 +243,7 @@ export function RecommendationStep({
             type="button"
             className="w-full"
             onClick={() => onAccept(null)}
-            disabled={loading}
+            disabled={loading || !caseName.trim()}
           >
             {loading ? 'Creating...' : 'Get Started'}
           </Button>
@@ -271,7 +300,7 @@ export function RecommendationStep({
             type="button"
             className="w-full"
             onClick={() => onAccept(override || null)}
-            disabled={loading || !override}
+            disabled={loading || !override || !caseName.trim()}
           >
             {loading ? 'Creating...' : 'Get Started'}
           </Button>
