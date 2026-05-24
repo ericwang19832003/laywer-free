@@ -403,6 +403,8 @@ CRITICAL RULES:
 - Do NOT predict outcomes or make strategic recommendations.
 - Use clear, professional legal language appropriate for a pro se litigant filing in a Texas court.
 - Number ALL paragraphs and sub-paragraphs (1., 2.1, 2.2, 3.1, 4.1, 4.2, etc.).
+- Do NOT add [VERIFY:], [CHECK:], or any bracketed annotation markers to citations or legal references. Use statutes and rules exactly as given.
+- Do NOT leave unfilled placeholder text. If a required value is not provided, omit that element entirely.
 
 DOCUMENT STRUCTURE \u2014 follow this exact section order:
 

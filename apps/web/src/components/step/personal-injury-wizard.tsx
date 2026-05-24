@@ -74,6 +74,14 @@ interface PersonalInjuryWizardProps {
 
 const MOTOR_VEHICLE_TYPES = ['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist']
 
+function formatDateForDisplay(isoDate: string): string {
+  if (!isoDate) return ''
+  const parts = isoDate.split('-')
+  if (parts.length !== 3) return isoDate
+  const [year, month, day] = parts
+  return `${month}/${day}/${year}`
+}
+
 function getSubTypeLabel(subType: string): string {
   switch (subType) {
     case 'auto_accident': return 'Auto Accident'
@@ -1736,7 +1744,7 @@ export function PersonalInjuryWizard({
               stepId="incident"
               onEdit={handleReviewEdit}
             >
-              <ReviewRow label="Date" value={incidentDate || 'Not provided'} />
+              <ReviewRow label="Date" value={formatDateForDisplay(incidentDate) || 'Not provided'} />
               <ReviewRow label="Location" value={incidentLocation || 'Not provided'} />
               <ReviewRow label="Description" value={incidentDescription || 'Not provided'} />
               <ReviewRow label="Police report" value={policeReportFiled === true ? `Yes${policeReportNumber ? ` (#${policeReportNumber})` : ''}` : policeReportFiled === false ? 'No' : 'Not answered'} />
@@ -1776,7 +1784,7 @@ export function PersonalInjuryWizard({
               >
                 <ReviewRow label="Product" value={productName || 'Not provided'} />
                 <ReviewRow label="Manufacturer" value={manufacturer || 'Not provided'} />
-                <ReviewRow label="Purchase date" value={purchaseDate || 'Not provided'} />
+                <ReviewRow label="Purchase date" value={formatDateForDisplay(purchaseDate) || 'Not provided'} />
                 <ReviewRow label="Defect" value={defectDescription || 'Not provided'} />
               </ReviewSection>
             )}
@@ -1857,6 +1865,7 @@ export function PersonalInjuryWizard({
                   <ReviewRow label="Property damage" value={`$${(parseFloat(propertyDamage) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
                   <ReviewRow label={`Pain & suffering (${painSufferingMultiplier}x)`} value={`$${painSufferingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
                   <ReviewRow label="Grand total" value={`$${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} bold />
+                  <p className="text-xs text-warm-muted mt-2">These exact amounts will appear in your petition. Your demand letter may have used a different amount as a negotiating starting position.</p>
                 </ReviewSection>
               </>
             )}
@@ -1946,7 +1955,18 @@ export function PersonalInjuryWizard({
             </div>
 
             {acknowledged && (
-              <div className="mt-6">
+              <div className="mt-6 space-y-4">
+                {/* Next Steps card */}
+                <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-4">
+                  <p className="text-sm font-medium text-warm-text mb-2">After you download: what to do next</p>
+                  <ol className="text-sm text-warm-muted space-y-1 list-decimal list-inside">
+                    <li>Fill in any blank fields — search <strong>CAUSE NO.</strong> and <strong>PRECINCT</strong> in the document and enter the values from the court clerk.</li>
+                    <li>Print 2 copies of the petition (one for the court, one for your records).</li>
+                    <li>Bring both copies to the courthouse along with the filing fee (typically $85–$175 in Texas JP courts).</li>
+                    <li>The clerk will stamp your copy, assign a cause number, and tell you when the defendant must be served.</li>
+                  </ol>
+                </div>
+
                 <Button
                   onClick={handleFinalConfirm}
                   disabled={confirming}
@@ -1962,7 +1982,7 @@ export function PersonalInjuryWizard({
                     'Confirm & Submit'
                   )}
                 </Button>
-                <p className="text-xs text-warm-muted text-center mt-2">
+                <p className="text-xs text-warm-muted text-center">
                   This saves your document and marks this step as complete.
                 </p>
               </div>
@@ -2010,6 +2030,7 @@ export function PersonalInjuryWizard({
           canAdvance={canAdvance}
           totalEstimateMinutes={totalEstimateMinutes}
           completeButtonLabel={generating ? 'Generating...' : 'Generate My Petition'}
+          completedSteps={Array.from({ length: currentStep }, (_, i) => i)}
         >
           {generating ? (
             <div className="flex items-center gap-3 py-12 justify-center">

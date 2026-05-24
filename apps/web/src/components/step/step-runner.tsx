@@ -75,7 +75,8 @@ export function StepRunner({
       toast.success('Nice work! Step complete.')
       router.push(`/case/${caseId}`)
       router.refresh()
-    } catch {
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       setLoading(false)
     }
   }
