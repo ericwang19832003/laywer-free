@@ -1,5 +1,5 @@
 {
-  "installCommand": "COREPACK_ENABLE_STRICT=0 npm install --prefix=../.. --legacy-peer-deps",
+  "installCommand": "npx --yes npm@9 install --prefix=../.. --legacy-peer-deps",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
