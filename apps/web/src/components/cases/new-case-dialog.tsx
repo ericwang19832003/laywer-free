@@ -64,6 +64,63 @@ function getTotalSteps(disputeType: DisputeType | '', landlordTenantSubType?: st
   return 6
 }
 
+const DISPUTE_TYPE_LABELS: Record<string, string> = {
+  personal_injury: 'Personal Injury',
+  small_claims: 'Small Claims',
+  landlord_tenant: 'Landlord/Tenant',
+  debt_collection: 'Debt Collection',
+  family: 'Family Law',
+  business: 'Business Dispute',
+  contract: 'Contract Dispute',
+  property: 'Property Dispute',
+  real_estate: 'Real Estate',
+  other: 'Legal Matter',
+}
+
+const SUB_TYPE_LABELS: Record<string, string> = {
+  auto_accident: 'Auto Accident',
+  slip_and_fall: 'Slip & Fall',
+  medical_malpractice: 'Medical Malpractice',
+  dog_bite: 'Dog Bite',
+  workplace_injury: 'Workplace Injury',
+  wrongful_death: 'Wrongful Death',
+  product_liability: 'Product Liability',
+  assault: 'Assault',
+  property_damage: 'Property Damage',
+  unpaid_debt: 'Unpaid Debt',
+  security_deposit: 'Security Deposit',
+  bad_check: 'Bad Check',
+  consumer_complaint: 'Consumer Complaint',
+  eviction: 'Eviction',
+  habitability: 'Habitability',
+  lease_dispute: 'Lease Dispute',
+  credit_card: 'Credit Card Debt',
+  medical_debt: 'Medical Debt',
+  student_loan: 'Student Loan',
+  mortgage: 'Mortgage',
+  auto_loan: 'Auto Loan',
+  personal_loan: 'Personal Loan',
+  divorce: 'Divorce',
+  child_custody: 'Child Custody',
+  child_support: 'Child Support',
+  alimony: 'Alimony',
+  adoption: 'Adoption',
+  breach_of_contract: 'Breach of Contract',
+  partnership_dispute: 'Partnership Dispute',
+  employment: 'Employment Dispute',
+  intellectual_property: 'IP Dispute',
+  general: 'Legal Matter',
+}
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function generateCaseName(disputeType: string, subType: string): string {
+  const now = new Date()
+  const monthYear = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
+  const label = (subType && SUB_TYPE_LABELS[subType]) || DISPUTE_TYPE_LABELS[disputeType] || 'My Case'
+  return `${label} — ${monthYear}`
+}
+
 interface WizardState {
   step: number
   selectedState: State | ''
@@ -215,7 +272,30 @@ export function NewCaseDialog() {
     }
   }, [open])
   const [loading, setLoading] = useState(false)
+  const [caseName, setCaseName] = useState('')
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (state.disputeType) {
+      const subType =
+        state.piSubType ||
+        state.familySubType ||
+        state.businessSubType ||
+        state.smallClaimsSubType ||
+        state.landlordTenantSubType ||
+        state.debtSubType ||
+        ''
+      setCaseName(generateCaseName(state.disputeType, subType))
+    }
+  }, [
+    state.disputeType,
+    state.piSubType,
+    state.familySubType,
+    state.businessSubType,
+    state.smallClaimsSubType,
+    state.landlordTenantSubType,
+    state.debtSubType,
+  ])
   const router = useRouter()
   const { gatedFetch } = useUpgradeGateContext()
   const { casesRemaining, tier, loading: subLoading } = useSubscription()
@@ -303,6 +383,7 @@ export function NewCaseDialog() {
           ...(isPersonalInjury && state.piSubType
             ? { pi_sub_type: state.piSubType }
             : {}),
+          ...(caseName.trim() ? { description: caseName.trim() } : {}),
         }),
       })
 
@@ -348,6 +429,7 @@ export function NewCaseDialog() {
     setOpen(nextOpen)
     if (!nextOpen) {
       dispatch({ type: 'RESET' })
+      setCaseName('')
       setError(null)
       setLoading(false)
     }
@@ -726,6 +808,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -737,6 +821,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -748,6 +834,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -759,6 +847,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -824,6 +914,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -853,6 +945,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -864,6 +958,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -875,6 +971,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 
@@ -886,6 +984,8 @@ export function NewCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName={caseName}
+            onCaseNameChange={setCaseName}
           />
         )}
 

@@ -658,6 +658,8 @@ export function ImportCaseDialog() {
             onCountyChange={(county) => dispatch({ type: 'SET_COUNTY', county })}
             onAccept={handleAccept}
             loading={loading}
+            caseName=""
+            onCaseNameChange={() => {}}
           />
         )}
 
