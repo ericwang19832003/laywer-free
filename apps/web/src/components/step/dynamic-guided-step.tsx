@@ -551,6 +551,8 @@ const SKIPPABLE_TASK_KEYS = new Set([
   'sc_default_judgment',
   'sc_appeal_guide',
   'sc_counterclaim_defense',
+  're_demand_letter',
+  're_negotiation',
   're_title_defect_analysis',
   're_seller_disclosure',
   're_earnest_money',

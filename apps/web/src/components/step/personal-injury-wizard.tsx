@@ -188,7 +188,7 @@ function defaultMultiplier(severity: string): number {
 /* ------------------------------------------------------------------ */
 
 function suggestCourtType(totalDamages: number): string {
-  if (totalDamages < 20000) return 'jp'
+  if (totalDamages <= 20000) return 'jp'
   if (totalDamages <= 200000) return 'county'
   return 'district'
 }
