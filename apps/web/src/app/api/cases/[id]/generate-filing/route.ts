@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { ZodType } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateFilingRequestSchema } from '@lawyer-free/shared/schemas/filing'
@@ -328,7 +328,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(
       { error: 'Document generation is temporarily unavailable. Please try again later.' },
       { status: 503 }
@@ -455,27 +455,25 @@ export async function POST(
       }
     }
 
-    const anthropic = new Anthropic()
-    let message
+    const openai = new OpenAI()
+    let fullText: string
     try {
-      message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o',
         max_tokens: 4096,
-        system: prompt.system,
-        messages: [{ role: 'user', content: prompt.user }],
+        messages: [
+          { role: 'system', content: prompt.system },
+          { role: 'user', content: prompt.user },
+        ],
       })
+      fullText = completion.choices[0]?.message?.content ?? ''
     } catch (err) {
-      console.error('[generate-filing] Anthropic API error:', err)
+      console.error('[generate-filing] OpenAI API error:', err)
       return NextResponse.json(
         { error: 'Document generation failed. Please check your inputs and try again.' },
         { status: 502 }
       )
     }
-
-    const fullText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
 
     const annotationMarker = '---ANNOTATIONS---'
     const markerIndex = fullText.indexOf(annotationMarker)
