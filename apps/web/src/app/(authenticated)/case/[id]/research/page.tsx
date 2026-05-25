@@ -62,33 +62,28 @@ export default async function ResearchPage({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-warm-border bg-warm-bg/50">
-          <CardContent className="p-5 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-warm-muted">Step 1</p>
-            <h3 className="text-lg font-semibold text-warm-text">Search for case law</h3>
-            <p className="text-sm text-warm-muted">
-              Use filters and context to find authorities tailored to your case.
-            </p>
-            <Button asChild className="bg-warm-ink text-white hover:bg-warm-ink/90">
-              <Link href={`/case/${id}/research/search`}>Go to Search</Link>
+      <Card className="border-warm-border">
+        <CardContent className="divide-y divide-warm-border p-0">
+          <div className="flex items-start gap-3 p-4">
+            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-warm-text text-xs font-bold text-white">
+              1
+            </div>
+            <p className="flex-1 min-w-0 text-sm font-semibold text-warm-text leading-snug">Search for case law</p>
+            <Button asChild size="sm" className="flex-shrink-0 bg-warm-text text-white hover:bg-warm-text/90">
+              <Link href={`/case/${id}/research/search`}>Search →</Link>
             </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="border-warm-border bg-warm-bg/50">
-          <CardContent className="p-5 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-warm-muted">Step 2</p>
-            <h3 className="text-lg font-semibold text-warm-text">Ask a research question</h3>
-            <p className="text-sm text-warm-muted">
-              Ask questions and get citation-backed responses from saved authorities.
-            </p>
-            <Button asChild variant="outline">
-              <Link href={`/case/${id}/research/ask`}>Go to Ask</Link>
+          </div>
+          <div className="flex items-start gap-3 p-4">
+            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-warm-muted/20 text-xs font-bold text-warm-muted">
+              2
+            </div>
+            <p className="flex-1 min-w-0 text-sm font-semibold text-warm-text leading-snug">Ask a research question</p>
+            <Button asChild size="sm" variant="outline" className="flex-shrink-0">
+              <Link href={`/case/${id}/research/ask`}>Ask →</Link>
             </Button>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="border-warm-border">
         <CardContent className="p-5">
