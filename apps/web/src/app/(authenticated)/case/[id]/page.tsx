@@ -2,10 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { SupportiveHeader } from '@/components/layout/supportive-header'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
-import { DashboardTabs } from './dashboard-tabs'
-import { FocusTab } from './focus-tab'
-import { OverviewTab } from './overview-tab'
-import { ToolsTab } from './tools-tab'
+import { SinglePageDashboard } from './single-page-dashboard'
 import { TabSkeleton } from './tab-skeleton'
 
 export default async function DashboardPage({
@@ -53,23 +50,9 @@ export default async function DashboardPage({
           subtitle="You're in control. We'll guide the process and track deadlines."
         />
 
-        <DashboardTabs
-          focusContent={
-            <Suspense fallback={<TabSkeleton />}>
-              <FocusTab {...shared} />
-            </Suspense>
-          }
-          overviewContent={
-            <Suspense fallback={<TabSkeleton />}>
-              <OverviewTab {...shared} />
-            </Suspense>
-          }
-          toolsContent={
-            <Suspense fallback={<TabSkeleton />}>
-              <ToolsTab caseId={id} />
-            </Suspense>
-          }
-        />
+        <Suspense fallback={<TabSkeleton />}>
+          <SinglePageDashboard {...shared} />
+        </Suspense>
 
         <LegalDisclaimer />
       </main>
