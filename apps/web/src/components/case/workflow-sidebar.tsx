@@ -187,14 +187,8 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
   const initialCollapsed = new Set<number>()
-  phases.forEach((phase, idx) => {
-    const phaseTasks = phase.taskKeys
-      .map((k) => taskMap.get(k))
-      .filter(Boolean) as SidebarTask[]
-    const allDone =
-      phaseTasks.length > 0 &&
-      phaseTasks.every((t) => t.status === 'completed' || t.status === 'skipped')
-    if (allDone) initialCollapsed.add(idx)
+  phases.forEach((_, idx) => {
+    if (idx !== currentPhaseIdx) initialCollapsed.add(idx)
   })
 
   const [collapsed, setCollapsed] = useState(initialCollapsed)
