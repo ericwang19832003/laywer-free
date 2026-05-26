@@ -1,5 +1,5 @@
 {
-  "installCommand": "rm -rf /vercel/.npm/_npx 2>/dev/null; cd ../.. && npm install --legacy-peer-deps --ignore-scripts",
+  "installCommand": "cd ../.. && npm install --legacy-peer-deps --force",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
