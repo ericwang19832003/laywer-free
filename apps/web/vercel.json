@@ -1,6 +1,6 @@
 {
   "installCommand": "cd ../.. && COREPACK_ENABLE_STRICT=0 npx --yes yarn@1 install --ignore-engines",
-  "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
+  "buildCommand": "cd ../.. && COREPACK_ENABLE_STRICT=0 npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
     { "path": "/api/cron/send-reminders", "schedule": "0 * * * *" },
