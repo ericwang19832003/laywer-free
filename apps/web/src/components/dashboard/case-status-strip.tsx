@@ -29,7 +29,8 @@ function progressText(tasksSummary: Record<string, number>): string {
 function strengthText(riskLevel: string | null | undefined): { text: string; color: string } {
   switch (riskLevel) {
     case 'low': return { text: 'Your case looks solid', color: 'bg-calm-green/10 text-calm-green' }
-    case 'medium': return { text: 'A few things to watch', color: 'bg-calm-amber/10 text-calm-amber' }
+    case 'moderate':
+    case 'elevated': return { text: 'A few things to watch', color: 'bg-calm-amber/10 text-calm-amber' }
     case 'high': return { text: 'Needs your attention', color: 'bg-red-100 text-red-700' }
     default: return { text: 'Still gathering data', color: 'bg-warm-border/40 text-warm-muted' }
   }
