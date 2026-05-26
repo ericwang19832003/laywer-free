@@ -183,6 +183,7 @@ export function PIIntakeStep({
         <dt className="text-sm font-medium text-warm-muted">Case stage</dt>
         <dd className="text-warm-text mt-0.5">
           {caseStage === 'start' && 'Just getting started'}
+          {caseStage === 'preservation' && 'Sending an evidence preservation letter'}
           {caseStage === 'medical' && 'Collecting medical records / estimates'}
           {caseStage === 'insurance' && 'Dealing with insurance'}
           {caseStage === 'demand' && 'Ready to send a demand letter'}
@@ -311,6 +312,7 @@ export function PIIntakeStep({
           <div className="space-y-2">
             {[
               { value: 'start', label: 'Just getting started', desc: 'I haven\'t taken any action yet.' },
+              { value: 'preservation', label: 'Sending an evidence preservation letter', desc: 'Putting the other party on notice to preserve surveillance footage, records, and communications.' },
               { value: 'medical', label: 'Collecting medical records / estimates', desc: 'I\'m gathering documentation of my damages.' },
               { value: 'insurance', label: 'Dealing with insurance', desc: 'I\'m communicating with the insurance company.' },
               { value: 'demand', label: 'Ready to send a demand letter', desc: 'I\'m ready to make a formal demand.' },
