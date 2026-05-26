@@ -105,6 +105,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Auto-complete the welcome task — it's a content-free interstitial with no user value.
+    // We bypass the task PATCH API here because VALID_TRANSITIONS blocks todo→completed directly.
+    const welcomeTask = (tasks ?? []).find((t) => t.task_key === 'welcome')
+    if (welcomeTask && welcomeTask.status === 'todo') {
+      const now = new Date().toISOString()
+      await supabase
+        .from('tasks')
+        .update({ status: 'completed', completed_at: now })
+        .eq('id', welcomeTask.id)
+      welcomeTask.status = 'completed'
+      welcomeTask.completed_at = now
+    }
+
     return NextResponse.json({ case: newCase, tasks }, { status: 201 })
   } catch {
     return NextResponse.json(
