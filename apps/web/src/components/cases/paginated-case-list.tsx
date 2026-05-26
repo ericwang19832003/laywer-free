@@ -32,12 +32,12 @@ export function PaginatedCaseList({
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loading, setLoading] = useState(false)
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([])
   const [deleting, setDeleting] = useState(false)
 
   const handleCaseAction = useCallback(async (caseId: string, action: 'view' | 'delete' | 'archive') => {
     if (action === 'delete') {
-      setPendingDeleteId(caseId)
+      setPendingDeleteIds(prev => prev.includes(caseId) ? prev : [...prev, caseId])
     } else if (action === 'archive') {
       const res = await fetch(`/api/cases/${caseId}`, { method: 'DELETE' })
       if (res.ok) {
@@ -47,15 +47,17 @@ export function PaginatedCaseList({
   }, [])
 
   const confirmDelete = useCallback(async () => {
-    if (!pendingDeleteId) return
+    if (!pendingDeleteIds.length) return
     setDeleting(true)
-    const res = await fetch(`/api/cases/${pendingDeleteId}`, { method: 'DELETE' })
-    if (res.ok) {
-      setCases(prev => prev.filter(c => c.id !== pendingDeleteId))
-    }
+    await Promise.all(
+      pendingDeleteIds.map(async (id) => {
+        const res = await fetch(`/api/cases/${id}`, { method: 'DELETE' })
+        if (res.ok) setCases(prev => prev.filter(c => c.id !== id))
+      })
+    )
     setDeleting(false)
-    setPendingDeleteId(null)
-  }, [pendingDeleteId])
+    setPendingDeleteIds([])
+  }, [pendingDeleteIds])
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loading) return
@@ -95,12 +97,12 @@ export function PaginatedCaseList({
         />
       </div>
 
-      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null) }}>
+      <AlertDialog open={pendingDeleteIds.length > 0} onOpenChange={(open) => { if (!open) setPendingDeleteIds([]) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this case?</AlertDialogTitle>
+            <AlertDialogTitle>{pendingDeleteIds.length > 1 ? `Delete ${pendingDeleteIds.length} cases?` : 'Delete this case?'}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will archive the case and remove it from your dashboard. Your data will be preserved but the case will no longer appear in your active cases.
+              This will archive the {pendingDeleteIds.length > 1 ? 'cases' : 'case'} and remove {pendingDeleteIds.length > 1 ? 'them' : 'it'} from your dashboard. Your data will be preserved but the {pendingDeleteIds.length > 1 ? 'cases' : 'case'} will no longer appear in your active cases.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
