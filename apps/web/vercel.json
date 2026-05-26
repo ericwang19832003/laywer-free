@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../.. && npm install --legacy-peer-deps",
+  "installCommand": "cd ../.. && npx --yes yarn@1 install --ignore-engines --network-concurrency 1",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
