@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CaseCardData } from '@/components/cases/case-cards'
 
@@ -48,9 +50,10 @@ function formatDeadline(dateString: string): { text: string; className: string }
 
 interface CasesTableViewProps {
   cases: CaseCardData[]
+  onAction?: (caseId: string, action: 'delete' | 'archive') => void
 }
 
-export function CasesTableView({ cases }: CasesTableViewProps) {
+export function CasesTableView({ cases, onAction }: CasesTableViewProps) {
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
@@ -72,6 +75,7 @@ export function CasesTableView({ cases }: CasesTableViewProps) {
               <th className="text-left text-xs font-medium text-warm-muted px-5 py-3">
                 Last Activity
               </th>
+              <th className="px-5 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-warm-border">
@@ -133,6 +137,18 @@ export function CasesTableView({ cases }: CasesTableViewProps) {
                     <span className="text-xs text-warm-muted">
                       {c.lastActivity ? formatRelativeDate(c.lastActivity) : '—'}
                     </span>
+                  </td>
+                  <td className="px-3 py-3.5 text-right">
+                    {onAction && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.preventDefault(); onAction(c.id, 'delete') }}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/5 h-7 px-2"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </td>
                 </tr>
               )

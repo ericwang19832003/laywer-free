@@ -1006,7 +1006,7 @@ export function CaseCards({ cases, onCaseAction }: CaseCardsProps) {
               ))}
             </div>
           ) : viewMode === 'list' ? (
-            <CasesTableView cases={filteredAndSortedCases} />
+            <CasesTableView cases={filteredAndSortedCases} onAction={onCaseAction ? (id, action) => onCaseAction(id, action) : undefined} />
       ) : (
         <CaseTimelineView cases={filteredAndSortedCases} />
       )}
