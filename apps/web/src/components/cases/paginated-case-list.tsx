@@ -20,6 +20,7 @@ interface PaginatedCaseListProps {
   initialNextCursor: string | null
   initialHasMore: boolean
   totalCount: number
+  onCasesDeleted?: (count: number) => void
 }
 
 export function PaginatedCaseList({
@@ -27,6 +28,7 @@ export function PaginatedCaseList({
   initialNextCursor,
   initialHasMore,
   totalCount,
+  onCasesDeleted,
 }: PaginatedCaseListProps) {
   const [cases, setCases] = useState<CaseCardData[]>(initialCases)
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor)
@@ -42,22 +44,26 @@ export function PaginatedCaseList({
       const res = await fetch(`/api/cases/${caseId}`, { method: 'DELETE' })
       if (res.ok) {
         setCases(prev => prev.filter(c => c.id !== caseId))
+        onCasesDeleted?.(1)
       }
     }
-  }, [])
+  }, [onCasesDeleted])
 
   const confirmDelete = useCallback(async () => {
     if (!pendingDeleteIds.length) return
     setDeleting(true)
-    await Promise.all(
+    const results = await Promise.all(
       pendingDeleteIds.map(async (id) => {
         const res = await fetch(`/api/cases/${id}`, { method: 'DELETE' })
         if (res.ok) setCases(prev => prev.filter(c => c.id !== id))
+        return res.ok
       })
     )
+    const deletedCount = results.filter(Boolean).length
+    if (deletedCount > 0) onCasesDeleted?.(deletedCount)
     setDeleting(false)
     setPendingDeleteIds([])
-  }, [pendingDeleteIds])
+  }, [pendingDeleteIds, onCasesDeleted])
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loading) return

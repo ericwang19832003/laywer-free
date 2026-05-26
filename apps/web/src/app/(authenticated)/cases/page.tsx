@@ -3,9 +3,7 @@ import Link from 'next/link'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { NewCaseDialog } from '@/components/cases/new-case-dialog'
 import { ImportCaseDialog } from '@/components/cases/import-case-dialog'
-import { StatsCards } from '@/components/cases/stats-cards'
-import { CaseCards } from '@/components/cases/case-cards'
-import { PaginatedCaseList } from '@/components/cases/paginated-case-list'
+import { CasesWithStats } from '@/components/cases/cases-with-stats'
 import { TodaysActionCard } from '@/components/cases/todays-action-card'
 import { Clock, Shield, FileText } from 'lucide-react'
 import Image from 'next/image'
@@ -155,16 +153,12 @@ export default async function CasesPage() {
           <>
             <TodaysActionCard />
 
-            <StatsCards
+            <CasesWithStats
               activeCases={totalCaseCount ?? cases.length}
               tasksCompleted={totalCompleted}
               tasksTotal={totalTasks}
-              // eslint-disable-next-line react-hooks/purity
               upcomingDeadlines={allDeadlines.filter(d => new Date(d.due_at).getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000).length}
               averageHealth={avgHealth}
-            />
-
-            <PaginatedCaseList
               initialCases={caseRows.map(row => ({
                 id: row.id,
                 description: row.description || '',
