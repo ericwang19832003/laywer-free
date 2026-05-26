@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
           link: `/case/${a.case_id}/deadlines`,
         }
       })
-      .filter(Boolean)
+      .filter((n): n is NonNullable<typeof n> => n !== null)
 
     if (notificationRows.length > 0) {
       await supabase.from('notifications').insert(notificationRows)
