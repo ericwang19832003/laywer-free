@@ -65,6 +65,7 @@ const SKIPPABLE_TASKS = new Set([
   'property_insurance_guide',
   'property_mediation_guide',
   'property_pretrial_motions',
+  'pi_court_selection',
   'pi_pip_claim',
   'pi_comparative_fault',
   'pi_expert_witness_guide',

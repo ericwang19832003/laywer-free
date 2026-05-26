@@ -51,6 +51,7 @@ import { PIMedicalRecordsStep } from '@/components/step/personal-injury/pi-medic
 import { PIInsuranceCommunicationStep } from '@/components/step/personal-injury/pi-insurance-communication-step'
 import { PISettlementNegotiationStep } from '@/components/step/personal-injury/pi-settlement-negotiation-step'
 import { PIFileWithCourtStep } from '@/components/step/personal-injury/pi-file-with-court-step'
+import { PiCourtSelectionStep } from '@/components/step/personal-injury/pi-court-selection-step'
 import { PIServeDefendantStep } from '@/components/step/personal-injury/pi-serve-defendant-step'
 import { PITrialPrepStep } from '@/components/step/personal-injury/pi-trial-prep-step'
 import { PIPostResolutionStep } from '@/components/step/personal-injury/pi-post-resolution-step'
@@ -1244,6 +1245,11 @@ export default async function StepPage({
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
       return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} skippable />
+    }
+    case 'pi_court_selection': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      return <PiCourtSelectionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
     }
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase

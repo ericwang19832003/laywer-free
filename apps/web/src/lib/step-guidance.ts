@@ -167,6 +167,14 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
       'Your minimum acceptable settlement amount',
     ],
   },
+  pi_court_selection: {
+    why: 'Filing in the wrong court can get your case dismissed. Texas has separate courts for different damage amounts.',
+    checklist: [
+      'County where the incident happened',
+      'County where the defendant lives or does business',
+      'Your estimated damages range',
+    ],
+  },
   prepare_pi_petition: {
     why: 'If settlement talks fail, filing a lawsuit preserves your right to recover damages through the court.',
     checklist: [
