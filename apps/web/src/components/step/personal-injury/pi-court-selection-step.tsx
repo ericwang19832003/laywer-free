@@ -8,6 +8,7 @@ interface PiCourtSelectionStepProps {
   caseId: string
   taskId: string
   piSubType?: string
+  state?: string
   existingAnswers?: Record<string, string>
 }
 
@@ -15,10 +16,11 @@ export function PiCourtSelectionStep({
   caseId,
   taskId,
   piSubType,
+  state,
   existingAnswers,
 }: PiCourtSelectionStepProps) {
   // Memoize so config reference stays stable across re-renders
-  const config = useMemo(() => createPiCourtSelectionConfig(piSubType), [piSubType])
+  const config = useMemo(() => createPiCourtSelectionConfig(piSubType, state), [piSubType, state])
   return (
     <GuidedStep
       caseId={caseId}

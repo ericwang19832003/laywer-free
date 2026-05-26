@@ -45,17 +45,17 @@ import { standingOrdersConfig } from '@lawyer-free/shared/guided-steps/family/fa
 
 // ── Small Claims ────────────────────────────────────────────────────────────
 import { scEvidenceVaultConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-evidence-vault'
-import { scFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-file-with-court'
-import { scJpCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
-import { scFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
-import { scServiceGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-service-guide'
+import { createScFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-file-with-court'
+import { createScCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
+import { createScFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
+import { createScServiceGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-service-guide'
 import { scCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-courtroom-guide'
-import { scEvidenceRulesConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-evidence-rules'
-import { scDamagesByTypeConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-damages-by-type'
+import { createScEvidenceRulesConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-evidence-rules'
+import { createScDamagesByTypeConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-damages-by-type'
 import { scSettlementGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-settlement-guide'
 import { scDefaultJudgmentConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-default-judgment'
-import { scPostJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-post-judgment-guide'
-import { scAppealGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-appeal-guide'
+import { createScPostJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-post-judgment-guide'
+import { createScAppealGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-appeal-guide'
 import { scCounterclaimDefenseConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-counterclaim-defense'
 
 // ── Landlord-Tenant: chain ──────────────────────────────────────────────────
@@ -79,8 +79,8 @@ import { ltAppealGuideConfig } from '@lawyer-free/shared/guided-steps/landlord-t
 import { ltCourtroomGuideConfig as ltCourtroomGuideDeepConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-courtroom-guide'
 import { ltLeaseTerminationGuideConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-lease-termination-guide'
 import { ltWritOfPossessionConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-writ-of-possession'
-import { ltRepairRequestConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-repair-request'
-import { ltEvictionResponseConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-response'
+import { createLtRepairRequestConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-repair-request'
+import { createLtEvictionResponseConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-eviction-response'
 import { ltHabitabilityChecklistConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-habitability-checklist'
 import { ltSb38AwarenessConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-sb38-awareness'
 import { ltFederalPropertyCheckConfig } from '@lawyer-free/shared/guided-steps/landlord-tenant/lt-federal-property-check'
@@ -152,7 +152,7 @@ import { contractDemandLetterConfig } from '@lawyer-free/shared/guided-steps/con
 import { contractNegotiationConfig } from '@lawyer-free/shared/guided-steps/contract/contract-negotiation'
 import { contractFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/contract/contract-file-with-court'
 import { contractServeDefendantConfig } from '@lawyer-free/shared/guided-steps/contract/contract-serve-defendant'
-import { contractWaitForAnswerConfig } from '@lawyer-free/shared/guided-steps/contract/contract-wait-for-answer'
+import { createContractWaitForAnswerConfig } from '@lawyer-free/shared/guided-steps/contract/contract-wait-for-answer'
 import { contractReviewAnswerConfig } from '@lawyer-free/shared/guided-steps/contract/contract-review-answer'
 import { contractDiscoveryConfig } from '@lawyer-free/shared/guided-steps/contract/contract-discovery'
 import { contractMediationConfig } from '@lawyer-free/shared/guided-steps/contract/contract-mediation'
@@ -161,9 +161,9 @@ import { contractBreachAnalysisConfig } from '@lawyer-free/shared/guided-steps/c
 import { contractStatuteOfFraudsConfig } from '@lawyer-free/shared/guided-steps/contract/contract-statute-of-frauds'
 import { contractDamagesMethodsConfig } from '@lawyer-free/shared/guided-steps/contract/contract-damages-methods'
 import { contractProvisionsCheckConfig } from '@lawyer-free/shared/guided-steps/contract/contract-provisions-check'
-import { contractDefensesGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-defenses-guide'
-import { contractFilingGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide'
-import { contractServiceGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-service-guide'
+import { createContractDefensesGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-defenses-guide'
+import { createContractFilingGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-filing-guide'
+import { createContractServiceGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-service-guide'
 import { contractCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-courtroom-guide'
 import { contractSettlementGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-settlement-guide'
 import { contractPostJudgmentGuideConfig } from '@lawyer-free/shared/guided-steps/contract/contract-post-judgment-guide'
@@ -240,8 +240,9 @@ import { piMedicalImprovementConfig } from '@lawyer-free/shared/guided-steps/per
 /**
  * Returns the GuidedStepConfig for a given task key, or null if unrecognised.
  * Factory-based configs accept a sub-type encoded in the task key itself.
+ * Pass `state` (e.g. 'CA', 'NY') for state-aware configs; defaults to 'TX'.
  */
-function resolveConfig(taskKey: string): GuidedStepConfig | null {
+function resolveConfig(taskKey: string, state?: string): GuidedStepConfig | null {
   switch (taskKey) {
     // ── Family: Divorce ─────────────────────────────────────────────────────
     case 'divorce_intake': return createFamilyIntakeConfig('divorce')
@@ -333,17 +334,17 @@ function resolveConfig(taskKey: string): GuidedStepConfig | null {
 
     // ── Small Claims ────────────────────────────────────────────────────────
     case 'sc_evidence_vault': return scEvidenceVaultConfig
-    case 'sc_file_with_court': return scFileWithCourtConfig
-    case 'sc_jp_court_guide': return scJpCourtGuideConfig
-    case 'sc_filing_guide': return scFilingGuideConfig
-    case 'sc_service_guide': return scServiceGuideConfig
+    case 'sc_file_with_court': return createScFileWithCourtConfig(state)
+    case 'sc_jp_court_guide': return createScCourtGuideConfig(state)
+    case 'sc_filing_guide': return createScFilingGuideConfig(state)
+    case 'sc_service_guide': return createScServiceGuideConfig(state)
     case 'sc_courtroom_guide': return scCourtroomGuideConfig
-    case 'sc_evidence_rules': return scEvidenceRulesConfig
-    case 'sc_damages_by_type': return scDamagesByTypeConfig
+    case 'sc_evidence_rules': return createScEvidenceRulesConfig(state)
+    case 'sc_damages_by_type': return createScDamagesByTypeConfig(state)
     case 'sc_settlement_guide': return scSettlementGuideConfig
     case 'sc_default_judgment': return scDefaultJudgmentConfig
-    case 'sc_post_judgment_guide': return scPostJudgmentGuideConfig
-    case 'sc_appeal_guide': return scAppealGuideConfig
+    case 'sc_post_judgment_guide': return createScPostJudgmentGuideConfig(state)
+    case 'sc_appeal_guide': return createScAppealGuideConfig(state)
     case 'sc_counterclaim_defense': return scCounterclaimDefenseConfig
 
     // ── Landlord-Tenant: chain ──────────────────────────────────────────────
@@ -358,8 +359,8 @@ function resolveConfig(taskKey: string): GuidedStepConfig | null {
     case 'lt_post_judgment': return postJudgmentConfig
 
     // ── Landlord-Tenant: depth steps ────────────────────────────────────────
-    case 'lt_repair_request': return ltRepairRequestConfig
-    case 'lt_eviction_response': return ltEvictionResponseConfig
+    case 'lt_repair_request': return createLtRepairRequestConfig(state)
+    case 'lt_eviction_response': return createLtEvictionResponseConfig(state)
     case 'lt_habitability_checklist': return ltHabitabilityChecklistConfig
     case 'lt_security_deposit_demand': return ltSecurityDepositDemandConfig
     case 'lt_repair_and_deduct': return ltRepairAndDeductConfig
@@ -443,7 +444,7 @@ function resolveConfig(taskKey: string): GuidedStepConfig | null {
     case 'contract_negotiation': return contractNegotiationConfig
     case 'contract_file_with_court': return contractFileWithCourtConfig
     case 'contract_serve_defendant': return contractServeDefendantConfig
-    case 'contract_wait_for_answer': return contractWaitForAnswerConfig
+    case 'contract_wait_for_answer': return createContractWaitForAnswerConfig(state)
     case 'contract_review_answer': return contractReviewAnswerConfig
     case 'contract_discovery': return contractDiscoveryConfig
     case 'contract_mediation': return contractMediationConfig
@@ -454,9 +455,9 @@ function resolveConfig(taskKey: string): GuidedStepConfig | null {
     case 'contract_statute_of_frauds': return contractStatuteOfFraudsConfig
     case 'contract_damages_methods': return contractDamagesMethodsConfig
     case 'contract_provisions_check': return contractProvisionsCheckConfig
-    case 'contract_defenses_guide': return contractDefensesGuideConfig
-    case 'contract_filing_guide': return contractFilingGuideConfig
-    case 'contract_service_guide': return contractServiceGuideConfig
+    case 'contract_defenses_guide': return createContractDefensesGuideConfig(state)
+    case 'contract_filing_guide': return createContractFilingGuideConfig(state)
+    case 'contract_service_guide': return createContractServiceGuideConfig(state)
     case 'contract_courtroom_guide': return contractCourtroomGuideConfig
     case 'contract_settlement_guide': return contractSettlementGuideConfig
     case 'contract_post_judgment_guide': return contractPostJudgmentGuideConfig
@@ -621,6 +622,11 @@ interface DynamicGuidedStepProps {
   taskId: string
   existingAnswers?: Record<string, string>
   /**
+   * Two-letter state code (e.g. 'CA', 'NY') for state-aware configs.
+   * Defaults to 'TX' when omitted.
+   */
+  state?: string
+  /**
    * Optional override for skippable. When provided, takes precedence over the
    * built-in SKIPPABLE_TASK_KEYS set. Useful for task keys whose skippable
    * state depends on runtime data (e.g. biz_employment_eeoc).
@@ -628,8 +634,8 @@ interface DynamicGuidedStepProps {
   skippable?: boolean
 }
 
-export function DynamicGuidedStep({ taskKey, caseId, taskId, existingAnswers, skippable }: DynamicGuidedStepProps) {
-  const config = resolveConfig(taskKey)
+export function DynamicGuidedStep({ taskKey, caseId, taskId, existingAnswers, state, skippable }: DynamicGuidedStepProps) {
+  const config = resolveConfig(taskKey, state)
 
   if (!config) {
     // Unrecognised task key — should not happen in practice

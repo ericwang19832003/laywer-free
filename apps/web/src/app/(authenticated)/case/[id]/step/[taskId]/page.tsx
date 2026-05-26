@@ -231,6 +231,13 @@ export default async function StepPage({
     }
   }
 
+  const { data: caseStateData } = await supabase
+    .from('cases')
+    .select('state')
+    .eq('id', id)
+    .maybeSingle()
+  const caseState = caseStateData?.state ?? undefined
+
   switch (task.task_key) {
     case 'welcome':
       return <WelcomeStep caseId={id} taskId={taskId} />
@@ -543,116 +550,116 @@ export default async function StepPage({
     }
     // Family law — Divorce (12 tasks)
     case 'divorce_intake':
-      return <DynamicGuidedStep taskKey="divorce_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_safety_screening':
       return <SafetyScreeningStep caseId={id} taskId={taskId} />
     case 'divorce_evidence_vault':
-      return <DynamicGuidedStep taskKey="divorce_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'divorce_file_with_court':
-      return <DynamicGuidedStep taskKey="divorce_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_serve_respondent':
-      return <DynamicGuidedStep taskKey="divorce_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_waiting_period':
-      return <DynamicGuidedStep taskKey="divorce_waiting_period" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_waiting_period" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_temporary_orders':
-      return <DynamicGuidedStep taskKey="divorce_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_mediation':
-      return <DynamicGuidedStep taskKey="divorce_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_property_division':
-      return <DynamicGuidedStep taskKey="divorce_property_division" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_property_division" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_final_orders':
-      return <DynamicGuidedStep taskKey="divorce_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Custody (10 tasks)
     case 'custody_intake':
-      return <DynamicGuidedStep taskKey="custody_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_safety_screening':
       return <SafetyScreeningStep caseId={id} taskId={taskId} />
     case 'custody_evidence_vault':
-      return <DynamicGuidedStep taskKey="custody_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'custody_file_with_court':
-      return <DynamicGuidedStep taskKey="custody_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_serve_respondent':
-      return <DynamicGuidedStep taskKey="custody_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_temporary_orders':
-      return <DynamicGuidedStep taskKey="custody_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_mediation':
-      return <DynamicGuidedStep taskKey="custody_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_final_orders':
-      return <DynamicGuidedStep taskKey="custody_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Child Support (8 tasks)
     case 'child_support_intake':
-      return <DynamicGuidedStep taskKey="child_support_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_evidence_vault':
-      return <DynamicGuidedStep taskKey="child_support_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'child_support_file_with_court':
-      return <DynamicGuidedStep taskKey="child_support_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_serve_respondent':
-      return <DynamicGuidedStep taskKey="child_support_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_temporary_orders':
-      return <DynamicGuidedStep taskKey="child_support_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_final_orders':
-      return <DynamicGuidedStep taskKey="child_support_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Visitation (9 tasks)
     case 'visitation_intake':
-      return <DynamicGuidedStep taskKey="visitation_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_safety_screening':
       return <SafetyScreeningStep caseId={id} taskId={taskId} />
     case 'visitation_evidence_vault':
-      return <DynamicGuidedStep taskKey="visitation_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'visitation_file_with_court':
-      return <DynamicGuidedStep taskKey="visitation_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_serve_respondent':
-      return <DynamicGuidedStep taskKey="visitation_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_mediation':
-      return <DynamicGuidedStep taskKey="visitation_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_final_orders':
-      return <DynamicGuidedStep taskKey="visitation_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Spousal Support (8 tasks)
     case 'spousal_support_intake':
-      return <DynamicGuidedStep taskKey="spousal_support_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_evidence_vault':
-      return <DynamicGuidedStep taskKey="spousal_support_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'spousal_support_file_with_court':
-      return <DynamicGuidedStep taskKey="spousal_support_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_serve_respondent':
-      return <DynamicGuidedStep taskKey="spousal_support_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_temporary_orders':
-      return <DynamicGuidedStep taskKey="spousal_support_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_temporary_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_final_orders':
-      return <DynamicGuidedStep taskKey="spousal_support_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Protective Order (6 tasks)
     case 'po_intake':
-      return <DynamicGuidedStep taskKey="po_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="po_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'po_safety_screening':
       return <SafetyScreeningStep caseId={id} taskId={taskId} isProtectiveOrder />
     case 'po_prepare_filing': {
@@ -661,30 +668,30 @@ export default async function StepPage({
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'po_file_with_court':
-      return <DynamicGuidedStep taskKey="po_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="po_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'po_hearing':
-      return <DynamicGuidedStep taskKey="po_hearing" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="po_hearing" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Modification (9 tasks)
     case 'mod_intake':
-      return <DynamicGuidedStep taskKey="mod_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_intake" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_evidence_vault':
-      return <DynamicGuidedStep taskKey="mod_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_existing_order_review':
-      return <DynamicGuidedStep taskKey="mod_existing_order_review" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_existing_order_review" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_prepare_filing': {
       const { data: caseRow } = await supabase.from('cases').select('county, state').eq('id', id).single()
       const { data: familyDetails } = await supabase.from('family_case_details').select('*').eq('case_id', id).maybeSingle()
       return <FamilyLawWizard caseId={id} taskId={taskId} existingMetadata={task.metadata} familyDetails={familyDetails} caseData={{ county: caseRow?.county ?? null, state: caseRow?.state ?? undefined }} />
     }
     case 'mod_file_with_court':
-      return <DynamicGuidedStep taskKey="mod_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_serve_respondent':
-      return <DynamicGuidedStep taskKey="mod_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_serve_respondent" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_mediation':
-      return <DynamicGuidedStep taskKey="mod_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_final_orders':
-      return <DynamicGuidedStep taskKey="mod_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_final_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family motions (filed from Motions page)
     case 'protective_order': {
@@ -800,9 +807,9 @@ export default async function StepPage({
       )
     }
     case 'sc_evidence_vault':
-      return <DynamicGuidedStep taskKey="sc_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_file_with_court':
-      return <DynamicGuidedStep taskKey="sc_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_serve_defendant':
       return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'sc_prepare_for_hearing':
@@ -836,7 +843,7 @@ export default async function StepPage({
       )
     }
     case 'lt_negotiation':
-      return <DynamicGuidedStep taskKey="lt_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'prepare_landlord_tenant_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
@@ -853,257 +860,257 @@ export default async function StepPage({
       )
     }
     case 'lt_file_with_court':
-      return <DynamicGuidedStep taskKey="lt_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'serve_other_party':
       return <ServeOtherPartyStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'lt_wait_for_response':
-      return <DynamicGuidedStep taskKey="lt_wait_for_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_wait_for_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_review_response':
-      return <DynamicGuidedStep taskKey="lt_review_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_review_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_discovery':
-      return <DynamicGuidedStep taskKey="lt_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_prepare_for_hearing':
-      return <DynamicGuidedStep taskKey="lt_prepare_for_hearing" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_prepare_for_hearing" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_mediation':
-      return <DynamicGuidedStep taskKey="lt_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_hearing_day':
-      return <DynamicGuidedStep taskKey="lt_hearing_day" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_hearing_day" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_post_judgment':
-      return <DynamicGuidedStep taskKey="lt_post_judgment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_post_judgment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     // Small claims depth steps
     case 'sc_jp_court_guide':
-      return <DynamicGuidedStep taskKey="sc_jp_court_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_jp_court_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_filing_guide':
-      return <DynamicGuidedStep taskKey="sc_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_service_guide':
-      return <DynamicGuidedStep taskKey="sc_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_courtroom_guide':
-      return <DynamicGuidedStep taskKey="sc_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_evidence_rules':
-      return <DynamicGuidedStep taskKey="sc_evidence_rules" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_evidence_rules" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_damages_by_type':
-      return <DynamicGuidedStep taskKey="sc_damages_by_type" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_damages_by_type" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_settlement_guide':
-      return <DynamicGuidedStep taskKey="sc_settlement_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_settlement_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_default_judgment':
-      return <DynamicGuidedStep taskKey="sc_default_judgment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_default_judgment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_post_judgment_guide':
-      return <DynamicGuidedStep taskKey="sc_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_appeal_guide':
-      return <DynamicGuidedStep taskKey="sc_appeal_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_appeal_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_counterclaim_defense':
-      return <DynamicGuidedStep taskKey="sc_counterclaim_defense" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="sc_counterclaim_defense" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Real estate depth steps
     case 're_filing_guide':
-      return <DynamicGuidedStep taskKey="re_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_service_guide':
-      return <DynamicGuidedStep taskKey="re_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_courtroom_guide':
-      return <DynamicGuidedStep taskKey="re_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_title_defect_analysis':
-      return <DynamicGuidedStep taskKey="re_title_defect_analysis" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_title_defect_analysis" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_seller_disclosure':
-      return <DynamicGuidedStep taskKey="re_seller_disclosure" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_seller_disclosure" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_earnest_money':
-      return <DynamicGuidedStep taskKey="re_earnest_money" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_earnest_money" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_construction_defect':
-      return <DynamicGuidedStep taskKey="re_construction_defect" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_construction_defect" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_failed_closing':
-      return <DynamicGuidedStep taskKey="re_failed_closing" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_failed_closing" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_adverse_possession':
-      return <DynamicGuidedStep taskKey="re_adverse_possession" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_adverse_possession" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_discovery_guide':
-      return <DynamicGuidedStep taskKey="re_discovery_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_discovery_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_post_judgment_guide':
-      return <DynamicGuidedStep taskKey="re_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Business dispute depth steps
     case 'biz_courtroom_guide':
-      return <DynamicGuidedStep taskKey="biz_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_service_guide':
-      return <DynamicGuidedStep taskKey="biz_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_discovery_guide':
-      return <DynamicGuidedStep taskKey="biz_discovery_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_discovery_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_wrongful_termination':
-      return <DynamicGuidedStep taskKey="biz_wrongful_termination" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_wrongful_termination" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_wage_theft':
-      return <DynamicGuidedStep taskKey="biz_wage_theft" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_wage_theft" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_non_compete':
-      return <DynamicGuidedStep taskKey="biz_non_compete" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_non_compete" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_contract_breach':
-      return <DynamicGuidedStep taskKey="biz_b2b_contract_breach" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_contract_breach" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_trade_secrets':
-      return <DynamicGuidedStep taskKey="biz_b2b_trade_secrets" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_trade_secrets" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_fiduciary':
-      return <DynamicGuidedStep taskKey="biz_partnership_fiduciary" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_fiduciary" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_accounting':
-      return <DynamicGuidedStep taskKey="biz_partnership_accounting" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_accounting" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Contract dispute depth steps
     case 'contract_breach_analysis':
-      return <DynamicGuidedStep taskKey="contract_breach_analysis" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_breach_analysis" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_statute_of_frauds':
-      return <DynamicGuidedStep taskKey="contract_statute_of_frauds" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_statute_of_frauds" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_damages_methods':
-      return <DynamicGuidedStep taskKey="contract_damages_methods" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_damages_methods" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_provisions_check':
-      return <DynamicGuidedStep taskKey="contract_provisions_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_provisions_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_defenses_guide':
-      return <DynamicGuidedStep taskKey="contract_defenses_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_defenses_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_filing_guide':
-      return <DynamicGuidedStep taskKey="contract_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_service_guide':
-      return <DynamicGuidedStep taskKey="contract_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_courtroom_guide':
-      return <DynamicGuidedStep taskKey="contract_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_settlement_guide':
-      return <DynamicGuidedStep taskKey="contract_settlement_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_settlement_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_post_judgment_guide':
-      return <DynamicGuidedStep taskKey="contract_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Property damage depth steps
     case 'property_damage_assessment':
-      return <DynamicGuidedStep taskKey="property_damage_assessment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_damage_assessment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_insurance_guide':
-      return <DynamicGuidedStep taskKey="property_insurance_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_insurance_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_filing_guide':
-      return <DynamicGuidedStep taskKey="property_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_service_guide':
-      return <DynamicGuidedStep taskKey="property_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_courtroom_guide':
-      return <DynamicGuidedStep taskKey="property_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_mediation_guide':
-      return <DynamicGuidedStep taskKey="property_mediation_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_mediation_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_pretrial_motions':
-      return <DynamicGuidedStep taskKey="property_pretrial_motions" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_pretrial_motions" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_damages_guide':
-      return <DynamicGuidedStep taskKey="property_damages_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_damages_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_post_judgment_guide':
-      return <DynamicGuidedStep taskKey="property_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Personal injury depth steps
     case 'pi_damages_calculation':
-      return <DynamicGuidedStep taskKey="pi_damages_calculation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_damages_calculation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_pip_claim':
-      return <DynamicGuidedStep taskKey="pi_pip_claim" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_pip_claim" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_medical_improvement':
-      return <DynamicGuidedStep taskKey="pi_medical_improvement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_medical_improvement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_filing_guide':
-      return <DynamicGuidedStep taskKey="pi_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_service_guide':
-      return <DynamicGuidedStep taskKey="pi_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_courtroom_guide':
-      return <DynamicGuidedStep taskKey="pi_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_comparative_fault':
-      return <DynamicGuidedStep taskKey="pi_comparative_fault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_comparative_fault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_lien_resolution':
-      return <DynamicGuidedStep taskKey="pi_lien_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_lien_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_expert_witness_guide':
-      return <DynamicGuidedStep taskKey="pi_expert_witness_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="pi_expert_witness_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Landlord-tenant depth steps
     case 'lt_repair_request':
-      return <DynamicGuidedStep taskKey="lt_repair_request" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_repair_request" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_eviction_response':
-      return <DynamicGuidedStep taskKey="lt_eviction_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_eviction_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_habitability_checklist':
-      return <DynamicGuidedStep taskKey="lt_habitability_checklist" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_habitability_checklist" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_security_deposit_demand':
-      return <DynamicGuidedStep taskKey="lt_security_deposit_demand" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_security_deposit_demand" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_repair_and_deduct':
-      return <DynamicGuidedStep taskKey="lt_repair_and_deduct" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_repair_and_deduct" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_illegal_lockout':
-      return <DynamicGuidedStep taskKey="lt_illegal_lockout" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_illegal_lockout" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_eviction_notice_analysis':
-      return <DynamicGuidedStep taskKey="lt_eviction_notice_analysis" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_eviction_notice_analysis" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_jp_court_procedures':
-      return <DynamicGuidedStep taskKey="lt_jp_court_procedures" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_jp_court_procedures" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_appeal_guide':
-      return <DynamicGuidedStep taskKey="lt_appeal_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_appeal_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_courtroom_guide':
-      return <DynamicGuidedStep taskKey="lt_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_lease_termination':
-      return <DynamicGuidedStep taskKey="lt_lease_termination" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_lease_termination" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_writ_of_possession':
-      return <DynamicGuidedStep taskKey="lt_writ_of_possession" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_writ_of_possession" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_sb38_awareness':
-      return <DynamicGuidedStep taskKey="lt_sb38_awareness" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_sb38_awareness" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_federal_property_check':
-      return <DynamicGuidedStep taskKey="lt_federal_property_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_federal_property_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_retaliation_defense':
-      return <DynamicGuidedStep taskKey="lt_retaliation_defense" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_retaliation_defense" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_rent_into_registry':
-      return <DynamicGuidedStep taskKey="lt_rent_into_registry" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_rent_into_registry" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_post_eviction_rights':
-      return <DynamicGuidedStep taskKey="lt_post_eviction_rights" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_post_eviction_rights" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_constructive_eviction':
-      return <DynamicGuidedStep taskKey="lt_constructive_eviction" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_constructive_eviction" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'lt_code_enforcement':
-      return <DynamicGuidedStep taskKey="lt_code_enforcement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="lt_code_enforcement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law depth steps
     case 'family_filing_guide':
-      return <DynamicGuidedStep taskKey="family_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_service_guide':
-      return <DynamicGuidedStep taskKey="family_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_courtroom_guide':
-      return <DynamicGuidedStep taskKey="family_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_mediation_prep':
-      return <DynamicGuidedStep taskKey="family_mediation_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_mediation_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_post_judgment_guide':
-      return <DynamicGuidedStep taskKey="family_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_discovery_guide':
-      return <DynamicGuidedStep taskKey="family_discovery_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_discovery_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_temp_orders_prep':
-      return <DynamicGuidedStep taskKey="family_temp_orders_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_temp_orders_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_property_division_guide':
-      return <DynamicGuidedStep taskKey="family_property_division_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_property_division_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_custody_factors':
-      return <DynamicGuidedStep taskKey="family_custody_factors" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_custody_factors" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_uncontested_path':
-      return <DynamicGuidedStep taskKey="family_uncontested_path" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="family_uncontested_path" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Response checkpoint (6 sub-types)
     case 'divorce_response_checkpoint':
-      return <DynamicGuidedStep taskKey="divorce_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_response_checkpoint':
-      return <DynamicGuidedStep taskKey="custody_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_response_checkpoint':
-      return <DynamicGuidedStep taskKey="child_support_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_response_checkpoint':
-      return <DynamicGuidedStep taskKey="visitation_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_response_checkpoint':
-      return <DynamicGuidedStep taskKey="spousal_support_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_response_checkpoint':
-      return <DynamicGuidedStep taskKey="mod_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_response_checkpoint" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Post-decree (6 sub-types)
     case 'divorce_post_decree':
-      return <DynamicGuidedStep taskKey="divorce_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_post_decree':
-      return <DynamicGuidedStep taskKey="custody_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_post_decree':
-      return <DynamicGuidedStep taskKey="child_support_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'visitation_post_decree':
-      return <DynamicGuidedStep taskKey="visitation_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="visitation_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_post_decree':
-      return <DynamicGuidedStep taskKey="spousal_support_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'mod_post_decree':
-      return <DynamicGuidedStep taskKey="mod_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="mod_post_decree" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law — Sub-type specific steps
     case 'custody_uccjea_affidavit':
-      return <DynamicGuidedStep taskKey="custody_uccjea_affidavit" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="custody_uccjea_affidavit" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'child_support_ag_option':
-      return <DynamicGuidedStep taskKey="child_support_ag_option" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_ag_option" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'spousal_support_eligibility':
-      return <DynamicGuidedStep taskKey="spousal_support_eligibility" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="spousal_support_eligibility" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'custody_paternity':
     case 'child_support_paternity':
-      return <DynamicGuidedStep taskKey="child_support_paternity" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="child_support_paternity" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'divorce_standing_orders':
-      return <DynamicGuidedStep taskKey="divorce_standing_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="divorce_standing_orders" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Debt defense task chain steps
     case 'debt_defense_intake':
@@ -1150,51 +1157,51 @@ export default async function StepPage({
       return <ServePlaintiffStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     // Debt defense depth steps
     case 'fdcpa_check':
-      return <DynamicGuidedStep taskKey="fdcpa_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="fdcpa_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_sol_check':
-      return <DynamicGuidedStep taskKey="debt_sol_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_sol_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_answer_prep':
-      return <DynamicGuidedStep taskKey="debt_answer_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_answer_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_filing_guide':
-      return <DynamicGuidedStep taskKey="debt_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_service_guide':
-      return <DynamicGuidedStep taskKey="debt_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_courtroom_guide':
-      return <DynamicGuidedStep taskKey="debt_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_post_judgment_guide':
-      return <DynamicGuidedStep taskKey="debt_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'fdcpa_counterclaim_guide':
-      return <DynamicGuidedStep taskKey="fdcpa_counterclaim_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="fdcpa_counterclaim_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_motion_to_dismiss':
-      return <DynamicGuidedStep taskKey="debt_motion_to_dismiss" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_motion_to_dismiss" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_default_recovery':
-      return <DynamicGuidedStep taskKey="debt_default_recovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_default_recovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_settlement_guide':
-      return <DynamicGuidedStep taskKey="debt_settlement_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_settlement_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_validation_response':
-      return <DynamicGuidedStep taskKey="debt_validation_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_validation_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_evidence_rules':
-      return <DynamicGuidedStep taskKey="debt_evidence_rules" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_evidence_rules" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_continuance_request':
-      return <DynamicGuidedStep taskKey="debt_continuance_request" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_continuance_request" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_witness_prep':
-      return <DynamicGuidedStep taskKey="debt_witness_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_witness_prep" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_credit_dispute':
-      return <DynamicGuidedStep taskKey="debt_credit_dispute" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_credit_dispute" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_court_type_guide':
-      return <DynamicGuidedStep taskKey="debt_court_type_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_court_type_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_pre_answer_settlement':
-      return <DynamicGuidedStep taskKey="debt_pre_answer_settlement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_pre_answer_settlement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_standing_challenge':
-      return <DynamicGuidedStep taskKey="debt_standing_challenge" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_standing_challenge" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_discovery_response':
-      return <DynamicGuidedStep taskKey="debt_discovery_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_discovery_response" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_business_records_challenge':
-      return <DynamicGuidedStep taskKey="debt_business_records_challenge" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_business_records_challenge" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_exemption_claim':
-      return <DynamicGuidedStep taskKey="debt_exemption_claim" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_exemption_claim" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_appeal_process':
-      return <DynamicGuidedStep taskKey="debt_appeal_process" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="debt_appeal_process" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'debt_hearing_prep':
       return <DebtHearingPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'debt_hearing_day':
@@ -1247,9 +1254,11 @@ export default async function StepPage({
       return <PISettlementNegotiationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} skippable />
     }
     case 'pi_court_selection': {
-      const { data: piDetails } = await supabase
-        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
-      return <PiCourtSelectionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} />
+      const [{ data: piDetails }, { data: caseRow }] = await Promise.all([
+        supabase.from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle(),
+        supabase.from('cases').select('state').eq('id', id).single(),
+      ])
+      return <PiCourtSelectionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} state={caseRow?.state ?? undefined} />
     }
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase
@@ -1316,9 +1325,9 @@ export default async function StepPage({
         />
       )
     case 'contract_demand_letter':
-      return <DynamicGuidedStep taskKey="contract_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_negotiation':
-      return <DynamicGuidedStep taskKey="contract_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
@@ -1335,19 +1344,19 @@ export default async function StepPage({
       )
     }
     case 'contract_file_with_court':
-      return <DynamicGuidedStep taskKey="contract_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_serve_defendant':
-      return <DynamicGuidedStep taskKey="contract_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_wait_for_answer':
-      return <DynamicGuidedStep taskKey="contract_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_review_answer':
-      return <DynamicGuidedStep taskKey="contract_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_discovery':
-      return <DynamicGuidedStep taskKey="contract_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_mediation':
-      return <DynamicGuidedStep taskKey="contract_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_mediation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_post_resolution':
-      return <DynamicGuidedStep taskKey="contract_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="contract_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Property dispute task chain steps
     case 'property_intake':
@@ -1359,9 +1368,9 @@ export default async function StepPage({
         />
       )
     case 'property_demand_letter':
-      return <DynamicGuidedStep taskKey="property_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_negotiation':
-      return <DynamicGuidedStep taskKey="property_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
@@ -1378,17 +1387,17 @@ export default async function StepPage({
       )
     }
     case 'property_file_with_court':
-      return <DynamicGuidedStep taskKey="property_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_serve_defendant':
-      return <DynamicGuidedStep taskKey="property_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_wait_for_answer':
-      return <DynamicGuidedStep taskKey="property_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_review_answer':
-      return <DynamicGuidedStep taskKey="property_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_discovery':
-      return <DynamicGuidedStep taskKey="property_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_post_resolution':
-      return <DynamicGuidedStep taskKey="property_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="property_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Real estate dispute task chain steps
     case 're_intake':
@@ -1400,11 +1409,11 @@ export default async function StepPage({
         />
       )
     case 're_evidence_vault':
-      return <DynamicGuidedStep taskKey="re_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_evidence_vault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_demand_letter':
-      return <DynamicGuidedStep taskKey="re_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_negotiation':
-      return <DynamicGuidedStep taskKey="re_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('court_type, county, state').eq('id', id).single()
@@ -1435,17 +1444,17 @@ export default async function StepPage({
       )
     }
     case 're_file_with_court':
-      return <DynamicGuidedStep taskKey="re_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_serve_defendant':
-      return <DynamicGuidedStep taskKey="re_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_wait_for_answer':
-      return <DynamicGuidedStep taskKey="re_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_review_answer':
-      return <DynamicGuidedStep taskKey="re_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_discovery':
-      return <DynamicGuidedStep taskKey="re_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_post_resolution':
-      return <DynamicGuidedStep taskKey="re_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="re_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Business: Partnership dispute task chain steps
     case 'biz_partnership_intake':
@@ -1457,11 +1466,11 @@ export default async function StepPage({
         />
       )
     case 'biz_partnership_evidence':
-      return <DynamicGuidedStep taskKey="biz_partnership_evidence" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_evidence" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_demand_letter':
-      return <DynamicGuidedStep taskKey="biz_partnership_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_adr':
-      return <DynamicGuidedStep taskKey="biz_partnership_adr" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_adr" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
@@ -1486,15 +1495,15 @@ export default async function StepPage({
       )
     }
     case 'biz_partnership_file_with_court':
-      return <DynamicGuidedStep taskKey="biz_partnership_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_serve_defendant':
-      return <DynamicGuidedStep taskKey="biz_partnership_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_wait_for_answer':
-      return <DynamicGuidedStep taskKey="biz_partnership_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_discovery':
-      return <DynamicGuidedStep taskKey="biz_partnership_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_post_resolution':
-      return <DynamicGuidedStep taskKey="biz_partnership_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_partnership_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Business: Employment dispute task chain steps
     case 'biz_employment_intake':
@@ -1506,15 +1515,15 @@ export default async function StepPage({
         />
       )
     case 'biz_employment_evidence':
-      return <DynamicGuidedStep taskKey="biz_employment_evidence" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_evidence" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_demand_letter':
-      return <DynamicGuidedStep taskKey="biz_employment_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_eeoc': {
       const { data: empIntakeTask } = await supabase
         .from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'biz_employment_intake').maybeSingle()
       const empIntakeMeta = empIntakeTask?.metadata as Record<string, unknown> | null
       const isDiscrimination = empIntakeMeta?.specific_dispute_type === 'discrimination_harassment'
-      return <DynamicGuidedStep taskKey="biz_employment_eeoc" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} skippable={!isDiscrimination} />
+      return <DynamicGuidedStep taskKey="biz_employment_eeoc" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} skippable={!isDiscrimination} state={caseState} />
     }
     case 'biz_employment_prepare_filing': {
       const { data: caseRow } = await supabase
@@ -1539,15 +1548,15 @@ export default async function StepPage({
       )
     }
     case 'biz_employment_file_with_court':
-      return <DynamicGuidedStep taskKey="biz_employment_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_serve_defendant':
-      return <DynamicGuidedStep taskKey="biz_employment_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_wait_for_answer':
-      return <DynamicGuidedStep taskKey="biz_employment_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_discovery':
-      return <DynamicGuidedStep taskKey="biz_employment_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_post_resolution':
-      return <DynamicGuidedStep taskKey="biz_employment_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_employment_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Business: B2B Commercial dispute task chain steps
     case 'biz_b2b_intake':
@@ -1559,11 +1568,11 @@ export default async function StepPage({
         />
       )
     case 'biz_b2b_evidence':
-      return <DynamicGuidedStep taskKey="biz_b2b_evidence" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_evidence" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_demand_letter':
-      return <DynamicGuidedStep taskKey="biz_b2b_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_negotiation':
-      return <DynamicGuidedStep taskKey="biz_b2b_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
@@ -1588,15 +1597,15 @@ export default async function StepPage({
       )
     }
     case 'biz_b2b_file_with_court':
-      return <DynamicGuidedStep taskKey="biz_b2b_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_serve_defendant':
-      return <DynamicGuidedStep taskKey="biz_b2b_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_wait_for_answer':
-      return <DynamicGuidedStep taskKey="biz_b2b_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_discovery':
-      return <DynamicGuidedStep taskKey="biz_b2b_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_post_resolution':
-      return <DynamicGuidedStep taskKey="biz_b2b_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="biz_b2b_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Other dispute task chain steps
     case 'other_intake':
@@ -1608,7 +1617,7 @@ export default async function StepPage({
         />
       )
     case 'other_demand_letter':
-      return <DynamicGuidedStep taskKey="other_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_demand_letter" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'other_prepare_filing': {
       const { data: caseRow } = await supabase
         .from('cases').select('county, court_type, state').eq('id', id).single()
@@ -1625,17 +1634,17 @@ export default async function StepPage({
       )
     }
     case 'other_file_with_court':
-      return <DynamicGuidedStep taskKey="other_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'other_serve_defendant':
-      return <DynamicGuidedStep taskKey="other_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'other_wait_for_answer':
-      return <DynamicGuidedStep taskKey="other_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_wait_for_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'other_review_answer':
-      return <DynamicGuidedStep taskKey="other_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_review_answer" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'other_discovery':
-      return <DynamicGuidedStep taskKey="other_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_discovery" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'other_post_resolution':
-      return <DynamicGuidedStep taskKey="other_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <DynamicGuidedStep taskKey="other_post_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     default:
       return (
