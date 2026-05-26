@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npx turbo build --filter=@lawyer-free/web",
+  "installCommand": "cd ../.. && npm install --legacy-peer-deps",
+  "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
     { "path": "/api/cron/send-reminders", "schedule": "0 * * * *" },
