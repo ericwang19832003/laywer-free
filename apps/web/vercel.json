@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../.. && npx --yes yarn@1 install --ignore-engines && echo YARN_OK && ls apps/web/node_modules/next/package.json 2>&1 && ls node_modules/next/package.json 2>&1",
+  "installCommand": "cd ../.. && echo AFTER_CD=$(pwd) && npx --yes yarn@1 --version && echo YARN_VERSION_OK",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
