@@ -41,4 +41,22 @@ describe('DashboardTabs', () => {
     expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tab', { name: 'Focus' })).toHaveAttribute('aria-selected', 'false')
   })
+
+  it('navigates tabs with arrow keys', () => {
+    setup()
+    const focusTab = screen.getByRole('tab', { name: 'Focus' })
+    focusTab.focus()
+    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
+    expect(screen.getByRole('tab', { name: 'Tools' })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
+    expect(screen.getByRole('tab', { name: 'Focus' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('navigates tabs with ArrowLeft', () => {
+    setup()
+    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowLeft' })
+    expect(screen.getByRole('tab', { name: 'Tools' })).toHaveAttribute('aria-selected', 'true')
+  })
 })
