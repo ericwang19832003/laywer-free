@@ -366,7 +366,7 @@ function CaseCardView({ caseData, onAction, isSelected, onSelect }: { caseData: 
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="p-2 rounded-lg hover:bg-warm-border/40 transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-2 rounded-lg hover:bg-warm-border/40 transition-colors"
                 >
                   <MoreVertical className="h-4 w-4 text-warm-muted" />
                 </button>
@@ -571,7 +571,7 @@ function CaseListRow({ caseData, onAction, isSelected, onSelect }: { caseData: C
         )}
       </td>
       <td className="py-3 px-4">
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1">
           <Link href={`/case/${caseData.id}`}>
             <Button variant="ghost" size="icon-xs">
               <Eye className="h-4 w-4" />
