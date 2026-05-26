@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../.. && npm install --legacy-peer-deps",
+  "installCommand": "cd ../.. && npm install --legacy-peer-deps 2>&1 || (tail -100 /vercel/.npm/_logs/*.log 2>/dev/null; exit 1)",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
