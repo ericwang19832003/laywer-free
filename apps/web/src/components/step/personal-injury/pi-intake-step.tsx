@@ -183,11 +183,11 @@ export function PIIntakeStep({
         <dt className="text-sm font-medium text-warm-muted">Case stage</dt>
         <dd className="text-warm-text mt-0.5">
           {caseStage === 'start' && 'Just getting started'}
-          {caseStage === 'preservation' && 'Sending an evidence preservation letter'}
-          {caseStage === 'medical' && 'Collecting medical records / estimates'}
-          {caseStage === 'insurance' && 'Dealing with insurance'}
-          {caseStage === 'demand' && 'Ready to send a demand letter'}
-          {caseStage === 'negotiation' && 'Negotiating settlement'}
+          {caseStage === 'preservation' && 'Trying to save evidence before it\'s gone'}
+          {caseStage === 'medical' && 'Getting treatment and collecting records'}
+          {caseStage === 'insurance' && 'Dealing with the insurance company'}
+          {caseStage === 'demand' && 'Ready to ask for a specific amount in writing'}
+          {caseStage === 'negotiation' && 'Received an offer — negotiating back and forth'}
           {caseStage === 'filing' && 'Filing a lawsuit'}
         </dd>
       </div>
@@ -311,13 +311,13 @@ export function PIIntakeStep({
           </p>
           <div className="space-y-2">
             {[
-              { value: 'start', label: 'Just getting started', desc: 'I haven\'t taken any action yet.' },
-              { value: 'preservation', label: 'Sending an evidence preservation letter', desc: 'Putting the other party on notice to preserve surveillance footage, records, and communications.' },
-              { value: 'medical', label: 'Collecting medical records / estimates', desc: 'I\'m gathering documentation of my damages.' },
-              { value: 'insurance', label: 'Dealing with insurance', desc: 'I\'m communicating with the insurance company.' },
-              { value: 'demand', label: 'Ready to send a demand letter', desc: 'I\'m ready to make a formal demand.' },
-              { value: 'negotiation', label: 'Negotiating settlement', desc: 'I\'m in settlement negotiations.' },
-              { value: 'filing', label: 'Filing a lawsuit', desc: 'Negotiations failed and I\'m filing suit.' },
+              { value: 'start', label: 'Just getting started', desc: 'I haven\'t done anything yet — I\'m figuring out my options.' },
+              { value: 'preservation', label: 'Trying to save evidence before it\'s gone', desc: 'I need to send a letter requiring the other party to preserve surveillance footage, records, and communications before they\'re deleted. (Called an "evidence preservation letter.")' },
+              { value: 'medical', label: 'Getting treatment and collecting records', desc: 'I\'m still treating injuries or gathering medical records, repair estimates, and documentation of my losses.' },
+              { value: 'insurance', label: 'Dealing with the insurance company', desc: 'I\'ve filed a claim and I\'m communicating with an adjuster — but no settlement offer yet.' },
+              { value: 'demand', label: 'Ready to ask for a specific amount in writing', desc: 'I\'ve documented my damages and I\'m ready to send a formal demand letter requesting compensation before filing a lawsuit.' },
+              { value: 'negotiation', label: 'Received an offer — negotiating back and forth', desc: 'I have a settlement offer on the table and I\'m negotiating to resolve without going to court.' },
+              { value: 'filing', label: 'Filing a lawsuit', desc: 'Talks broke down — I\'m ready to file a complaint in court.' },
             ].map((option) => (
               <label
                 key={option.value}
