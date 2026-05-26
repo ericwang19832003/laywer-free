@@ -1,5 +1,5 @@
 {
-  "installCommand": "pwd && cd ../.. && pwd && ls package.json && npx --yes yarn@1 install --ignore-engines",
+  "installCommand": "echo CWD=$(pwd) && ls -la | head -10",
   "buildCommand": "cd ../.. && npx turbo build --filter=@lawyer-free/web",
   "framework": "nextjs",
   "crons": [
