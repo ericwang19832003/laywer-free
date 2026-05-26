@@ -4,6 +4,16 @@ import { useState, useCallback } from 'react'
 import { CaseCards } from '@/components/cases/case-cards'
 import { CasePagination } from '@/components/cases/case-pagination'
 import type { CaseCardData } from '@/components/cases/case-cards'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface PaginatedCaseListProps {
   initialCases: CaseCardData[]
@@ -22,6 +32,30 @@ export function PaginatedCaseList({
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loading, setLoading] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleCaseAction = useCallback(async (caseId: string, action: 'view' | 'delete' | 'archive') => {
+    if (action === 'delete') {
+      setPendingDeleteId(caseId)
+    } else if (action === 'archive') {
+      const res = await fetch(`/api/cases/${caseId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setCases(prev => prev.filter(c => c.id !== caseId))
+      }
+    }
+  }, [])
+
+  const confirmDelete = useCallback(async () => {
+    if (!pendingDeleteId) return
+    setDeleting(true)
+    const res = await fetch(`/api/cases/${pendingDeleteId}`, { method: 'DELETE' })
+    if (res.ok) {
+      setCases(prev => prev.filter(c => c.id !== pendingDeleteId))
+    }
+    setDeleting(false)
+    setPendingDeleteId(null)
+  }, [pendingDeleteId])
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loading) return
@@ -49,15 +83,38 @@ export function PaginatedCaseList({
   }, [nextCursor, loading])
 
   return (
-    <div className="mt-6">
-      <CaseCards cases={cases} />
-      <CasePagination
-        showing={cases.length}
-        total={totalCount}
-        hasMore={hasMore}
-        loading={loading}
-        onLoadMore={loadMore}
-      />
-    </div>
+    <>
+      <div className="mt-6">
+        <CaseCards cases={cases} onCaseAction={handleCaseAction} />
+        <CasePagination
+          showing={cases.length}
+          total={totalCount}
+          hasMore={hasMore}
+          loading={loading}
+          onLoadMore={loadMore}
+        />
+      </div>
+
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this case?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will archive the case and remove it from your dashboard. Your data will be preserved but the case will no longer appear in your active cases.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete case'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

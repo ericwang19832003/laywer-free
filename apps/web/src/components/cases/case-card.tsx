@@ -64,7 +64,7 @@ export function CaseCard({
             {/* Health score */}
             <div className="shrink-0 text-center w-14">
               <p className={`text-lg font-semibold ${healthInfo.colorClass}`}>
-                {healthScore !== null ? healthScore : '\u2014'}
+                {healthScore !== null ? healthScore : '—'}
               </p>
               <p className={`text-[10px] ${healthInfo.colorClass}`}>
                 {healthInfo.label}
