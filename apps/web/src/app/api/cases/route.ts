@@ -110,12 +110,14 @@ export async function POST(request: NextRequest) {
     const welcomeTask = (tasks ?? []).find((t) => t.task_key === 'welcome')
     if (welcomeTask && welcomeTask.status === 'todo') {
       const now = new Date().toISOString()
-      await supabase
+      const { error: welcomeError } = await supabase
         .from('tasks')
         .update({ status: 'completed', completed_at: now })
         .eq('id', welcomeTask.id)
-      welcomeTask.status = 'completed'
-      welcomeTask.completed_at = now
+      if (!welcomeError) {
+        welcomeTask.status = 'completed'
+        welcomeTask.completed_at = now
+      }
     }
 
     return NextResponse.json({ case: newCase, tasks }, { status: 201 })
