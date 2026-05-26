@@ -34,7 +34,7 @@ export function DashboardTabs({ focus, overview, tools }: DashboardTabsProps) {
             aria-controls={`panel-${tab.toLowerCase()}`}
             tabIndex={active === tab ? 0 : -1}
             onClick={() => setActive(tab)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`flex-1 text-center px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
               active === tab
                 ? 'border-calm-indigo text-calm-indigo'
                 : 'border-transparent text-warm-muted hover:text-warm-text'

@@ -20,11 +20,43 @@ export default async function DashboardPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: caseRow, error } = await supabase
-    .from('cases')
-    .select('dispute_type, jurisdiction, court_type, county, created_at, outcome')
-    .eq('id', id)
-    .single()
+  const [
+    { data: caseRow, error },
+    escalationResult,
+    riskScoreResult,
+    tasksResult,
+    upcomingDeadlinesResult,
+  ] = await Promise.all([
+    supabase
+      .from('cases')
+      .select('dispute_type, jurisdiction, court_type, county, created_at, outcome')
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('reminder_escalations')
+      .select(
+        'id, case_id, deadline_id, escalation_level, message, triggered_at, deadlines(due_at, key)'
+      )
+      .eq('case_id', id)
+      .eq('acknowledged', false)
+      .order('escalation_level', { ascending: false })
+      .order('triggered_at', { ascending: false }),
+    supabase
+      .from('case_risk_scores')
+      .select('risk_level')
+      .eq('case_id', id)
+      .order('computed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase.from('tasks').select('status').eq('case_id', id),
+    supabase
+      .from('deadlines')
+      .select('due_at, label')
+      .eq('case_id', id)
+      .gte('due_at', new Date().toISOString())
+      .order('due_at', { ascending: true })
+      .limit(3),
+  ])
 
   if (error || !caseRow) {
     return (
@@ -48,34 +80,6 @@ export default async function DashboardPage({
     outcome: caseRow.outcome ?? null,
     createdAt: caseRow.created_at ?? null,
   }
-
-  const [escalationResult, riskScoreResult, tasksResult, upcomingDeadlinesResult] =
-    await Promise.all([
-      supabase
-        .from('reminder_escalations')
-        .select(
-          'id, case_id, deadline_id, escalation_level, message, triggered_at, deadlines(due_at, key)'
-        )
-        .eq('case_id', id)
-        .eq('acknowledged', false)
-        .order('escalation_level', { ascending: false })
-        .order('triggered_at', { ascending: false }),
-      supabase
-        .from('case_risk_scores')
-        .select('risk_level')
-        .eq('case_id', id)
-        .order('computed_at', { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase.from('tasks').select('status').eq('case_id', id),
-      supabase
-        .from('deadlines')
-        .select('due_at, label')
-        .eq('case_id', id)
-        .gte('due_at', new Date().toISOString())
-        .order('due_at', { ascending: true })
-        .limit(3),
-    ])
 
   const alerts: ReminderEscalation[] = (escalationResult.data ?? []).map(
     (row: Record<string, unknown>) => {
