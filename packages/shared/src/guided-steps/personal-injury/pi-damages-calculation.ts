@@ -17,7 +17,18 @@ function formatDollars(amount: number): string {
   })
 }
 
-export const piDamagesCalculationConfig: GuidedStepConfig = {
+const PROPERTY_DAMAGE_ONLY_SUBTYPES = new Set([
+  'vehicle_damage',
+  'property_damage',
+  'property_damage_negligence',
+  'vandalism',
+  'other_property_damage',
+])
+
+export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStepConfig {
+  const isPropertyDamageOnly = !!piSubType && PROPERTY_DAMAGE_ONLY_SUBTYPES.has(piSubType)
+
+  return {
   title: 'Calculating Your Damages',
   reassurance:
     'Understanding what your case is worth helps you negotiate from strength — not desperation.',
@@ -26,8 +37,9 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
     {
       id: 'damages_intro',
       type: 'info',
-      prompt:
-        'DAMAGES ARE WHAT THE LAW SAYS YOU\'RE OWED.\n\nTwo types:\n1. ECONOMIC (specials): Medical bills, lost wages, property damage — things with receipts\n2. NON-ECONOMIC (generals): Pain, suffering, mental anguish, loss of enjoyment — things without receipts\n\nYour total demand = Economic damages + (Economic × multiplier for pain/suffering)',
+      prompt: isPropertyDamageOnly
+        ? 'PROPERTY DAMAGE — what you\'re owed:\n\n1. REPAIR COST: Get 2–3 written estimates from licensed repair shops.\n2. DIMINISHED VALUE: If the property is worth less even after repair.\n3. LOSS OF USE: Rental car or temporary replacement costs while your property was being fixed.\n\nAll three added together = your total demand.'
+        : 'DAMAGES ARE WHAT THE LAW SAYS YOU\'RE OWED.\n\nTwo types:\n1. ECONOMIC (specials): Medical bills, lost wages, property damage — things with receipts\n2. NON-ECONOMIC (generals): Pain, suffering, mental anguish, loss of enjoyment — things without receipts\n\nYour total demand = Economic damages + (Economic × multiplier for pain/suffering)',
     },
     {
       id: 'medical_expenses',
@@ -36,6 +48,7 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
       placeholder: '$0',
       helpText:
         'Include ER visits, surgery, physical therapy, prescriptions, and any other medical costs related to the injury.',
+      showIf: () => !isPropertyDamageOnly,
     },
     {
       id: 'expect_future_medical',
@@ -43,6 +56,7 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
       prompt: 'Do you expect future medical treatment?',
       helpText:
         'This includes follow-up surgeries, ongoing physical therapy, future prescriptions, or long-term care.',
+      showIf: () => !isPropertyDamageOnly,
     },
     {
       id: 'future_medical_cost',
@@ -51,12 +65,13 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
       placeholder: '$0',
       helpText:
         'Ask your doctor for an estimate. Include ongoing therapy, future surgeries, and long-term medication costs.',
-      showIf: (answers) => answers.expect_future_medical === 'yes',
+      showIf: (answers) => !isPropertyDamageOnly && answers.expect_future_medical === 'yes',
     },
     {
       id: 'missed_work',
       type: 'yes_no',
       prompt: 'Have you missed work because of your injury?',
+      showIf: () => !isPropertyDamageOnly,
     },
     {
       id: 'lost_wages',
@@ -65,7 +80,7 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
       placeholder: '$0',
       helpText:
         'Calculate: (hourly rate or daily pay) × days missed. Include bonuses, overtime, and benefits you would have earned.',
-      showIf: (answers) => answers.missed_work === 'yes',
+      showIf: (answers) => !isPropertyDamageOnly && answers.missed_work === 'yes',
     },
     {
       id: 'injury_severity',
@@ -91,13 +106,51 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
           label: 'Catastrophic — TBI, paralysis, amputation, loss of organ function',
         },
       ],
+      showIf: () => !isPropertyDamageOnly,
+    },
+    {
+      id: 'repair_cost',
+      type: 'text',
+      prompt: 'What is the repair or replacement cost of the damaged property?',
+      placeholder: '$0',
+      helpText: 'Enter the highest estimate you have. You\'ll need at least one written estimate from a licensed professional.',
+      showIf: () => isPropertyDamageOnly,
+    },
+    {
+      id: 'has_diminished_value',
+      type: 'yes_no',
+      prompt: 'Is the property worth less now even after repair?',
+      helpText: 'This is "diminished value" — e.g., a repaired car that sells for less than an identical undamaged car.',
+      showIf: () => isPropertyDamageOnly,
+    },
+    {
+      id: 'diminished_value',
+      type: 'text',
+      prompt: 'How much has the property lost in value?',
+      placeholder: '$0',
+      helpText: 'Get a written appraisal or use the difference between pre-damage and post-repair market values.',
+      showIf: (answers) => isPropertyDamageOnly && answers.has_diminished_value === 'yes',
+    },
+    {
+      id: 'has_loss_of_use',
+      type: 'yes_no',
+      prompt: 'Did you incur rental or temporary replacement costs while the property was being repaired?',
+      showIf: () => isPropertyDamageOnly,
+    },
+    {
+      id: 'loss_of_use_cost',
+      type: 'text',
+      prompt: 'How much did you spend on rental or temporary replacement?',
+      placeholder: '$0',
+      helpText: 'Include rental car receipts, equipment rental, or any other temporary replacement costs.',
+      showIf: (answers) => isPropertyDamageOnly && answers.has_loss_of_use === 'yes',
     },
     {
       id: 'damages_calculation',
       type: 'info',
       prompt: '', // Populated dynamically via generateSummary; placeholder for step display
       showIf: (answers) => {
-        // Show once we have enough info to calculate
+        if (isPropertyDamageOnly) return !!answers.repair_cost
         return !!answers.injury_severity && !!answers.medical_expenses
       },
     },
@@ -105,6 +158,41 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
 
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
+
+    if (isPropertyDamageOnly) {
+      const repairCost = parseDollars(answers.repair_cost)
+      const diminishedValue = parseDollars(answers.diminished_value)
+      const lossOfUse = parseDollars(answers.loss_of_use_cost)
+
+      if (repairCost > 0) {
+        items.push({ status: 'done', text: `Repair/replacement cost: ${formatDollars(repairCost)}` })
+      } else {
+        items.push({ status: 'needed', text: 'Get written repair/replacement estimates from a licensed professional.' })
+      }
+
+      if (answers.has_diminished_value === 'yes') {
+        if (diminishedValue > 0) {
+          items.push({ status: 'done', text: `Diminished value: ${formatDollars(diminishedValue)}` })
+        } else {
+          items.push({ status: 'needed', text: 'Get an appraisal to document diminished value.' })
+        }
+      }
+
+      if (answers.has_loss_of_use === 'yes') {
+        if (lossOfUse > 0) {
+          items.push({ status: 'done', text: `Loss of use costs: ${formatDollars(lossOfUse)}` })
+        } else {
+          items.push({ status: 'needed', text: 'Document rental or temporary replacement receipts.' })
+        }
+      }
+
+      const total = repairCost + diminishedValue + lossOfUse
+      if (total > 0) {
+        items.push({ status: 'info', text: `Estimated total demand: ${formatDollars(total)}` })
+      }
+
+      return items
+    }
 
     const medicalExpenses = parseDollars(answers.medical_expenses)
     const futureMedical = parseDollars(answers.future_medical_cost)
@@ -151,7 +239,6 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
       }
     }
 
-    // Run the calculation if we have enough data
     if (answers.injury_severity && medicalExpenses > 0) {
       try {
         const result = calculatePIDamages({
@@ -190,4 +277,7 @@ export const piDamagesCalculationConfig: GuidedStepConfig = {
 
     return items
   },
+  }
 }
+
+export const piDamagesCalculationConfig = createPiDamagesCalculationConfig()

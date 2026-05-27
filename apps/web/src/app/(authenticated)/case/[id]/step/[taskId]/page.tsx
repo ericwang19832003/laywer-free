@@ -990,8 +990,11 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="property_post_judgment_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Personal injury depth steps
-    case 'pi_damages_calculation':
-      return <DynamicGuidedStep taskKey="pi_damages_calculation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'pi_damages_calculation': {
+      const { data: piDetails } = await supabase
+        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+      return <DynamicGuidedStep taskKey="pi_damages_calculation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piDetails?.pi_sub_type ?? undefined} />
+    }
     case 'pi_pip_claim':
       return <DynamicGuidedStep taskKey="pi_pip_claim" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_medical_improvement':

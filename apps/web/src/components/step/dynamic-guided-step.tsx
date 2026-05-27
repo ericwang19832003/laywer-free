@@ -116,7 +116,7 @@ import { debtPreAnswerSettlementConfig } from '@lawyer-free/shared/guided-steps/
 import { debtAppealProcessConfig } from '@lawyer-free/shared/guided-steps/debt-defense/debt-appeal-process'
 
 // ── Personal Injury: depth steps ────────────────────────────────────────────
-import { piDamagesCalculationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-damages-calculation'
+import { piDamagesCalculationConfig, createPiDamagesCalculationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-damages-calculation'
 import { piPipClaimConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pip-claim'
 import { piFilingGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-filing-guide'
 import { piServiceGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-service-guide'
@@ -242,7 +242,7 @@ import { piMedicalImprovementConfig } from '@lawyer-free/shared/guided-steps/per
  * Factory-based configs accept a sub-type encoded in the task key itself.
  * Pass `state` (e.g. 'CA', 'NY') for state-aware configs; defaults to 'TX'.
  */
-function resolveConfig(taskKey: string, state?: string): GuidedStepConfig | null {
+function resolveConfig(taskKey: string, state?: string, piSubType?: string): GuidedStepConfig | null {
   switch (taskKey) {
     // ── Family: Divorce ─────────────────────────────────────────────────────
     case 'divorce_intake': return createFamilyIntakeConfig('divorce')
@@ -405,7 +405,7 @@ function resolveConfig(taskKey: string, state?: string): GuidedStepConfig | null
     case 'debt_appeal_process': return debtAppealProcessConfig
 
     // ── Personal Injury: depth steps ────────────────────────────────────────
-    case 'pi_damages_calculation': return piDamagesCalculationConfig
+    case 'pi_damages_calculation': return createPiDamagesCalculationConfig(piSubType)
     case 'pi_pip_claim': return piPipClaimConfig
     case 'pi_medical_improvement': return piMedicalImprovementConfig
     case 'pi_filing_guide': return piFilingGuideConfig
@@ -627,6 +627,11 @@ interface DynamicGuidedStepProps {
    */
   state?: string
   /**
+   * PI sub-type (e.g. 'property_damage', 'slip_and_fall') for configs that
+   * vary questions based on the nature of the personal injury claim.
+   */
+  piSubType?: string
+  /**
    * Optional override for skippable. When provided, takes precedence over the
    * built-in SKIPPABLE_TASK_KEYS set. Useful for task keys whose skippable
    * state depends on runtime data (e.g. biz_employment_eeoc).
@@ -634,8 +639,8 @@ interface DynamicGuidedStepProps {
   skippable?: boolean
 }
 
-export function DynamicGuidedStep({ taskKey, caseId, taskId, existingAnswers, state, skippable }: DynamicGuidedStepProps) {
-  const config = resolveConfig(taskKey, state)
+export function DynamicGuidedStep({ taskKey, caseId, taskId, existingAnswers, state, piSubType, skippable }: DynamicGuidedStepProps) {
+  const config = resolveConfig(taskKey, state, piSubType)
 
   if (!config) {
     // Unrecognised task key — should not happen in practice
