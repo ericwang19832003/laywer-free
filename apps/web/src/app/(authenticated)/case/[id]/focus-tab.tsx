@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { NextStepCard } from '@/components/dashboard/next-step-card'
 import { DeadlinesCard } from '@/components/dashboard/deadlines-card'
 import { ProgressCard } from '@/components/dashboard/progress-card'
-import { InsightsCard } from '@/components/dashboard/insights-card'
-import { StrategyCard } from '@/components/dashboard/strategy-card'
 import ProSeBanner from '@/components/dashboard/pro-se-banner'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
@@ -26,24 +24,9 @@ export async function FocusTab({
     const dashboard = dashboardResult.data as DashboardData | null
 
     const [
-      insightsResult,
-      strategyResult,
       taskDescResult,
       skippedResult,
     ] = await Promise.all([
-      supabase
-        .from('case_insights')
-        .select('id, insight_type, title, body, priority, created_at')
-        .eq('case_id', caseId)
-        .eq('dismissed', false)
-        .order('created_at', { ascending: false })
-        .limit(3),
-      supabase
-        .from('ai_cache')
-        .select('content, generated_at')
-        .eq('case_id', caseId)
-        .eq('cache_key', 'strategy')
-        .single(),
       dashboard?.next_task
         ? supabase.from('tasks').select('metadata').eq('id', dashboard.next_task.id).single()
         : Promise.resolve({ data: null }),
@@ -69,13 +52,6 @@ export async function FocusTab({
         | { description: string; importance: 'critical' | 'important' | 'helpful' }
         | undefined) ?? null
 
-    const strategyRecs =
-      (
-        strategyResult.data?.content as {
-          recommendations: { title: string; body: string; priority: string }[]
-        } | null
-      )?.recommendations?.slice(0, 3) ?? null
-
     const tasksSummary = dashboard.tasks_summary ?? {}
     const totalTasks = Object.values(tasksSummary).reduce((s: number, v) => s + (v as number), 0)
     const completedTasks =
@@ -95,14 +71,6 @@ export async function FocusTab({
 
         {/* 3. Progress */}
         <ProgressCard tasksSummary={dashboard.tasks_summary} />
-
-        {/* 4. Insights & Recommendations */}
-        <InsightsCard caseId={caseId} initialInsights={insightsResult.data ?? []} />
-        <StrategyCard
-          caseId={caseId}
-          recommendations={strategyRecs}
-          generatedAt={strategyResult.data?.generated_at ?? null}
-        />
 
         <ProSeBanner />
         <BackfillBanner caseId={caseId} skippedCount={skippedResult.count ?? 0} />
