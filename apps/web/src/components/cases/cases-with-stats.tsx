@@ -19,8 +19,8 @@ interface CasesWithStatsProps {
 
 export function CasesWithStats({
   activeCases: initialActiveCases,
-  tasksCompleted,
-  tasksTotal,
+  tasksCompleted: initialTasksCompleted,
+  tasksTotal: initialTasksTotal,
   upcomingDeadlines,
   averageHealth,
   initialCases,
@@ -30,9 +30,18 @@ export function CasesWithStats({
 }: CasesWithStatsProps) {
   const [activeCases, setActiveCases] = useState(initialActiveCases)
   const [totalCount, setTotalCount] = useState(initialTotalCount)
+  const [tasksCompleted, setTasksCompleted] = useState(initialTasksCompleted)
+  const [tasksTotal, setTasksTotal] = useState(initialTasksTotal)
 
   const handleCasesDeleted = useCallback((count: number) => {
-    setActiveCases(prev => Math.max(0, prev - count))
+    setActiveCases(prev => {
+      const next = Math.max(0, prev - count)
+      if (next === 0) {
+        setTasksCompleted(0)
+        setTasksTotal(0)
+      }
+      return next
+    })
     setTotalCount(prev => Math.max(0, prev - count))
   }, [])
 

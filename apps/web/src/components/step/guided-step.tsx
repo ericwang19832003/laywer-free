@@ -227,7 +227,13 @@ export function GuidedStep({
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm text-warm-muted mb-2">
               <span>
-                Question {currentIndex + 1} of {totalQuestions}
+                {currentQuestion.type === 'info' ? (
+                  `Step ${currentIndex + 1} of ${totalQuestions}`
+                ) : (() => {
+                  const realTotal = visibleQuestions.filter(q => q.type !== 'info').length
+                  const realPos = visibleQuestions.slice(0, currentIndex + 1).filter(q => q.type !== 'info').length
+                  return `Question ${realPos} of ${realTotal}`
+                })()}
               </span>
               <span>{progress}%</span>
             </div>
