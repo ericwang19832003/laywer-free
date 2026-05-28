@@ -24,3 +24,4 @@ Available skills:
 - /guard - Full Safety: /careful + /freeze combined
 - /unfreeze - Unlock: remove the /freeze boundary
 - /gstack-upgrade - Self-Updater: upgrade gstack to latest
+- /petition-workflow-auditor - Filing Auditor: procedural completeness, risk review, and readiness score for court filings

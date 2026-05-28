@@ -42,7 +42,7 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       id: 'unsure_info',
       type: 'info',
       prompt:
-        'Check your court paperwork — the court name is on your citation or petition. JP Courts handle claims up to $20,000. County Courts handle claims up to $200,000. District Courts handle claims over $200,000.',
+        'Check your court paperwork — the court name is on your citation or petition. JP Courts handle claims up to $20,000. County Courts handle claims up to $250,000. District Courts handle claims over $250,000.',
       showIf: (answers) => answers.which_court === 'unsure',
     },
     {

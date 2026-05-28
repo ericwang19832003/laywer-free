@@ -15,8 +15,8 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
         'Include repair costs, lost use of property, diminished value, and any other losses. Use your highest contractor estimate.',
       options: [
         { value: 'under_20k', label: 'Under $20,000' },
-        { value: '20k_to_100k', label: '$20,000 to $100,000' },
-        { value: 'over_100k', label: 'Over $100,000' },
+        { value: '20k_to_250k', label: '$20,000 to $250,000' },
+        { value: 'over_250k', label: 'Over $250,000' },
       ],
     },
 
@@ -33,14 +33,14 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in County Court at Law. Filing fee: $250\u2013350. More formal, but still manageable for pro se.',
-      showIf: (answers) => answers.total_damages === '20k_to_100k',
+      showIf: (answers) => answers.total_damages === '20k_to_250k',
     },
     {
       id: 'court_district',
       type: 'info',
       prompt:
         'File in District Court. Filing fee: $300\u2013400. Most formal. Consider consulting an attorney for complex cases.',
-      showIf: (answers) => answers.total_damages === 'over_100k',
+      showIf: (answers) => answers.total_damages === 'over_250k',
     },
 
     // Filing method
@@ -124,8 +124,8 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
     if (answers.total_damages) {
       const courtLabels: Record<string, string> = {
         under_20k: 'Justice of the Peace (JP) Court (under $20K)',
-        '20k_to_100k': 'County Court at Law ($20K\u2013$100K)',
-        over_100k: 'District Court (over $100K)',
+        '20k_to_250k': 'County Court at Law ($20K\u2013$100K)',
+        over_250k: 'District Court (over $100K)',
       }
       items.push({
         status: 'done',

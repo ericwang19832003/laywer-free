@@ -93,7 +93,7 @@ export const STATE_LIT_INFO: Record<string, StateLitigationInfo> = {
       jpCourtLimit: '$20,000',
       jpCourtLimitNumber: 20000,
       midCourtName: 'County Court at Law',
-      midCourtRange: '$20,000 to $100,000',
+      midCourtRange: '$20,001 to $250,000',
       highCourtName: 'District Court',
       eFilingUrl: 'efiletexas.gov',
       eFilingName: 'eFileTexas',

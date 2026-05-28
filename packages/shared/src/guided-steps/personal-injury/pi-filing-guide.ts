@@ -13,6 +13,12 @@ export const piFilingGuideConfig: GuidedStepConfig = {
         "STATUTE OF LIMITATIONS REMINDER: In Texas, you have 2 years from the date of injury to file a personal injury lawsuit (Tex. Civ. Prac. & Rem. Code \u00a716.003). If you miss this deadline, the court will almost certainly dismiss your case. File as soon as possible to preserve your rights.",
     },
     {
+      id: 'trcp_47c_reminder',
+      type: 'info',
+      prompt:
+        'REQUIRED IN EVERY TEXAS PETITION — TRCP 47(c) DAMAGES TIER:\n\nYour Original Petition MUST include exactly one of these four statements. Without it, your filing is defective and a default judgment may be capped.\n\n1. "Only nonmonetary relief is sought."\n2. "Monetary relief of $250,000 or less."\n3. "Monetary relief over $250,000 but not more than $1,000,000."\n4. "Monetary relief over $1,000,000."\n\nThis statement also determines which court has jurisdiction. For most personal injury cases, choose option 3 or 4. Add it to your petition under a paragraph titled "Discovery Control Plan and Damages" or similar.',
+    },
+    {
       id: 'filing_method',
       type: 'single_choice',
       prompt: 'How do you plan to file your lawsuit?',

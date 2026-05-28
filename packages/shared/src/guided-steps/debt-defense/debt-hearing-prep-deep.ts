@@ -29,14 +29,14 @@ export const debtHearingPrepDeepConfig: GuidedStepConfig = {
       id: 'county_court_info',
       type: 'info',
       prompt:
-        'County court follows formal rules of civil procedure and evidence. You may face motions, objections, and more structured proceedings. The judge expects proper legal etiquette — stand when speaking, address the judge as "Your Honor," and wait to be recognized before speaking. Cases in county court are typically between $20,000 and $200,000 (county court at law) or up to $500 for small claims in regular county court. Prepare for a longer hearing.',
+        'County court follows formal rules of civil procedure and evidence. You may face motions, objections, and more structured proceedings. The judge expects proper legal etiquette — stand when speaking, address the judge as "Your Honor," and wait to be recognized before speaking. Cases in county court are typically between $20,000 and $250,000 (county court at law) or up to $500 for small claims in regular county court. Prepare for a longer hearing.',
       showIf: (answers) => answers.which_court === 'county_court',
     },
     {
       id: 'district_court_info',
       type: 'info',
       prompt:
-        'District court is the most formal. Strict rules of evidence and procedure apply. The opposing side will likely have an attorney who is experienced in court. Consider whether you need legal representation. If you proceed on your own, study the Texas Rules of Civil Procedure and the Texas Rules of Evidence. District court handles cases over $200,000 or cases with specific subject matter jurisdiction.',
+        'District court is the most formal. Strict rules of evidence and procedure apply. The opposing side will likely have an attorney who is experienced in court. Consider whether you need legal representation. If you proceed on your own, study the Texas Rules of Civil Procedure and the Texas Rules of Evidence. District court handles cases over $250,000 or cases with specific subject matter jurisdiction.',
       showIf: (answers) => answers.which_court === 'district_court',
     },
     {

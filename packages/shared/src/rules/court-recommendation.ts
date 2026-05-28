@@ -168,7 +168,7 @@ function recommendTexasCourt(input: CourtRecommendationInput): CourtRecommendati
     return {
       recommended: 'county',
       reasoning:
-        'Claims between $20,000 and $200,000 fall within County Court at Law jurisdiction.',
+        'Claims between $20,000 and $250,000 fall within County Court at Law jurisdiction.',
       confidence: 'high',
     }
   }
@@ -178,7 +178,7 @@ function recommendTexasCourt(input: CourtRecommendationInput): CourtRecommendati
     return {
       recommended: 'district',
       reasoning:
-        'Claims exceeding $200,000 are best suited for District Court, which has no upper jurisdictional limit.',
+        'Claims exceeding $250,000 are best suited for District Court, which has no upper jurisdictional limit.',
       confidence: 'high',
     }
   }

@@ -47,9 +47,8 @@ export const reFilingGuideConfig: GuidedStepConfig = {
         'Include the full amount: repair costs, diminished property value, lost earnest money, out-of-pocket expenses, and any consequential damages.',
       options: [
         { value: 'under_20k', label: 'Under $20,000' },
-        { value: '20k_to_100k', label: '$20,000 to $100,000' },
-        { value: '100k_to_200k', label: '$100,000 to $200,000' },
-        { value: 'over_200k', label: 'Over $200,000' },
+        { value: '20k_to_250k', label: '$20,000 to $250,000' },
+        { value: 'over_250k', label: 'Over $250,000' },
       ],
     },
     {
@@ -64,15 +63,15 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in County Court at Law. Filing fee: $250-350. More formal than JP Court. Can handle declaratory judgments and injunctive relief related to the property.',
-      showIf: (answers) => answers.total_damages === '20k_to_100k',
+      showIf: (answers) => answers.total_damages === '20k_to_250k',
     },
     {
       id: 'court_district',
       type: 'info',
       prompt:
-        'File in District Court. Filing fee: $300-400. Most formal. Required for claims over $200,000 and cases seeking specific performance (forcing a sale or transfer). District Court has full equitable powers.',
+        'File in District Court. Filing fee: $300-400. Most formal. Required for claims over $250,000 and cases seeking specific performance (forcing a sale or transfer). District Court has full equitable powers.',
       showIf: (answers) =>
-        answers.total_damages === '100k_to_200k' || answers.total_damages === 'over_200k',
+        answers.total_damages === 'over_250k',
     },
 
     // Filing method
@@ -174,9 +173,8 @@ export const reFilingGuideConfig: GuidedStepConfig = {
     if (answers.total_damages) {
       const courtLabels: Record<string, string> = {
         under_20k: 'Justice of the Peace (JP) Court (under $20K)',
-        '20k_to_100k': 'County Court at Law ($20K-$100K)',
-        '100k_to_200k': 'District Court ($100K-$200K)',
-        over_200k: 'District Court (over $200K)',
+        '20k_to_250k': 'County Court at Law ($20K-$250K)',
+        over_250k: 'District Court (over $250K)',
       }
       items.push({
         status: 'done',

@@ -88,7 +88,7 @@ function getTexasCourts(): Court[] {
       website: 'https://www.cjo.co.harris.tx.us',
       divisions: ['Civil', 'Probate', 'Family'],
       filingFee: { filing: 268, service: 50, hearing: 25 },
-      jurisdiction: ['Claims $20,001 to $200,000', 'Civil matters', 'Probate', 'Family law'],
+      jurisdiction: ['Claims $20,001 to $250,000', 'Civil matters', 'Probate', 'Family law'],
       notes: 'County-level civil matters. Filing fee varies by case type.'
     },
     {
@@ -105,7 +105,7 @@ function getTexasCourts(): Court[] {
       website: 'https://www.justex.net',
       divisions: ['Civil', 'Family', 'Criminal', 'Probate'],
       filingFee: { filing: 300, service: 75, hearing: 50 },
-      jurisdiction: ['Claims over $200,000', 'Family law', 'Criminal matters', 'Probate', 'Title to real property'],
+      jurisdiction: ['Claims over $250,000', 'Family law', 'Criminal matters', 'Probate', 'Title to real property'],
       notes: 'General jurisdiction court. Handles most major civil litigation.'
     },
     // Travis County
@@ -137,7 +137,7 @@ function getTexasCourts(): Court[] {
       phone: '(512) 854-9511',
       website: 'https://www.traviscountytx.gov',
       filingFee: { filing: 268, service: 50, hearing: 25 },
-      jurisdiction: ['Claims $20,001 to $200,000', 'Civil appeals from JP'],
+      jurisdiction: ['Claims $20,001 to $250,000', 'Civil appeals from JP'],
     },
     {
       id: 'tx-travis-district',
@@ -152,7 +152,7 @@ function getTexasCourts(): Court[] {
       phone: '(512) 854-9459',
       website: 'https://www.traviscountytx.gov/district-clerk',
       filingFee: { filing: 300, service: 75, hearing: 50 },
-      jurisdiction: ['Claims over $200,000', 'Family law', 'Criminal matters', 'Probate'],
+      jurisdiction: ['Claims over $250,000', 'Family law', 'Criminal matters', 'Probate'],
     },
     // Dallas County
     {
@@ -183,7 +183,7 @@ function getTexasCourts(): Court[] {
       phone: '(214) 653-7268',
       website: 'https://www.dallascounty.org',
       filingFee: { filing: 268, service: 50, hearing: 25 },
-      jurisdiction: ['Claims $20,001 to $200,000'],
+      jurisdiction: ['Claims $20,001 to $250,000'],
     },
     {
       id: 'tx-dallas-district',
@@ -198,7 +198,7 @@ function getTexasCourts(): Court[] {
       phone: '(214) 653-6000',
       website: 'https://www.dallascounty.org',
       filingFee: { filing: 300, service: 75, hearing: 50 },
-      jurisdiction: ['Claims over $200,000', 'Family law', 'Criminal', 'Probate'],
+      jurisdiction: ['Claims over $250,000', 'Family law', 'Criminal', 'Probate'],
     },
     // Tarrant County
     {
@@ -229,7 +229,7 @@ function getTexasCourts(): Court[] {
       phone: '(817) 884-1550',
       website: 'https://www.tarrantcounty.com',
       filingFee: { filing: 268, service: 50, hearing: 25 },
-      jurisdiction: ['Claims $20,001 to $200,000'],
+      jurisdiction: ['Claims $20,001 to $250,000'],
     },
     {
       id: 'tx-tarrant-district',
@@ -244,7 +244,7 @@ function getTexasCourts(): Court[] {
       phone: '(817) 884-1700',
       website: 'https://www.tarrantcounty.com',
       filingFee: { filing: 300, service: 75, hearing: 50 },
-      jurisdiction: ['Claims over $200,000', 'Family law', 'Criminal', 'Probate'],
+      jurisdiction: ['Claims over $250,000', 'Family law', 'Criminal', 'Probate'],
     },
     // Federal - Texas Districts
     {

@@ -179,7 +179,7 @@ export function validateJurisdiction(input: {
       if (amountSought > 200000) {
         return {
           valid: false,
-          warning: 'County Court handles claims up to $200,000.',
+          warning: 'County Court handles claims up to $250,000.',
           suggestion: 'Consider filing in District Court instead.',
         }
       }

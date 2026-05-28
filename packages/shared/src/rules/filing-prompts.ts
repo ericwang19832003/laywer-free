@@ -53,7 +53,7 @@ function getDocumentFormat(courtType: string, role: string, isGeneralDenial?: bo
       return `Generate a Texas Original Petition. Include:
 - Caption: "In the [Court Type] Court of [County] County, Texas"
 - Title: "PLAINTIFF'S ORIGINAL PETITION"
-- "DISCOVERY CONTROL PLAN" paragraph (Level 1 for claims under $100K, Level 2 otherwise)
+- "DISCOVERY CONTROL PLAN" paragraph (Expedited Actions under TRCP 169 for claims ≤$250K; Standard discovery under TRCP 190 otherwise)
 - Parties section with numbered paragraphs
 - Factual allegations with numbered paragraphs
 - Cause(s) of action section

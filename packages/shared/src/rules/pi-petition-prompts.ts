@@ -108,9 +108,9 @@ function getCourtCaption(courtType: string, county: string, causeNumber?: string
 
 function getDiscoveryLevel(courtType: string): string {
   if (courtType === 'jp') {
-    return 'Level 1 of Texas Rule of Civil Procedure 190.2'
+    return 'Expedited Actions under Texas Rule of Civil Procedure 169'
   }
-  return 'Level 2 of Texas Rule of Civil Procedure 190.3'
+  return 'Standard discovery under Texas Rule of Civil Procedure 190'
 }
 
 function getJurisdictionLanguage(courtType: string): string {
