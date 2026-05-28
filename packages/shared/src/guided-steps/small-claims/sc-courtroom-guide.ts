@@ -49,8 +49,11 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'security_deposit_script',
         type: 'info',
-        prompt:
-          'Sample testimony: "Your Honor, I rented from the defendant at [address]. I moved out on [date] and provided my forwarding address in writing. My deposit was $[amount]. It has been over 30 days and I have not received my deposit or an itemized list of deductions. Here is my lease, move-out photos, and the forwarding address letter."',
+        prompt: state === 'NY'
+          ? 'Sample testimony: "Your Honor, I rented from the defendant at [address]. I moved out on [date] and provided my forwarding address in writing. My deposit was $[amount]. It has been over 14 days and I have not received my deposit or an itemized statement of deductions, as required by New York General Obligations Law § 7-108(1-a). Here is my lease, move-out photos, and the forwarding address letter."'
+          : state === 'CA'
+          ? 'Sample testimony: "Your Honor, I rented from the defendant at [address]. I moved out on [date] and provided my forwarding address in writing. My deposit was $[amount]. It has been over 21 days and I have not received my deposit or an itemized statement of deductions, as required by California Civil Code § 1950.5. Here is my lease, move-out photos, and the forwarding address letter."'
+          : 'Sample testimony: "Your Honor, I rented from the defendant at [address]. I moved out on [date] and provided my forwarding address in writing. My deposit was $[amount]. It has been over 30 days and I have not received my deposit or an itemized list of deductions. Here is my lease, move-out photos, and the forwarding address letter."',
         showIf: (answers) => answers.claim_type === 'security_deposit',
       },
       {

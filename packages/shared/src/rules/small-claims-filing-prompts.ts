@@ -86,6 +86,63 @@ export function getDocumentFormat(subType: string, state?: string): string {
     }
   }
 
+  if (state === 'NY') {
+    switch (subType) {
+      case 'security_deposit':
+        return `This is a New York small claims claim for a security deposit dispute. Include:
+- FACTS: Describe the rental address, move-in and move-out dates, deposit amount paid, and landlord's failure to return the deposit.
+- LEGAL BASIS: Cite N.Y. General Obligations Law § 7-108(1-a) — landlord must return the security deposit or provide an itemized statement of deductions within 14 days of the tenant vacating. (This 14-day deadline was enacted by the Housing Stability and Tenant Protection Act of 2019.)
+- BAD FAITH PENALTIES: A landlord who wrongfully withholds a deposit may be liable for actual damages plus up to twice the amount wrongfully withheld if the court finds bad faith (GOL § 7-108(e)).
+- DEDUCTIONS DISPUTE: Normal wear and tear is not deductible. Any improper deductions should be itemized and challenged.`
+
+      case 'breach_of_contract':
+        return `This is a New York small claims claim for breach of contract. Include:
+- CONTRACT: Describe the contract — parties, date, subject matter, key terms, and consideration (what each party promised).
+- PERFORMANCE: Describe the Plaintiff's performance or readiness to perform.
+- BREACH: Describe specifically how the Defendant breached the contract.
+- DAMAGES: Describe the damages caused by the breach. Note: New York's statute of limitations for contract claims is 6 years (CPLR § 213(2)).`
+
+      case 'consumer_refund':
+        return `This is a New York small claims claim for a consumer refund dispute. Include:
+- PURCHASE: Describe the purchase — what was bought, when, where, and for how much.
+- DEFECT OR FAILURE: Describe the defect, failure, or misrepresentation.
+- REFUND ATTEMPTS: Describe attempts to obtain a refund, including dates and responses.
+- LEGAL BASIS: If applicable, note New York General Business Law § 349 (deceptive acts and practices) or § 350 (false advertising) — these provide remedies for consumers harmed by deceptive or false business practices.`
+
+      case 'property_damage':
+        return `This is a New York small claims claim for property damage. Include:
+- PROPERTY: Describe the property damaged — type, location, and condition before the incident.
+- CAUSE: Describe the incident, date, time, and how Defendant's actions or negligence caused the damage.
+- REPAIR ESTIMATES: Include repair or replacement cost estimates (contractor quotes, receipts, etc.).`
+
+      case 'car_accident':
+        return `This is a New York small claims claim for vehicle damage from a car accident. Include:
+- ACCIDENT: Describe the accident — date, time, location, and how it occurred.
+- FAULT: Describe how the Defendant's negligence or traffic violation caused the accident.
+- COMPARATIVE FAULT: Note that New York follows pure comparative negligence (CPLR § 1411) — Plaintiff's recovery is reduced by their percentage of fault, but Plaintiff can recover even if mostly at fault.
+- VEHICLE DAMAGE: Describe the damage to Plaintiff's vehicle and the cost of repairs or diminished value.`
+
+      case 'neighbor_dispute':
+        return `This is a New York small claims claim for a neighbor dispute. Include:
+- PARTIES AND ADDRESSES: Identify both parties and their property addresses.
+- NATURE OF DISPUTE: Describe the specific conduct — encroachment, noise, water runoff, tree damage, fence disputes, etc.
+- DURATION: Describe how long the issue has persisted.
+- ATTEMPTS TO RESOLVE: Describe any attempts to resolve before filing.`
+
+      case 'unpaid_loan':
+        return `This is a New York small claims claim for an unpaid loan or debt. Include:
+- LOAN TERMS: Describe the loan — amount, date, interest rate (if any), repayment schedule, written or oral.
+- PAYMENTS: Describe any payments made, including dates and amounts.
+- OUTSTANDING BALANCE: State the current outstanding balance, including any agreed-upon interest. Note: New York's statute of limitations for contract claims is 6 years (CPLR § 213(2)).`
+
+      default:
+        return `This is a New York small claims claim. Include:
+- FACTS: A clear, chronological narrative of the facts giving rise to the claim.
+- LEGAL BASIS: The legal theory supporting the claim under New York law.
+- DAMAGES: How the Plaintiff was harmed and the monetary value of the harm.`
+    }
+  }
+
   switch (subType) {
     case 'security_deposit':
       return `This is a Texas small claims petition for a security deposit dispute. Include:
@@ -159,6 +216,8 @@ function buildUserPrompt(facts: SmallClaimsFilingFacts, resolvedState?: string):
 
   const courtTypeLabel = resolvedState === 'CA'
     ? 'Small Claims Court (Superior Court)'
+    : resolvedState === 'NY'
+    ? 'Small Claims Court (UCCA §1801)'
     : 'Justice Court (JP)'
 
   const courtSection = [
@@ -259,29 +318,49 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
   const format = getDocumentFormat(facts.claim_sub_type, resolvedState)
 
   const isCA = resolvedState === 'CA'
+  const isNY = resolvedState === 'NY'
+  // NYC boroughs — use NYC Civil Court; all other NY counties use city/district/town court
+  const NYC_BOROUGHS = new Set(['New York', 'Kings', 'Bronx', 'Queens', 'Richmond'])
+  const isNYC = isNY && NYC_BOROUGHS.has(facts.county)
 
   const courtLabel = isCA
+    ? `Small Claims Court, ${facts.county} County`
+    : isNYC
+    ? `New York City Civil Court, Small Claims Part, ${facts.county} County`
+    : isNY
     ? `Small Claims Court, ${facts.county} County`
     : `Justice Court${facts.precinct ? `, Precinct ${facts.precinct}` : ''}, ${facts.county} County, Texas`
 
   const captionLine = isCA
     ? `SUPERIOR COURT OF CALIFORNIA, COUNTY OF ${facts.county.toUpperCase()}, SMALL CLAIMS DIVISION`
+    : isNYC
+    ? `CIVIL COURT OF THE CITY OF NEW YORK, COUNTY OF ${facts.county.toUpperCase()} — SMALL CLAIMS PART`
+    : isNY
+    ? `${facts.county.toUpperCase()} COUNTY — SMALL CLAIMS PART`
     : `In the Justice Court, Precinct ${facts.precinct ?? '___'}, ${facts.county} County, Texas`
 
   const docTitleLine = isCA
     ? `PLAINTIFF'S CLAIM AND ORDER TO GO TO SMALL CLAIMS COURT — ${docTitle}`
+    : isNY
+    ? `NOTICE OF SMALL CLAIM — ${docTitle}`
     : `PLAINTIFF'S ORIGINAL PETITION (SMALL CLAIMS) — ${docTitle}`
 
   const jurisdictionClause = isCA
     ? `This court has jurisdiction under Cal. Code Civ. Proc. § 116.221 because the amount in controversy does not exceed $12,500 (individual plaintiff).`
+    : isNY
+    ? `This court has jurisdiction under Uniform City Court Act § 1801 (NYC) or Uniform District Court Act § 1801 (outside NYC) because the amount in controversy does not exceed $10,000 (NYC) or $5,000 (outside NYC).`
     : `This court has jurisdiction under Tex. Gov. Code § 27.031 because the amount in controversy does not exceed $20,000.`
 
   const applicableRules = isCA
     ? `This claim is governed by the California Small Claims Act, Cal. Code Civ. Proc. §§ 116.110–116.950. Note: attorneys may not represent parties at a California small claims hearing (CCP § 116.530).`
+    : isNY
+    ? `This claim is governed by New York UCCA Article 18 (NYC) or UDCA Article 18 (outside NYC). Note: attorneys may represent parties in New York Small Claims Court, though most hearings proceed without counsel.`
     : `This petition is governed by the Texas Rules of Civil Procedure, Rules 500-507 (proceedings in justice courts). Cite TRCP 500-507 where appropriate.`
 
   const verificationLine = isCA
     ? `I declare under penalty of perjury under the laws of the State of California that the foregoing is true and correct. Executed on [date] at [city], California.`
+    : isNY
+    ? `I certify that the foregoing statements made by me are true. I am aware that if any of the foregoing statements made by me are willfully false, I am subject to punishment.`
     : `My name is [Plaintiff name]. I declare under penalty of perjury that the foregoing is true and correct. Executed on [date].`
 
   const signatureLabel = isCA ? 'Plaintiff in Pro Per' : 'Pro Se'

@@ -29,7 +29,9 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'timeline_info',
         type: 'info',
-        prompt: 'Once the defendant is served, your hearing is typically set 10–21 days later. Small claims court moves fast compared to other courts.',
+        prompt: state === 'NY'
+          ? 'Once the defendant is served, your hearing in New York Small Claims Court is typically scheduled 30–70 days later (NYC). The court mails you a Notice of Hearing with the date and time.'
+          : 'Once the defendant is served, your hearing is typically set 10–21 days later. Small claims court moves fast compared to other courts.',
         showIf: (answers) => answers.know_timeline === 'no',
       },
       {
@@ -62,7 +64,9 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'service_info',
         type: 'info',
-        prompt: `In most counties, a constable or process server delivers the lawsuit papers to the defendant. The court typically arranges this for you when you file — you just need to provide the defendant's address and pay the service fee.`,
+        prompt: state === 'NY'
+          ? `In New York Small Claims Court, the clerk mails the lawsuit papers to the defendant by certified mail — you just need to provide the defendant's address and pay the filing fee. Service must be done at least 5 days before your hearing.`
+          : `In most counties, a constable or process server delivers the lawsuit papers to the defendant. The court typically arranges this for you when you file — you just need to provide the defendant's address and pay the service fee.`,
         showIf: (answers) => answers.know_service === 'no',
       },
       {

@@ -171,3 +171,94 @@ describe('smallClaimsFilingFactsSchema', () => {
     expect(result.success).toBe(false)
   })
 })
+
+describe('NY state — buildSmallClaimsFilingPrompt', () => {
+  const nyFacts: SmallClaimsFilingFacts = {
+    plaintiff: { full_name: 'James Park', address: '123 Main St', city: 'New York', state: 'NY', zip: '10001' },
+    defendant: { full_name: 'Brooklyn Storage LLC', address: '456 Atlantic Ave', city: 'Brooklyn', state: 'NY', zip: '11201' },
+    court_type: 'jp',
+    county: 'Kings',
+    claim_sub_type: 'security_deposit',
+    claim_amount: 3500,
+    damages_breakdown: [
+      { category: 'Security deposit', amount: 3000, description: 'Unreturned deposit' },
+      { category: 'Statutory damages', amount: 500, description: 'Bad faith penalty' },
+    ],
+    incident_date: '2025-11-01',
+    description: 'Landlord failed to return security deposit within 14 days of move-out and provided no itemized statement.',
+    demand_letter_sent: true,
+    demand_letter_date: '2025-11-20',
+    defendant_is_business: true,
+    state: 'NY',
+  }
+
+  it('uses NY court caption, not Texas', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    // Kings County is an NYC borough — should use NYC Civil Court caption
+    expect(result.system).toContain('CIVIL COURT OF THE CITY OF NEW YORK')
+    expect(result.system).toContain('KINGS')
+    expect(result.system).not.toContain('Texas')
+    expect(result.system).not.toContain('TRCP')
+    expect(result.system).not.toContain('Justice Court')
+  })
+
+  it('uses UCCA jurisdiction, not Tex. Gov. Code', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    expect(result.system).toContain('UCCA')
+    expect(result.system).not.toContain('Tex. Gov. Code')
+  })
+
+  it('uses NOTICE OF SMALL CLAIM document title', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    expect(result.system).toContain('NOTICE OF SMALL CLAIM')
+  })
+
+  it('uses NY certification verification, not Texas declaration', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    expect(result.system).toContain('I certify')
+    expect(result.system).toContain('willfully false')
+    expect(result.system).not.toContain('Tex.')
+  })
+
+  it('cites GOL § 7-108 (14-day rule) for security_deposit', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    expect(result.system).toContain('7-108')
+    expect(result.system).toContain('14 days')
+    expect(result.system).not.toContain('92.104')
+    expect(result.system).not.toContain('227-e')
+  })
+
+  it('cites CPLR § 1411 comparative negligence for car_accident', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...nyFacts, claim_sub_type: 'car_accident' })
+    expect(result.system).toContain('1411')
+  })
+
+  it('cites GBL § 349 for consumer_refund', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...nyFacts, claim_sub_type: 'consumer_refund' })
+    expect(result.system).toContain('349')
+  })
+
+  it('cites CPLR § 213 for breach_of_contract', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...nyFacts, claim_sub_type: 'breach_of_contract' })
+    expect(result.system).toContain('213')
+  })
+
+  it('user prompt shows NY Small Claims Court type, not JP', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    expect(result.user).toContain('Small Claims Court')
+    expect(result.user).not.toContain('Justice Court (JP)')
+  })
+
+  it('still uses Plaintiff/Defendant terminology', () => {
+    const result = buildSmallClaimsFilingPrompt(nyFacts)
+    expect(result.system).toContain('Plaintiff')
+    expect(result.system).toContain('Defendant')
+  })
+
+  it('resolvedState from second parameter overrides facts.state', () => {
+    const factsNoState = { ...nyFacts, state: undefined }
+    const result = buildSmallClaimsFilingPrompt(factsNoState, 'NY')
+    expect(result.system).toContain('UCCA')
+    expect(result.system).not.toContain('Tex. Gov. Code')
+  })
+})
