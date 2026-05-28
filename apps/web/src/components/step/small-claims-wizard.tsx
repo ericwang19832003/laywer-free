@@ -425,6 +425,7 @@ export function SmallClaimsWizard({
       demand_letter_sent: demandLetterSent,
       demand_letter_date: demandLetterDate || undefined,
       defendant_is_business: defendantIsBusiness,
+      state: caseData.state ?? undefined,
       ...subTypeFields,
     }
   }, [
@@ -432,6 +433,7 @@ export function SmallClaimsWizard({
     defendant,
     defendantCounty,
     caseData.county,
+    caseData.state,
     precinct,
     claimSubType,
     totalDamages,

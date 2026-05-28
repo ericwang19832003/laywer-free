@@ -189,6 +189,7 @@ export function PetitionWizard({
       role: caseData.role as 'plaintiff' | 'defendant',
       dispute_type: caseData.dispute_type ?? undefined,
       government_entity: caseData.government_entity ?? false,
+      state: caseData.state ?? undefined,
     }
   }, [
     yourInfo, opposingParties, caseData, description, incidentDate,

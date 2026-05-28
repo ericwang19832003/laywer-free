@@ -37,6 +37,7 @@ export const smallClaimsFilingFactsSchema = z.object({
   loan_date: z.string().optional(),
   accident_date: z.string().optional(),
   defendant_is_business: z.boolean().default(false),
+  state: z.string().optional(),
 })
 
 export type SmallClaimsFilingFacts = z.infer<typeof smallClaimsFilingFactsSchema>

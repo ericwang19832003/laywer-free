@@ -250,10 +250,11 @@ function buildUserPrompt(facts: SmallClaimsFilingFacts): string {
 }
 
 export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, state?: string): FilingPrompt {
+  const resolvedState = state ?? facts.state
   const docTitle = getDocumentTitle(facts.claim_sub_type)
-  const format = getDocumentFormat(facts.claim_sub_type, state)
+  const format = getDocumentFormat(facts.claim_sub_type, resolvedState)
 
-  const isCA = state === 'CA'
+  const isCA = resolvedState === 'CA'
 
   const courtLabel = isCA
     ? `Small Claims Court, ${facts.county} County`
