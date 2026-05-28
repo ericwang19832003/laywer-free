@@ -238,10 +238,11 @@ function recommendCaliforniaCourt(input: CourtRecommendationInput): CourtRecomme
   }
 
   // Rule 5: Diversity jurisdiction — requires amount > $75,000 (28 U.S.C. § 1332)
-  // The 'over_35k' bucket covers $35K–$75K where federal diversity does NOT apply.
+  // CA's amount ranges use 'over_35k' as an unbounded top bucket (no 75k_200k bucket),
+  // so 'over_35k' can cover claims above $75k and must be included here.
   if (
     circumstances.outOfState &&
-    (amount === '75k_200k' || amount === 'over_200k')
+    (amount === 'over_35k' || amount === '75k_200k' || amount === 'over_200k')
   ) {
     return {
       recommended: 'federal',

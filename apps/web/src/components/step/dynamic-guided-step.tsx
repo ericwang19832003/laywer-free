@@ -49,7 +49,7 @@ import { createScFileWithCourtConfig } from '@lawyer-free/shared/guided-steps/sm
 import { createScCourtGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-jp-court-guide'
 import { createScFilingGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-filing-guide'
 import { createScServiceGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-service-guide'
-import { scCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-courtroom-guide'
+import { createScCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-courtroom-guide'
 import { createScEvidenceRulesConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-evidence-rules'
 import { createScDamagesByTypeConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-damages-by-type'
 import { scSettlementGuideConfig } from '@lawyer-free/shared/guided-steps/small-claims/sc-settlement-guide'
@@ -338,7 +338,7 @@ function resolveConfig(taskKey: string, state?: string, piSubType?: string): Gui
     case 'sc_jp_court_guide': return createScCourtGuideConfig(state)
     case 'sc_filing_guide': return createScFilingGuideConfig(state)
     case 'sc_service_guide': return createScServiceGuideConfig(state)
-    case 'sc_courtroom_guide': return scCourtroomGuideConfig
+    case 'sc_courtroom_guide': return createScCourtroomGuideConfig(state)
     case 'sc_evidence_rules': return createScEvidenceRulesConfig(state)
     case 'sc_damages_by_type': return createScDamagesByTypeConfig(state)
     case 'sc_settlement_guide': return scSettlementGuideConfig

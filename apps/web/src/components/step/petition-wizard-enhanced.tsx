@@ -170,6 +170,7 @@ export function PetitionWizardEnhanced({
     role: caseData.role as 'plaintiff' | 'defendant',
     dispute_type: caseData.dispute_type ?? undefined,
     government_entity: caseData.government_entity ?? false,
+    state: caseData.state ?? undefined,
   }), [yourInfo, opposingParties, caseData, description, incidentDate, incidentLocation, claimDetails, amountSought, otherRelief, requestAttorneyFees, requestCourtCosts])
 
   const buildMetadata = useCallback(() => ({

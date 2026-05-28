@@ -142,7 +142,7 @@ export function getDocumentFormat(subType: string, state?: string): string {
   }
 }
 
-function buildUserPrompt(facts: SmallClaimsFilingFacts): string {
+function buildUserPrompt(facts: SmallClaimsFilingFacts, resolvedState?: string): string {
   const partiesSection = [
     '--- PARTIES ---',
     `Plaintiff: ${facts.plaintiff.full_name}`,
@@ -157,9 +157,13 @@ function buildUserPrompt(facts: SmallClaimsFilingFacts): string {
     .filter(Boolean)
     .join('\n')
 
+  const courtTypeLabel = resolvedState === 'CA'
+    ? 'Small Claims Court (Superior Court)'
+    : 'Justice Court (JP)'
+
   const courtSection = [
     '--- COURT ---',
-    `Court type: Justice Court (JP)`,
+    `Court type: ${courtTypeLabel}`,
     `County: ${facts.county}`,
     facts.precinct ? `Precinct: ${facts.precinct}` : null,
     facts.cause_number ? `Cause number: ${facts.cause_number}` : null,
@@ -344,7 +348,7 @@ Use simple language a high school student could understand. Do NOT use legal jar
 
 Format the document professionally with proper legal formatting.`
 
-  const user = buildUserPrompt(facts)
+  const user = buildUserPrompt(facts, resolvedState)
 
   return { system, user }
 }
