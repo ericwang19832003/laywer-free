@@ -33,6 +33,8 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
           ? 'Once the defendant is served, your hearing in New York Small Claims Court is typically scheduled 30–70 days later (NYC). The court mails you a Notice of Hearing with the date and time.'
           : state === 'FL'
           ? 'After filing, your hearing in Florida Small Claims Court is typically scheduled 30–45 days later. The clerk mails you a Notice of Hearing with the date and time (Fla. R. Sm. Cl. P. 7.090).'
+          : state === 'PA'
+          ? 'Once the defendant is served, your hearing in Pennsylvania Magisterial District Court is typically scheduled within 30–70 days of filing. The court mails you a Notice of Hearing with the date and time (Pa.R.Civ.P.M.D.J. 307).'
           : 'Once the defendant is served, your hearing is typically set 10–21 days later. Small claims court moves fast compared to other courts.',
         showIf: (answers) => answers.know_timeline === 'no',
       },
@@ -70,6 +72,8 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
           ? `In New York Small Claims Court, the clerk mails the lawsuit papers to the defendant by certified mail — you just need to provide the defendant's address and pay the filing fee. Service must be done at least 5 days before your hearing.`
           : state === 'FL'
           ? `In Florida Small Claims Court, you must arrange personal service — the clerk does not mail the papers for you. The county sheriff or a certified process server must personally deliver the papers to the defendant (Fla. R. Sm. Cl. P. 7.070). Provide the defendant's address at filing and pay the sheriff's service fee (typically $40–$60).`
+          : state === 'PA'
+          ? `In Pennsylvania Magisterial District Court, service can be by personal delivery from a constable, OR by certified mail with return receipt requested — both are valid (Pa.R.Civ.P.M.D.J. 307). The court typically arranges service when you file. Provide the defendant's address and pay the service fee (typically $50–$100 for constable; less for certified mail). The defendant must be served at least 10 days before your hearing.`
           : `In most counties, a constable or process server delivers the lawsuit papers to the defendant. The court typically arranges this for you when you file — you just need to provide the defendant's address and pay the service fee.`,
         showIf: (answers) => answers.know_service === 'no',
       },

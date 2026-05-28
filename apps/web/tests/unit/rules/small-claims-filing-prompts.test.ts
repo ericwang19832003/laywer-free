@@ -349,3 +349,92 @@ describe('FL state — buildSmallClaimsFilingPrompt', () => {
     expect(result.system).not.toContain('Tex. Gov. Code')
   })
 })
+
+describe('PA state — buildSmallClaimsFilingPrompt', () => {
+  const paFacts: SmallClaimsFilingFacts = {
+    plaintiff: { full_name: 'Robert Chen', address: '50 Market St', city: 'Lancaster', state: 'PA', zip: '17601' },
+    defendant: { full_name: 'Liberty Storage Co', address: '200 Broad St', city: 'Lancaster', state: 'PA', zip: '17602' },
+    court_type: 'jp',
+    county: 'Lancaster',
+    claim_sub_type: 'security_deposit',
+    claim_amount: 2800,
+    damages_breakdown: [
+      { category: 'Security deposit', amount: 2000, description: 'Unreturned deposit' },
+      { category: 'Double damages', amount: 800, description: 'Bad faith penalty' },
+    ],
+    incident_date: '2025-10-01',
+    description: 'Landlord failed to return security deposit and itemized list within 30 days of vacating.',
+    demand_letter_sent: true,
+    demand_letter_date: '2025-11-01',
+    defendant_is_business: true,
+    state: 'PA',
+  }
+
+  it('uses PA court caption, not Texas', () => {
+    const result = buildSmallClaimsFilingPrompt(paFacts)
+    expect(result.system).toContain('MAGISTERIAL DISTRICT COURT')
+    expect(result.system).toContain('LANCASTER')
+    expect(result.system).toContain('PENNSYLVANIA')
+    expect(result.system).not.toContain('Texas')
+    expect(result.system).not.toContain('TRCP')
+    expect(result.system).not.toContain('Justice Court')
+  })
+
+  it('uses 42 Pa. C.S. § 1515 jurisdiction, not Tex. Gov. Code', () => {
+    const result = buildSmallClaimsFilingPrompt(paFacts)
+    expect(result.system).toContain('1515')
+    expect(result.system).toContain('$12,000')
+    expect(result.system).not.toContain('Tex. Gov. Code')
+    expect(result.system).not.toContain('$20,000')
+  })
+
+  it('uses CIVIL COMPLAINT document title', () => {
+    const result = buildSmallClaimsFilingPrompt(paFacts)
+    expect(result.system).toContain('CIVIL COMPLAINT')
+    expect(result.system).not.toContain('PETITION')
+  })
+
+  it('uses PA verification language (18 Pa. C.S. § 4904)', () => {
+    const result = buildSmallClaimsFilingPrompt(paFacts)
+    expect(result.system).toContain('4904')
+    expect(result.system).toContain('unsworn falsification')
+    expect(result.system).not.toContain('Tex.')
+  })
+
+  it('cites 68 P.S. § 250.512 (30-day rule) for security_deposit', () => {
+    const result = buildSmallClaimsFilingPrompt(paFacts)
+    expect(result.system).toContain('250.512')
+    expect(result.system).toContain('30 days')
+    expect(result.system).not.toContain('92.104')
+  })
+
+  it('cites 42 Pa. C.S. § 7102 modified comparative negligence for car_accident', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...paFacts, claim_sub_type: 'car_accident' })
+    expect(result.system).toContain('7102')
+    expect(result.system).toContain('modified comparative')
+  })
+
+  it('cites UTPCPL for consumer_refund', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...paFacts, claim_sub_type: 'consumer_refund' })
+    expect(result.system).toContain('UTPCPL')
+    expect(result.system).toContain('201-1')
+  })
+
+  it('cites 42 Pa. C.S. § 5525 for breach_of_contract', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...paFacts, claim_sub_type: 'breach_of_contract' })
+    expect(result.system).toContain('5525')
+  })
+
+  it('user prompt shows Magisterial District Court type, not Justice Court (JP)', () => {
+    const result = buildSmallClaimsFilingPrompt(paFacts)
+    expect(result.user).toContain('Magisterial District Court')
+    expect(result.user).not.toContain('Justice Court (JP)')
+  })
+
+  it('resolvedState from second parameter overrides facts.state', () => {
+    const factsNoState = { ...paFacts, state: undefined }
+    const result = buildSmallClaimsFilingPrompt(factsNoState, 'PA')
+    expect(result.system).toContain('1515')
+    expect(result.system).not.toContain('Tex. Gov. Code')
+  })
+})

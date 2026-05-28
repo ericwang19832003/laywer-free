@@ -23,6 +23,8 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
           ? `Service means officially delivering the lawsuit papers to the defendant. In New York Small Claims Court, the clerk mails the papers by certified mail to the defendant — you pay a small fee and provide the address. Service must be completed at least 5 days before the hearing (UCCA § 1803-a). If certified mail is refused or undelivered, the court can attempt personal service by a marshal.`
           : state === 'FL'
           ? `Service means officially delivering the lawsuit papers to the defendant in person. In Florida Small Claims Court, the defendant must be personally served — the clerk does NOT mail the papers. You must arrange service by the county sheriff or a certified process server (Fla. R. Sm. Cl. P. 7.070). Service must be completed at least 5 days before your hearing (Fla. R. Sm. Cl. P. 7.080).`
+          : state === 'PA'
+          ? `Service means officially delivering the lawsuit papers to the defendant. In Pennsylvania Magisterial District Court, service can be by personal delivery from a constable or sheriff, OR by certified mail with return receipt requested (Pa.R.Civ.P.M.D.J. 307). The defendant must be served at least 10 days before the hearing (Pa.R.Civ.P.M.D.J. 307(b)). The court typically arranges service when you file — you provide the defendant's address and pay the service fee.`
           : `Service means officially delivering the lawsuit papers to the defendant. In ${sc.courtAbbrev}, the clerk typically handles this for you when you file. The most common method is constable or process server delivery — they physically deliver the papers to the defendant.`,
         showIf: (answers) => answers.know_service_basics === 'no',
       },
@@ -59,6 +61,12 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
               { value: 'process_server', label: 'Certified process server' },
               { value: 'not_sure', label: 'Not sure — I will ask the clerk' },
             ]
+          : state === 'PA'
+          ? [
+              { value: 'constable', label: 'Constable / process server (most common)' },
+              { value: 'certified_mail', label: 'Certified mail with return receipt (also allowed in PA)' },
+              { value: 'not_sure', label: 'Not sure — the clerk will advise' },
+            ]
           : [
               { value: 'constable', label: 'Constable / process server (most common)' },
               { value: 'certified_mail', label: 'Certified mail (if allowed in your county)' },
@@ -74,6 +82,8 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
           ? `A New York City marshal or process server can personally deliver the papers to the defendant. This is used when certified mail fails or is refused. The fee is typically $50–$100. After service, the marshal files an Affidavit of Service with the court.`
           : state === 'FL'
           ? `In Florida, the county sheriff personally delivers the lawsuit papers to the defendant. The fee is typically $40–$60, paid when you file. You provide the defendant's address, and the clerk forwards the papers to the sheriff's office. Alternatively, you may hire a certified process server ($50–$100), which can be faster for hard-to-locate defendants (Fla. R. Sm. Cl. P. 7.070).`
+          : state === 'PA'
+          ? `A constable or certified process server personally delivers the lawsuit papers to the defendant. The fee is typically $50–$100, paid when you file. You provide the defendant's address and the court arranges service through the constable's office. After service, the constable files a return of service with the court (Pa.R.Civ.P.M.D.J. 307).`
           : `Constable or process server delivery is the most common and reliable method in ${sc.courtAbbrev}. The fee is typically $50–$100. In many courts, when you file your claim, the clerk issues citation and arranges delivery. You just pay the fee and provide the address.`,
         showIf: (answers) => answers.service_method === 'constable' || answers.service_method === 'process_server',
       },
@@ -86,6 +96,8 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
           ? "The court clerk mails the papers to the defendant by certified mail. You pay a filing fee and provide the defendant's address — the clerk handles the mailing. Service must be completed at least 5 days before your hearing (UCCA § 1803-a). If the certified mail is refused or returned undelivered, the court may arrange service by a NYC marshal."
           : state === 'FL'
           ? "Florida Small Claims Court requires personal service — certified mail is not a valid service method (Fla. R. Sm. Cl. P. 7.070). Service must be performed by the county sheriff or a certified process server. If you need assistance, contact the clerk's office."
+          : state === 'PA'
+          ? "Pennsylvania Magisterial District Court allows service by certified mail with return receipt requested — this is a valid alternative to personal service by a constable (Pa.R.Civ.P.M.D.J. 307). The court typically handles the mailing; you provide the defendant's address and pay a small fee. Service must be completed at least 10 days before your hearing. If certified mail is refused or returned unclaimed, switch to personal service by a constable."
           : "Some courts allow service by certified mail with return receipt requested. This is cheaper but less reliable — the defendant can refuse to sign. If certified mail fails, you may need to switch to constable or process server.",
         showIf: (answers) => answers.service_method === 'certified_mail',
       },
@@ -114,6 +126,8 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
           ? "If certified mail is returned undelivered or refused, inform the court. The court can arrange service by a NYC marshal, or you can hire a process server. If you cannot locate the defendant, contact the clerk for guidance — the court has procedures for hard-to-serve defendants."
           : state === 'FL'
           ? "If the sheriff or process server cannot serve the defendant, you have options: (1) Request an alias summons to try again at a corrected or alternate address. (2) Request substituted service — leaving papers with a resident at the defendant's dwelling plus mailing a copy. (3) If the defendant cannot be located after diligent search, request service by publication. Contact the clerk's office for guidance on the appropriate procedure."
+          : state === 'PA'
+          ? `If certified mail is refused or returned, switch to personal service by a constable or process server. If the constable cannot locate the defendant, you can: (1) Request an alias complaint to try again at a corrected or alternate address. (2) Request substitute service — leaving papers with an adult at the defendant's dwelling plus mailing a copy. Contact the clerk's office for guidance on the appropriate procedure under Pa.R.Civ.P.M.D.J. 307.`
           : "If the constable can't serve the defendant, you have options: (1) Request an alias citation to try again at a different address or time. (2) Ask for service by posting — the constable posts the citation on the defendant's door. (3) File a motion for alternative service if the defendant is actively avoiding service. The clerk or judge can guide you through these options.",
         showIf: (answers) => answers.worried_about_failure === 'yes',
       },
@@ -131,6 +145,8 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
           ? "Once certified mail service is complete, the clerk has a record of it. For marshal/personal service, the marshal files an Affidavit of Service with the court. Service must be completed at least 5 days before your hearing (UCCA § 1803-a). Check with the clerk before your hearing date to confirm service was successful."
           : state === 'FL'
           ? "Once the sheriff or process server delivers the papers, they file a Return of Service with the court — you don't need to do this yourself. Check with the clerk or case portal to confirm the Return of Service is on file before your hearing. Service must be completed at least 5 days before your hearing (Fla. R. Sm. Cl. P. 7.080)."
+          : state === 'PA'
+          ? `Once the constable or process server delivers the papers, they file a return of service with the court. For certified mail service, the signed return receipt card is proof of service. Service must be completed at least 10 days before your hearing (Pa.R.Civ.P.M.D.J. 307(b)). Check with the clerk to confirm service is on file before your hearing date.`
           : "Once service is complete, the constable or process server files proof of service with the court. This is your proof that the defendant was notified. You don't usually need to do anything — the court receives this automatically. Your hearing will be set 10–21 days after service.",
         showIf: (answers) => answers.service_complete === 'no',
       },
@@ -150,6 +166,8 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
             ? 'The clerk sends papers by certified mail — provide the defendant\'s address and pay the fee. Service must be at least 5 days before hearing (UCCA § 1803-a).'
             : state === 'FL'
             ? 'The sheriff or a certified process server personally serves the defendant — provide their address and pay the sheriff\'s fee. Service must be at least 5 days before hearing (Fla. R. Sm. Cl. P. 7.080).'
+            : state === 'PA'
+            ? 'Constable or certified mail service — defendant must be served at least 10 days before hearing (Pa.R.Civ.P.M.D.J. 307(b)).'
             : 'The clerk handles service — the constable or process server delivers papers to the defendant at the address you provide.',
         })
       }

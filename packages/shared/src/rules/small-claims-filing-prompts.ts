@@ -200,6 +200,63 @@ export function getDocumentFormat(subType: string, state?: string): string {
     }
   }
 
+  if (state === 'PA') {
+    switch (subType) {
+      case 'security_deposit':
+        return `This is a Pennsylvania Magisterial District Court claim for a security deposit dispute. Include:
+- FACTS: Describe the rental address, move-in and move-out dates, deposit amount paid, and landlord's failure to return the deposit.
+- LEGAL BASIS: Cite 68 P.S. § 250.512 — landlord must return the security deposit with an itemized list of deductions within 30 days of the tenant vacating and providing their forwarding address.
+- DOUBLE DAMAGES: A landlord who wrongfully withholds a deposit forfeits the right to withhold any portion and may be liable for double the amount wrongfully withheld (68 P.S. § 250.512(c)).
+- DEDUCTIONS DISPUTE: Normal wear and tear is not deductible. Any improper deductions should be itemized and challenged.`
+
+      case 'breach_of_contract':
+        return `This is a Pennsylvania Magisterial District Court claim for breach of contract. Include:
+- CONTRACT: Describe the contract — parties, date, subject matter, key terms, and consideration (what each party promised).
+- PERFORMANCE: Describe the Plaintiff's performance or readiness to perform.
+- BREACH: Describe specifically how the Defendant breached the contract.
+- DAMAGES: Describe the damages caused by the breach. Note: Pennsylvania's statute of limitations for contract claims is 4 years (42 Pa. C.S. § 5525(a)).`
+
+      case 'consumer_refund':
+        return `This is a Pennsylvania Magisterial District Court claim for a consumer refund dispute. Include:
+- PURCHASE: Describe the purchase — what was bought, when, where, and for how much.
+- DEFECT OR FAILURE: Describe the defect, failure, or misrepresentation.
+- REFUND ATTEMPTS: Describe attempts to obtain a refund, including dates and responses.
+- LEGAL BASIS: If applicable, note the Pennsylvania Unfair Trade Practices and Consumer Protection Law (UTPCPL), 73 P.S. § 201-1 et seq. — provides remedies including treble damages for unfair or deceptive trade practices.`
+
+      case 'property_damage':
+        return `This is a Pennsylvania Magisterial District Court claim for property damage. Include:
+- PROPERTY: Describe the property damaged — type, location, and condition before the incident.
+- CAUSE: Describe the incident, date, time, and how Defendant's actions or negligence caused the damage.
+- REPAIR ESTIMATES: Include repair or replacement cost estimates (contractor quotes, receipts, etc.).`
+
+      case 'car_accident':
+        return `This is a Pennsylvania Magisterial District Court claim for vehicle damage from a car accident. Include:
+- ACCIDENT: Describe the accident — date, time, location, and how it occurred.
+- FAULT: Describe how the Defendant's negligence or traffic violation caused the accident.
+- COMPARATIVE FAULT: Note that Pennsylvania follows modified comparative negligence (42 Pa. C.S. § 7102) — a plaintiff who is 51% or more at fault may not recover. If Plaintiff is 50% or less at fault, recovery is reduced proportionally by the percentage of fault.
+- VEHICLE DAMAGE: Describe the damage to Plaintiff's vehicle and the cost of repairs or diminished value.`
+
+      case 'neighbor_dispute':
+        return `This is a Pennsylvania Magisterial District Court claim for a neighbor dispute. Include:
+- PARTIES AND ADDRESSES: Identify both parties and their property addresses.
+- NATURE OF DISPUTE: Describe the specific conduct — encroachment, noise, water runoff, tree damage, fence disputes, etc.
+- DURATION: Describe how long the issue has persisted.
+- ATTEMPTS TO RESOLVE: Describe any attempts to resolve before filing.`
+
+      case 'unpaid_loan':
+        return `This is a Pennsylvania Magisterial District Court claim for an unpaid loan or debt. Include:
+- LOAN TERMS: Describe the loan — amount, date, interest rate (if any), repayment schedule, written or oral.
+- PAYMENTS: Describe any payments made, including dates and amounts.
+- OUTSTANDING BALANCE: State the current outstanding balance. Note: Pennsylvania's statute of limitations for contract claims is 4 years (42 Pa. C.S. § 5525(a)).`
+
+      default:
+        return `This is a Pennsylvania Magisterial District Court claim. Include:
+- FACTS: A clear, chronological narrative of the facts giving rise to the claim.
+- LEGAL BASIS: The legal theory supporting the claim under Pennsylvania law.
+- DAMAGES: How the Plaintiff was harmed and the monetary value of the harm.`
+    }
+  }
+
   switch (subType) {
     case 'security_deposit':
       return `This is a Texas small claims petition for a security deposit dispute. Include:
@@ -277,6 +334,8 @@ function buildUserPrompt(facts: SmallClaimsFilingFacts, resolvedState?: string):
     ? 'Small Claims Court (UCCA §1801)'
     : resolvedState === 'FL'
     ? 'County Court, Small Claims Division'
+    : resolvedState === 'PA'
+    ? 'Magisterial District Court'
     : 'Justice Court (JP)'
 
   const courtSection = [
@@ -379,9 +438,12 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
   const isCA = resolvedState === 'CA'
   const isNY = resolvedState === 'NY'
   const isFL = resolvedState === 'FL'
+  const isPA = resolvedState === 'PA'
   // NYC boroughs — use NYC Civil Court; all other NY counties use city/district/town court
   const NYC_BOROUGHS = new Set(['New York', 'Kings', 'Bronx', 'Queens', 'Richmond'])
   const isNYC = isNY && NYC_BOROUGHS.has(facts.county)
+  // Philadelphia County uses Philadelphia Municipal Court, not a Magisterial District Court
+  const isPhiladelphia = isPA && facts.county.toLowerCase() === 'philadelphia'
 
   const courtLabel = isCA
     ? `Small Claims Court, ${facts.county} County`
@@ -391,6 +453,10 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     ? `Small Claims Court, ${facts.county} County`
     : isFL
     ? `County Court, Small Claims Division, ${facts.county} County, Florida`
+    : isPhiladelphia
+    ? `Philadelphia Municipal Court`
+    : isPA
+    ? `Magisterial District Court, ${facts.county} County, Pennsylvania`
     : `Justice Court${facts.precinct ? `, Precinct ${facts.precinct}` : ''}, ${facts.county} County, Texas`
 
   const captionLine = isCA
@@ -401,6 +467,10 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     ? `${facts.county.toUpperCase()} COUNTY — SMALL CLAIMS PART`
     : isFL
     ? `IN THE COUNTY COURT IN AND FOR ${facts.county.toUpperCase()} COUNTY, FLORIDA — SMALL CLAIMS DIVISION`
+    : isPhiladelphia
+    ? `IN THE MUNICIPAL COURT OF PHILADELPHIA COUNTY, PENNSYLVANIA`
+    : isPA
+    ? `IN THE MAGISTERIAL DISTRICT COURT, ${facts.county.toUpperCase()} COUNTY, PENNSYLVANIA`
     : `In the Justice Court, Precinct ${facts.precinct ?? '___'}, ${facts.county} County, Texas`
 
   const docTitleLine = isCA
@@ -409,6 +479,8 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     ? `NOTICE OF SMALL CLAIM — ${docTitle}`
     : isFL
     ? `PLAINTIFF'S STATEMENT OF CLAIM — ${docTitle}`
+    : isPA
+    ? `CIVIL COMPLAINT — ${docTitle}`
     : `PLAINTIFF'S ORIGINAL PETITION (SMALL CLAIMS) — ${docTitle}`
 
   const jurisdictionClause = isCA
@@ -419,6 +491,10 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     ? facts.claim_amount && facts.claim_amount > 8000
       ? `JURISDICTION WARNING: Florida small claims jurisdiction under Fla. Stat. § 34.01 is limited to $8,000. The stated claim amount ($${facts.claim_amount.toLocaleString()}) exceeds this limit. You may need to file in County Court (general civil jurisdiction) or reduce your claim to $8,000. Consult the clerk before filing.`
       : `This court has jurisdiction under Fla. Stat. § 34.01 because the amount in controversy does not exceed $8,000.`
+    : isPA
+    ? facts.claim_amount && facts.claim_amount > 12000
+      ? `JURISDICTION WARNING: Pennsylvania Magisterial District Court jurisdiction under 42 Pa. C.S. § 1515(a)(3) is limited to $12,000. The stated claim amount ($${facts.claim_amount.toLocaleString()}) exceeds this limit. You may need to file in the Court of Common Pleas or reduce your claim to $12,000. Consult the clerk before filing.`
+      : `This court has jurisdiction under 42 Pa. C.S. § 1515(a)(3) because the amount in controversy does not exceed $12,000.`
     : `This court has jurisdiction under Tex. Gov. Code § 27.031 because the amount in controversy does not exceed $20,000.`
 
   const applicableRules = isCA
@@ -427,6 +503,8 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     ? `This claim is governed by New York UCCA Article 18 (NYC) or UDCA Article 18 (outside NYC). Note: attorneys may represent parties in New York Small Claims Court, though most hearings proceed without counsel.`
     : isFL
     ? `This claim is governed by the Florida Rules of Small Claims Procedure (Fla. R. Sm. Cl. P.) and Fla. Stat. Chapter 34. Attorneys may represent parties in Florida Small Claims Court.`
+    : isPA
+    ? `This complaint is governed by the Pennsylvania Rules of Civil Procedure Applicable to Magisterial District Courts (Pa.R.Civ.P.M.D.J.) and 42 Pa. C.S. § 1515. Attorneys may represent parties in Pennsylvania Magisterial District Court, though many cases proceed without counsel.`
     : `This petition is governed by the Texas Rules of Civil Procedure, Rules 500-507 (proceedings in justice courts). Cite TRCP 500-507 where appropriate.`
 
   const verificationLine = isCA
@@ -435,6 +513,8 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     ? `I certify that the foregoing statements made by me are true. I am aware that if any of the foregoing statements made by me are willfully false, I am subject to punishment.`
     : isFL
     ? `Under penalties of perjury, I declare that I have read the foregoing, and the facts alleged are true to the best of my knowledge and belief. (Fla. Stat. § 92.525)`
+    : isPA
+    ? `I verify that the statements made in this filing are true and correct to the best of my knowledge, information and belief. I understand that false statements herein are made subject to the penalties of 18 Pa. C.S. § 4904 relating to unsworn falsification to authorities.`
     : `My name is [Plaintiff name]. I declare under penalty of perjury that the foregoing is true and correct. Executed on [date].`
 
   const signatureLabel = isCA ? 'Plaintiff in Pro Per' : 'Pro Se'
