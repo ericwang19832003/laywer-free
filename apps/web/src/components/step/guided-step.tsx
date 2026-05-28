@@ -165,16 +165,6 @@ export function GuidedStep({
   async function handleComplete() {
     setLoading(true)
     try {
-      // Ensure task is in_progress before completing (guards against skipped auto-save)
-      await fetch(`/api/tasks/${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'in_progress',
-          metadata: { guided_answers: answers },
-        }),
-      })
-
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

@@ -60,7 +60,7 @@ export async function PATCH(
 
     if (newStatus !== undefined) {
       updatePayload.status = newStatus
-      if (newStatus === 'completed') {
+      if (newStatus === 'completed' && !currentTask.completed_at) {
         updatePayload.completed_at = new Date().toISOString()
       }
     }
@@ -89,8 +89,8 @@ export async function PATCH(
       )
     }
 
-    // Side effects only fire when status is actually changing
-    if (newStatus !== undefined) {
+    // Side effects only fire when status is actually changing to a new value
+    if (newStatus !== undefined && newStatus !== currentTask.status) {
       // Write timeline event
       await supabase.from('task_events').insert({
         case_id: currentTask.case_id,

@@ -20,30 +20,30 @@ describe('updateTaskSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects missing status', () => {
+  it('accepts empty object (both fields optional)', () => {
     const result = updateTaskSchema.safeParse({})
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 })
 
 describe('VALID_TRANSITIONS', () => {
-  it('todo can go to in_progress and skipped', () => {
-    expect(VALID_TRANSITIONS['todo']).toEqual(['in_progress', 'skipped'])
+  it('todo can go to in_progress, completed, and skipped', () => {
+    expect(VALID_TRANSITIONS['todo']).toEqual(['in_progress', 'completed', 'skipped'])
   })
 
-  it('in_progress can go to needs_review, completed, skipped', () => {
-    expect(VALID_TRANSITIONS['in_progress']).toEqual(['needs_review', 'completed', 'skipped'])
+  it('in_progress can go to in_progress, needs_review, completed, skipped', () => {
+    expect(VALID_TRANSITIONS['in_progress']).toEqual(['in_progress', 'needs_review', 'completed', 'skipped'])
   })
 
-  it('completed has no valid transitions', () => {
-    expect(VALID_TRANSITIONS['completed']).toEqual([])
+  it('completed can re-complete or reopen to in_progress', () => {
+    expect(VALID_TRANSITIONS['completed']).toEqual(['completed', 'in_progress'])
   })
 
   it('locked has no valid transitions', () => {
     expect(VALID_TRANSITIONS['locked']).toEqual([])
   })
 
-  it('skipped can go to todo', () => {
-    expect(VALID_TRANSITIONS['skipped']).toEqual(['todo'])
+  it('skipped can go to todo, in_progress, or completed', () => {
+    expect(VALID_TRANSITIONS['skipped']).toEqual(['todo', 'in_progress', 'completed'])
   })
 })

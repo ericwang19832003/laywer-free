@@ -10,9 +10,9 @@ export type UpdateTaskInput = z.infer<typeof updateTaskSchema>
 // Valid status transitions
 export const VALID_TRANSITIONS: Record<string, string[]> = {
   locked: [],
-  todo: ['in_progress', 'skipped'],
+  todo: ['in_progress', 'completed', 'skipped'],
   in_progress: ['in_progress', 'needs_review', 'completed', 'skipped'],
   needs_review: ['completed', 'in_progress'],
-  completed: [],
-  skipped: ['todo'],
+  completed: ['completed', 'in_progress'],
+  skipped: ['todo', 'in_progress', 'completed'],
 }
