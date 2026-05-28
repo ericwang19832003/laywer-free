@@ -43,6 +43,8 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
           ? `File in the ${sc.courtAbbrev} in the county where: (1) the defendant lives or regularly works, (2) where the transaction or event occurred, or (3) for consumer purchases, where you signed the contract or made the purchase (CCP § 116.370). If multiple counties qualify, you can choose.`
           : state === 'NY'
           ? `File in the ${sc.courtAbbrev} in the county (borough, in NYC) where the defendant resides, works, or has their principal place of business (UCCA § 1803). For disputes arising from a consumer transaction, you may also file where the transaction took place.`
+          : state === 'FL'
+          ? `File in the ${sc.courtAbbrev} in the county where the defendant resides, has their principal place of business, OR where the cause of action accrued (i.e., where the transaction or event occurred) (Fla. Stat. § 47.011). If multiple counties qualify, you can choose.`
           : `File in the ${sc.courtAbbrev} in the county where the defendant lives, OR where the transaction or event occurred. If those are different counties, you can choose either one.`,
         showIf: (answers) => answers.know_venue === 'no',
       },
@@ -126,6 +128,8 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
           status: 'needed',
           text: state === 'NY'
             ? `Identify the correct ${sc.courtAbbrev}: where the defendant resides, works, or has their principal place of business (UCCA § 1803).`
+            : state === 'FL'
+            ? `Identify the correct ${sc.courtAbbrev}: where the defendant resides, has their principal place of business, or where the incident/transaction occurred (Fla. Stat. § 47.011).`
             : `Identify the correct ${sc.courtAbbrev}: where the defendant lives or where the transaction occurred.`,
         })
       }

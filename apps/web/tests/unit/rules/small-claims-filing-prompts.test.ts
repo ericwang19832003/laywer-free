@@ -262,3 +262,90 @@ describe('NY state — buildSmallClaimsFilingPrompt', () => {
     expect(result.system).not.toContain('Tex. Gov. Code')
   })
 })
+
+describe('FL state — buildSmallClaimsFilingPrompt', () => {
+  const flFacts: SmallClaimsFilingFacts = {
+    plaintiff: { full_name: 'Maria Torres', address: '100 Main St', city: 'Miami', state: 'FL', zip: '33101' },
+    defendant: { full_name: 'Sunshine Storage LLC', address: '200 Brickell Ave', city: 'Miami', state: 'FL', zip: '33131' },
+    court_type: 'jp',
+    county: 'Miami-Dade',
+    claim_sub_type: 'security_deposit',
+    claim_amount: 2500,
+    damages_breakdown: [
+      { category: 'Security deposit', amount: 2000, description: 'Unreturned deposit' },
+      { category: 'Damages', amount: 500, description: 'Bad faith penalty' },
+    ],
+    incident_date: '2025-10-01',
+    description: 'Landlord failed to return security deposit within 15 days and provided no written notice of claim.',
+    demand_letter_sent: true,
+    demand_letter_date: '2025-10-20',
+    defendant_is_business: true,
+    state: 'FL',
+  }
+
+  it('uses FL court caption, not Texas', () => {
+    const result = buildSmallClaimsFilingPrompt(flFacts)
+    expect(result.system).toContain('MIAMI-DADE COUNTY')
+    expect(result.system).toContain('FLORIDA')
+    expect(result.system).not.toContain('Texas')
+    expect(result.system).not.toContain('TRCP')
+    expect(result.system).not.toContain('Justice Court')
+  })
+
+  it('uses Fla. Stat. § 34.01 jurisdiction, not Tex. Gov. Code', () => {
+    const result = buildSmallClaimsFilingPrompt(flFacts)
+    expect(result.system).toContain('34.01')
+    expect(result.system).toContain('$8,000')
+    expect(result.system).not.toContain('Tex. Gov. Code')
+    expect(result.system).not.toContain('$20,000')
+  })
+
+  it('uses PLAINTIFF\'S STATEMENT OF CLAIM document title', () => {
+    const result = buildSmallClaimsFilingPrompt(flFacts)
+    expect(result.system).toContain('PLAINTIFF\'S STATEMENT OF CLAIM')
+  })
+
+  it('uses FL verification language (Fla. Stat. § 92.525)', () => {
+    const result = buildSmallClaimsFilingPrompt(flFacts)
+    expect(result.system).toContain('penalties of perjury')
+    expect(result.system).toContain('92.525')
+    expect(result.system).not.toContain('Tex.')
+  })
+
+  it('cites Fla. Stat. § 83.49 (15/30-day rule) for security_deposit', () => {
+    const result = buildSmallClaimsFilingPrompt(flFacts)
+    expect(result.system).toContain('83.49')
+    expect(result.system).toContain('15 days')
+    expect(result.system).not.toContain('92.104')
+  })
+
+  it('cites Fla. Stat. § 768.81 modified comparative negligence for car_accident', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...flFacts, claim_sub_type: 'car_accident' })
+    expect(result.system).toContain('768.81')
+    expect(result.system).toContain('modified comparative')
+  })
+
+  it('cites FDUTPA for consumer_refund', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...flFacts, claim_sub_type: 'consumer_refund' })
+    expect(result.system).toContain('FDUTPA')
+    expect(result.system).toContain('501.201')
+  })
+
+  it('cites Fla. Stat. § 95.11 for breach_of_contract', () => {
+    const result = buildSmallClaimsFilingPrompt({ ...flFacts, claim_sub_type: 'breach_of_contract' })
+    expect(result.system).toContain('95.11')
+  })
+
+  it('user prompt shows County Court type, not Justice Court (JP)', () => {
+    const result = buildSmallClaimsFilingPrompt(flFacts)
+    expect(result.user).toContain('County Court')
+    expect(result.user).not.toContain('Justice Court (JP)')
+  })
+
+  it('resolvedState from second parameter overrides facts.state', () => {
+    const factsNoState = { ...flFacts, state: undefined }
+    const result = buildSmallClaimsFilingPrompt(factsNoState, 'FL')
+    expect(result.system).toContain('34.01')
+    expect(result.system).not.toContain('Tex. Gov. Code')
+  })
+})
