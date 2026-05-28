@@ -811,7 +811,7 @@ export default async function StepPage({
     case 'sc_file_with_court':
       return <DynamicGuidedStep taskKey="sc_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_serve_defendant':
-      return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+      return <ServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_prepare_for_hearing':
       return <PrepareForHearingStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'sc_hearing_day':

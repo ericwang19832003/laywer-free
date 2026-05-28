@@ -18,7 +18,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'sc_basics_info',
         type: 'info',
-        prompt: `${sc.courtName} handles small claims up to ${sc.limit}. It uses relaxed procedures — no formal discovery is required, evidence rules are relaxed, and hearings are typically 15–30 minutes long.${isTx ? ' (Governed by TRCP Rules 500-507.)' : ''}`,
+        prompt: `${sc.courtName} handles small claims up to ${sc.limit}. It uses relaxed procedures — no formal discovery is required, evidence rules are relaxed, and hearings are typically 15–30 minutes long.${isTx ? ' (Governed by TRCP Rules 500-507.)' : state === 'FL' ? ' (Governed by the Florida Rules of Small Claims Procedure, Fla. R. Sm. Cl. P. 7.010 et seq.)' : state === 'CA' ? ' (Governed by the California Small Claims Act, CCP §§ 116.110–116.950.)' : state === 'NY' ? ' (Governed by New York City Civil Court Act Article 18 (NYC) or UCCA Article 18 (outside NYC).)' : state === 'PA' ? ' (Governed by Pa.R.Civ.P.M.D.J.)' : ''}`,
         showIf: (answers) => answers.know_sc_basics === 'no',
       },
       {
