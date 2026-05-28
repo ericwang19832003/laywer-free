@@ -176,7 +176,7 @@ export function validateJurisdiction(input: {
       return { valid: true }
 
     case 'County':
-      if (amountSought > 200000) {
+      if (amountSought > 250000) {
         return {
           valid: false,
           warning: 'County Court handles claims up to $250,000.',

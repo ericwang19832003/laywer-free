@@ -6,7 +6,7 @@ export const TX_CONFIG: StateConfig = {
   abbreviation: 'TX',
   courtTypes: [
     { value: 'jp', label: 'JP Court (Small Claims)', maxAmount: 20_000 },
-    { value: 'county', label: 'County Court', maxAmount: 200_000 },
+    { value: 'county', label: 'County Court', maxAmount: 250_000 },
     { value: 'district', label: 'District Court' },
   ],
   federalCourtAvailable: true,
@@ -22,8 +22,8 @@ export const TX_CONFIG: StateConfig = {
   amountRanges: [
     { value: 'under_20k', label: 'Under $20,000', maxAmount: 20_000 },
     { value: '20k_75k', label: '$20,000 – $75,000', maxAmount: 75_000 },
-    { value: '75k_200k', label: '$75,000 – $200,000', maxAmount: 200_000 },
-    { value: 'over_200k', label: 'Over $200,000' },
+    { value: '75k_200k', label: '$75,000 – $250,000', maxAmount: 250_000 },
+    { value: 'over_200k', label: 'Over $250,000' },
     { value: 'not_money', label: "It's not about money" },
   ],
 }

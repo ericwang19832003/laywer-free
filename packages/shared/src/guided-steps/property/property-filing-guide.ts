@@ -124,8 +124,8 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
     if (answers.total_damages) {
       const courtLabels: Record<string, string> = {
         under_20k: 'Justice of the Peace (JP) Court (under $20K)',
-        '20k_to_250k': 'County Court at Law ($20K\u2013$100K)',
-        over_250k: 'District Court (over $100K)',
+        '20k_to_250k': 'County Court at Law ($20K\u2013$250K)',
+        over_250k: 'District Court (over $250K)',
       }
       items.push({
         status: 'done',
