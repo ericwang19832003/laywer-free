@@ -89,7 +89,7 @@ const CA_RULES: SolRuleMap = {
   landlord_tenant: { default: 2, notes: 'Cal. Code Civ. Proc. § 339' },
   small_claims: { default: 2, overrides: { breach_of_contract: 4 } },
   debt_collection: { default: 4 },
-  real_estate: { default: 4, overrides: { construction_defect: 10 } },
+  real_estate: { default: 4, overrides: { construction_defect_latent: 10, construction_defect_patent: 4, construction_defect: 10 } },
   business: { default: 4 },
   family: { default: null },
   other: { default: 2, overrides: { fraud: 3, defamation: 1 } },

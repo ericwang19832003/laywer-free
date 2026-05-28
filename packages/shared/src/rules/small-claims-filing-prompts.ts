@@ -28,7 +28,64 @@ export function getDocumentTitle(subType: string): string {
   }
 }
 
-export function getDocumentFormat(subType: string): string {
+export function getDocumentFormat(subType: string, state?: string): string {
+  if (state === 'CA') {
+    switch (subType) {
+      case 'security_deposit':
+        return `This is a California small claims claim for a security deposit dispute. Include:
+- FACTS: Describe the rental address, move-in and move-out dates, deposit amount paid, and landlord's failure to return the deposit.
+- LEGAL BASIS: Cite Cal. Civil Code § 1950.5 — landlord must return the security deposit or provide an itemized statement of deductions within 21 days of the tenant vacating. (Texas has 30 days; California's deadline is 21 days.)
+- BAD FAITH PENALTIES: Under Civil Code § 1950.5(l), a landlord who in bad faith retains a deposit may be liable for up to twice the amount of the deposit as a penalty, plus actual damages.
+- DEDUCTIONS DISPUTE: Describe any improper deductions — normal wear and tear is not deductible under California law (Civil Code § 1950.5(b)).`
+
+      case 'breach_of_contract':
+        return `This is a California small claims claim for breach of contract. Include:
+- CONTRACT: Describe the contract — parties, date, subject matter, key terms, and what each party promised.
+- PERFORMANCE: Describe the Plaintiff's performance or readiness to perform.
+- BREACH: Describe specifically how the Defendant breached the contract.
+- DAMAGES: Describe the damages caused directly by the breach. Note: under California law, damages must be foreseeable at the time the contract was made (Civil Code §§ 3300–3301).`
+
+      case 'consumer_refund':
+        return `This is a California small claims claim for a consumer refund dispute. Include:
+- PURCHASE: Describe the purchase — what was bought, when, where, and for how much.
+- DEFECT OR FAILURE: Describe the defect, failure, or misrepresentation.
+- REFUND ATTEMPTS: Describe attempts to obtain a refund, including dates and responses.
+- LEGAL BASIS: If applicable, note the California Consumers Legal Remedies Act (CLRA, Civil Code § 1750 et seq.) or the Unfair Competition Law (Bus. & Prof. Code § 17200) — these provide remedies for consumers harmed by deceptive or unlawful business practices.`
+
+      case 'property_damage':
+        return `This is a California small claims claim for property damage. Include:
+- PROPERTY: Describe the property damaged — type, location, and condition before the incident.
+- CAUSE: Describe the incident, date, time, and how Defendant's actions or negligence caused the damage.
+- REPAIR ESTIMATES: Include repair or replacement cost estimates (contractor quotes, receipts, etc.).`
+
+      case 'car_accident':
+        return `This is a California small claims claim for vehicle damage from a car accident. Include:
+- ACCIDENT: Describe the accident — date, time, location, and how it occurred.
+- FAULT: Describe how the Defendant's negligence or traffic violation caused the accident.
+- COMPARATIVE FAULT: Note that California follows pure comparative fault (Li v. Yellow Cab Co., 13 Cal.3d 804 (1975)) — Plaintiff's recovery is reduced by their percentage of fault, but Plaintiff can recover even if mostly at fault.
+- VEHICLE DAMAGE: Describe the damage to Plaintiff's vehicle and the cost of repairs or diminished value.`
+
+      case 'neighbor_dispute':
+        return `This is a California small claims claim for a neighbor dispute. Include:
+- PARTIES AND ADDRESSES: Identify both parties and their property addresses.
+- NATURE OF DISPUTE: Describe the specific conduct — encroachment, noise, water runoff, tree damage, fence disputes, etc.
+- DURATION: Describe how long the issue has persisted.
+- ATTEMPTS TO RESOLVE: Describe any attempts to resolve before filing.`
+
+      case 'unpaid_loan':
+        return `This is a California small claims claim for an unpaid loan or debt. Include:
+- LOAN TERMS: Describe the loan — amount, date, interest rate (if any), repayment schedule, written or oral.
+- PAYMENTS: Describe any payments made, including dates and amounts.
+- OUTSTANDING BALANCE: State the current outstanding balance, including any agreed-upon interest.`
+
+      default:
+        return `This is a California small claims claim. Include:
+- FACTS: A clear, chronological narrative of the facts giving rise to the claim.
+- LEGAL BASIS: The legal theory supporting the claim under California law.
+- DAMAGES: How the Plaintiff was harmed and the monetary value of the harm.`
+    }
+  }
+
   switch (subType) {
     case 'security_deposit':
       return `This is a Texas small claims petition for a security deposit dispute. Include:
@@ -192,11 +249,39 @@ function buildUserPrompt(facts: SmallClaimsFilingFacts): string {
     .join('\n')
 }
 
-export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts): FilingPrompt {
+export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, state?: string): FilingPrompt {
   const docTitle = getDocumentTitle(facts.claim_sub_type)
-  const format = getDocumentFormat(facts.claim_sub_type)
+  const format = getDocumentFormat(facts.claim_sub_type, state)
 
-  const system = `You are a legal document formatting assistant. You help self-represented (pro se) litigants format their small claims court filings for Texas Justice of the Peace (JP) Courts.
+  const isCA = state === 'CA'
+
+  const courtLabel = isCA
+    ? `Small Claims Court, ${facts.county} County`
+    : `Justice Court${facts.precinct ? `, Precinct ${facts.precinct}` : ''}, ${facts.county} County, Texas`
+
+  const captionLine = isCA
+    ? `SUPERIOR COURT OF CALIFORNIA, COUNTY OF ${facts.county.toUpperCase()}, SMALL CLAIMS DIVISION`
+    : `In the Justice Court, Precinct ${facts.precinct ?? '___'}, ${facts.county} County, Texas`
+
+  const docTitleLine = isCA
+    ? `PLAINTIFF'S CLAIM AND ORDER TO GO TO SMALL CLAIMS COURT — ${docTitle}`
+    : `PLAINTIFF'S ORIGINAL PETITION (SMALL CLAIMS) — ${docTitle}`
+
+  const jurisdictionClause = isCA
+    ? `This court has jurisdiction under Cal. Code Civ. Proc. § 116.221 because the amount in controversy does not exceed $12,500 (individual plaintiff).`
+    : `This court has jurisdiction under Tex. Gov. Code § 27.031 because the amount in controversy does not exceed $20,000.`
+
+  const applicableRules = isCA
+    ? `This claim is governed by the California Small Claims Act, Cal. Code Civ. Proc. §§ 116.110–116.950. Note: attorneys may not represent parties at a California small claims hearing (CCP § 116.530).`
+    : `This petition is governed by the Texas Rules of Civil Procedure, Rules 500-507 (proceedings in justice courts). Cite TRCP 500-507 where appropriate.`
+
+  const verificationLine = isCA
+    ? `I declare under penalty of perjury under the laws of the State of California that the foregoing is true and correct. Executed on [date] at [city], California.`
+    : `My name is [Plaintiff name]. I declare under penalty of perjury that the foregoing is true and correct. Executed on [date].`
+
+  const signatureLabel = isCA ? 'Plaintiff in Pro Per' : 'Pro Se'
+
+  const system = `You are a legal document formatting assistant. You help self-represented (${signatureLabel}) litigants format their small claims court filings for ${courtLabel}.
 
 IMPORTANT RULES:
 - You format documents. You do NOT provide legal advice.
@@ -204,20 +289,20 @@ IMPORTANT RULES:
 - Use only the facts provided. Do not invent or assume additional facts.
 - Do not predict outcomes or make strategic recommendations.
 - Use plain, clear language appropriate for a pro se filer.
-- ALWAYS use "Plaintiff" and "Defendant" terminology. Small claims cases in JP Court use civil-case party labels, NOT family-law party labels.
+- ALWAYS use "Plaintiff" and "Defendant" terminology.
 
 DOCUMENT FORMAT:
-Generate a "PLAINTIFF'S ORIGINAL PETITION (SMALL CLAIMS) — ${docTitle}" for the Justice Court${facts.precinct ? `, Precinct ${facts.precinct}` : ''}, ${facts.county} County, Texas.
+Generate a "${docTitleLine}" for the ${courtLabel}.
 
-Caption: "In the Justice Court, Precinct ${facts.precinct ?? '___'}, ${facts.county} County, Texas"
+Caption: "${captionLine}"
 
-The petition must include these sections:
+The document must include these sections:
 
-1. CAPTION — Court name, cause number (if known), and party names (Plaintiff v. Defendant).
+1. CAPTION — Court name, case number (if known), and party names (Plaintiff v. Defendant).
 
 2. PARTIES — Full names and addresses of Plaintiff and Defendant.${facts.defendant_is_business ? ' Note that the Defendant is a business entity.' : ''}
 
-3. JURISDICTION — This court has jurisdiction under Tex. Gov. Code § 27.031 because the amount in controversy does not exceed $20,000.
+3. JURISDICTION — ${jurisdictionClause}
 
 4. FACTS — Plain language description of the events giving rise to the claim.
 
@@ -232,12 +317,12 @@ ${format}
    - Court costs
    - Any other relief the court deems just and equitable
 
-8. VERIFICATION — A sworn statement: "My name is [Plaintiff name]. I declare under penalty of perjury that the foregoing is true and correct. Executed on [date]."
+8. VERIFICATION — A sworn statement: "${verificationLine}"
 
-9. PRO SE SIGNATURE BLOCK — "Respectfully submitted" with Plaintiff's name, address, phone number, and "Pro Se" designation.
+9. SIGNATURE BLOCK — "Respectfully submitted" with Plaintiff's name, address, phone number, and "${signatureLabel}" designation.
 
 APPLICABLE RULES:
-This petition is governed by the Texas Rules of Civil Procedure, Rules 500-507 (proceedings in justice courts). Cite TRCP 500-507 where appropriate.
+${applicableRules}
 
 ANNOTATIONS:
 After the document text, output a section starting with "---ANNOTATIONS---" on its own line.

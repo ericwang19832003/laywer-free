@@ -5,8 +5,27 @@ interface FilingPrompt {
   user: string
 }
 
-function getDocumentFormat(courtType: string, role: string, isGeneralDenial?: boolean): string {
+function getDocumentFormat(courtType: string, role: string, state?: string, isGeneralDenial?: boolean): string {
   if (role === 'defendant') {
+    if (state === 'CA') {
+      if (isGeneralDenial) {
+        return `Generate a General Denial for California Superior Court under CCP § 431.30(d). Include:
+- Caption: "SUPERIOR COURT OF CALIFORNIA, COUNTY OF [County]" with case number and party names
+- Title: "DEFENDANT'S ANSWER TO COMPLAINT"
+- General denial paragraph: "Defendant denies each and every allegation of Plaintiff's Complaint and each cause of action therein."
+- Any affirmative defenses stated separately (e.g., statute of limitations, failure to mitigate)
+- Prayer asking the court to dismiss the complaint and award costs
+- Signature block with "Defendant in Pro Per"`
+      }
+      return `Generate an Answer to Complaint for California Superior Court. Include:
+- Caption: "SUPERIOR COURT OF CALIFORNIA, COUNTY OF [County]"
+- Title: "DEFENDANT'S ANSWER TO COMPLAINT"
+- Numbered paragraphs admitting, denying, or stating lack of knowledge for each allegation
+- Affirmative defenses as a separate numbered section
+- Counterclaim section if requested
+- Prayer
+- Signature block with "Defendant in Pro Per"`
+    }
     if (isGeneralDenial) {
       return `Generate a General Denial Answer. This is a simple document that denies all allegations in the plaintiff's petition. Include:
 - Case caption (court, parties, cause number if provided)
@@ -24,6 +43,46 @@ function getDocumentFormat(courtType: string, role: string, isGeneralDenial?: bo
 - Counterclaim section if requested
 - Prayer
 - Signature block with "Pro Se"`
+  }
+
+  if (state === 'CA') {
+    switch (courtType) {
+      case 'small_claims':
+        return `Generate a California Small Claims Court claim following the SC-100 form style. Include:
+- Caption: "SUPERIOR COURT OF CALIFORNIA, COUNTY OF [County], SMALL CLAIMS DIVISION"
+- Title: "PLAINTIFF'S CLAIM AND ORDER TO GO TO SMALL CLAIMS COURT"
+- Brief statement of claim in plain language
+- Amount claimed
+- Jurisdiction statement: "This court has jurisdiction under Cal. Code Civ. Proc. § 116.221 because the amount in controversy does not exceed $12,500."
+- Declaration under penalty of perjury
+- Signature block with "Plaintiff in Pro Per"`
+
+      case 'federal':
+        return `Generate a federal Complaint under the Federal Rules of Civil Procedure. Include:
+- Caption: "In the United States District Court for the [District] District of California"
+- Title: "COMPLAINT"
+- Statement of jurisdiction (diversity under 28 U.S.C. § 1332 or federal question under 28 U.S.C. § 1331)
+- Parties section with numbered paragraphs
+- Factual allegations with numbered paragraphs
+- Causes of action (each as a separate "COUNT")
+- Prayer for relief
+- Jury demand if appropriate
+- Signature block with "Plaintiff in Pro Per"
+- Verification if required`
+
+      default: // limited_civil, unlimited_civil
+        return `Generate a California Complaint for Superior Court. Include:
+- Caption: "SUPERIOR COURT OF CALIFORNIA, COUNTY OF [County]"
+- Title: "COMPLAINT"
+- Jurisdiction and venue paragraph (citing Cal. Code Civ. Proc. § 395 for venue)
+- Parties section with numbered paragraphs (e.g., "Plaintiff [Name] is an individual residing in [County] County, California.")
+- General allegations with numbered paragraphs
+- Cause(s) of action as separate numbered sections (e.g., "FIRST CAUSE OF ACTION — Breach of Written Contract")
+- Each cause of action must incorporate prior allegations and state the legal elements
+- Prayer for relief listing each item sought (damages, costs, interest under CCP § 685.010 at 10% per year)
+- Signature block with "Plaintiff in Pro Per"
+- Verification if the complaint will be verified (declare under penalty of perjury that contents are true)`
+    }
   }
 
   switch (courtType) {
@@ -65,11 +124,22 @@ function getDocumentFormat(courtType: string, role: string, isGeneralDenial?: bo
 }
 
 export function buildFilingPrompt(facts: FilingFacts): FilingPrompt {
-  const format = getDocumentFormat(facts.court_type, facts.role, facts.is_general_denial)
+  const format = getDocumentFormat(facts.court_type, facts.role, facts.state, facts.is_general_denial)
 
   let governmentAddendum = ''
   if (facts.government_entity) {
-    governmentAddendum = `
+    if (facts.state === 'CA') {
+      governmentAddendum = `
+
+GOVERNMENT ENTITY NOTICE (CALIFORNIA):
+One or more defendants are government entities. You MUST include:
+- Reference to the California Government Claims Act (Gov. Code §§ 810–996.6) for tort claims
+- A statement that a government claim was timely presented under Gov. Code § 912.4 (within 6 months of the incident for personal injury/death; 1 year for other claims)
+- Note that failure to present a timely government claim bars the lawsuit
+- Sovereign immunity may limit available remedies — punitive damages generally not available against public entities (Gov. Code § 818)
+- Include a note in the document flagging the special requirements for the filer to verify`
+    } else {
+      governmentAddendum = `
 
 GOVERNMENT ENTITY NOTICE:
 One or more defendants are government entities. You MUST include:
@@ -79,6 +149,7 @@ One or more defendants are government entities. You MUST include:
 - Do NOT include punitive damages claims against government entities
 - Do NOT include claims for pain and suffering against government entities (not permitted under TTCA)
 - Include a note in the document flagging the special requirements for the filer to verify`
+    }
   }
 
   const system = `You are a legal document formatting assistant. You help self-represented (pro se) litigants format their court filings.

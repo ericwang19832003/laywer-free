@@ -30,6 +30,8 @@ export interface GenerateDeadlinesInput {
   taskMetadata: Record<string, unknown>
   /** Deadline keys that already exist for this case (for deduplication) */
   existingDeadlineKeys: string[]
+  /** Two-letter state code — controls which holiday/weekend rule applies */
+  state?: string
 }
 
 export interface GeneratedDeadline {
@@ -169,6 +171,8 @@ export interface SeedDeadlinesInput {
   serviceDate?: string
   /** Deadline keys that already exist for this case */
   existingDeadlineKeys: string[]
+  /** Two-letter state code — controls which holiday/weekend rule applies */
+  state?: string
 }
 
 /**
@@ -204,6 +208,7 @@ export function seedDeadlinesFromDates(
         ...input.existingDeadlineKeys,
         ...results.map((d) => d.key),
       ],
+      state: input.state,
     })
     results.push(...filingDeadlines)
   }
@@ -219,6 +224,7 @@ export function seedDeadlinesFromDates(
         ...input.existingDeadlineKeys,
         ...results.map((d) => d.key),
       ],
+      state: input.state,
     })
     results.push(...serviceDeadlines)
   }
@@ -262,10 +268,19 @@ export function generateDeadlines(
     // --- Compute raw due date: reference + offset_days calendar days ---
     let dueDate = addCalendarDays(referenceDate, rule.offset_days)
 
-    // --- Apply Texas Rule 4 if configured ---
+    // --- Apply court-day adjustment if configured ---
     if (rule.apply_rule_4) {
-      dueDate = applyTexasRule4(dueDate)
-      // Restore noon time (Rule 4 strips it to midnight)
+      const isTX = !input.state || input.state.toUpperCase() === 'TX'
+      if (isTX) {
+        dueDate = applyTexasRule4(dueDate)
+      } else {
+        // For non-TX states: advance past weekends (state-specific holidays are
+        // governed by each state's equivalent of CCP § 12a, but weekends are universal)
+        const day = dueDate.getDay()
+        if (day === 0) dueDate = addCalendarDays(dueDate, 1)       // Sunday → Monday
+        else if (day === 6) dueDate = addCalendarDays(dueDate, 2)  // Saturday → Monday
+      }
+      // Restore noon time
       dueDate = new Date(
         dueDate.getFullYear(),
         dueDate.getMonth(),
