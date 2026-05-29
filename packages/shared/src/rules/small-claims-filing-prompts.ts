@@ -450,7 +450,7 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     : isNYC
     ? `New York City Civil Court, Small Claims Part, ${facts.county} County`
     : isNY
-    ? `Small Claims Court, ${facts.county} County`
+    ? `Small Claims Part, ${facts.county} County, New York`
     : isFL
     ? `County Court, Small Claims Division, ${facts.county} County, Florida`
     : isPhiladelphia
@@ -464,7 +464,7 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
     : isNYC
     ? `CIVIL COURT OF THE CITY OF NEW YORK, COUNTY OF ${facts.county.toUpperCase()} — SMALL CLAIMS PART`
     : isNY
-    ? `${facts.county.toUpperCase()} COUNTY — SMALL CLAIMS PART`
+    ? `SMALL CLAIMS PART, ${facts.county.toUpperCase()} COUNTY, NEW YORK`
     : isFL
     ? `IN THE COUNTY COURT IN AND FOR ${facts.county.toUpperCase()} COUNTY, FLORIDA — SMALL CLAIMS DIVISION`
     : isPhiladelphia
@@ -485,8 +485,14 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
 
   const jurisdictionClause = isCA
     ? `This court has jurisdiction under Cal. Code Civ. Proc. § 116.221 because the amount in controversy does not exceed $12,500 (individual plaintiff).`
+    : isNYC
+    ? facts.claim_amount && facts.claim_amount > 10000
+      ? `JURISDICTION WARNING: NYC Civil Court Small Claims jurisdiction under NYC Civil Court Act § 1801 is limited to $10,000. The stated claim amount ($${facts.claim_amount.toLocaleString()}) exceeds this limit. You may need to file in NYC Civil Court (general civil part) or reduce your claim to $10,000. Consult the clerk before filing.`
+      : `This court has jurisdiction under New York City Civil Court Act § 1801 because the amount in controversy does not exceed $10,000.`
     : isNY
-    ? `This court has jurisdiction under Uniform City Court Act § 1801 (NYC) or Uniform District Court Act § 1801 (outside NYC) because the amount in controversy does not exceed $10,000 (NYC) or $5,000 (outside NYC).`
+    ? facts.claim_amount && facts.claim_amount > 5000
+      ? `JURISDICTION WARNING: Outside NYC, New York small claims jurisdiction under UCCA § 1801 (or applicable act) is limited to $5,000. The stated claim amount ($${facts.claim_amount.toLocaleString()}) exceeds this limit. You may need to file in the appropriate higher court or reduce your claim to $5,000. Consult the clerk before filing.`
+      : `This court has jurisdiction under UCCA § 1801 (or applicable act for your court type) because the amount in controversy does not exceed $5,000.`
     : isFL
     ? facts.claim_amount && facts.claim_amount > 8000
       ? `JURISDICTION WARNING: Florida small claims jurisdiction under Fla. Stat. § 34.01 is limited to $8,000. The stated claim amount ($${facts.claim_amount.toLocaleString()}) exceeds this limit. You may need to file in County Court (general civil jurisdiction) or reduce your claim to $8,000. Consult the clerk before filing.`
@@ -500,7 +506,7 @@ export function buildSmallClaimsFilingPrompt(facts: SmallClaimsFilingFacts, stat
   const applicableRules = isCA
     ? `This claim is governed by the California Small Claims Act, Cal. Code Civ. Proc. §§ 116.110–116.950. Note: attorneys may not represent parties at a California small claims hearing (CCP § 116.530).`
     : isNY
-    ? `This claim is governed by New York UCCA Article 18 (NYC) or UDCA Article 18 (outside NYC). Note: attorneys may represent parties in New York Small Claims Court, though most hearings proceed without counsel.`
+    ? `This claim is governed by New York City Civil Court Act Article 18 (NYC) or UCCA/UDCA Article 18 (outside NYC). Note: attorneys may represent parties in New York Small Claims Court, though most hearings proceed without counsel.`
     : isFL
     ? `This claim is governed by the Florida Rules of Small Claims Procedure (Fla. R. Sm. Cl. P.) and Fla. Stat. Chapter 34. Attorneys may represent parties in Florida Small Claims Court.`
     : isPA

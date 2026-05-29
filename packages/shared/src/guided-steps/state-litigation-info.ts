@@ -175,7 +175,7 @@ export const STATE_LIT_INFO: Record<string, StateLitigationInfo> = {
       courtAbbrev: 'Small Claims Court',
       limit: '$10,000 (NYC) or $5,000 (outside NYC)',
       limitNumber: 10000,
-      upperCourtName: 'Civil Court',
+      upperCourtName: 'NYC Civil Court (NYC) or County Court (outside NYC)',
       eFilingUrl: 'iapps.courts.state.ny.us/nyscef',
       eFilingName: 'NYSCEF',
       helpSiteUrl: 'nycourts.gov/courthelp',

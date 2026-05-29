@@ -6,7 +6,9 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
 
   return {
     title: 'Appealing a Small Claims Decision',
-    reassurance: `Losing in ${sc.courtAbbrev} is NOT the end. An appeal gives you a completely new trial in ${sc.upperCourtName}.`,
+    reassurance: state === 'NY'
+      ? `Losing in ${sc.courtAbbrev} is NOT the end. Outside NYC, you get a new trial in County Court. In NYC, the Appellate Term reviews the record from your small claims hearing.`
+      : `Losing in ${sc.courtAbbrev} is NOT the end. An appeal gives you a completely new trial in ${sc.upperCourtName}.`,
 
     questions: [
       {
@@ -73,7 +75,9 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'trial_de_novo',
         type: 'info',
-        prompt: `TRIAL DE NOVO — WHAT IT MEANS:\nYour case starts completely fresh in ${sc.upperCourtName}. The ${sc.courtAbbrev} decision is erased. You can:\n- Present new evidence you didn't have before\n- Call new witnesses\n- Make different arguments\n- Get a completely different result\n\nIt's as if the ${sc.courtAbbrev} hearing never happened.`,
+        prompt: state === 'NY'
+          ? `APPEAL — WHAT IT MEANS:\n\nOutside NYC: Your case starts completely fresh in County Court (trial de novo). The ${sc.courtAbbrev} decision is erased and you can present new evidence and witnesses.\n\nIn NYC (Appellate Term): The Appellate Term reviews the record from your small claims hearing — it is NOT a new trial. You argue that the judge made a legal error. New evidence is generally not considered.`
+          : `TRIAL DE NOVO — WHAT IT MEANS:\nYour case starts completely fresh in ${sc.upperCourtName}. The ${sc.courtAbbrev} decision is erased. You can:\n- Present new evidence you didn't have before\n- Call new witnesses\n- Make different arguments\n- Get a completely different result\n\nIt's as if the ${sc.courtAbbrev} hearing never happened.`,
       },
 
       {

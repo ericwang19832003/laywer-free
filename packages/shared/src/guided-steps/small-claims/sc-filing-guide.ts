@@ -42,7 +42,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         prompt: state === 'CA'
           ? `File in the ${sc.courtAbbrev} in the county where: (1) the defendant lives or regularly works, (2) where the transaction or event occurred, or (3) for consumer purchases, where you signed the contract or made the purchase (CCP § 116.370). If multiple counties qualify, you can choose.`
           : state === 'NY'
-          ? `File in the ${sc.courtAbbrev} in the county (borough, in NYC) where the defendant resides, works, or has their principal place of business (UCCA § 1803). For disputes arising from a consumer transaction, you may also file where the transaction took place.`
+          ? `File in the ${sc.courtAbbrev} in the county (borough, in NYC) where the defendant resides, works, or has their principal place of business (NYC Civil Court Act § 1803 for NYC; UCCA § 1803 for courts outside NYC). For disputes arising from a consumer transaction, you may also file where the transaction took place.`
           : state === 'FL'
           ? `File in the ${sc.courtAbbrev} in the county where the defendant resides, has their principal place of business, OR where the cause of action accrued (i.e., where the transaction or event occurred) (Fla. Stat. § 47.011). If multiple counties qualify, you can choose.`
           : state === 'PA'
@@ -129,7 +129,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         items.push({
           status: 'needed',
           text: state === 'NY'
-            ? `Identify the correct ${sc.courtAbbrev}: where the defendant resides, works, or has their principal place of business (UCCA § 1803).`
+            ? `Identify the correct ${sc.courtAbbrev}: where the defendant resides, works, or has their principal place of business (NYC Civil Court Act § 1803 for NYC; UCCA § 1803 outside NYC).`
             : state === 'FL'
             ? `Identify the correct ${sc.courtAbbrev}: where the defendant resides, has their principal place of business, or where the incident/transaction occurred (Fla. Stat. § 47.011).`
             : state === 'PA'

@@ -30,7 +30,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
         id: 'timeline_info',
         type: 'info',
         prompt: state === 'NY'
-          ? 'Once the defendant is served, your hearing in New York Small Claims Court is typically scheduled 30–70 days later (NYC). The court mails you a Notice of Hearing with the date and time.'
+          ? 'Once the defendant is served, your hearing in New York Small Claims Court is typically scheduled 30–70 days later (NYC courts) or 30–45 days later (courts outside NYC). The court mails you a Notice of Hearing with the date and time.'
           : state === 'FL'
           ? 'After filing, your hearing in Florida Small Claims Court is typically scheduled 30–45 days later. The clerk mails you a Notice of Hearing with the date and time (Fla. R. Sm. Cl. P. 7.090).'
           : state === 'PA'
@@ -46,7 +46,9 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'judge_decides_info',
         type: 'info',
-        prompt: 'The judge decides your case unless someone requests a jury in writing. Most small claims cases are decided by the judge alone. Judges value clear facts and common sense over legal citations.',
+        prompt: state === 'NY'
+          ? 'The judge (or court-appointed arbitrator) decides your case. New York Small Claims Court does NOT offer jury trials — the decision is by the judge or arbitrator alone. Judges value clear facts and common sense over legal citations.'
+          : 'The judge decides your case unless someone requests a jury in writing. Most small claims cases are decided by the judge alone. Judges value clear facts and common sense over legal citations.',
         showIf: (answers) => answers.know_judge_decides === 'no',
       },
       {

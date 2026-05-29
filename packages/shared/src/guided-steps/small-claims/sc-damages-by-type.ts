@@ -26,7 +26,9 @@ export function createScDamagesByTypeConfig(state?: string): GuidedStepConfig {
       {
         id: 'security_deposit_info',
         type: 'info',
-        prompt: 'Security deposit damages: (1) Your deposit amount. (2) Statutory penalties for bad faith retention (check your state\'s landlord-tenant law). (3) Any additional fees specified by statute. Bring your lease, deposit receipts, and move-out photos.',
+        prompt: state === 'NY'
+          ? 'Security deposit damages in New York (GOL § 7-108): (1) Your deposit amount. (2) If the landlord failed to return the deposit with an itemized statement within 14 days of move-out, the court may award up to 2× the wrongfully withheld amount as a bad faith penalty (GOL § 7-108(1-a)(e)). (3) Bring your lease, deposit receipt, move-in/move-out condition report, and any itemized deduction letter the landlord sent.'
+          : 'Security deposit damages: (1) Your deposit amount. (2) Statutory penalties for bad faith retention (check your state\'s landlord-tenant law). (3) Any additional fees specified by statute. Bring your lease, deposit receipts, and move-out photos.',
         showIf: (answers) => answers.claim_type === 'security_deposit',
       },
       {
