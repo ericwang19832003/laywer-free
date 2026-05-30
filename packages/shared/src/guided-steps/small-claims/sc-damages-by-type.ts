@@ -46,7 +46,7 @@ export function createScDamagesByTypeConfig(state?: string): GuidedStepConfig {
       {
         id: 'property_damage_info',
         type: 'info',
-        prompt: `Property damage: (1) Repair cost — get 3 written estimates to show the judge. (2) Diminished value — if the property is worth less even after repair. (3) Loss of use — reasonable cost of replacement while yours was being repaired (e.g., rental car, temporary equipment). All three together must be under ${sc.limit}.`,
+        prompt: `Property damage — what you may recover:\n\n1. REPAIR OR REPLACEMENT COST (pick one — mutually exclusive):\n   • Repairable → get 2–3 written estimates; the judge uses a reasonable estimate\n   • Totaled/destroyed → fair market value just before the incident\n\n2. DIMINISHED VALUE (repaired property only):\n   If the property is worth less even after repair (e.g., a repaired car with an accident record). Get a written appraisal. Does not apply if you claimed replacement value.\n\n3. LOSS OF USE:\n   Rental or substitute costs you paid while the property was out of service. Keep receipts.\n\nAll amounts combined must be under ${sc.limit}.`,
         showIf: (answers) => answers.claim_type === 'property_damage',
       },
       {
@@ -110,7 +110,7 @@ export function createScDamagesByTypeConfig(state?: string): GuidedStepConfig {
           security_deposit: 'Deposit + statutory bad faith penalty + any statutory fees.',
           breach_of_contract: 'Amount paid - value received + foreseeable consequential damages.',
           consumer_refund: 'Purchase price + consumer protection statute damages if deceptive conduct.',
-          property_damage: 'Repair cost (3 estimates) + diminished value + loss of use.',
+          property_damage: 'Repair OR replacement cost (pick one) + diminished value (repaired only) + loss of use.',
           car_accident: 'Repair estimate + rental car + medical bills (must total under limit).',
           unpaid_loan: 'Principal + contractual interest + late fees.',
           neighbor_dispute: 'Repair/remediation cost + loss of enjoyment.',

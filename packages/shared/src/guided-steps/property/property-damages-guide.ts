@@ -10,7 +10,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       id: 'damages_overview',
       type: 'info',
       prompt:
-        'TYPES OF PROPERTY DAMAGES IN TEXAS:\n\n1. REPAIR/REPLACEMENT COST: What it costs to fix or replace the damaged property\n2. DIMINISHED VALUE: Even after repair, property may be worth less (e.g., flood-damaged home)\n3. LOSS OF USE: If you couldn\'t use your property during repairs (temporary housing, rental costs)\n4. CONSEQUENTIAL DAMAGES: Related costs (hotel stays, storage, moving, HOA fines)\n5. MENTAL ANGUISH: In some cases (trespass, nuisance), Texas allows emotional distress damages',
+        'TYPES OF PROPERTY DAMAGES IN TEXAS:\n\n1. REPAIR OR REPLACEMENT COST (pick one — these are mutually exclusive):\n   • Repairable: cost to restore property to pre-damage condition (use a reasonable estimate from 2–3 licensed contractors)\n   • Totaled/destroyed: fair market value immediately before the damage (not the cost to rebuild)\n\n2. DIMINISHED VALUE (repaired property only):\n   Property may still be worth less after full repair (e.g., flood-damaged home, car with accident history on title). Does not apply if you claimed replacement value.\n\n3. LOSS OF USE:\n   Costs incurred while the property was unusable — temporary housing, lost rental income, or lost business income during the repair period.\n\n4. CONSEQUENTIAL DAMAGES:\n   Other costs directly caused by the damage — hotel stays, storage fees, moving, emergency repairs to prevent further damage, HOA fines, permit and inspection fees.',
     },
     {
       id: 'repair_cost',
@@ -69,7 +69,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       id: 'damages_summary',
       type: 'info',
       prompt:
-        'YOUR TOTAL CLAIM = Repair Cost + Diminished Value + Loss of Use + Consequential Damages\n\nDocument each category separately with receipts, estimates, or appraisals. Present them as line items to the court — judges appreciate organized, itemized damage calculations. Do not round up or guess — use actual numbers backed by evidence.',
+        'YOUR TOTAL CLAIM = Repair OR Replacement Cost (one, not both) + Diminished Value + Loss of Use + Consequential Damages\n\nRepair cost and replacement cost are mutually exclusive — pick whichever applies. Diminished value only applies if you chose repair cost, not replacement.\n\nDocument each category separately with receipts, estimates, or appraisals. Present them as line items to the court — judges appreciate organized, itemized damage calculations. Do not round up or guess — use actual numbers backed by evidence.',
     },
   ],
 
