@@ -19,6 +19,7 @@ interface DisputeOption {
 
 interface AiSuggestion {
   primary: DisputeType
+  card_id: string
   reasoning: string
   confidence: string
   secondary: DisputeType[]
@@ -98,7 +99,10 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
       if (res.ok) {
         const data: AiSuggestion = await res.json()
         setAiSuggestion(data)
-        const match = options.find((opt) => opt.value === data.primary && !opt.comingSoon)
+        // Prefer card_id (more specific) over falling back to primary type match
+        const match =
+          options.find((opt) => opt.id === data.card_id && !opt.comingSoon) ??
+          options.find((opt) => opt.value === data.primary && !opt.comingSoon)
         if (match) setSelectedId(match.id)
       }
     } catch {
@@ -114,8 +118,8 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
     onSelect(opt.value)
   }
 
-  function getLabel(type: DisputeType): string {
-    return options.find((o) => o.value === type)?.label ?? type
+  function getCardLabel(cardId: string): string {
+    return options.find((o) => o.id === cardId)?.label ?? options.find((o) => o.value === cardId)?.label ?? cardId
   }
 
   if (view === 'describe') {
@@ -163,7 +167,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
       {aiSuggestion && (
         <div className="rounded-lg bg-calm-indigo/8 border border-calm-indigo/20 px-3 py-2.5 space-y-1">
           <p className="text-xs font-medium text-calm-indigo">
-            This looks like a <strong>{getLabel(aiSuggestion.primary)}</strong> case.
+            This looks like a <strong>{getCardLabel(aiSuggestion.card_id)}</strong> case.
           </p>
           {aiSuggestion.reasoning && (
             <p className="text-xs text-warm-muted leading-relaxed">{aiSuggestion.reasoning}</p>
@@ -174,7 +178,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
               {aiSuggestion.secondary.map((t, i) => (
                 <span key={t}>
                   {i > 0 && ', '}
-                  {getLabel(t)}
+                  {getCardLabel(t)}
                 </span>
               ))}
             </p>
