@@ -75,6 +75,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
   const [view, setView] = useState<'describe' | 'select'>(() => (value ? 'select' : 'describe'))
   const [description, setDescription] = useState('')
   const [classifying, setClassifying] = useState(false)
+  const [describeError, setDescribeError] = useState('')
   const [aiSuggestion, setAiSuggestion] = useState<AiSuggestion | null>(null)
   const [selectedId, setSelectedId] = useState<string>(() => {
     if (!value) return ''
@@ -83,7 +84,12 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
   })
 
   async function handleAnalyze() {
-    if (!description.trim() || classifying) return
+    if (classifying) return
+    if (!description.trim()) {
+      setDescribeError('Please describe your situation before continuing.')
+      return
+    }
+    setDescribeError('')
     setClassifying(true)
     try {
       const supabase = createClient()
@@ -134,7 +140,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
         <textarea
           className={TEXTAREA_CLS}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => { setDescription(e.target.value); if (describeError) setDescribeError('') }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAnalyze()
           }}
@@ -142,10 +148,13 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
           rows={3}
           maxLength={500}
         />
+        {describeError && (
+          <p className="text-xs text-red-500">{describeError}</p>
+        )}
         <div className="flex flex-col gap-2">
           <Button
             onClick={handleAnalyze}
-            disabled={!description.trim() || classifying}
+            disabled={classifying}
             className="w-full"
           >
             {classifying ? 'Analyzing…' : 'Continue'}
