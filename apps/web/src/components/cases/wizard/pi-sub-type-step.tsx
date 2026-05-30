@@ -23,10 +23,30 @@ const PROPERTY_DAMAGE_OPTIONS: { value: PiSubType; label: string; description: s
 
 interface PISubTypeStepProps {
   value: PiSubType | ''
+  showPropertyDamageOnly?: boolean
   onSelect: (type: PiSubType) => void
 }
 
-export function PISubTypeStep({ value, onSelect }: PISubTypeStepProps) {
+export function PISubTypeStep({ value, showPropertyDamageOnly, onSelect }: PISubTypeStepProps) {
+  if (showPropertyDamageOnly) {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-warm-text">What type of property damage is this?</p>
+        <div className="space-y-2">
+          {PROPERTY_DAMAGE_OPTIONS.map((opt) => (
+            <OptionCard
+              key={opt.value}
+              label={opt.label}
+              description={opt.description}
+              selected={value === opt.value}
+              onClick={() => onSelect(opt.value)}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <p className="text-sm font-medium text-warm-text">What type of case is this?</p>

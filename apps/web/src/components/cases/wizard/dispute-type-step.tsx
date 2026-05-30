@@ -63,7 +63,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
 interface DisputeTypeStepProps {
   value: DisputeType | ''
   selectedState?: State
-  onSelect: (type: DisputeType) => void
+  onSelect: (type: DisputeType, cardId: string) => void
 }
 
 const TEXTAREA_CLS =
@@ -121,7 +121,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
 
   function handleSelect(opt: DisputeOption) {
     setSelectedId(opt.id)
-    onSelect(opt.value)
+    onSelect(opt.value, opt.id)
   }
 
   function getCardLabel(cardId: string): string {

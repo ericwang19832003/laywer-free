@@ -134,6 +134,7 @@ interface WizardState {
   debtSide: DebtSide | ''
   debtSubType: DebtSubType | ''
   piSubType: PiSubType | ''
+  piCardId: string
   amount: AmountRange | ''
   circumstances: CircumstanceFlags
   county: string
@@ -143,7 +144,7 @@ type WizardAction =
   | { type: 'SET_STATE'; selectedState: State }
   | { type: 'SET_PENDING_STATE'; pendingState: State | '' }
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
-  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType }
+  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType; cardId?: string }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
   | { type: 'SET_BUSINESS_SUB_TYPE'; businessSubType: BusinessSubType }
   | { type: 'SET_SMALL_CLAIMS_SUB_TYPE'; smallClaimsSubType: SmallClaimsSubType }
@@ -171,6 +172,7 @@ const initialState: WizardState = {
   debtSide: '',
   debtSubType: '',
   piSubType: '',
+  piCardId: '',
   amount: '',
   circumstances: {
     realProperty: false,
@@ -201,6 +203,7 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
         debtSide: action.disputeType === 'debt_collection' ? state.debtSide : '',
         debtSubType: action.disputeType === 'debt_collection' ? state.debtSubType : '',
         piSubType: action.disputeType === 'personal_injury' ? state.piSubType : '',
+        piCardId: action.disputeType === 'personal_injury' ? (action.cardId ?? '') : '',
         step: 4,
       }
     case 'SET_FAMILY_SUB_TYPE':
@@ -733,8 +736,8 @@ export function NewCaseDialog() {
           <DisputeTypeStep
             value={state.disputeType}
             selectedState={selectedState}
-            onSelect={(disputeType) =>
-              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType })
+            onSelect={(disputeType, cardId) =>
+              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType, cardId })
             }
           />
         )}
@@ -779,6 +782,7 @@ export function NewCaseDialog() {
         {state.step === 4 && isPersonalInjury && (
           <PISubTypeStep
             value={state.piSubType}
+            showPropertyDamageOnly={state.piCardId === 'property_damage'}
             onSelect={(t) => dispatch({ type: 'SET_PI_SUB_TYPE', payload: t })}
           />
         )}
