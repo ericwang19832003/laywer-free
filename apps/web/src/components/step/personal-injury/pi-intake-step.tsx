@@ -406,7 +406,7 @@ export function PIIntakeStep({
           </label>
           <textarea
             id="pi-incident-description"
-            placeholder="Describe the incident in your own words..."
+            placeholder="e.g. On March 5, a truck ran a red light and hit my parked car while I was at the gas station..."
             value={incidentDescription}
             onChange={(e) => setIncidentDescription(e.target.value)}
             rows={4}
@@ -493,9 +493,10 @@ export function PIIntakeStep({
               >
                 Describe the damage *
               </label>
+              <p className="text-xs text-warm-muted -mt-1">List what was damaged, its condition, and your estimated repair or replacement cost.</p>
               <textarea
                 id="pi-damage-description"
-                placeholder="Describe the property damage in detail..."
+                placeholder="e.g. Front bumper, hood, and left headlight destroyed. Repair estimate: $4,200. Car was towed."
                 value={damageDescription}
                 onChange={(e) => setDamageDescription(e.target.value)}
                 rows={4}
