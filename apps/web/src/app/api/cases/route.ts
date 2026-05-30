@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
       role, county, court_type, dispute_type, state,
       family_sub_type, small_claims_sub_type, landlord_tenant_sub_type,
       debt_sub_type, pi_sub_type, business_sub_type, contract_sub_type,
-      property_sub_type, other_sub_type, re_sub_type, description,
+      property_sub_type, other_sub_type, re_sub_type, secondary_dispute_types,
+      description,
     } = parsed.data
 
     // Atomic case + detail creation via database transaction
@@ -82,13 +83,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Persist the user-provided case name
-    if (description && newCase) {
-      await supabase
-        .from('cases')
-        .update({ description })
-        .eq('id', caseId)
-      newCase.description = description
+    // Persist case name and secondary dispute types
+    const extraUpdates: Record<string, unknown> = {}
+    if (description) extraUpdates.description = description
+    if (secondary_dispute_types && secondary_dispute_types.length > 0) {
+      extraUpdates.secondary_dispute_types = secondary_dispute_types
+    }
+    if (Object.keys(extraUpdates).length > 0 && newCase) {
+      await supabase.from('cases').update(extraUpdates).eq('id', caseId)
+      Object.assign(newCase, extraUpdates)
     }
 
     // Fetch auto-created tasks (created by the seed_case_tasks trigger)
