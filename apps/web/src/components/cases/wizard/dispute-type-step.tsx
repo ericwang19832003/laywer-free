@@ -36,6 +36,22 @@ const GATED_TYPES: Record<string, Parameters<typeof isFeatureEnabled>[0]> = {
   other: 'wizard_other',
 }
 
+/** Priority order for auto-designating primary when multiple types are selected */
+const DISPUTE_PRIORITY: DisputeType[] = [
+  'personal_injury', 'landlord_tenant', 'debt_collection', 'family',
+  'business', 'contract', 'property', 'real_estate', 'small_claims', 'other',
+]
+
+function getPrimaryId(ids: string[], opts: DisputeOption[]): string {
+  if (ids.length === 0) return ''
+  const selected = opts.filter(o => ids.includes(o.id))
+  for (const type of DISPUTE_PRIORITY) {
+    const match = selected.find(o => o.value === type)
+    if (match) return match.id
+  }
+  return ids[0]
+}
+
 function getDisputeOptions(selectedState: State): DisputeOption[] {
   const limit = getSmallClaimsMax(selectedState)
   const limitFormatted = `$${limit.toLocaleString()}`
@@ -50,7 +66,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
     { id: 'property', value: 'property', label: 'Property dispute', description: 'Land ownership, boundary, or title dispute' },
     { id: 'real_estate', value: 'real_estate', label: 'Real estate', description: 'Real estate transactions, liens, or deed issues' },
     { id: 'family', value: 'family', label: 'Family matter', description: 'Custody, divorce, child support, or protective order' },
-    { id: 'small_claims', value: 'small_claims', label: 'Small claim', description: `General dispute under ${limitFormatted} that doesn’t fit above` },
+    { id: 'small_claims', value: 'small_claims', label: 'Small claim', description: `General dispute under ${limitFormatted} that doesn't fit above` },
     { id: 'other', value: 'other', label: 'Something else', description: "Doesn't fit the categories above" },
   ]
   return options.map((opt) => {
@@ -65,7 +81,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
 interface DisputeTypeStepProps {
   value: DisputeType | ''
   selectedState?: State
-  onSelect: (type: DisputeType, cardId: string, subTypeSuggestion?: string, roleSuggestion?: string) => void
+  onSelect: (type: DisputeType, cardId: string, secondaryTypes: DisputeType[], subTypeSuggestion?: string, roleSuggestion?: string) => void
 }
 
 const TEXTAREA_CLS =
@@ -79,10 +95,10 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
   const [classifying, setClassifying] = useState(false)
   const [describeError, setDescribeError] = useState('')
   const [aiSuggestion, setAiSuggestion] = useState<AiSuggestion | null>(null)
-  const [selectedId, setSelectedId] = useState<string>(() => {
-    if (!value) return ''
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => {
+    if (!value) return []
     const match = options.find((opt) => opt.value === value)
-    return match?.id ?? ''
+    return match ? [match.id] : []
   })
 
   async function handleAnalyze() {
@@ -107,11 +123,18 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
       if (res.ok) {
         const data: AiSuggestion = await res.json()
         setAiSuggestion(data)
-        // Prefer card_id (more specific) over falling back to primary type match
-        const match =
+        const primaryMatch =
           options.find((opt) => opt.id === data.card_id && !opt.comingSoon) ??
           options.find((opt) => opt.value === data.primary && !opt.comingSoon)
-        if (match) setSelectedId(match.id)
+        if (primaryMatch) {
+          const ids = [primaryMatch.id]
+          // Pre-select AI-suggested secondary types
+          for (const secType of (data.secondary ?? [])) {
+            const secMatch = options.find(o => o.value === secType && !o.comingSoon && o.id !== primaryMatch.id)
+            if (secMatch && !ids.includes(secMatch.id)) ids.push(secMatch.id)
+          }
+          setSelectedIds(ids)
+        }
       }
     } catch {
       // Best-effort — fall through to select view regardless
@@ -121,14 +144,37 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
     }
   }
 
-  function handleSelect(opt: DisputeOption) {
-    setSelectedId(opt.id)
-    onSelect(opt.value, opt.id, aiSuggestion?.suggested_sub_type ?? undefined, aiSuggestion?.suggested_role ?? undefined)
+  function handleToggle(opt: DisputeOption) {
+    if (opt.comingSoon) return
+    setSelectedIds(prev =>
+      prev.includes(opt.id)
+        ? prev.filter(id => id !== opt.id)
+        : [...prev, opt.id]
+    )
+  }
+
+  function handleContinue() {
+    if (selectedIds.length === 0) return
+    const primaryId = getPrimaryId(selectedIds, options)
+    const primaryOpt = options.find(o => o.id === primaryId)!
+    const secondaryTypes = selectedIds
+      .filter(id => id !== primaryId)
+      .map(id => options.find(o => o.id === id)!.value)
+      .filter((v, i, arr) => arr.indexOf(v) === i && v !== primaryOpt.value)
+    onSelect(
+      primaryOpt.value,
+      primaryOpt.id,
+      secondaryTypes,
+      aiSuggestion?.suggested_sub_type ?? undefined,
+      aiSuggestion?.suggested_role ?? undefined,
+    )
   }
 
   function getCardLabel(cardId: string): string {
     return options.find((o) => o.id === cardId)?.label ?? options.find((o) => o.value === cardId)?.label ?? cardId
   }
+
+  const primaryId = getPrimaryId(selectedIds, options)
 
   if (view === 'describe') {
     return (
@@ -185,32 +231,30 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
           )}
           {aiSuggestion.secondary.length > 0 && (
             <p className="text-xs text-warm-muted">
-              Also related:{' '}
-              {aiSuggestion.secondary.map((t, i) => (
-                <span key={t}>
-                  {i > 0 && ', '}
-                  {getCardLabel(t)}
-                </span>
-              ))}
+              We&apos;ve also pre-selected related categories below — adjust as needed.
             </p>
           )}
         </div>
       )}
-      <p className="text-sm font-medium text-warm-text">What is this dispute about?</p>
-      {!aiSuggestion && (
-        <p className="text-xs text-warm-muted">
-          Choose the category that best describes your situation. We&apos;ll ask follow-up questions to narrow it down.
-        </p>
-      )}
+      <div>
+        <p className="text-sm font-medium text-warm-text">What is this dispute about?</p>
+        {!aiSuggestion && (
+          <p className="text-xs text-warm-muted mt-0.5">
+            Select all that apply. We&apos;ll ask follow-up questions based on the primary type.
+          </p>
+        )}
+      </div>
       <div className="space-y-2">
         {options.map((opt) => (
           <div key={opt.id} className="relative">
             <OptionCard
               label={opt.label}
               description={opt.description}
-              selected={selectedId === opt.id}
-              onClick={() => !opt.comingSoon && handleSelect(opt)}
+              selected={selectedIds.includes(opt.id)}
+              onClick={() => !opt.comingSoon && handleToggle(opt)}
               disabled={opt.comingSoon}
+              variant="checkbox"
+              isPrimary={selectedIds.length > 1 && opt.id === primaryId}
             />
             {opt.comingSoon && (
               <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
@@ -225,6 +269,15 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
           </div>
         ))}
       </div>
+      {selectedIds.length > 0 && (
+        <Button
+          type="button"
+          className="w-full"
+          onClick={handleContinue}
+        >
+          Continue →
+        </Button>
+      )}
     </div>
   )
 }

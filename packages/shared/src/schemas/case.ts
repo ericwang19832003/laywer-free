@@ -163,7 +163,7 @@ export type State = (typeof STATES)[number]
 export const ALL_COURT_TYPES = [
   'jp', 'county', 'district',
   'small_claims', 'limited_civil', 'unlimited_civil',
-  'ny_small_claims', 'ny_civil', 'ny_supreme',
+  'ny_small_claims', 'ny_civil', 'ny_supreme', 'ny_family_court',
   'fl_small_claims', 'fl_county', 'fl_circuit',
   'pa_magisterial', 'pa_common_pleas',
   'federal', 'unknown',
@@ -185,6 +185,7 @@ export const createCaseSchema = z.object({
   re_sub_type: z.enum(REAL_ESTATE_SUB_TYPES).optional(),
   business_sub_type: z.enum(BUSINESS_SUB_TYPES).optional(),
   other_sub_type: z.enum(OTHER_SUB_TYPES).optional(),
+  secondary_dispute_types: z.array(z.enum(DISPUTE_TYPES)).optional(),
   description: z.string().max(80).optional(),
 })
 

@@ -135,6 +135,7 @@ interface WizardState {
   pendingState: State | ''
   role: 'plaintiff' | 'defendant' | ''
   disputeType: DisputeType | ''
+  secondaryDisputeTypes: DisputeType[]
   familySubType: FamilySubType | ''
   businessSubType: BusinessSubType | ''
   smallClaimsSubType: SmallClaimsSubType | ''
@@ -152,7 +153,7 @@ type WizardAction =
   | { type: 'SET_STATE'; selectedState: State }
   | { type: 'SET_PENDING_STATE'; pendingState: State | '' }
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
-  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType; cardId?: string; subTypeSuggestion?: string; roleSuggestion?: string }
+  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType; cardId?: string; secondaryTypes?: DisputeType[]; subTypeSuggestion?: string; roleSuggestion?: string }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
   | { type: 'SET_BUSINESS_SUB_TYPE'; businessSubType: BusinessSubType }
   | { type: 'SET_SMALL_CLAIMS_SUB_TYPE'; smallClaimsSubType: SmallClaimsSubType }
@@ -173,6 +174,7 @@ const initialState: WizardState = {
   pendingState: '',
   role: '',
   disputeType: '',
+  secondaryDisputeTypes: [],
   familySubType: '',
   businessSubType: '',
   smallClaimsSubType: '',
@@ -207,6 +209,7 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return {
         ...state,
         disputeType: action.disputeType,
+        secondaryDisputeTypes: action.secondaryTypes ?? [],
         role: isPI ? 'plaintiff' : (action.disputeType === 'debt_collection' && (roleHint === 'plaintiff' || roleHint === 'defendant') ? roleHint : state.role),
         familySubType: action.disputeType === 'family'
           ? (VALID_FAMILY_SUB_TYPES.has(sub) ? sub as FamilySubType : '')
@@ -414,6 +417,9 @@ export function NewCaseDialog() {
           ...debtSubTypePayload,
           ...(isPersonalInjury && state.piSubType
             ? { pi_sub_type: state.piSubType }
+            : {}),
+          ...(state.secondaryDisputeTypes.length > 0
+            ? { secondary_dispute_types: state.secondaryDisputeTypes }
             : {}),
           ...(caseName.trim() ? { description: caseName.trim() } : {}),
         }),
@@ -770,8 +776,8 @@ export function NewCaseDialog() {
           <DisputeTypeStep
             value={state.disputeType}
             selectedState={selectedState}
-            onSelect={(disputeType, cardId, subTypeSuggestion, roleSuggestion) =>
-              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType, cardId, subTypeSuggestion, roleSuggestion })
+            onSelect={(disputeType, cardId, secondaryTypes, subTypeSuggestion, roleSuggestion) =>
+              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType, cardId, secondaryTypes, subTypeSuggestion, roleSuggestion })
             }
           />
         )}
