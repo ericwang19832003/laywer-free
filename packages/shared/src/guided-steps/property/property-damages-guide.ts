@@ -27,6 +27,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
         'Has the damage reduced your property\'s market value even after repairs?',
       helpText:
         'For example, a home that was flooded may sell for less even after full repairs. A property with a history of foundation damage may be worth less than a comparable home without that history.',
+      notApplicable: 'Not applicable — I\'m claiming replacement value, not repair cost',
     },
     {
       id: 'diminished_value_info',
@@ -97,6 +98,11 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       items.push({
         status: 'done',
         text: 'No diminished value claim.',
+      })
+    } else if (answers.has_diminished_value === 'na') {
+      items.push({
+        status: 'done',
+        text: 'Diminished value not applicable — claiming replacement value.',
       })
     }
 

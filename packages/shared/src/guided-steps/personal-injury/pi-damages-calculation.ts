@@ -121,6 +121,7 @@ export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStep
       type: 'yes_no',
       prompt: 'Is the property worth less now even after repair?',
       helpText: 'This is "diminished value" — e.g., a repaired car that sells for less than an identical undamaged car.',
+      notApplicable: 'Not applicable — I\'m claiming replacement value, not repair cost',
       showIf: () => isPropertyDamageOnly,
     },
     {
@@ -176,6 +177,8 @@ export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStep
         } else {
           items.push({ status: 'needed', text: 'Get an appraisal to document diminished value.' })
         }
+      } else if (answers.has_diminished_value === 'na') {
+        items.push({ status: 'done', text: 'Diminished value not applicable — claiming replacement value.' })
       }
 
       if (answers.has_loss_of_use === 'yes') {

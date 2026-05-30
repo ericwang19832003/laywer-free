@@ -316,6 +316,14 @@ export function GuidedStep({
                         >
                           No
                         </button>
+                        {currentQuestion.notApplicable && (
+                          <button
+                            onClick={() => handleAnswer('na')}
+                            className="rounded-lg border border-warm-border p-4 text-left text-sm font-medium text-warm-muted hover:border-warm-text hover:text-warm-text transition-colors"
+                          >
+                            {currentQuestion.notApplicable}
+                          </button>
+                        )}
                       </>
                     ) : (
                       currentQuestion.options?.map((opt) => (
