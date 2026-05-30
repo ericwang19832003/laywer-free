@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { NewCaseDialog } from '@/components/cases/new-case-dialog'
-import { ImportCaseDialog } from '@/components/cases/import-case-dialog'
 import { CasesWithStats } from '@/components/cases/cases-with-stats'
 import { TodaysActionCard } from '@/components/cases/todays-action-card'
 import { Clock, Shield, FileText } from 'lucide-react'
@@ -141,10 +140,6 @@ export default async function CasesPage() {
             <p className="mt-0.5 text-sm text-warm-muted">
               Organize your matters, track deadlines, and keep evidence in one place.
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <ImportCaseDialog />
-            <NewCaseDialog />
           </div>
         </div>
 
