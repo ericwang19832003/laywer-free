@@ -87,7 +87,7 @@ export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStep
       type: 'single_choice',
       prompt: 'How severe is your injury?',
       helpText:
-        'This determines the multiplier used to estimate pain and suffering damages.',
+        'Insurance adjusters typically use a multiplier of your economic damages as a starting point for settlement negotiations. This is an industry benchmark — not a legal formula. Courts award whatever the evidence supports.',
       options: [
         {
           value: 'minor',
@@ -256,11 +256,11 @@ export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStep
         })
         items.push({
           status: 'info',
-          text: `Pain & suffering multiplier (${severity}): ${result.painSufferingMultiplier}x → ${formatDollars(result.painSufferingEstimate)}`,
+          text: `Insurance settlement benchmark — non-economic damages (${severity}, ${result.painSufferingMultiplier}x economic): ~${formatDollars(result.painSufferingEstimate)}`,
         })
         items.push({
           status: 'info',
-          text: `Total demand range: ${formatDollars(result.totalDemandRange.low)} – ${formatDollars(result.totalDemandRange.high)}`,
+          text: `Estimated demand range (negotiation starting point, not a legal entitlement): ${formatDollars(result.totalDemandRange.low)} – ${formatDollars(result.totalDemandRange.high)}`,
         })
       } catch {
         items.push({
