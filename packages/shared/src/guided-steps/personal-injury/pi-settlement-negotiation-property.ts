@@ -27,7 +27,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       id: 'counter_offer_info',
       type: 'info',
       prompt:
-        'To write a counter-offer: state why their offer is low, itemize your repair costs (including diminished value and loss of use), propose a specific amount, and set a response deadline.',
+        'To write a counter-offer: state why their offer is low, itemize your damages (repair or replacement cost, diminished value, and loss of use), propose a specific amount, and set a response deadline.',
       showIf: (answers) => answers.offer_evaluation === 'too_low',
     },
     {
@@ -141,12 +141,12 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       if (answers.offer_evaluation === 'too_low') {
         items.push({
           status: 'needed',
-          text: 'Write a counter-offer: explain why the offer is low, itemize your repair costs (including diminished value and loss of use), propose a specific amount, and set a deadline.',
+          text: 'Write a counter-offer: explain why the offer is low, itemize your damages (repair or replacement cost, diminished value, and loss of use), propose a specific amount, and set a deadline.',
         })
       } else if (answers.offer_evaluation === 'seems_fair') {
         items.push({
           status: 'info',
-          text: 'The offer seems fair. Review it carefully before accepting and make sure it covers all repair costs, diminished value, and loss of use.',
+          text: 'The offer seems fair. Review it carefully before accepting and make sure it covers all your damages — repair or replacement cost, diminished value, and loss of use.',
         })
       } else if (answers.offer_evaluation === 'unsure') {
         items.push({
