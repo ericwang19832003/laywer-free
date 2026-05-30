@@ -17,7 +17,7 @@ export const FL_CONFIG: StateConfig = {
     personalInjury: 2,
     writtenContract: 5,
     oralContract: 4,
-    propertyDamage: 4,
+    propertyDamage: 2,
   },
   amountRanges: [
     { value: 'under_8k', label: 'Under $8,000', maxAmount: 8_000 },

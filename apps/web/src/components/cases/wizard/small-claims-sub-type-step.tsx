@@ -144,8 +144,14 @@ export function SmallClaimsSubTypeStep({ value, selectedState = 'TX', onSelect }
 
       <div className="rounded-md border border-calm-amber bg-calm-amber/5 px-4 py-3">
         <p className="text-xs font-medium text-calm-amber leading-relaxed">
-          {stateName} small claims limit: {limitFormatted}. If your claim is for more than{' '}
-          {limitFormatted}, you may need to file in {selectedState === 'PA' ? 'Common Pleas' : selectedState === 'FL' ? 'County or Circuit' : selectedState === 'NY' ? 'Civil or Supreme' : selectedState === 'CA' ? 'Limited Civil or Unlimited Civil' : 'County or District'} Court instead.
+          {selectedState === 'NY' ? (
+            <>New York small claims limit: $10,000 in New York City; $5,000 outside NYC. If your claim exceeds the local limit, you may need to file in Civil or Supreme Court instead.</>
+          ) : selectedState === 'CA' ? (
+            <>California small claims limit: $12,500 for individuals; $7,500 for businesses. If your claim exceeds the limit, you may need to file in Limited Civil or Unlimited Civil Court instead.</>
+          ) : (
+            <>{stateName} small claims limit: {limitFormatted}. If your claim is for more than{' '}
+            {limitFormatted}, you may need to file in {selectedState === 'PA' ? 'Common Pleas' : selectedState === 'FL' ? 'County or Circuit' : 'County or District'} Court instead.</>
+          )}
         </p>
       </div>
     </div>

@@ -23,6 +23,8 @@ interface AiSuggestion {
   reasoning: string
   confidence: string
   secondary: DisputeType[]
+  suggested_sub_type?: string | null
+  suggested_role?: string | null
 }
 
 /** Maps dispute option ids to their feature flags (only gated types) */
@@ -63,7 +65,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
 interface DisputeTypeStepProps {
   value: DisputeType | ''
   selectedState?: State
-  onSelect: (type: DisputeType, cardId: string) => void
+  onSelect: (type: DisputeType, cardId: string, subTypeSuggestion?: string, roleSuggestion?: string) => void
 }
 
 const TEXTAREA_CLS =
@@ -121,7 +123,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
 
   function handleSelect(opt: DisputeOption) {
     setSelectedId(opt.id)
-    onSelect(opt.value, opt.id)
+    onSelect(opt.value, opt.id, aiSuggestion?.suggested_sub_type ?? undefined, aiSuggestion?.suggested_role ?? undefined)
   }
 
   function getCardLabel(cardId: string): string {

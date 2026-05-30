@@ -7,6 +7,7 @@ export const NY_CONFIG: StateConfig = {
   courtTypes: [
     { value: 'ny_small_claims', label: 'Small Claims Court', maxAmount: 10_000 },
     { value: 'ny_civil', label: 'Civil Court', maxAmount: 25_000 },
+    { value: 'ny_family_court', label: 'Family Court' },
     { value: 'ny_supreme', label: 'Supreme Court' },
   ],
   federalCourtAvailable: true,

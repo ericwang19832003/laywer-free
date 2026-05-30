@@ -112,6 +112,14 @@ const SUB_TYPE_LABELS: Record<string, string> = {
   general: 'Legal Matter',
 }
 
+const VALID_PI_SUB_TYPES = new Set(['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist', 'slip_and_fall', 'dog_bite', 'product_liability', 'other_injury'])
+const VALID_PROPERTY_DAMAGE_SUB_TYPES = new Set(['vehicle_damage', 'property_damage_negligence', 'vandalism', 'other_property_damage'])
+const VALID_LANDLORD_TENANT_SUB_TYPES = new Set(['eviction', 'nonpayment', 'security_deposit', 'property_damage', 'repair_maintenance', 'lease_termination', 'habitability', 'other'])
+const VALID_SMALL_CLAIMS_SUB_TYPES = new Set(['security_deposit', 'breach_of_contract', 'consumer_refund', 'property_damage', 'car_accident', 'neighbor_dispute', 'unpaid_loan', 'other'])
+const VALID_FAMILY_SUB_TYPES = new Set(['divorce', 'custody', 'child_support', 'visitation', 'spousal_support', 'protective_order', 'modification'])
+const VALID_DEBT_SUB_TYPES = new Set(['credit_card', 'medical_bills', 'personal_loan', 'auto_loan', 'payday_loan', 'debt_buyer', 'other'])
+const VALID_BUSINESS_SUB_TYPES = new Set(['partnership', 'employment', 'b2b_commercial'])
+
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 function generateCaseName(disputeType: string, subType: string): string {
@@ -144,7 +152,7 @@ type WizardAction =
   | { type: 'SET_STATE'; selectedState: State }
   | { type: 'SET_PENDING_STATE'; pendingState: State | '' }
   | { type: 'SET_ROLE'; role: 'plaintiff' | 'defendant' }
-  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType; cardId?: string }
+  | { type: 'SET_DISPUTE_TYPE'; disputeType: DisputeType; cardId?: string; subTypeSuggestion?: string; roleSuggestion?: string }
   | { type: 'SET_FAMILY_SUB_TYPE'; familySubType: FamilySubType }
   | { type: 'SET_BUSINESS_SUB_TYPE'; businessSubType: BusinessSubType }
   | { type: 'SET_SMALL_CLAIMS_SUB_TYPE'; smallClaimsSubType: SmallClaimsSubType }
@@ -191,21 +199,42 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, pendingState: action.pendingState }
     case 'SET_ROLE':
       return { ...state, role: action.role, step: 3 }
-    case 'SET_DISPUTE_TYPE':
+    case 'SET_DISPUTE_TYPE': {
+      const sub = action.subTypeSuggestion ?? ''
+      const roleHint = action.roleSuggestion
+      const isPI = action.disputeType === 'personal_injury'
+      const isPropDamageCard = action.cardId === 'property_damage'
       return {
         ...state,
         disputeType: action.disputeType,
-        role: action.disputeType === 'personal_injury' ? 'plaintiff' : state.role,
-        familySubType: action.disputeType === 'family' ? state.familySubType : '',
-        businessSubType: action.disputeType === 'business' ? state.businessSubType : '',
-        smallClaimsSubType: action.disputeType === 'small_claims' ? state.smallClaimsSubType : '',
-        landlordTenantSubType: action.disputeType === 'landlord_tenant' ? state.landlordTenantSubType : '',
-        debtSide: action.disputeType === 'debt_collection' ? state.debtSide : '',
-        debtSubType: action.disputeType === 'debt_collection' ? state.debtSubType : '',
-        piSubType: action.disputeType === 'personal_injury' ? state.piSubType : '',
-        piCardId: action.disputeType === 'personal_injury' ? (action.cardId ?? '') : '',
+        role: isPI ? 'plaintiff' : (action.disputeType === 'debt_collection' && (roleHint === 'plaintiff' || roleHint === 'defendant') ? roleHint : state.role),
+        familySubType: action.disputeType === 'family'
+          ? (VALID_FAMILY_SUB_TYPES.has(sub) ? sub as FamilySubType : '')
+          : '',
+        businessSubType: action.disputeType === 'business'
+          ? (VALID_BUSINESS_SUB_TYPES.has(sub) ? sub as BusinessSubType : '')
+          : '',
+        smallClaimsSubType: action.disputeType === 'small_claims'
+          ? (VALID_SMALL_CLAIMS_SUB_TYPES.has(sub) ? sub as SmallClaimsSubType : '')
+          : '',
+        landlordTenantSubType: action.disputeType === 'landlord_tenant'
+          ? (VALID_LANDLORD_TENANT_SUB_TYPES.has(sub) ? sub as LandlordTenantSubType : '')
+          : '',
+        debtSide: action.disputeType === 'debt_collection'
+          ? ((roleHint === 'plaintiff' || roleHint === 'defendant') ? roleHint as DebtSide : '')
+          : '',
+        debtSubType: action.disputeType === 'debt_collection'
+          ? (VALID_DEBT_SUB_TYPES.has(sub) ? sub as DebtSubType : '')
+          : '',
+        piSubType: isPI
+          ? (isPropDamageCard
+              ? (VALID_PROPERTY_DAMAGE_SUB_TYPES.has(sub) ? sub as PiSubType : '')
+              : (VALID_PI_SUB_TYPES.has(sub) ? sub as PiSubType : ''))
+          : '',
+        piCardId: isPI ? (action.cardId ?? '') : '',
         step: 4,
       }
+    }
     case 'SET_FAMILY_SUB_TYPE':
       return { ...state, familySubType: action.familySubType, step: 5 }
     case 'SET_BUSINESS_SUB_TYPE':
@@ -215,7 +244,7 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
     case 'SET_LANDLORD_TENANT_SUB_TYPE':
       return { ...state, landlordTenantSubType: action.landlordTenantSubType, step: 5 }
     case 'SET_DEBT_SIDE':
-      return { ...state, debtSide: action.debtSide, step: state.step + 1 }
+      return { ...state, debtSide: action.debtSide, role: action.debtSide, step: state.step + 1 }
     case 'SET_DEBT_SUB_TYPE':
       return { ...state, debtSubType: action.debtSubType, step: state.step + 1 }
     case 'SET_PI_SUB_TYPE':
@@ -487,11 +516,16 @@ export function NewCaseDialog() {
           confidence: 'high' as const,
         }
       : isNY
-        ? {
-            recommended: 'ny_supreme' as const,
-            reasoning: 'Family law matters such as divorce are heard in New York Supreme Court.',
-            confidence: 'high' as const,
-          }
+        ? (() => {
+            const isNYFamilyCourt = new Set(['custody', 'child_support', 'visitation', 'protective_order']).has(state.familySubType)
+            return {
+              recommended: isNYFamilyCourt ? 'ny_family_court' as const : 'ny_supreme' as const,
+              reasoning: isNYFamilyCourt
+                ? 'In New York, custody, child support, visitation, and protective order matters are heard in Family Court — a separate court from Supreme Court. File in Supreme Court instead only if this matter is part of a divorce proceeding.'
+                : 'Divorce and spousal support matters in New York are filed in Supreme Court, which is the main civil trial court (not the highest court).',
+              confidence: 'high' as const,
+            }
+          })()
         : isCA
           ? {
               recommended: 'unlimited_civil' as const,
@@ -736,8 +770,8 @@ export function NewCaseDialog() {
           <DisputeTypeStep
             value={state.disputeType}
             selectedState={selectedState}
-            onSelect={(disputeType, cardId) =>
-              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType, cardId })
+            onSelect={(disputeType, cardId, subTypeSuggestion, roleSuggestion) =>
+              dispatch({ type: 'SET_DISPUTE_TYPE', disputeType, cardId, subTypeSuggestion, roleSuggestion })
             }
           />
         )}

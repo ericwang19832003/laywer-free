@@ -50,6 +50,7 @@ export type CourtType =
   | 'ny_small_claims'
   | 'ny_civil'
   | 'ny_supreme'
+  | 'ny_family_court'
   | 'fl_small_claims'
   | 'fl_county'
   | 'fl_circuit'

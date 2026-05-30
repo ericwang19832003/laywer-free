@@ -33,6 +33,7 @@ const CA_COURT_LABELS: Record<string, string> = {
 const NY_COURT_LABELS: Record<string, string> = {
   ny_small_claims: 'Small Claims Court',
   ny_civil: 'Civil Court',
+  ny_family_court: 'Family Court',
   ny_supreme: 'Supreme Court',
   federal: 'Federal Court',
 }
