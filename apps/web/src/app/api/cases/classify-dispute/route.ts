@@ -34,44 +34,43 @@ const VALID_CARD_IDS = new Set([
   'other',
 ])
 
-const SYSTEM_PROMPT = `You are a legal intake classifier. Given a user's description of their dispute, return a JSON object with:
-- "primary": the single best matching dispute type
-- "card_id": the specific UI card to highlight (see card list below)
-- "reasoning": 1-2 sentence plain English explanation starting with "This looks like a [card label] case because..."
+const SYSTEM_PROMPT = `You are a legal intake classifier. Given a user's description of their dispute, return a JSON object with exactly these fields:
+- "primary": dispute type (see list A)
+- "card_id": UI card to highlight (see list B — this is the most important field)
+- "reasoning": 1-2 sentences explaining what happened and why this category fits
 - "confidence": "high", "medium", or "low"
-- "secondary": array of 0-2 additional dispute types that may also apply (omit or use [] if none)
+- "secondary": array of 0-2 other types that may also apply (use [] if none)
 
-Valid dispute types for "primary":
-- "debt_collection": money owed, credit card debt, someone owes you money, debt collector contacting you
-- "landlord_tenant": rent, lease, eviction, security deposit, repairs, habitability
-- "personal_injury": ANY injury or damage caused by someone else's negligence or fault
-- "contract": breach of written or oral agreement, broken promise, services not delivered
-- "property": land ownership, boundary disputes, title disputes
-- "real_estate": real estate transactions, liens, deed issues, closing disputes
-- "business": business partnership disputes, employment, commercial contracts, IP
-- "family": divorce, custody, child support, protective orders, domestic matters
-- "small_claims": general money dispute under the small claims limit that doesn't fit above
-- "other": truly doesn't fit any category above
+LIST A — primary dispute types:
+- "debt_collection": money owed, credit cards, debt collectors
+- "landlord_tenant": rent, lease, eviction, deposit, repairs
+- "personal_injury": harm caused by someone else's fault (covers both bodily injury AND property damage from negligence)
+- "contract": broken agreement, services not delivered
+- "property": land ownership, boundary, title
+- "real_estate": real estate transactions, liens, deeds
+- "business": business partnerships, employment, commercial
+- "family": divorce, custody, child support
+- "small_claims": general money dispute that doesn't fit above
+- "other": truly doesn't fit
 
-Card IDs for "card_id" (choose the most specific):
-- "debt_collection" — debt, money owed, credit card lawsuit
-- "landlord_tenant" — landlord/tenant disputes
-- "personal_injury" — physical injury to a person (bodily harm, pain and suffering)
-- "property_damage" — damage to property or belongings (fire, accident, vandalism) WITHOUT physical injury to a person; primary must be "personal_injury"
-- "contract" — contract/agreement disputes
-- "business" — business disputes
-- "property" — land/boundary/title
-- "real_estate" — real estate transactions
-- "family" — family law
-- "small_claims" — small claims
-- "other" — other
+LIST B — card_id (pick the single most accurate card):
+- "personal_injury": a PERSON was physically hurt (bodily injury, pain, medical bills, physical harm to the body)
+- "property_damage": belongings, vehicles, or property were DAMAGED or DESTROYED — even by fire, accident, or negligence — but NO person was physically injured; set primary to "personal_injury"
+- "debt_collection", "landlord_tenant", "contract", "business", "property", "real_estate", "family", "small_claims", "other": same as primary
+
+CRITICAL RULE: Use card_id "property_damage" (NOT "personal_injury") whenever:
+- Items/belongings were damaged or destroyed (fire, flood, car accident, etc.)
+- Property damage occurred but no person suffered bodily injury
+
+Use card_id "personal_injury" ONLY when a person's body was hurt.
 
 Examples:
-- Truck fire destroyed belongings → primary: "personal_injury", card_id: "property_damage"
-- Car accident injury → primary: "personal_injury", card_id: "personal_injury"
-- Landlord won't return deposit → primary: "landlord_tenant", card_id: "landlord_tenant"
+- "Rented a truck, it caught fire, my belongings were destroyed" → card_id: "property_damage", primary: "personal_injury"
+- "Slipped and fell at a store, broke my arm" → card_id: "personal_injury", primary: "personal_injury"
+- "Car hit mine, my car is totaled but I'm fine" → card_id: "property_damage", primary: "personal_injury"
+- "Landlord kept my deposit" → card_id: "landlord_tenant", primary: "landlord_tenant"
 
-Return only the JSON object. No explanation outside the JSON.`
+Return only the JSON object.`
 
 export async function POST(request: NextRequest) {
   try {
