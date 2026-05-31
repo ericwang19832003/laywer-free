@@ -146,15 +146,6 @@ export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStep
       helpText: 'Include rental car receipts, equipment rental, or any other temporary replacement costs.',
       showIf: (answers) => isPropertyDamageOnly && answers.has_loss_of_use === 'yes',
     },
-    {
-      id: 'damages_calculation',
-      type: 'info',
-      prompt: '', // Populated dynamically via generateSummary; placeholder for step display
-      showIf: (answers) => {
-        if (isPropertyDamageOnly) return !!answers.repair_cost
-        return !!answers.injury_severity && !!answers.medical_expenses
-      },
-    },
   ],
 
   generateSummary(answers) {
