@@ -1,6 +1,16 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { getCourtLabel, getStateName } from '@/lib/filing-configs'
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
+    .replace(/__([^_\n]+)__/g, '$1')
+    .replace(/_([^_\n]+)_/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/`([^`\n]+)`/g, '$1')
+}
+
 const PAGE_W = 612
 const PAGE_H = 792
 const MARGIN = 72
@@ -270,7 +280,7 @@ export async function generateCourtFormPdf(data: CourtFormData): Promise<Uint8Ar
   // ==========================================
   const paragraphs = data.documentBody.split('\n')
   for (const para of paragraphs) {
-    const trimmed = para.trim()
+    const trimmed = stripMarkdown(para.trim())
     if (trimmed === '') {
       y -= LINE_H / 2
       continue

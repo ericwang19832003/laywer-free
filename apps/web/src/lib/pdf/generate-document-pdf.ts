@@ -1,5 +1,15 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
+    .replace(/__([^_\n]+)__/g, '$1')
+    .replace(/_([^_\n]+)_/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/`([^`\n]+)`/g, '$1')
+}
+
 const PAGE_W = 612
 const PAGE_H = 792
 const MARGIN = 72
@@ -105,12 +115,12 @@ export async function generateDocumentPdf(opts: DocumentPdfOptions): Promise<Uin
 
   // Body content
   for (const para of paragraphs) {
-    if (para.trim() === '') {
+    if (para.trim() === '' || stripMarkdown(para.trim()) === '') {
       y -= LINE_HEIGHT / 2
       continue
     }
 
-    const lines = wrapText(para, regular, BODY_SIZE, CONTENT_W)
+    const lines = wrapText(stripMarkdown(para), regular, BODY_SIZE, CONTENT_W)
     for (const line of lines) {
       if (y < MARGIN + LINE_HEIGHT) newPage()
       page.drawText(line, { x: MARGIN, y, size: BODY_SIZE, font: regular, color: DARK })

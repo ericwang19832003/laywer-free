@@ -500,7 +500,7 @@ export function PersonalInjuryWizard({
       case 'product_liability':
         return `${manufacturer || 'The manufacturer'} designed, manufactured, and/or sold a defective product (${productName || 'the product'}), which was unreasonably dangerous due to: ${defectDescription || 'a defect'}, proximately causing injury.`
       case 'vehicle_damage':
-        return `The defendant negligently operated their vehicle on ${incidentDate} at ${incidentLocation}, causing damage to Plaintiff's property. ${incidentDescription}`
+        return `The defendant's negligent acts or omissions in connection with a vehicle on ${incidentDate} at ${incidentLocation} caused damage to Plaintiff's property. ${incidentDescription}`
       case 'property_damage_negligence':
         return `The defendant's negligent actions on ${incidentDate} at ${incidentLocation} proximately caused damage to Plaintiff's property. ${incidentDescription}`
       case 'vandalism':
@@ -521,7 +521,7 @@ export function PersonalInjuryWizard({
     const opposingParties = []
 
     // Add opposing party based on sub-type
-    if (MOTOR_VEHICLE_TYPES.includes(piSubType) && otherDriverName) {
+    if ((MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && otherDriverName) {
       opposingParties.push({ full_name: otherDriverName })
     } else if (piSubType === 'slip_and_fall' && premisesOwnerName) {
       opposingParties.push({ full_name: premisesOwnerName })
