@@ -358,7 +358,7 @@ export function PropertyWizard({
   /* ---- Document title ---- */
 
   const documentTitle = documentType === 'demand_letter' ? 'Demand Letter' : 'Petition'
-  const draftTitle = `Your Property ${documentTitle} Draft`
+  const draftTitle = `Your ${documentTitle} Draft`
 
   /* ---- Step rendering ---- */
 
@@ -674,7 +674,7 @@ export function PropertyWizard({
   return (
     <WizardShell
       caseId={caseId}
-      title={`Prepare Your Property ${documentTitle}`}
+      title={`Prepare Your ${documentTitle}`}
       steps={STEPS}
       currentStep={currentStep}
       onStepChange={setCurrentStep}

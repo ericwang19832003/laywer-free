@@ -275,7 +275,7 @@ export function WizardShell({
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex gap-8">
             {/* Desktop sidebar */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
+            <aside className="hidden lg:block w-52 flex-shrink-0">
               <div className="sticky top-8">
                 <div className="bg-white rounded-xl border border-warm-border p-4">
                   <StepSidebar />
@@ -304,17 +304,7 @@ export function WizardShell({
                 </div>
               )}
 
-              <div className="mt-6 mb-6">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-warm-muted">
-                    Step {currentStep + 1} of {steps.length}: <span className="font-medium text-warm-text">{step.title}</span>
-                  </span>
-                  <span className="text-warm-muted">{Math.round(progress)}%</span>
-                </div>
-                <Progress value={progress} className="h-2" aria-label="Step progress" />
-              </div>
-
-              <Card className="border-warm-border">
+              <Card className="mt-6 border-warm-border">
                 <CardContent className="pt-6">
                   {step.subtitle && (
                     <p className="text-sm text-warm-muted mb-6 italic">
