@@ -170,8 +170,12 @@ function getStepsForSubType(subType: string): WizardStep[] {
 }
 
 function getDocumentTitle(subType: string): string {
-  const docType = isPropertyDamageSubType(subType) ? 'Property Damage Petition' : 'Personal Injury Petition'
-  return `${docType} - ${getSubTypeLabel(subType)}`
+  if (isPropertyDamageSubType(subType)) {
+    const label = getSubTypeLabel(subType)
+    // Avoid redundant suffix when the label is already captured by the doc type
+    return label === 'Property Damage' ? 'Property Damage Petition' : `${label} Petition`
+  }
+  return `Personal Injury Petition - ${getSubTypeLabel(subType)}`
 }
 
 function getDraftTitle(subType: string): string {
@@ -370,6 +374,9 @@ export function PersonalInjuryWizard({
   )
 
   /* ---- Insurance ---- */
+  const [noInsurance, setNoInsurance] = useState<boolean>(
+    (meta.no_insurance as boolean) ?? false
+  )
   const [yourInsuranceCarrier, setYourInsuranceCarrier] = useState<string>(
     (meta.your_insurance_carrier as string) ?? personalInjuryDetails?.your_insurance_carrier ?? ''
   )
@@ -641,8 +648,9 @@ export function PersonalInjuryWizard({
         additional_costs: additionalCosts,
       } : {}),
       // Insurance
-      your_insurance_carrier: yourInsuranceCarrier || null,
-      your_policy_number: yourPolicyNumber || null,
+      no_insurance: noInsurance,
+      your_insurance_carrier: noInsurance ? null : (yourInsuranceCarrier || null),
+      your_policy_number: noInsurance ? null : (yourPolicyNumber || null),
       um_uim_coverage: umUimCoverage,
       // Your info
       your_name: yourName || null,
@@ -694,6 +702,7 @@ export function PersonalInjuryWizard({
       hasRepairReceipts,
       lossOfUse,
       additionalCosts,
+      noInsurance,
       yourInsuranceCarrier,
       yourPolicyNumber,
       umUimCoverage,
@@ -1563,50 +1572,76 @@ export function PersonalInjuryWizard({
       case 'insurance':
         return (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="your-insurance">Your Insurance Carrier</Label>
-              <Input
-                id="your-insurance"
-                placeholder="e.g. State Farm, USAA"
-                value={yourInsuranceCarrier}
-                onChange={(e) => setYourInsuranceCarrier(e.target.value)}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="no-insurance"
+                checked={noInsurance}
+                onCheckedChange={(c) => {
+                  setNoInsurance(c === true)
+                  if (c === true) {
+                    setYourInsuranceCarrier('')
+                    setYourPolicyNumber('')
+                    setUmUimCoverage(false)
+                  }
+                }}
               />
+              <Label htmlFor="no-insurance" className="text-sm cursor-pointer">
+                I don&apos;t have insurance / I am uninsured
+              </Label>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="your-policy">Your Policy Number</Label>
-              <Input
-                id="your-policy"
-                placeholder="Policy number"
-                value={yourPolicyNumber}
-                onChange={(e) => setYourPolicyNumber(e.target.value)}
-              />
-            </div>
-
-            {MOTOR_VEHICLE_TYPES.includes(piSubType) && (
+            {noInsurance ? (
+              <div className="rounded-lg border border-warm-border bg-warm-surface/50 p-3">
+                <p className="text-sm text-warm-muted">
+                  That&apos;s okay. You can still file a claim directly against the other party. If the other party has insurance, their carrier may be responsible for your damages.
+                </p>
+              </div>
+            ) : (
               <>
                 <div className="space-y-2">
-                  <Label>Other Party&apos;s Insurance</Label>
-                  <div className="rounded-lg border border-warm-border p-3 bg-warm-surface/50">
-                    <p className="text-sm text-warm-text">
-                      {otherDriverInsurance || 'Not provided'}
-                    </p>
-                    <p className="text-xs text-warm-muted">From the Other Driver Info step</p>
-                  </div>
+                  <Label htmlFor="your-insurance">Your Insurance Carrier</Label>
+                  <Input
+                    id="your-insurance"
+                    placeholder="e.g. State Farm, USAA"
+                    value={yourInsuranceCarrier}
+                    onChange={(e) => setYourInsuranceCarrier(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="your-policy">Your Policy Number</Label>
+                  <Input
+                    id="your-policy"
+                    placeholder="Policy number"
+                    value={yourPolicyNumber}
+                    onChange={(e) => setYourPolicyNumber(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <Checkbox
+                    id="um-uim"
+                    checked={umUimCoverage}
+                    onCheckedChange={(c) => setUmUimCoverage(c === true)}
+                  />
+                  <Label htmlFor="um-uim" className="text-sm cursor-pointer">
+                    I have UM/UIM (Uninsured/Underinsured Motorist) coverage
+                  </Label>
                 </div>
               </>
             )}
 
-            <div className="flex items-center gap-2 pt-2">
-              <Checkbox
-                id="um-uim"
-                checked={umUimCoverage}
-                onCheckedChange={(c) => setUmUimCoverage(c === true)}
-              />
-              <Label htmlFor="um-uim" className="text-sm cursor-pointer">
-                I have UM/UIM (Uninsured/Underinsured Motorist) coverage
-              </Label>
-            </div>
+            {MOTOR_VEHICLE_TYPES.includes(piSubType) && (
+              <div className="space-y-2">
+                <Label>Other Party&apos;s Insurance</Label>
+                <div className="rounded-lg border border-warm-border p-3 bg-warm-surface/50">
+                  <p className="text-sm text-warm-text">
+                    {otherDriverInsurance || 'Not provided'}
+                  </p>
+                  <p className="text-xs text-warm-muted">From the Other Driver Info step</p>
+                </div>
+              </div>
+            )}
           </div>
         )
 
@@ -1876,9 +1911,15 @@ export function PersonalInjuryWizard({
               stepId="insurance"
               onEdit={handleReviewEdit}
             >
-              <ReviewRow label="Your carrier" value={yourInsuranceCarrier || 'Not provided'} />
-              <ReviewRow label="Your policy #" value={yourPolicyNumber || 'Not provided'} />
-              <ReviewRow label="UM/UIM coverage" value={umUimCoverage ? 'Yes' : 'No'} />
+              {noInsurance ? (
+                <ReviewRow label="Your insurance" value="Uninsured" />
+              ) : (
+                <>
+                  <ReviewRow label="Your carrier" value={yourInsuranceCarrier || 'Not provided'} />
+                  <ReviewRow label="Your policy #" value={yourPolicyNumber || 'Not provided'} />
+                  <ReviewRow label="UM/UIM coverage" value={umUimCoverage ? 'Yes' : 'No'} />
+                </>
+              )}
             </ReviewSection>
 
             {/* Venue */}
