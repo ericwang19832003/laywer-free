@@ -217,7 +217,7 @@ export function GuidedStep({
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm text-warm-muted mb-2">
               <span>
-                {`Step ${currentIndex + 1} of ${totalQuestions}`}
+                {`Step ${currentIndex + 1}`}
               </span>
               <span>{progress}%</span>
             </div>
