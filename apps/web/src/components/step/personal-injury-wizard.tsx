@@ -150,7 +150,8 @@ function getStepsForSubType(subType: string): WizardStep[] {
   // Property damage cases: no injuries/medical steps
   if (isPropertyDamageSubType(subType)) {
     if (subType === 'vehicle_damage') {
-      return [...common, otherDriver, damageDetails, damages, insurance, venue, howToFile, review]
+      const vehicleDamageDefendant: WizardStep = { id: 'other_driver', title: 'Defendant Info', subtitle: 'Provide information about the party responsible for the damage (e.g., other driver, rental company, fleet operator).' }
+      return [...common, vehicleDamageDefendant, damageDetails, damages, insurance, venue, howToFile, review]
     }
     return [...common, damageDetails, damages, insurance, venue, howToFile, review]
   }
@@ -739,6 +740,13 @@ export function PersonalInjuryWizard({
   }
 
   async function generateDraft() {
+    // For vehicle_damage cases, defendant name is required to avoid "Unknown Defendant" in the petition
+    if ((MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && !otherDriverName.trim()) {
+      const otherDriverStepIdx = steps.findIndex(s => s.id === 'other_driver')
+      if (otherDriverStepIdx >= 0) setCurrentStep(otherDriverStepIdx)
+      setGenError('Please enter the defendant\'s name before generating the petition.')
+      return
+    }
     setGenerating(true)
     setGenError(null)
     try {
@@ -1015,21 +1023,29 @@ export function PersonalInjuryWizard({
       /* ============================================================ */
       /*  OTHER DRIVER                                                 */
       /* ============================================================ */
-      case 'other_driver':
+      case 'other_driver': {
+        const isVehicleDamage = piSubType === 'vehicle_damage'
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="other-driver-name">Other Driver&apos;s Name</Label>
+              <Label htmlFor="other-driver-name">
+                {isVehicleDamage ? 'Defendant Name' : 'Other Driver’s Name'}
+              </Label>
               <Input
                 id="other-driver-name"
-                placeholder="Full name"
+                placeholder={isVehicleDamage ? 'e.g. Penske Truck Leasing, John Smith, ABC Corp' : 'Full name'}
                 value={otherDriverName}
                 onChange={(e) => setOtherDriverName(e.target.value)}
               />
+              {isVehicleDamage && (
+                <p className="text-xs text-muted-foreground">Enter the full legal name of the person or company responsible for the damage.</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="other-driver-insurance">Other Driver&apos;s Insurance Carrier</Label>
+              <Label htmlFor="other-driver-insurance">
+                {isVehicleDamage ? 'Defendant’s Insurance Carrier' : 'Other Driver’s Insurance Carrier'}
+              </Label>
               <Input
                 id="other-driver-insurance"
                 placeholder="e.g. State Farm, Geico, Progressive"
@@ -1039,7 +1055,9 @@ export function PersonalInjuryWizard({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="other-driver-policy">Other Driver&apos;s Policy Number</Label>
+              <Label htmlFor="other-driver-policy">
+                {isVehicleDamage ? 'Defendant’s Policy Number' : 'Other Driver’s Policy Number'}
+              </Label>
               <Input
                 id="other-driver-policy"
                 placeholder="Policy number"
@@ -1059,6 +1077,7 @@ export function PersonalInjuryWizard({
             </div>
           </div>
         )
+      }
 
       /* ============================================================ */
       /*  PREMISES                                                     */
