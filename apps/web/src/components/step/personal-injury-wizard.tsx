@@ -130,7 +130,7 @@ function getPreflightTip(subType: string): string {
 /*  Dynamic steps                                                      */
 /* ------------------------------------------------------------------ */
 
-function getStepsForSubType(subType: string): WizardStep[] {
+function getStepsForSubType(subType: string, isFederal: boolean): WizardStep[] {
   const preflight: WizardStep = { id: 'preflight', title: 'Before You Start', subtitle: "We'll review your case timeline, court selection, and make sure you're filing in the right place." }
   const incident: WizardStep = { id: 'incident', title: 'What Happened', subtitle: 'Describe the accident or incident. Be specific about date, location, and what happened — courts need clear facts.' }
   const otherDriver: WizardStep = { id: 'other_driver', title: 'Other Driver Info', subtitle: 'Provide information about the party responsible. Their name and contact details help identify the defendant.' }
@@ -145,29 +145,41 @@ function getStepsForSubType(subType: string): WizardStep[] {
   const howToFile: WizardStep = { id: 'how_to_file', title: 'How to File', subtitle: 'Choose how to submit your petition.' }
   const review: WizardStep = { id: 'review', title: 'Review Everything', subtitle: 'Review everything before we generate your petition. Make sure all facts are accurate.' }
 
+  // Federal-specific steps (inserted after venue when isFederal is true)
+  const defendantDetails: WizardStep = { id: 'defendant_details', title: 'Defendant Entity', subtitle: "Enter the defendant's legal entity type, state of formation, and principal place of business. This establishes diversity of citizenship for federal jurisdiction." }
+  const vehicleIdentifiers: WizardStep = { id: 'vehicle_identifiers', title: 'Vehicle Details', subtitle: 'Enter the vehicle\'s identifying information. VIN, USDOT number, and any documentation discrepancies are required in a federal complaint.' }
+  const investigators: WizardStep = { id: 'investigators', title: 'Investigation & Reports', subtitle: 'Provide information about any official investigations or reports. Named investigators and their conclusions support your factual allegations.' }
+  const prelitigation: WizardStep = { id: 'prelitigation', title: 'Pre-Filing History', subtitle: 'Document pre-suit communications and any settlement offers. Federal complaints should reflect the history of the dispute.' }
+
   const common = [preflight, incident]
+  const isVehicle = MOTOR_VEHICLE_TYPES.includes(subType) || subType === 'vehicle_damage'
 
   // Property damage cases: no injuries/medical steps
   if (isPropertyDamageSubType(subType)) {
     if (subType === 'vehicle_damage') {
       const vehicleDamageDefendant: WizardStep = { id: 'other_driver', title: 'Defendant Info', subtitle: 'Provide information about the party responsible for the damage (e.g., other driver, rental company, fleet operator).' }
-      return [...common, vehicleDamageDefendant, damageDetails, damages, insurance, venue, howToFile, review]
+      const federalSteps = isFederal ? [defendantDetails, vehicleIdentifiers, investigators, prelitigation] : []
+      return [...common, vehicleDamageDefendant, damageDetails, damages, insurance, venue, ...federalSteps, howToFile, review]
     }
-    return [...common, damageDetails, damages, insurance, venue, howToFile, review]
+    const federalSteps = isFederal ? [defendantDetails, prelitigation] : []
+    return [...common, damageDetails, damages, insurance, venue, ...federalSteps, howToFile, review]
   }
 
-  const tail = [injuries, medical, damages, insurance, venue, howToFile, review]
+  const tailCore = [injuries, medical, damages, insurance, venue]
+  const federalSteps = isFederal
+    ? isVehicle ? [defendantDetails, vehicleIdentifiers, investigators, prelitigation] : [defendantDetails, prelitigation]
+    : []
 
   if (MOTOR_VEHICLE_TYPES.includes(subType)) {
-    return [...common, otherDriver, ...tail]
+    return [...common, otherDriver, ...tailCore, ...federalSteps, howToFile, review]
   }
   if (subType === 'slip_and_fall') {
-    return [...common, premises, ...tail]
+    return [...common, premises, ...tailCore, ...federalSteps, howToFile, review]
   }
   if (subType === 'product_liability') {
-    return [...common, product, ...tail]
+    return [...common, product, ...tailCore, ...federalSteps, howToFile, review]
   }
-  return [...common, ...tail]
+  return [...common, ...tailCore, ...federalSteps, howToFile, review]
 }
 
 function getDocumentTitle(subType: string): string {
@@ -211,9 +223,32 @@ function courtTypeLabel(ct: string): string {
     case 'jp': return 'Justice of the Peace (under $20K)'
     case 'county': return 'County Court ($20K-$200K)'
     case 'district': return 'District Court (over $200K)'
+    case 'federal': return 'Federal District Court'
     default: return ct
   }
 }
+
+const FEDERAL_DISTRICTS = [
+  { value: 'S.D. Tex.', label: 'S.D. Tex. — Southern District (Houston, Galveston, Corpus Christi, Laredo, McAllen, Brownsville)' },
+  { value: 'N.D. Tex.', label: 'N.D. Tex. — Northern District (Dallas, Fort Worth, Amarillo, Lubbock, Wichita Falls)' },
+  { value: 'W.D. Tex.', label: 'W.D. Tex. — Western District (Austin, San Antonio, El Paso, Waco, Midland-Odessa)' },
+  { value: 'E.D. Tex.', label: 'E.D. Tex. — Eastern District (Tyler, Beaumont, Marshall, Sherman, Texarkana)' },
+]
+
+const FEDERAL_DIVISIONS: Record<string, string[]> = {
+  'S.D. Tex.': ['Houston', 'Galveston', 'Corpus Christi', 'Laredo', 'McAllen', 'Brownsville'],
+  'N.D. Tex.': ['Dallas', 'Fort Worth', 'Amarillo', 'Lubbock', 'Wichita Falls'],
+  'W.D. Tex.': ['Austin', 'San Antonio', 'El Paso', 'Waco', 'Midland-Odessa'],
+  'E.D. Tex.': ['Tyler', 'Beaumont', 'Marshall', 'Sherman', 'Texarkana'],
+}
+
+const DEFENDANT_ENTITY_TYPES = [
+  { value: 'corp', label: 'Corporation' },
+  { value: 'lp', label: 'Limited Partnership (LP)' },
+  { value: 'llc', label: 'Limited Liability Company (LLC)' },
+  { value: 'individual', label: 'Individual' },
+  { value: 'other', label: 'Other' },
+]
 
 /* ------------------------------------------------------------------ */
 /*  Body part options                                                  */
@@ -261,7 +296,12 @@ export function PersonalInjuryWizard({
   const isPropertyDamage = isPropertyDamageSubType(piSubType)
   const totalEstimateMinutes = 35
 
-  const steps = useMemo(() => getStepsForSubType(piSubType), [piSubType])
+  /* ---- isFederal must be declared before steps (steps depends on it) ---- */
+  const [isFederal, setIsFederal] = useState<boolean>(
+    (meta.is_federal as boolean) ?? false
+  )
+
+  const steps = useMemo(() => getStepsForSubType(piSubType, isFederal), [piSubType, isFederal])
 
   /* ---- Incident ---- */
   const [incidentDate, setIncidentDate] = useState<string>(
@@ -406,6 +446,76 @@ export function PersonalInjuryWizard({
     (meta.cause_number as string) ?? ''
   )
 
+  /* ---- Federal court (isFederal is declared above steps) ---- */
+  const [federalDistrict, setFederalDistrict] = useState<string>(
+    (meta.federal_district as string) ?? ''
+  )
+  const [federalDivision, setFederalDivision] = useState<string>(
+    (meta.federal_division as string) ?? ''
+  )
+  const [civilActionNumber, setCivilActionNumber] = useState<string>(
+    (meta.civil_action_number as string) ?? ''
+  )
+
+  /* ---- Defendant entity (federal diversity) ---- */
+  const [defendantEntityType, setDefendantEntityType] = useState<string>(
+    (meta.defendant_entity_type as string) ?? ''
+  )
+  const [defendantStateOfOrg, setDefendantStateOfOrg] = useState<string>(
+    (meta.defendant_state_of_org as string) ?? ''
+  )
+  const [defendantPrincipalPlace, setDefendantPrincipalPlace] = useState<string>(
+    (meta.defendant_principal_place as string) ?? ''
+  )
+  const [defendantCitizenshipNote, setDefendantCitizenshipNote] = useState<string>(
+    (meta.defendant_citizenship_note as string) ?? ''
+  )
+
+  /* ---- Vehicle identifiers (federal vehicle_damage) ---- */
+  const [vehicleVin, setVehicleVin] = useState<string>(
+    (meta.vehicle_vin as string) ?? ''
+  )
+  const [vehiclePlateState, setVehiclePlateState] = useState<string>(
+    (meta.vehicle_plate_state as string) ?? ''
+  )
+  const [vehicleUsdot, setVehicleUsdot] = useState<string>(
+    (meta.vehicle_usdot as string) ?? ''
+  )
+  const [vehicleUnitNumber, setVehicleUnitNumber] = useState<string>(
+    (meta.vehicle_unit_number as string) ?? ''
+  )
+  const [paperworkMismatch, setPaperworkMismatch] = useState<boolean>(
+    (meta.paperwork_mismatch as boolean) ?? false
+  )
+  const [paperworkMismatchDescription, setPaperworkMismatchDescription] = useState<string>(
+    (meta.paperwork_mismatch_description as string) ?? ''
+  )
+
+  /* ---- Investigation ---- */
+  const [investigatorName, setInvestigatorName] = useState<string>(
+    (meta.investigator_name as string) ?? ''
+  )
+  const [investigatorAgency, setInvestigatorAgency] = useState<string>(
+    (meta.investigator_agency as string) ?? ''
+  )
+  const [investigationConclusion, setInvestigationConclusion] = useState<string>(
+    (meta.investigation_conclusion as string) ?? ''
+  )
+
+  /* ---- Pre-litigation history ---- */
+  const [notifiedDate, setNotifiedDate] = useState<string>(
+    (meta.notified_date as string) ?? ''
+  )
+  const [claimNumber, setClaimNumber] = useState<string>(
+    (meta.claim_number as string) ?? ''
+  )
+  const [settlementOfferAmount, setSettlementOfferAmount] = useState<string>(
+    (meta.settlement_offer_amount as string) ?? ''
+  )
+  const [settlementOfferDate, setSettlementOfferDate] = useState<string>(
+    (meta.settlement_offer_date as string) ?? ''
+  )
+
   /* ---- Filing method ---- */
   const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
     (meta.filing_method as 'online' | 'in_person') ?? ''
@@ -541,9 +651,39 @@ export function PersonalInjuryWizard({
         zip: yourZip || undefined,
       },
       opposing_parties: opposingParties,
-      court_type: courtType as 'jp' | 'county' | 'district',
+      court_type: isFederal ? 'federal' : courtType as 'jp' | 'county' | 'district',
       county: county || '',
       cause_number: causeNumber || undefined,
+      // Federal court fields
+      is_federal: isFederal,
+      ...(isFederal ? {
+        federal_district: federalDistrict || undefined,
+        federal_division: federalDivision || undefined,
+        civil_action_number: civilActionNumber || undefined,
+        defendant_entity_type: defendantEntityType || undefined,
+        defendant_state_of_org: defendantStateOfOrg || undefined,
+        defendant_principal_place: defendantPrincipalPlace || undefined,
+        defendant_citizenship_note: defendantCitizenshipNote || undefined,
+      } : {}),
+      // Vehicle identifiers (federal vehicle_damage)
+      ...(isFederal && (piSubType === 'vehicle_damage' || MOTOR_VEHICLE_TYPES.includes(piSubType)) ? {
+        vehicle_vin: vehicleVin || undefined,
+        vehicle_plate_state: vehiclePlateState || undefined,
+        vehicle_usdot: vehicleUsdot || undefined,
+        vehicle_unit_number: vehicleUnitNumber || undefined,
+        paperwork_mismatch: paperworkMismatch,
+        paperwork_mismatch_description: paperworkMismatchDescription || undefined,
+        investigator_name: investigatorName || undefined,
+        investigator_agency: investigatorAgency || undefined,
+        investigation_conclusion: investigationConclusion || undefined,
+      } : {}),
+      // Pre-litigation history (federal)
+      ...(isFederal ? {
+        notified_date: notifiedDate || undefined,
+        claim_number: claimNumber || undefined,
+        settlement_offer_amount: settlementOfferAmount || undefined,
+        settlement_offer_date: settlementOfferDate || undefined,
+      } : {}),
       pi_sub_type: piSubType,
       incident_date: incidentDate,
       incident_location: incidentLocation,
@@ -572,7 +712,7 @@ export function PersonalInjuryWizard({
             total: grandTotal,
           },
       negligence_theory: buildNegligenceTheory(),
-      prior_demand_sent: false,
+      prior_demand_sent: notifiedDate !== '',
     }
   }, [
     lostWages,
@@ -586,9 +726,30 @@ export function PersonalInjuryWizard({
     yourCity,
     yourState,
     yourZip,
+    isFederal,
     courtType,
     county,
     causeNumber,
+    federalDistrict,
+    federalDivision,
+    civilActionNumber,
+    defendantEntityType,
+    defendantStateOfOrg,
+    defendantPrincipalPlace,
+    defendantCitizenshipNote,
+    vehicleVin,
+    vehiclePlateState,
+    vehicleUsdot,
+    vehicleUnitNumber,
+    paperworkMismatch,
+    paperworkMismatchDescription,
+    investigatorName,
+    investigatorAgency,
+    investigationConclusion,
+    notifiedDate,
+    claimNumber,
+    settlementOfferAmount,
+    settlementOfferDate,
     incidentDate,
     incidentLocation,
     incidentDescription,
@@ -663,6 +824,32 @@ export function PersonalInjuryWizard({
       county: county || null,
       court_type: courtType || null,
       cause_number: causeNumber || null,
+      // Federal court
+      is_federal: isFederal,
+      federal_district: federalDistrict || null,
+      federal_division: federalDivision || null,
+      civil_action_number: civilActionNumber || null,
+      // Defendant entity
+      defendant_entity_type: defendantEntityType || null,
+      defendant_state_of_org: defendantStateOfOrg || null,
+      defendant_principal_place: defendantPrincipalPlace || null,
+      defendant_citizenship_note: defendantCitizenshipNote || null,
+      // Vehicle identifiers
+      vehicle_vin: vehicleVin || null,
+      vehicle_plate_state: vehiclePlateState || null,
+      vehicle_usdot: vehicleUsdot || null,
+      vehicle_unit_number: vehicleUnitNumber || null,
+      paperwork_mismatch: paperworkMismatch,
+      paperwork_mismatch_description: paperworkMismatchDescription || null,
+      // Investigation
+      investigator_name: investigatorName || null,
+      investigator_agency: investigatorAgency || null,
+      investigation_conclusion: investigationConclusion || null,
+      // Pre-litigation history
+      notified_date: notifiedDate || null,
+      claim_number: claimNumber || null,
+      settlement_offer_amount: settlementOfferAmount || null,
+      settlement_offer_date: settlementOfferDate || null,
       // Filing method
       filing_method: filingMethod || null,
       // Draft
@@ -715,6 +902,27 @@ export function PersonalInjuryWizard({
       county,
       courtType,
       causeNumber,
+      isFederal,
+      federalDistrict,
+      federalDivision,
+      civilActionNumber,
+      defendantEntityType,
+      defendantStateOfOrg,
+      defendantPrincipalPlace,
+      defendantCitizenshipNote,
+      vehicleVin,
+      vehiclePlateState,
+      vehicleUsdot,
+      vehicleUnitNumber,
+      paperworkMismatch,
+      paperworkMismatchDescription,
+      investigatorName,
+      investigatorAgency,
+      investigationConclusion,
+      notifiedDate,
+      claimNumber,
+      settlementOfferAmount,
+      settlementOfferDate,
       filingMethod,
       draft,
       annotations,
@@ -849,7 +1057,16 @@ export function PersonalInjuryWizard({
       case 'insurance':
         return true
       case 'venue':
+        if (isFederal) return federalDistrict !== '' && county.trim() !== ''
         return county.trim() !== '' && courtType !== ''
+      case 'defendant_details':
+        return defendantEntityType !== '' && defendantStateOfOrg.trim() !== '' && defendantPrincipalPlace.trim() !== ''
+      case 'vehicle_identifiers':
+        return vehicleVin.trim() !== ''
+      case 'investigators':
+        return true
+      case 'prelitigation':
+        return true
       case 'how_to_file':
         return filingMethod !== ''
       case 'review':
@@ -872,6 +1089,12 @@ export function PersonalInjuryWizard({
     effectiveGrandTotal,
     county,
     courtType,
+    isFederal,
+    federalDistrict,
+    defendantEntityType,
+    defendantStateOfOrg,
+    defendantPrincipalPlace,
+    vehicleVin,
     filingMethod,
   ])
 
@@ -1717,52 +1940,150 @@ export function PersonalInjuryWizard({
               </div>
             </div>
 
+            {/* Federal vs. State court selection */}
             <div className="space-y-2">
-              <Label htmlFor="county">County</Label>
-              <Input
-                id="county"
-                placeholder="e.g. Travis"
-                value={county}
-                onChange={(e) => setCounty(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Court Type</Label>
-              <div className="flex flex-col gap-2">
-                {(['jp', 'county', 'district'] as const).map((ct) => (
-                  <Button
-                    key={ct}
-                    type="button"
-                    variant={courtType === ct ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setCourtType(ct)}
-                    className="justify-start text-left"
-                  >
-                    {courtTypeLabel(ct)}
-                    {ct === suggested && courtType !== ct && (
-                      <span className="ml-2 text-xs opacity-60">(suggested)</span>
-                    )}
-                  </Button>
-                ))}
+              <Label>Which court are you filing in?</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={!isFederal ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setIsFederal(false)}
+                  className="flex-1"
+                >
+                  Texas State Court
+                </Button>
+                <Button
+                  type="button"
+                  variant={isFederal ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setIsFederal(true)}
+                  className="flex-1"
+                >
+                  Federal District Court
+                </Button>
               </div>
-              {effectiveGrandTotal > 0 && (
-                <p className="text-xs text-warm-muted">
-                  Based on your total damages of ${effectiveGrandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })},
-                  we suggest {courtTypeLabel(suggested).toLowerCase()}.
-                </p>
-              )}
+              <p className="text-xs text-warm-muted">
+                {isFederal
+                  ? 'Federal court requires diversity of citizenship (parties from different states) and damages exceeding $75,000.'
+                  : 'State court handles most personal injury and property damage cases in Texas.'}
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cause-number">Cause Number (optional)</Label>
-              <Input
-                id="cause-number"
-                placeholder="Leave blank if not yet assigned"
-                value={causeNumber}
-                onChange={(e) => setCauseNumber(e.target.value)}
-              />
-            </div>
+            {isFederal ? (
+              <>
+                <div className="space-y-2">
+                  <Label>Federal District</Label>
+                  <div className="flex flex-col gap-2">
+                    {FEDERAL_DISTRICTS.map((d) => (
+                      <Button
+                        key={d.value}
+                        type="button"
+                        variant={federalDistrict === d.value ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setFederalDistrict(d.value)
+                          setFederalDivision('')
+                        }}
+                        className="justify-start text-left h-auto py-2 text-xs"
+                      >
+                        {d.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {federalDistrict && FEDERAL_DIVISIONS[federalDistrict] && (
+                  <div className="space-y-2">
+                    <Label>Division</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {FEDERAL_DIVISIONS[federalDistrict].map((div) => (
+                        <Button
+                          key={div}
+                          type="button"
+                          variant={federalDivision === div ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setFederalDivision(div)}
+                        >
+                          {div}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="county-federal">County Where Incident Occurred</Label>
+                  <Input
+                    id="county-federal"
+                    placeholder="e.g. Harris"
+                    value={county}
+                    onChange={(e) => setCounty(e.target.value)}
+                  />
+                  <p className="text-xs text-warm-muted">The county establishes venue within the federal district.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="civil-action-number">Civil Action Number (if already assigned)</Label>
+                  <Input
+                    id="civil-action-number"
+                    placeholder="e.g. 4:26-cv-01400"
+                    value={civilActionNumber}
+                    onChange={(e) => setCivilActionNumber(e.target.value)}
+                  />
+                  <p className="text-xs text-warm-muted">Leave blank if you have not yet filed with the court.</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="county">County</Label>
+                  <Input
+                    id="county"
+                    placeholder="e.g. Travis"
+                    value={county}
+                    onChange={(e) => setCounty(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Court Type</Label>
+                  <div className="flex flex-col gap-2">
+                    {(['jp', 'county', 'district'] as const).map((ct) => (
+                      <Button
+                        key={ct}
+                        type="button"
+                        variant={courtType === ct ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCourtType(ct)}
+                        className="justify-start text-left"
+                      >
+                        {courtTypeLabel(ct)}
+                        {ct === suggested && courtType !== ct && (
+                          <span className="ml-2 text-xs opacity-60">(suggested)</span>
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                  {effectiveGrandTotal > 0 && (
+                    <p className="text-xs text-warm-muted">
+                      Based on your total damages of ${effectiveGrandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })},
+                      we suggest {courtTypeLabel(suggested).toLowerCase()}.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cause-number">Cause Number (optional)</Label>
+                  <Input
+                    id="cause-number"
+                    placeholder="Leave blank if not yet assigned"
+                    value={causeNumber}
+                    onChange={(e) => setCauseNumber(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
           </div>
         )
       }
@@ -1948,10 +2269,346 @@ export function PersonalInjuryWizard({
               onEdit={handleReviewEdit}
             >
               <ReviewRow label="Your name" value={yourName || 'Not provided'} />
-              <ReviewRow label="County" value={county || 'Not provided'} />
-              <ReviewRow label="Court type" value={courtType ? courtTypeLabel(courtType) : 'Not selected'} />
-              {causeNumber && <ReviewRow label="Cause #" value={causeNumber} />}
+              {isFederal ? (
+                <>
+                  <ReviewRow label="Court" value="Federal District Court" />
+                  <ReviewRow label="District" value={federalDistrict || 'Not selected'} />
+                  <ReviewRow label="Division" value={federalDivision || 'Not selected'} />
+                  {civilActionNumber && <ReviewRow label="Civil action #" value={civilActionNumber} />}
+                </>
+              ) : (
+                <>
+                  <ReviewRow label="County" value={county || 'Not provided'} />
+                  <ReviewRow label="Court type" value={courtType ? courtTypeLabel(courtType) : 'Not selected'} />
+                  {causeNumber && <ReviewRow label="Cause #" value={causeNumber} />}
+                </>
+              )}
             </ReviewSection>
+
+            {/* Federal-only sections */}
+            {isFederal && (
+              <>
+                <ReviewSection
+                  title="Defendant Entity"
+                  stepId="defendant_details"
+                  onEdit={handleReviewEdit}
+                >
+                  <ReviewRow label="Entity type" value={DEFENDANT_ENTITY_TYPES.find(t => t.value === defendantEntityType)?.label || 'Not selected'} />
+                  <ReviewRow label="State of formation" value={defendantStateOfOrg || 'Not provided'} />
+                  <ReviewRow label="Principal place of business" value={defendantPrincipalPlace || 'Not provided'} />
+                  {defendantCitizenshipNote && <ReviewRow label="Citizenship chain" value={defendantCitizenshipNote} />}
+                </ReviewSection>
+
+                {(piSubType === 'vehicle_damage' || MOTOR_VEHICLE_TYPES.includes(piSubType)) && (
+                  <>
+                    <ReviewSection
+                      title="Vehicle Details"
+                      stepId="vehicle_identifiers"
+                      onEdit={handleReviewEdit}
+                    >
+                      <ReviewRow label="VIN" value={vehicleVin || 'Not provided'} />
+                      <ReviewRow label="License plate" value={licensePlate ? `${licensePlate}${vehiclePlateState ? ` (${vehiclePlateState})` : ''}` : 'Not provided'} />
+                      {vehicleUsdot && <ReviewRow label="USDOT #" value={vehicleUsdot} />}
+                      {vehicleUnitNumber && <ReviewRow label="Unit #" value={vehicleUnitNumber} />}
+                      <ReviewRow label="Paperwork mismatch" value={paperworkMismatch ? 'Yes' : 'No'} />
+                    </ReviewSection>
+
+                    <ReviewSection
+                      title="Investigation"
+                      stepId="investigators"
+                      onEdit={handleReviewEdit}
+                    >
+                      <ReviewRow label="Investigator" value={investigatorName || 'Not provided'} />
+                      <ReviewRow label="Agency" value={investigatorAgency || 'Not provided'} />
+                      <ReviewRow label="Conclusion" value={investigationConclusion || 'Not provided'} />
+                    </ReviewSection>
+                  </>
+                )}
+
+                <ReviewSection
+                  title="Pre-Filing History"
+                  stepId="prelitigation"
+                  onEdit={handleReviewEdit}
+                >
+                  <ReviewRow label="Notified date" value={formatDateForDisplay(notifiedDate) || 'Not provided'} />
+                  {claimNumber && <ReviewRow label="Claim #" value={claimNumber} />}
+                  {settlementOfferAmount && parseFloat(settlementOfferAmount) > 0 && (
+                    <>
+                      <ReviewRow label="Settlement offer" value={`$${parseFloat(settlementOfferAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+                      {settlementOfferDate && <ReviewRow label="Offer date" value={formatDateForDisplay(settlementOfferDate)} />}
+                    </>
+                  )}
+                </ReviewSection>
+              </>
+            )}
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  DEFENDANT ENTITY (federal diversity)                         */
+      /* ============================================================ */
+      case 'defendant_details':
+        return (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-calm-indigo/20 bg-calm-indigo/5 p-3">
+              <p className="text-xs text-warm-muted">
+                Federal diversity jurisdiction requires that plaintiff and defendant are citizens of <strong>different states</strong>. For corporations, citizenship is both the state of incorporation and the principal place of business. For LPs and LLCs, citizenship flows through every member or partner.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Defendant Entity Type</Label>
+              <div className="flex flex-wrap gap-2">
+                {DEFENDANT_ENTITY_TYPES.map((t) => (
+                  <Button
+                    key={t.value}
+                    type="button"
+                    variant={defendantEntityType === t.value ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setDefendantEntityType(t.value)}
+                  >
+                    {t.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="defendant-state-org">State of Formation / Incorporation</Label>
+              <Input
+                id="defendant-state-org"
+                placeholder="e.g. Delaware"
+                value={defendantStateOfOrg}
+                onChange={(e) => setDefendantStateOfOrg(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="defendant-principal-place">Principal Place of Business</Label>
+              <Input
+                id="defendant-principal-place"
+                placeholder="e.g. Pennsylvania"
+                value={defendantPrincipalPlace}
+                onChange={(e) => setDefendantPrincipalPlace(e.target.value)}
+              />
+            </div>
+
+            {(defendantEntityType === 'lp' || defendantEntityType === 'llc') && (
+              <div className="space-y-2">
+                <Label htmlFor="defendant-citizenship-note">Member / Partner Citizenship Chain (optional)</Label>
+                <Textarea
+                  id="defendant-citizenship-note"
+                  placeholder={`e.g. Sole general partner is XYZ GP, LLC (Delaware; Pennsylvania). XYZ GP's sole member is ABC Holdings, LLC (Delaware; Pennsylvania). ABC Holdings' sole member is Parent Corp (Delaware corporation; principal place of business Pennsylvania).`}
+                  value={defendantCitizenshipNote}
+                  onChange={(e) => setDefendantCitizenshipNote(e.target.value)}
+                  rows={4}
+                />
+                <p className="text-xs text-warm-muted">
+                  For LPs and LLCs, citizenship is determined by each member's or partner's citizenship. Trace the chain to a corporation or individual whose citizenship you can confirm.
+                </p>
+              </div>
+            )}
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  VEHICLE IDENTIFIERS (federal vehicle_damage)                 */
+      /* ============================================================ */
+      case 'vehicle_identifiers':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              Federal complaints identify the specific vehicle by its unique identifiers. These appear in your factual background paragraphs and in your preservation of evidence demand.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="vehicle-vin">Vehicle Identification Number (VIN)</Label>
+              <Input
+                id="vehicle-vin"
+                placeholder="17-character VIN e.g. 3HAEUMML3ML535074"
+                value={vehicleVin}
+                onChange={(e) => setVehicleVin(e.target.value.toUpperCase())}
+                className="font-mono"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="vehicle-plate" className="text-xs">License Plate Number</Label>
+                <Input
+                  id="vehicle-plate"
+                  placeholder="e.g. 4017PK"
+                  value={licensePlate}
+                  onChange={(e) => setLicensePlate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="vehicle-plate-state" className="text-xs">Plate State</Label>
+                <Input
+                  id="vehicle-plate-state"
+                  placeholder="e.g. Virginia"
+                  value={vehiclePlateState}
+                  onChange={(e) => setVehiclePlateState(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="vehicle-usdot" className="text-xs">USDOT Number</Label>
+                <Input
+                  id="vehicle-usdot"
+                  placeholder="e.g. 327574"
+                  value={vehicleUsdot}
+                  onChange={(e) => setVehicleUsdot(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="vehicle-unit" className="text-xs">Fleet / Unit Number</Label>
+                <Input
+                  id="vehicle-unit"
+                  placeholder="e.g. 92601667"
+                  value={vehicleUnitNumber}
+                  onChange={(e) => setVehicleUnitNumber(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Did the rental paperwork match the actual vehicle?</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={paperworkMismatch === false ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPaperworkMismatch(false)}
+                >
+                  Yes, they matched
+                </Button>
+                <Button
+                  type="button"
+                  variant={paperworkMismatch === true ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPaperworkMismatch(true)}
+                >
+                  No, there was a mismatch
+                </Button>
+              </div>
+            </div>
+
+            {paperworkMismatch && (
+              <div className="space-y-2">
+                <Label htmlFor="mismatch-description">Describe the Mismatch</Label>
+                <Textarea
+                  id="mismatch-description"
+                  placeholder="e.g. The vehicle bore Virginia plates (4017PK) but the rental paperwork listed Indiana plates. The unit number (92601667) matched; the plate and state information did not."
+                  value={paperworkMismatchDescription}
+                  onChange={(e) => setPaperworkMismatchDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            )}
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  INVESTIGATORS (federal)                                      */
+      /* ============================================================ */
+      case 'investigators':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              Name any official who investigated the incident and document their conclusions. Named investigators with official conclusions carry significant weight in federal pleadings.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="investigator-name">Lead Investigator Name and Title</Label>
+              <Input
+                id="investigator-name"
+                placeholder="e.g. Assistant Chief Dean M. Hensley"
+                value={investigatorName}
+                onChange={(e) => setInvestigatorName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="investigator-agency">Agency</Label>
+              <Input
+                id="investigator-agency"
+                placeholder="e.g. Waller County Fire Marshal's Office"
+                value={investigatorAgency}
+                onChange={(e) => setInvestigatorAgency(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="investigation-conclusion">Investigation Conclusion</Label>
+              <Textarea
+                id="investigation-conclusion"
+                placeholder="e.g. The investigation determined the cause was mechanical failure: a blown tire on the rear wheel assembly that ignited, spreading to the truck and its contents. The fire was classified as accidental."
+                value={investigationConclusion}
+                onChange={(e) => setInvestigationConclusion(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+        )
+
+      /* ============================================================ */
+      /*  PRE-LITIGATION HISTORY (federal)                             */
+      /* ============================================================ */
+      case 'prelitigation':
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-warm-muted">
+              Document all pre-suit contact with the defendant. Federal complaints include this history to show the court the dispute is genuine and negotiations failed.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="notified-date">Date Defendant Was Notified</Label>
+              <Input
+                id="notified-date"
+                type="date"
+                value={notifiedDate}
+                onChange={(e) => setNotifiedDate(e.target.value)}
+              />
+              <p className="text-xs text-warm-muted">The date you first contacted them about your claim (e.g. the day of the incident).</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="claim-number">Claim Number (if assigned)</Label>
+              <Input
+                id="claim-number"
+                placeholder="e.g. CLM-2025-XXXXX"
+                value={claimNumber}
+                onChange={(e) => setClaimNumber(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="settlement-offer-amount">Settlement Offer Amount (if any)</Label>
+              <Input
+                id="settlement-offer-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={settlementOfferAmount}
+                onChange={(e) => setSettlementOfferAmount(e.target.value)}
+              />
+            </div>
+
+            {settlementOfferAmount && parseFloat(settlementOfferAmount) > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="settlement-offer-date">Date of Settlement Offer</Label>
+                <Input
+                  id="settlement-offer-date"
+                  type="date"
+                  value={settlementOfferDate}
+                  onChange={(e) => setSettlementOfferDate(e.target.value)}
+                />
+              </div>
+            )}
           </div>
         )
 

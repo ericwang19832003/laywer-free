@@ -48,6 +48,28 @@ export const piPetitionFactsSchema = z.object({
   negligence_theory: z.string().min(10),
   prior_demand_sent: z.boolean(),
   demand_date: z.string().optional(),
+  // Federal court fields (optional — used when court_type === 'federal')
+  is_federal: z.boolean().optional(),
+  federal_district: z.string().optional(),
+  federal_division: z.string().optional(),
+  civil_action_number: z.string().optional(),
+  defendant_entity_type: z.string().optional(),
+  defendant_state_of_org: z.string().optional(),
+  defendant_principal_place: z.string().optional(),
+  defendant_citizenship_note: z.string().optional(),
+  vehicle_vin: z.string().optional(),
+  vehicle_plate_state: z.string().optional(),
+  vehicle_usdot: z.string().optional(),
+  vehicle_unit_number: z.string().optional(),
+  paperwork_mismatch: z.boolean().optional(),
+  paperwork_mismatch_description: z.string().optional(),
+  investigator_name: z.string().optional(),
+  investigator_agency: z.string().optional(),
+  investigation_conclusion: z.string().optional(),
+  notified_date: z.string().optional(),
+  claim_number: z.string().optional(),
+  settlement_offer_amount: z.string().optional(),
+  settlement_offer_date: z.string().optional(),
 }).refine(
   (data) => {
     const isPropertyDamage = (PROPERTY_DAMAGE_TYPES as readonly string[]).includes(data.pi_sub_type)
