@@ -270,7 +270,99 @@ function buildFederalSystemPrompt(facts: PiPetitionFacts): string {
     ? `Property damages only. Include each category (repair/replacement, loss of use, additional costs/expenses). State dollar amounts where provided with "subject to supplementation" language. Do NOT include medical expenses, lost wages, or pain and suffering.`
     : `Include each category (medical expenses, lost wages, property damage, pain and suffering / mental anguish). State dollar amounts where provided with "subject to supplementation" language.`
 
-  return `You are a legal document formatting assistant specializing in federal court filings. Generate a professional PLAINTIFF'S ORIGINAL COMPLAINT for a federal diversity case in the United States District Court. This document is for a self-represented (pro se) plaintiff.
+  // Court identifiers
+  const districtMap: Record<string, string> = {
+    'N.D. Tex.': 'NORTHERN',
+    'S.D. Tex.': 'SOUTHERN',
+    'W.D. Tex.': 'WESTERN',
+    'E.D. Tex.': 'EASTERN',
+  }
+  const districtAbbr = facts.federal_district ? (districtMap[facts.federal_district] ?? facts.federal_district) : '___'
+  const districtLine = districtAbbr + ' DISTRICT OF TEXAS'
+  const divisionLine = facts.federal_division ? facts.federal_division.toUpperCase() + ' DIVISION' : '___ DIVISION'
+  const civilActionNo = facts.civil_action_number ?? '_______________'
+  const isCommercialVehicle = ['vehicle_damage', 'auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist'].includes(facts.pi_sub_type)
+
+  // Defendant citizenship chain guidance
+  const stateOfOrg = facts.defendant_state_of_org ?? '[STATE]'
+  const pob = facts.defendant_principal_place ?? '[CITY/STATE]'
+  let defendantCitizenshipGuidance: string
+  const citizenshipNote = facts.defendant_citizenship_note ? ` Additional context: ${facts.defendant_citizenship_note}` : ''
+  if (facts.defendant_entity_type === 'corp') {
+    defendantCitizenshipGuidance = `Defendant is a corporation. A corporation is a citizen of both its state of incorporation and its principal place of business under 28 U.S.C. § 1332(c)(1). Use the facts provided: Defendant is incorporated under the laws of ${stateOfOrg} with its principal place of business in ${pob}. Write: "[DEFENDANT NAME] is a corporation incorporated under the laws of ${stateOfOrg}, with its principal place of business in ${pob}, and is therefore a citizen of ${stateOfOrg} and [the state of its principal place of business]."${citizenshipNote}`
+  } else if (facts.defendant_entity_type === 'lp') {
+    defendantCitizenshipGuidance = `Defendant is a limited partnership organized under the laws of ${stateOfOrg}. A limited partnership takes the citizenship of each of its partners — general and limited — traced through the entire ownership chain to individual persons or corporations. Write: "[NAME] is a limited partnership whose general partner is [PARTNER NAME], a [corporation/individual] that is a citizen of [STATE(S)], and whose limited partners are citizens of [STATE(S)]. Accordingly, [NAME] is a citizen of [all partner states]." Use only facts provided.${citizenshipNote}`
+  } else if (facts.defendant_entity_type === 'llc') {
+    defendantCitizenshipGuidance = `Defendant is a limited liability company organized under the laws of ${stateOfOrg}. An LLC is a citizen of each state in which any member is domiciled or incorporated, traced through the entire ownership chain. Write: "[NAME] is an LLC whose sole member is [MEMBER NAME], a [corporation/individual] that is a citizen of [STATE(S)]." Use only facts provided.${citizenshipNote}`
+  } else {
+    defendantCitizenshipGuidance = `State what is known about Defendant's citizenship using only the facts provided.${citizenshipNote}`
+  }
+
+  // Vehicle identifiers guidance for Factual Background
+  const vehicleIdentifierLines: string[] = []
+  if (isCommercialVehicle && facts.vehicle_vin) {
+    vehicleIdentifierLines.push(`  Vehicle identifiers to include when first describing the subject vehicle:`)
+    vehicleIdentifierLines.push(`    - VIN: ${facts.vehicle_vin}`)
+    if (facts.vehicle_plate_state) vehicleIdentifierLines.push(`    - License plate state: ${facts.vehicle_plate_state}`)
+    if (facts.vehicle_usdot) vehicleIdentifierLines.push(`    - USDOT number: ${facts.vehicle_usdot}`)
+    if (facts.vehicle_unit_number) vehicleIdentifierLines.push(`    - Fleet/unit number: ${facts.vehicle_unit_number}`)
+    if (facts.paperwork_mismatch && facts.paperwork_mismatch_description) {
+      vehicleIdentifierLines.push(`    - Note discrepancy in vehicle paperwork: "${facts.paperwork_mismatch_description}"`)
+    }
+  }
+
+  // Investigator guidance
+  const investigatorGuidance = facts.investigator_name
+    ? `  Investigating officer: ${facts.investigator_name}${facts.investigator_agency ? ` of the ${facts.investigator_agency}` : ''}.${facts.investigation_conclusion ? ` The investigation concluded: "${facts.investigation_conclusion}".` : ''} Reference the investigator and agency by name when describing the incident.`
+    : ''
+
+  // Regulatory framework for commercial vehicle cases
+  const regulatoryLine = isCommercialVehicle
+    ? `- E. REGULATORY FRAMEWORK — Required for commercial vehicle cases: Cite 49 C.F.R. § 396.3(a) (FMCSR systematic inspection, repair, and maintenance obligation). State that Defendant, as a federally regulated commercial motor carrier, had a non-delegable duty to systematically inspect, repair, and maintain the subject vehicle in safe and proper operating condition.${facts.vehicle_usdot ? ` Defendant operates under USDOT number ${facts.vehicle_usdot}.` : ''} Also cite Texas Transportation Code § 502.040 (registration requirements) if applicable.`
+    : ''
+
+  // Pre-litigation history
+  const prelitFacts: string[] = []
+  if (facts.notified_date) prelitFacts.push(`On or about ${facts.notified_date}, Plaintiff notified Defendant and attempted to resolve this matter.`)
+  if (facts.claim_number) prelitFacts.push(`Defendant assigned claim number ${facts.claim_number}.`)
+  if (facts.settlement_offer_amount) {
+    const offerDate = facts.settlement_offer_date ? ` on or about ${facts.settlement_offer_date}` : ''
+    prelitFacts.push(`Defendant offered $${facts.settlement_offer_amount}${offerDate} to settle Plaintiff's claims.`)
+  }
+  const prelitLine = prelitFacts.length > 0
+    ? `- F. PRE-LITIGATION HISTORY — Include these facts: ${prelitFacts.join(' ')}`
+    : facts.prior_demand_sent
+    ? `- F. PRE-LITIGATION HISTORY — Include that Plaintiff notified Defendant and attempted to resolve this matter informally before filing suit.`
+    : ''
+
+  // Gross negligence guidance (enhanced for commercial vehicle cases)
+  const grossNegligenceGuidance = isCommercialVehicle
+    ? `COUNT -- GROSS NEGLIGENCE: For commercial vehicle cases, the scope and duration of regulatory non-compliance under 49 C.F.R. § 396.3(a) can support an inference of systemic conscious indifference. Allege: (a) Defendant knew its vehicles were subject to mandatory systematic inspection under federal law; (b) Defendant knew that failing to conduct systematic inspection created an extreme degree of risk to the motoring public; and (c) Defendant proceeded with conscious indifference to that risk. Cite Tex. Civ. Prac. & Rem. Code § 41.003. Include only if the facts support a pattern of systemic failure, not mere inadvertence.`
+    : `COUNT -- GROSS NEGLIGENCE: If the facts suggest extreme degree of risk and conscious indifference (Tex. Civ. Prac. & Rem. Code § 41.003). Only include if the facts genuinely support it.`
+
+  // Preservation of evidence — keyed to VIN if available
+  const preservationText = facts.vehicle_vin
+    ? `all documents and electronically stored information relating to the subject vehicle (VIN: ${facts.vehicle_vin}), including but not limited to: maintenance logs, inspection records, pre-trip inspection reports, repair orders, work orders, driver qualification files, hours-of-service records, electronic logging device (ELD) data, telematics and GPS data, dash camera footage, photographs, communications between Defendant and any insurer or claims adjuster, and any prior complaints or claims involving the same vehicle or fleet. Defendant shall immediately suspend any document retention/destruction policies with respect to these materials.`
+    : `all documents and electronically stored information relating to the events described herein, including but not limited to: [list specific categories relevant to the facts, e.g., maintenance records, inspection logs, contracts, communications, insurance policies, photographs, and any prior complaints or claims involving the same subject matter]. Defendant shall immediately suspend any document retention/destruction policies with respect to these materials.`
+
+  // Assemble factual background section
+  const factualBackgroundParts: string[] = [
+    '- A. BACKGROUND / THE TRANSACTION — Context leading to the incident.',
+    ...vehicleIdentifierLines,
+    '- B. CONDITION / CIRCUMSTANCES — Relevant conditions at the time.',
+    '- C. THE INCIDENT — What happened, in chronological detail.',
+    ...(investigatorGuidance ? [investigatorGuidance] : []),
+    '- D. DAMAGES — What was lost/destroyed and the amounts.',
+    ...(regulatoryLine ? [regulatoryLine] : []),
+    ...(prelitLine ? [prelitLine] : []),
+    '- Each paragraph should be one focused fact. Use "On or about" for approximate dates.',
+    '- Use ONLY the facts provided. Do NOT add hypothetical details.',
+  ]
+  const factualBackgroundSection = factualBackgroundParts.join('\n')
+
+  const districtVenuePhrase = facts.federal_district ?? 'this District'
+
+  return `You are a legal document formatting assistant specializing in federal court filings. Generate a professional PLAINTIFF'S ORIGINAL COMPLAINT for a federal diversity case in the United States District Court${facts.federal_district ? ` for the ${facts.federal_district}` : ''}. This document is for a self-represented (pro se) plaintiff.
 
 This must match the structure and quality of a real federal court complaint. Study the following format carefully.
 
@@ -287,44 +379,37 @@ CRITICAL RULES:
 DOCUMENT STRUCTURE:
 
 COURT CAPTION:
-Format as a federal court caption with \u00a7 symbols:
+Format as a federal court caption with § symbols:
 \`\`\`
 UNITED STATES DISTRICT COURT
-___ DISTRICT OF TEXAS
-___ DIVISION
+${districtLine}
+${divisionLine}
 
-[PLAINTIFF NAME],              \u00a7
-                               \u00a7
-     Plaintiff,                \u00a7    Civil Action No. _______________
-                               \u00a7
-v.                             \u00a7
-                               \u00a7
-[DEFENDANT NAME],              \u00a7
-                               \u00a7
-     Defendant.                \u00a7
+[PLAINTIFF NAME],              §
+                               §
+     Plaintiff,                §    Civil Action No. ${civilActionNo}
+                               §
+v.                             §
+                               §
+[DEFENDANT NAME],              §
+                               §
+     Defendant.                §
 \`\`\`
 Then centered: PLAINTIFF'S ORIGINAL COMPLAINT
 
 PRELIMINARY STATEMENT:
-Write 2\u20134 concise paragraphs (numbered continuously) summarizing the entire case: what happened, what went wrong, and why the plaintiff is suing. This should be a tight narrative overview. Start with: "1. On [DATE], Defendant..."
+Write 2–4 concise paragraphs (numbered continuously) summarizing the entire case: what happened, what went wrong, and why the plaintiff is suing. This should be a tight narrative overview. Start with: "1. On [DATE], Defendant..."
 
 I. JURISDICTION AND VENUE
 Numbered paragraphs continuing from the Preliminary Statement:
-- Subject matter jurisdiction: "This Court has subject matter jurisdiction under 28 U.S.C. \u00a7 1332(a). The amount in controversy exceeds $75,000, exclusive of interest and costs."
-- Plaintiff\u2019s citizenship: "[NAME] is a citizen of the State of [STATE]."
-- Defendant\u2019s citizenship: State what is known. If Defendant is a corporation, note state of incorporation and principal place of business if known. If a limited partnership/LLC, note the citizenship of partners/members if known. If not known, state: "Defendant is believed to be a citizen of [STATE(S)]. Complete diversity exists." (Use only facts provided \u2014 do not fabricate corporate structure.)
-- Venue: "Venue is proper under 28 U.S.C. \u00a7 1391(b)(2). A substantial part of the events giving rise to this action occurred in this District."
+- Subject matter jurisdiction: "This Court has subject matter jurisdiction under 28 U.S.C. § 1332(a). The amount in controversy exceeds $75,000, exclusive of interest and costs."
+- Plaintiff’s citizenship: "[NAME] is a citizen of the State of [STATE]."
+- Defendant’s citizenship: ${defendantCitizenshipGuidance}
+- Venue: "Venue is proper under 28 U.S.C. § 1391(b)(2). A substantial part of the events giving rise to this action occurred in ${districtVenuePhrase}."
 
 II. FACTUAL BACKGROUND
 Organize facts with lettered sub-sections and continuous paragraph numbering:
-- A. BACKGROUND / THE TRANSACTION \u2014 Context leading to the incident.
-- B. CONDITION / CIRCUMSTANCES \u2014 Relevant conditions at the time.
-- C. THE INCIDENT \u2014 What happened, in chronological detail.
-- D. DAMAGES \u2014 What was lost/destroyed and the amounts.
-- If Plaintiff attempted informal resolution, include that in the facts (e.g., demand letter, settlement attempts).
-- If there are regulatory implications, add: E. REGULATORY FRAMEWORK -- cite applicable federal regulations (49 C.F.R. Parts 390-399 for motor carriers) and/or state statutes. Be specific about which regulation applies and how it was violated.
-- Each paragraph should be one focused fact. Use "On or about" for approximate dates.
-- Use ONLY the facts provided. Do NOT add hypothetical details.
+${factualBackgroundSection}
 
 III. CAUSES OF ACTION
 Format as separate COUNTs with centered headings in ALL CAPS:
@@ -332,13 +417,13 @@ Format as separate COUNTs with centered headings in ALL CAPS:
 COUNT I -- NEGLIGENCE
 Core NEGLIGENCE theory: ${negligenceGuidance}
 - Start with: "[Next number]. Plaintiff incorporates all preceding paragraphs."
-- State the duty, the specific breaches (use lettered sub-items (a), (b), (c)...), and that the breach proximately caused Plaintiff\u2019s damages.
+- State the duty, the specific breaches (use lettered sub-items (a), (b), (c)...), and that the breach proximately caused Plaintiff’s damages.
 
 ${causesGuidance}
 
 Additional COUNTs to consider based on facts (only include if supported):
 - COUNT -- NEGLIGENCE PER SE: If Defendant violated a specific statute/regulation, cite it and explain how the violation constitutes negligence as a matter of law. State that Plaintiff is within the protected class and the harm is within the class of harms the provision addresses.
-- COUNT -- GROSS NEGLIGENCE: If the facts suggest extreme degree of risk and conscious indifference (Tex. Civ. Prac. & Rem. Code \u00a7 41.003). Only include if the facts genuinely support it.
+- ${grossNegligenceGuidance}
 - COUNT -- BAILMENT / NEGLIGENT BAILMENT: If Defendant as bailor rented, leased, or provided a vehicle or chattel to Plaintiff that was defective or unsafe. As bailor, Defendant had a duty to disclose known defects and to provide the property in safe, fit condition. The bailee (Plaintiff) is entitled to recover for damages caused by the bailor's failure to provide a safe chattel.
 - COUNT -- BREACH OF CONTRACT: If a contract/rental/service agreement existed. State the obligation, the breach, and proximate causation.
 - COUNT -- BREACH OF IMPLIED WARRANTY OF FITNESS: If Defendant impliedly warranted fitness for purpose. State that the product/vehicle was not fit and not in merchantable condition.
@@ -352,11 +437,11 @@ Each COUNT must:
 IV. DAMAGES
 Numbered paragraphs for each damages category:
 ${damagesGuidance}
-- Include: "Plaintiff seeks exemplary damages under Tex. Civ. Prac. & Rem. Code \u00a7 41.003 based on the conduct alleged in Count [GROSS NEGLIGENCE COUNT]" only if a gross negligence count was included.
+- Include: "Plaintiff seeks exemplary damages under Tex. Civ. Prac. & Rem. Code § 41.003 based on the conduct alleged in Count [GROSS NEGLIGENCE COUNT]" only if a gross negligence count was included.
 - Include pre-judgment and post-judgment interest and costs of court.
 
 V. PRESERVATION OF EVIDENCE
-"Defendant is on notice to preserve all documents and electronically stored information relating to [describe the subject], including: [list categories of documents relevant to the case based on the facts \u2014 e.g., maintenance records, inspection logs, communications, contracts, etc.]."
+"Defendant is on notice to preserve ${preservationText}"
 
 VI. JURY DEMAND
 "Plaintiff demands a trial by jury pursuant to Federal Rule of Civil Procedure 38."
@@ -382,6 +467,11 @@ Respectfully submitted,
 Phone: [if provided]
 Email: [if provided]
 
+CERTIFICATE OF SERVICE
+"I hereby certify that on [DATE], a true and correct copy of the foregoing Plaintiff's Original Complaint was filed with the Clerk of Court using the CM/ECF system, and served on all parties or their counsel of record via electronic notification pursuant to Federal Rule of Civil Procedure 5(b)(2)(E)."
+/s/ [Plaintiff Name]
+[PLAINTIFF NAME], Pro Se
+
 FORMATTING REQUIREMENTS:
 - Do NOT use markdown syntax (**bold**, *italic*, # headings) anywhere in the output. Plain text only.
 - Write all Roman numeral section headings and COUNT headings in ALL CAPS and center them (e.g., "I. JURISDICTION AND VENUE", "COUNT I -- NEGLIGENCE").
@@ -398,13 +488,14 @@ Below that, output one annotation per line in this exact format:
 Number annotations sequentially starting from 1. Cover these sections at minimum:
 - Caption (the header identifying the federal court and parties)
 - Preliminary Statement (a quick summary of the whole case)
-- Jurisdiction and Venue (why this federal court can hear the case \u2014 diversity of citizenship)
+- Jurisdiction and Venue (why this federal court can hear the case — diversity of citizenship)
 - Factual Background (the detailed story of what happened)
-- Causes of Action (the legal theories \u2014 explain each COUNT in plain English)
-- Damages (what money you\u2019re asking for)
+- Causes of Action (the legal theories — explain each COUNT in plain English)
+- Damages (what money you’re asking for)
 - Preservation of Evidence (telling the other side not to destroy records)
 - Jury Demand (your right to a jury trial in federal court)
 - Prayer for Relief (the formal ask to the court)
+- Certificate of Service (confirmation that you notified the other side by filing through the court's electronic system)
 
 Use simple language a high school student could understand. Do NOT use legal jargon in the explanations.`
 }
@@ -663,6 +754,32 @@ function buildUserPrompt(facts: PiPetitionFacts): string {
     .filter(Boolean)
     .join('\n')
 
+  const federalDetailsSection = isFederal
+    ? [
+        '--- FEDERAL COURT DETAILS ---',
+        facts.federal_district ? `Federal district: ${facts.federal_district}` : null,
+        facts.federal_division ? `Division: ${facts.federal_division}` : null,
+        facts.civil_action_number ? `Civil Action No.: ${facts.civil_action_number}` : null,
+        facts.defendant_entity_type ? `Defendant entity type: ${facts.defendant_entity_type}` : null,
+        facts.defendant_state_of_org ? `Defendant state of incorporation/organization: ${facts.defendant_state_of_org}` : null,
+        facts.defendant_principal_place ? `Defendant principal place of business: ${facts.defendant_principal_place}` : null,
+        facts.defendant_citizenship_note ? `Defendant citizenship note: ${facts.defendant_citizenship_note}` : null,
+        facts.vehicle_vin ? `Vehicle VIN: ${facts.vehicle_vin}` : null,
+        facts.vehicle_plate_state ? `Vehicle license plate state: ${facts.vehicle_plate_state}` : null,
+        facts.vehicle_usdot ? `USDOT number: ${facts.vehicle_usdot}` : null,
+        facts.vehicle_unit_number ? `Fleet/unit number: ${facts.vehicle_unit_number}` : null,
+        facts.paperwork_mismatch && facts.paperwork_mismatch_description
+          ? `Vehicle paperwork discrepancy: ${facts.paperwork_mismatch_description}` : null,
+        facts.investigator_name
+          ? `Investigating officer: ${facts.investigator_name}${facts.investigator_agency ? ` (${facts.investigator_agency})` : ''}` : null,
+        facts.investigation_conclusion ? `Investigation conclusion: ${facts.investigation_conclusion}` : null,
+        facts.notified_date ? `Date Defendant notified: ${facts.notified_date}` : null,
+        facts.claim_number ? `Claim number: ${facts.claim_number}` : null,
+        facts.settlement_offer_amount
+          ? `Settlement offer: $${facts.settlement_offer_amount}${facts.settlement_offer_date ? ` (offered on or about ${facts.settlement_offer_date})` : ''}` : null,
+      ].filter(Boolean).join('\n')
+    : null
+
   const docType = isFederal
     ? (isPropDamage ? "PLAINTIFF'S ORIGINAL COMPLAINT (Property Damage \u2014 Federal)" : "PLAINTIFF'S ORIGINAL COMPLAINT (Personal Injury \u2014 Federal)")
     : (isPropDamage ? "PLAINTIFF'S ORIGINAL PETITION (Property Damage)" : "PLAINTIFF'S ORIGINAL PETITION (Personal Injury)")
@@ -686,6 +803,7 @@ function buildUserPrompt(facts: PiPetitionFacts): string {
     '',
     negligenceSection,
     demandSection ? `\n${demandSection}` : null,
+    federalDetailsSection ? `\n${federalDetailsSection}` : null,
   ]
     .filter((s) => s !== null)
     .join('\n')
