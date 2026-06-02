@@ -55,7 +55,7 @@ export function PreservationLetterStep({
   const [caseSummary, setCaseSummary] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [customCategory, setCustomCategory] = useState('')
-  const [tone, setTone] = useState<'polite' | 'neutral' | 'firm'>('polite')
+  const [tone, setTone] = useState<'polite' | 'neutral' | 'firm'>('firm')
 
   // Preview + acknowledgment state
   const [generatedLetter, setGeneratedLetter] = useState('')
@@ -63,7 +63,7 @@ export function PreservationLetterStep({
   const [savedDocumentId, setSavedDocumentId] = useState<string | null>(null)
 
   // AI state
-  const [useAi, setUseAi] = useState(false)
+  const [useAi, setUseAi] = useState(true)
   const [aiError, setAiError] = useState<string | null>(null)
   const [generatorMeta, setGeneratorMeta] = useState<{
     generator: 'template' | 'openai'
