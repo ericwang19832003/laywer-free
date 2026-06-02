@@ -6,6 +6,7 @@ import { CaseStatusStrip } from '@/components/dashboard/case-status-strip'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { PriorityBanners } from '@/components/dashboard/priority-banners'
 import { DashboardTabs } from '@/components/dashboard/dashboard-tabs'
+import { PreservationLetterReminder } from '@/components/dashboard/preservation-letter-reminder'
 import { FocusTab } from './focus-tab'
 import { OverviewTab } from './overview-tab'
 import { ToolsTab } from './tools-tab'
@@ -26,6 +27,8 @@ export default async function DashboardPage({
     riskScoreResult,
     tasksResult,
     upcomingDeadlinesResult,
+    preservationTaskResult,
+    preservationSentResult,
   ] = await Promise.all([
     supabase
       .from('cases')
@@ -56,6 +59,21 @@ export default async function DashboardPage({
       .gte('due_at', new Date().toISOString())
       .order('due_at', { ascending: true })
       .limit(3),
+    supabase
+      .from('tasks')
+      .select('id')
+      .eq('case_id', id)
+      .eq('task_key', 'preservation_letter')
+      .neq('status', 'locked')
+      .maybeSingle(),
+    supabase
+      .from('task_events')
+      .select('id')
+      .eq('case_id', id)
+      .eq('kind', 'preservation_letter_sent')
+      .filter('payload->>status', 'eq', 'sent')
+      .limit(1)
+      .maybeSingle(),
   ])
 
   if (error || !caseRow) {
@@ -110,6 +128,10 @@ export default async function DashboardPage({
     label: string | null
   }>
 
+  // Show reminder when the workflow includes a preservation letter task but none has been sent yet
+  const preservationTaskId = preservationTaskResult.data?.id ?? null
+  const preservationLetterSent = !!preservationSentResult.data
+
   return (
     <div className="bg-warm-bg min-h-full">
       <main className="mx-auto max-w-2xl px-4 py-10">
@@ -125,6 +147,9 @@ export default async function DashboardPage({
             riskLevel={riskScoreResult.data?.risk_level}
           />
           <PriorityAlertsSection caseId={id} alerts={alerts} />
+          {preservationTaskId && !preservationLetterSent && (
+            <PreservationLetterReminder caseId={id} taskId={preservationTaskId} />
+          )}
           <PriorityBanners
             caseId={id}
             disputeType={shared.disputeType}
