@@ -27,6 +27,19 @@ const EVIDENCE_CATEGORIES = [
   'Phone records and voicemails',
 ] as const
 
+const LEGAL_CLAIMS = [
+  'Negligence',
+  'Gross negligence',
+  'Breach of contract',
+  'Unfair or deceptive practices',
+  'FDCPA / debt collection violations',
+  'Consumer fraud',
+  'Property damage',
+  'Products liability',
+  'Premises liability',
+  'Wrongful collection',
+] as const
+
 const TONE_OPTIONS = [
   { value: 'polite' as const, label: 'Polite', desc: 'Warm and cooperative' },
   { value: 'neutral' as const, label: 'Neutral', desc: 'Professional and direct' },
@@ -51,8 +64,11 @@ export function PreservationLetterStep({
   // Form state
   const [opponentName, setOpponentName] = useState('')
   const [opponentEmail, setOpponentEmail] = useState('')
+  const [defendantDescription, setDefendantDescription] = useState('')
   const [incidentDate, setIncidentDate] = useState('')
+  const [referenceNumbers, setReferenceNumbers] = useState('')
   const [caseSummary, setCaseSummary] = useState('')
+  const [selectedClaims, setSelectedClaims] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [customCategory, setCustomCategory] = useState('')
   const [tone, setTone] = useState<'polite' | 'neutral' | 'firm'>('firm')
@@ -83,6 +99,14 @@ export function PreservationLetterStep({
     )
   }
 
+  function toggleClaim(claim: string) {
+    setSelectedClaims((prev) =>
+      prev.includes(claim)
+        ? prev.filter((c) => c !== claim)
+        : [...prev, claim]
+    )
+  }
+
   async function handleBeforeReview() {
     if (!caseSummary.trim()) {
       throw new Error('Please provide a brief case summary.')
@@ -104,6 +128,9 @@ export function PreservationLetterStep({
             evidence_categories: selectedCategories,
             tone,
             opponent_name: opponentName || undefined,
+            defendant_description: defendantDescription || undefined,
+            reference_numbers: referenceNumbers || undefined,
+            legal_claims: selectedClaims,
             // NOTE: opponentEmail intentionally excluded
           }),
         })
@@ -361,7 +388,7 @@ export function PreservationLetterStep({
       caseId={caseId}
       taskId={taskId}
       title="You're doing the right thing."
-      reassurance="We'll draft a polite preservation request. You'll review it before sending."
+      reassurance="We'll draft a comprehensive preservation notice with numbered, case-specific evidence categories. You'll review it before sending."
       onConfirm={handleConfirm}
       onBeforeReview={handleBeforeReview}
       reviewContent={reviewContent}
@@ -392,6 +419,21 @@ export function PreservationLetterStep({
               value={opponentName}
               onChange={(e) => setOpponentName(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="defendant-description">
+              What does the opponent do? <span className="text-warm-muted font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="defendant-description"
+              placeholder="e.g. commercial truck rental company, parking enforcement company, general contractor"
+              value={defendantDescription}
+              onChange={(e) => setDefendantDescription(e.target.value)}
+            />
+            <p className="text-xs text-warm-muted">
+              Helps AI generate the right evidence categories for their specific systems and records.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -443,9 +485,49 @@ export function PreservationLetterStep({
           </p>
         </div>
 
+        {/* Reference numbers */}
+        <div className="space-y-2">
+          <Label htmlFor="reference-numbers">
+            Reference / claim / case numbers <span className="text-warm-muted font-normal">(optional)</span>
+          </Label>
+          <Input
+            id="reference-numbers"
+            placeholder="e.g. Claim #2025-001, Police Report #TX-2025-8847, Ticket #PCADAL-1122497"
+            value={referenceNumbers}
+            onChange={(e) => setReferenceNumbers(e.target.value)}
+          />
+          <p className="text-xs text-warm-muted">
+            Any identifiers that make this dispute traceable — goes in the subject line and letter body.
+          </p>
+        </div>
+
+        {/* Legal claims */}
+        <div className="space-y-3">
+          <Label>
+            Legal claims you&apos;re considering <span className="text-warm-muted font-normal">(optional)</span>
+          </Label>
+          <p className="text-xs text-warm-muted -mt-1">
+            Select any that apply — the AI uses these to generate the right evidence categories.
+          </p>
+          <div className="space-y-2">
+            {LEGAL_CLAIMS.map((claim) => (
+              <label key={claim} className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={selectedClaims.includes(claim)}
+                  onCheckedChange={() => toggleClaim(claim)}
+                />
+                <span className="text-sm text-warm-text">{claim}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         {/* Evidence categories */}
         <div className="space-y-3">
-          <Label>Types of evidence to preserve</Label>
+          <Label>Additional evidence types <span className="text-warm-muted font-normal">(optional)</span></Label>
+          <p className="text-xs text-warm-muted -mt-1">
+            AI will automatically generate case-specific categories. Select any you want to explicitly include.
+          </p>
           <div className="space-y-2">
             {EVIDENCE_CATEGORIES.map((category) => (
               <label
@@ -504,7 +586,7 @@ export function PreservationLetterStep({
                 Use AI to improve wording
               </p>
               <p className="text-xs text-warm-muted mt-0.5">
-                Optional. Uses AI to refine the letter&apos;s language. You&apos;ll still review before sending.
+                Uses AI to analyze your case and generate 12–20 numbered, case-specific evidence categories. Highly recommended.
               </p>
             </div>
           </label>

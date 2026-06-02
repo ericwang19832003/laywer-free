@@ -9,6 +9,9 @@ export const aiPreservationLetterRequestSchema = z.object({
   evidence_categories: z.array(z.string()).default([]),
   tone: z.enum(['polite', 'neutral', 'firm']),
   opponent_name: z.string().optional(),
+  defendant_description: z.string().optional(), // e.g. "commercial truck rental company"
+  reference_numbers: z.string().optional(),      // claim #, ticket #, case #, police report #
+  legal_claims: z.array(z.string()).default([]), // e.g. ["Negligence", "Gross negligence"]
 })
 
 export type AiPreservationLetterRequest = z.infer<typeof aiPreservationLetterRequestSchema>

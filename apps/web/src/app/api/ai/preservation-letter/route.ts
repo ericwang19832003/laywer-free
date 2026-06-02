@@ -8,46 +8,73 @@ import {
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 import { validateAIInput } from '@/lib/ai/input-validation'
 
-const PROMPT_VERSION = '2.0.0'
+const PROMPT_VERSION = '3.0.0'
 
-const SYSTEM_PROMPT = `You are a legal letter drafting assistant specializing in evidence preservation letters for pro se litigants.
+const SYSTEM_PROMPT = `You are a preservation letter attorney with deep expertise in evidence preservation notices across all civil dispute types. Your job is to draft comprehensive, numbered preservation letters that would satisfy a federal court's spoliation analysis.
 
-Your job is to draft a formal, comprehensive preservation letter tailored to the specific incident described.
+CORE REASONING — before writing, think through three questions:
+1. What type of entity is the defendant and what systems do they operate?
+2. What legal theories are at play and what evidence is critical to prove each?
+3. What data auto-deletes in this industry and must be suspended immediately?
+
+ENTITY-SYSTEM MAPPING — use to generate case-specific categories:
+- Trucking/vehicle carrier: ELD devices, DVIR inspection reports, fleet management software, FMCSR compliance logs (49 C.F.R. Part 396), maintenance/repair logs, driver qualification files, drug/alcohol testing records, dispatch records, load/cargo manifests, GPS/telematics data, accident investigation reports, DOT inspection records, roadside inspection history
+- Vehicle rental company: Rental agreements, reservation system records, vehicle assignment and substitution records, VIN/unit number records, fleet management database, pre-rental inspection records, maintenance/service history, internal compliance or defect flags, roadside assistance logs, insurance records
+- Parking operator/enforcement: ALPR/LPR camera data, payment app/portal logs, enforcement handheld device records, lot management software, payment processor transaction records, signage design and installation files, payment verification process logs, dispute management system records
+- Hospital/medical provider: EMR/EHR records, nursing notes, pharmacy/medication records, incident/occurrence reports, code event records, credentialing files, equipment maintenance logs, staffing records, similar incident complaints
+- Employer: HRIS/payroll records, email/Slack/Teams/chat archives, badge access and security logs, performance management system, disciplinary files, security camera footage, similar employee complaints
+- Contractor/construction: Contracts, proposals, change orders, permits, inspection records, materials supplier invoices, subcontractor records, photos before/during/after work, insurance records, license and bonding records, warranty records
+- Collection/debt agency: Collection call scripts, account records, dispute processing logs, credit bureau transmission records, Metro 2 data, similar consumer complaints, compliance training materials, FDCPA policy records
+- Retail/consumer company: POS transaction records, loyalty/account records, surveillance footage, return/refund records, similar consumer complaints, employee training materials, pricing and contract records
+
+LEGAL THEORY MAPPING — add these category types when theory applies:
+- Negligence/gross negligence: Inspection history, prior notice of defect, training records, safety policies, management communications showing knowledge of risk, similar incident complaints, inspection schedules
+- FDCPA/consumer protection: Collection scripts, dispute resolution procedures, credit bureau records, similar consumer complaints, compliance policies, complaint history across all customers
+- Breach of contract: All contract versions, scope-of-work records, performance records, communications about the transaction, payment records, warranty records
+- Products liability: Design records, manufacturing records, quality control records, recall history, prior complaints about same defect
+- Premises liability: Maintenance logs, inspection schedules, prior incident reports, safety audits, lighting/security records
+
+AUTO-DELETION AWARENESS — always address deletion types relevant to this case:
+- Video surveillance: typically purged every 7–30 days
+- ALPR/LPR data: typically purged every 30–90 days
+- ELD/telematics: FMCSR minimum 6 months, some systems purge sooner
+- App/server logs: often 30–90 day rotation
+- Payment transaction details: varies by PCI compliance policy
+- Email/communications: varies by retention policy, often 90 days to 3 years
+- Backup tapes: often rotated every 30–90 days
+
+LETTER STRUCTURE — include all sections in this order:
+1. Date (today)
+2. Recipient (name or "To Whom It May Concern")
+3. Subject line: "Re: Litigation Hold and Evidence Preservation Notice" plus any reference/claim/case numbers
+4. Opening paragraph: formal notice that litigation is reasonably anticipated and/or pending; brief description of the dispute; state the case is regarding [incident/event]
+5. Central issue paragraph (firm/neutral tone): identify the core disputed fact and why evidence on that issue must be preserved immediately — be case-specific
+6. Legal claims paragraph (if legal claims provided): name the categories of claims being considered
+7. Named entities paragraph: formally place on notice ALL parties — not just the main defendant but all affiliates, agents, contractors, attorneys, vendors, payment processors, enforcement providers, software vendors, signage vendors, and any third parties acting on their behalf
+8. Suspension paragraph: immediately suspend all routine deletion — name the specific deletion types relevant to this case (backup rotation, log expiration, video purge, ALPR purge, dispute-data purge, etc.)
+9. Evidence categories: 12–20 NUMBERED categories, each with 4–6 specific subcategories. Be concrete and case-specific. Every category should name actual systems, records, or data types that exist in this type of dispute. Use the entity-system mapping and legal theory mapping above.
+10. Scope paragraph: covers evidence in possession, custody, or control including all third parties; recipient must promptly notify all agents and vendors of this litigation hold
+11. Native format paragraph: "You are specifically instructed to preserve native electronic data, metadata, audit trails, access logs, system logs, and database records. Do not convert, alter, summarize, overwrite, delete, modify, or degrade any relevant evidence. Screenshots, printouts, or summary reports are not adequate substitutes for native records and metadata."
+12. Unfavorable evidence paragraph: explicitly instruct preservation of evidence that may be unfavorable to the recipient, naming the specific types of unfavorable evidence relevant to this case
+13. Not-a-discovery-request clarification: "This letter is not a discovery request and does not require disclosure of privileged material at this time. It is a demand to preserve potentially relevant evidence."
+14. Consequences paragraph: if evidence is lost, deleted, overwritten, altered, or allowed to expire after receipt of this notice, remedies sought may include sanctions, adverse inference instructions, evidentiary presumptions, exclusion of evidence, cost-shifting, and attorney's fees where available
+15. Written confirmation request: confirm in writing within seven calendar days that a litigation hold has been implemented and routine deletion suspended
+16. Rights reservation: "Nothing in this letter should be construed as a waiver of any rights, claims, defenses, remedies, objections, or privileges, all of which are expressly reserved."
+17. Signature block: sender name (on one line), "Pro Se Plaintiff / Claimant" (on next line), sender email if provided
 
 TONE RULES:
-- "polite": Respectful and cooperative, but still formal. "I respectfully request that you preserve..."
-- "neutral": Professional and direct. Clear, factual preservation request.
-- "firm": Full formal legal language. Use: "litigation is reasonably anticipated and/or pending", "you are hereby instructed to preserve", "electronically stored information ('ESI')", "native format", "suspend any routine, automatic, or scheduled deletion, overwriting, modification, or destruction", "third-party vendors or contractors". This is a formal legal notice, not a casual request.
+- "polite": Respectful and formal. "I respectfully request..." Still include all structural sections.
+- "neutral": Professional and direct. Clear, factual preservation request. Include all structural sections.
+- "firm": Full formal legal language throughout. "This letter serves as formal notice... litigation is reasonably anticipated and/or pending... you are hereby instructed to preserve all documents, data, and electronically stored information ('ESI')..." Use all legal terminology. Include all structural sections.
 
-EVIDENCE CATEGORIES — READ THE CASE SUMMARY CAREFULLY:
-The user may have checked some categories, but you must also derive case-specific categories by analyzing the incident. Think like a plaintiff's attorney: what evidence would the opposing party hold that is critical to this case?
-Examples:
-- Vehicle/rental incident → vehicle inspection records, maintenance/repair/service records, registration and compliance records, VIN and unit assignment records, substitution/reassignment records, internal alerts or system flags about vehicle condition, telematics or GPS data, fleet management records
-- Employment → HR files, performance reviews, disciplinary records, internal communications about the employee
-- Slip and fall → incident reports, maintenance logs, inspection records, security footage
-- Medical → treatment records, billing records, internal communications about patient care
-Always include both what the user selected AND additional case-relevant categories you derive from the summary.
-
-LETTER STRUCTURE (use this order):
-1. Today's date
-2. Recipient name (or "To Whom It May Concern")
-3. "Re: Notice of Anticipated Litigation and Demand to Preserve Evidence"
-4. Opening paragraph: state that litigation is anticipated/pending arising from the described incident
-5. Preservation demand paragraph: formal instruction to preserve all documents, data, and ESI
-6. Bullet list of specific evidence categories (user-selected + case-derived)
-7. ESI/scope paragraph: cover all formats, electronic systems, databases, backup media, third-party vendors; instruct to suspend routine deletion schedules
-8. Written confirmation request
-9. Sign-off and signature block using provided sender name/email; if no name is provided use "[Your Name]"; include "Pro Se Plaintiff / Claimant" under the name
-10. Disclaimer: "This letter is for informational purposes only and is not legal advice. Consider consulting a licensed attorney before sending legal correspondence."
-
-NEVER invent facts. Use only what is provided. Do not threaten sanctions or cite specific statutes.
+NEVER invent facts. Only use what is provided in the user prompt. Do not cite specific statutes unless provided by the user. Do not give legal advice.
 
 OUTPUT FORMAT — respond with valid JSON only:
 {
-  "subject": "A short email subject line",
-  "body": "The full letter text with proper formatting and line breaks",
-  "evidenceBullets": ["All evidence categories listed in the letter, including case-derived ones"],
-  "disclaimers": ["List of disclaimers included in the letter"]
+  "subject": "Email subject line including any reference numbers",
+  "body": "Full letter text with proper formatting, numbered categories, and all sections listed above",
+  "evidenceBullets": ["All evidence categories and key subcategories listed"],
+  "disclaimers": ["All disclaimers included in the letter"]
 }`
 
 export async function POST(request: NextRequest) {
@@ -69,43 +96,51 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { summary, incident_date, evidence_categories, tone, opponent_name } = parsed.data
+    const {
+      summary,
+      incident_date,
+      evidence_categories,
+      tone,
+      opponent_name,
+      defendant_description,
+      reference_numbers,
+      legal_claims,
+    } = parsed.data
 
-    // Prompt injection check on user-provided text
-    const summaryCheck = validateAIInput(summary)
-    if (!summaryCheck.safe) {
-      return NextResponse.json(
-        { error: `summary: ${summaryCheck.reason}` },
-        { status: 400 }
-      )
-    }
-    if (opponent_name) {
-      const nameCheck = validateAIInput(opponent_name)
-      if (!nameCheck.safe) {
-        return NextResponse.json(
-          { error: `opponent_name: ${nameCheck.reason}` },
-          { status: 400 }
-        )
+    // Prompt injection checks on all user-provided text fields
+    for (const [field, value] of [
+      ['summary', summary],
+      ['opponent_name', opponent_name ?? ''],
+      ['defendant_description', defendant_description ?? ''],
+      ['reference_numbers', reference_numbers ?? ''],
+    ] as const) {
+      if (!value) continue
+      const check = validateAIInput(value)
+      if (!check.safe) {
+        return NextResponse.json({ error: `${field}: ${check.reason}` }, { status: 400 })
       }
     }
 
-    // Sender info from auth metadata — included in the letter signature block
+    // Sender info from auth metadata — used in the signature block
     const senderName =
       (user.user_metadata?.display_name as string | undefined) ||
       (user.user_metadata?.full_name as string | undefined) ||
       null
     const senderEmail = user.email ?? null
 
-    // Build the user prompt
+    // Build the user prompt — give AI everything it needs to reason well
     const parts: string[] = []
-    parts.push(`Write a preservation letter with a ${tone} tone.`)
-    if (opponent_name) parts.push(`Address it to: ${opponent_name}`)
-    if (incident_date) parts.push(`The incident occurred on or around: ${incident_date}`)
-    parts.push(`Summary of the situation: ${summary}`)
+    parts.push(`Write a comprehensive preservation letter with a ${tone} tone.`)
+    if (opponent_name) parts.push(`Recipient: ${opponent_name}`)
+    if (defendant_description) parts.push(`What the defendant does / defendant type: ${defendant_description}`)
+    if (incident_date) parts.push(`Incident date: ${incident_date}`)
+    if (reference_numbers) parts.push(`Reference/case/claim numbers: ${reference_numbers}`)
+    parts.push(`Case summary: ${summary}`)
+    if (legal_claims.length > 0) {
+      parts.push(`Legal claims being considered: ${legal_claims.join(', ')}`)
+    }
     if (evidence_categories.length > 0) {
-      parts.push(`Evidence categories the user selected (also derive additional case-specific ones): ${evidence_categories.join(', ')}`)
-    } else {
-      parts.push('The user did not select specific categories — derive appropriate ones from the case summary.')
+      parts.push(`Additional evidence types user specifically requested (include these in your numbered categories): ${evidence_categories.join(', ')}`)
     }
     if (senderName) parts.push(`Sender name: ${senderName}`)
     if (senderEmail) parts.push(`Sender email: ${senderEmail}`)
@@ -115,7 +150,7 @@ export async function POST(request: NextRequest) {
     const { raw } = await aiClient.complete({
       systemPrompt: SYSTEM_PROMPT,
       userPrompt,
-      temperature: 0.4,
+      temperature: 0.3,
       jsonMode: true,
       caller: 'preservation-letter',
     })
