@@ -17,6 +17,8 @@ export async function GET(
   try {
     const message = await readMessage(messageId)
 
+    // The MCP server exposes read_email (single message) only — no thread reader.
+    // We return a one-message "thread" scoped to the selected message.
     return NextResponse.json({
       threadId: message.threadId,
       messages: [message],
