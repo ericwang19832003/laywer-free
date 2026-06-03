@@ -168,12 +168,12 @@ export default async function DashboardPage({
           }
           overview={
             <Suspense fallback={<TabSkeleton />}>
-              <OverviewTab caseId={id} />
+              <OverviewTab caseId={id} disputeType={shared.disputeType} createdAt={shared.createdAt} />
             </Suspense>
           }
           tools={
             <Suspense fallback={<TabSkeleton />}>
-              <ToolsTab caseId={id} />
+              <ToolsTab caseId={id} courtType={shared.courtType} county={shared.county} jurisdiction={shared.jurisdiction} />
             </Suspense>
           }
         />

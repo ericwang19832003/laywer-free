@@ -4,10 +4,27 @@ import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { EmailsCard } from '@/components/dashboard/emails-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
+import { AgentAdvisorCard } from '@/components/dashboard/agent-advisor-card'
+import { BinderCta } from '@/components/binders/binder-cta'
+import { MoreSection } from '@/components/dashboard/more-section'
+import { EfilingGuide } from '@/components/filing/efiling-guide'
+import { FeeCalculator } from '@/components/filing/fee-calculator'
+import { getSubscription } from '@/lib/subscription/check'
 
-export async function ToolsTab({ caseId }: { caseId: string }) {
+interface ToolsTabProps {
+  caseId: string
+  courtType: string
+  county: string | null
+  jurisdiction: string
+}
+
+export async function ToolsTab({ caseId, courtType, county, jurisdiction }: ToolsTabProps) {
   try {
     const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const subscription = user ? await getSubscription(supabase, user.id) : null
+    const isPro = subscription?.tier === 'pro' || subscription?.tier === 'essentials'
 
     const [
       authorityResult,
@@ -15,6 +32,7 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
       discoveryTaskResult,
       notesResult,
       sharingResult,
+      exhibitSetResult,
     ] = await Promise.all([
       supabase
         .from('case_authorities')
@@ -42,6 +60,11 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
         .select('share_token, share_enabled')
         .eq('case_id', caseId)
         .maybeSingle(),
+      supabase
+        .from('exhibit_sets')
+        .select('id')
+        .eq('case_id', caseId)
+        .maybeSingle(),
     ])
 
     const packs = packsResult.data ?? []
@@ -57,8 +80,12 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
       packItemsResult = { count: result.count }
     }
 
+    const exhibitSetId = exhibitSetResult.data?.id ?? null
+    const state = jurisdiction === 'TX' ? 'TX' : jurisdiction === 'CA' ? 'CA' : 'TX'
+
     return (
       <div className="space-y-6">
+        <AgentAdvisorCard caseId={caseId} isPro={isPro} />
         <ResearchCard caseId={caseId} authorityCount={authorityResult.count ?? 0} />
         <DiscoveryCard
           caseId={caseId}
@@ -69,11 +96,16 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
         />
         <EmailsCard caseId={caseId} />
         <NotesCard caseId={caseId} initialNotes={notesResult.data ?? []} />
-        <ShareCaseCard
-          caseId={caseId}
-          initialEnabled={sharingResult.data?.share_enabled ?? false}
-          initialToken={sharingResult.data?.share_token ?? null}
-        />
+        <MoreSection>
+          <EfilingGuide state={state} courtType={courtType} county={county ?? undefined} />
+          <FeeCalculator courtType={courtType} county={county ?? ''} state={state} />
+          <BinderCta caseId={caseId} exhibitSetId={exhibitSetId} />
+          <ShareCaseCard
+            caseId={caseId}
+            initialEnabled={sharingResult.data?.share_enabled ?? false}
+            initialToken={sharingResult.data?.share_token ?? null}
+          />
+        </MoreSection>
       </div>
     )
   } catch (error) {
