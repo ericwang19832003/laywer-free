@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractRequestSchema } from '@lawyer-free/shared/schemas/document-extraction'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
@@ -175,18 +175,17 @@ export async function POST(
 
     if (text.length > 0) {
       try {
-        const anthropic = new Anthropic()
-        const message = await anthropic.messages.create({
-          model: 'claude-sonnet-4-20250514',
+        const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
+        const message = await deepseek.chat.completions.create({
+          model: 'deepseek-chat',
           max_tokens: 1024,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: text }],
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: text },
+          ],
         })
 
-        const responseText = message.content
-          .filter((block) => block.type === 'text')
-          .map((block) => block.text)
-          .join('\n')
+        const responseText = message.choices[0]?.message?.content ?? ''
 
         fields = parseAnswerFields(responseText)
       } catch {

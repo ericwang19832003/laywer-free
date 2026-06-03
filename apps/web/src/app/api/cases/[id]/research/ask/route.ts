@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { createHash } from 'crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSingleEmbedding } from '@/lib/courtlistener/embeddings'
@@ -13,7 +13,7 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const AI_MODEL = 'claude-sonnet-4-20250514'
+const AI_MODEL = 'deepseek-chat'
 
 export async function POST(
   request: NextRequest,
@@ -168,21 +168,18 @@ export async function POST(
       county: caseData.county,
     })
 
-    // 4. Call Claude
-    const anthropic = new Anthropic()
-    const response = await anthropic.messages.create({
+    // 4. Call DeepSeek
+    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
+    const response = await deepseek.chat.completions.create({
       model: AI_MODEL,
       max_tokens: 2048,
       messages: [
+        { role: 'system', content: prompt.system },
         { role: 'user', content: prompt.user },
       ],
-      system: prompt.system,
     })
 
-    const answerRaw = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
+    const answerRaw = response.choices[0]?.message?.content ?? ''
 
     const answer = sanitizeDirectiveLanguage(answerRaw)
 

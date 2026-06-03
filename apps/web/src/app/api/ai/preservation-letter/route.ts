@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ...validated.data,
       _meta: {
-        model: 'gpt-4o-mini',
+        model: 'deepseek-chat',
         prompt_version: PROMPT_VERSION,
       },
     })

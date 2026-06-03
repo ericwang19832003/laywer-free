@@ -111,7 +111,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
     }
 
     const tools = buildTools(state, config)
-    const llm = new ChatOpenAI({ model: 'gpt-4o', temperature: 0.5 }).bindTools(tools)
+    const llm = new ChatOpenAI({ model: 'deepseek-chat', temperature: 0.5, openAIApiKey: process.env.DEEPSEEK_API_KEY, configuration: { baseURL: 'https://api.deepseek.com' } }).bindTools(tools)
 
     const contextSummary =
       `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +

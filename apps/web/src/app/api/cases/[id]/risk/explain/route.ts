@@ -13,7 +13,7 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const AI_MODEL = 'gpt-4o-mini'
+const AI_MODEL = 'deepseek-chat'
 const PROMPT_VERSION = '1.0.0'
 
 export async function POST(
@@ -80,7 +80,7 @@ export async function POST(
     let source: 'ai' | 'static' = 'static'
 
     // Try AI generation if configured
-    if (process.env.OPENAI_API_KEY) {
+    if (process.env.DEEPSEEK_API_KEY) {
       try {
         const userPrompt = buildExplanationPrompt(riskInput)
 

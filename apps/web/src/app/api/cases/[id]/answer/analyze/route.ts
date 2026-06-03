@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
@@ -185,22 +185,18 @@ export async function POST(
       )
     }
 
-    // Analyze with Claude
-    const anthropic = new Anthropic()
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    // Analyze with DeepSeek
+    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
+    const message = await deepseek.chat.completions.create({
+      model: 'deepseek-chat',
       max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      messages: [{
-        role: 'user',
-        content: `Analyze this court document for a ${caseData.role} in a ${caseData.dispute_type?.replace(/_/g, ' ')} case:\n\n${text.slice(0, 8000)}`,
-      }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Analyze this court document for a ${caseData.role} in a ${caseData.dispute_type?.replace(/_/g, ' ')} case:\n\n${text.slice(0, 8000)}` },
+      ],
     })
 
-    const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
+    const responseText = message.choices[0]?.message?.content ?? ''
 
     const analysis = parseAnalysis(responseText)
 
@@ -222,7 +218,7 @@ export async function POST(
       payload: { court_document_id, document_type: analysis.document_type ?? doc.doc_type },
     })
 
-    return NextResponse.json({ analysis, _meta: { source: 'ai', model: 'claude-sonnet-4-20250514' } }, { status: 201 })
+    return NextResponse.json({ analysis, _meta: { source: 'ai', model: 'deepseek-chat' } }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

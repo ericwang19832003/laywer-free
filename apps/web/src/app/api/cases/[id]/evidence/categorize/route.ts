@@ -16,7 +16,7 @@ import { validateAIInput } from '@/lib/ai/input-validation'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-const AI_MODEL = 'gpt-4o-mini'
+const AI_MODEL = 'deepseek-chat'
 
 export async function POST(
   request: NextRequest,
@@ -65,7 +65,7 @@ export async function POST(
     let source: 'ai' | 'heuristic' | 'none' = result ? 'heuristic' : 'none'
 
     // Try AI if available
-    if (process.env.OPENAI_API_KEY) {
+    if (process.env.DEEPSEEK_API_KEY) {
       try {
         const userPrompt = buildCategorizationPrompt({ file_name, mime_type, text_snippet })
 

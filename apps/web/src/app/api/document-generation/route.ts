@@ -14,7 +14,7 @@ import { validateAIInput } from '@/lib/ai/input-validation'
 import { getSubscription, incrementAiUsage } from '@/lib/subscription/check'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-const AI_MODEL = 'gpt-4o-mini'
+const AI_MODEL = 'deepseek-chat'
 
 const AI_REFUSAL_PATTERNS = [
   'i cannot',

@@ -29,12 +29,8 @@ Created src/lib/ai/client.ts with retry, Zod validation, typed errors, structure
 
 ## Design Review TODOs (2026-03-23)
 
-### P1 — 3-tab dashboard workbench
-**What:** Restructure case dashboard from 25+ stacked cards into Focus/Overview/Tools tabs.
-**Why:** NextStepCard (core value prop) is buried at position #7. Both Codex and Claude subagent flagged this as the #1 design problem. Users can't find what matters in a card dump.
-**Context:** Focus tab: NextStep + Deadlines + Progress (what 90% of visits need). Overview tab: Health, Confidence, Comparison, Timeline, Insights. Tools tab: Discovery, Research, Motions, Notes, etc. Banners become one-time onboarding. Replaces the old P3 "Full dashboard redesign" TODO.
-**Effort:** L (human: ~2 weeks / CC: ~2 hours)
-**Depends on:** Nothing
+### ~~P1 — 3-tab dashboard workbench~~ ✅ DONE (2026-06-03)
+Focus/Overview/Tools tabs with URL-driven active tab (searchParams.tab), lazy server rendering (only active tab's queries run), keyboard a11y (arrow keys + focus management), URL persistence via router.push, orphaned components surfaced (CaseComparisonCard, AgentAdvisorCard, BinderCta, EfilingGuide, FeeCalculator). Branch: feature/dashboard-3-tab-workbench.
 
 ### ~~P1 — Problem-first landing page~~ ✅ DONE (2026-03-24)
 Shipped in commit `213c1f3`. Welcome panel leads with "Facing a legal matter without a lawyer?"

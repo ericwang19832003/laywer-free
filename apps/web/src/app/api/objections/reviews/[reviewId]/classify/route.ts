@@ -58,7 +58,7 @@ export async function POST(
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
     // Check if OpenAI is configured
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.DEEPSEEK_API_KEY) {
       return NextResponse.json(
         { error: 'AI classification is not configured', fallback: true },
         { status: 503 }
@@ -205,7 +205,7 @@ export async function POST(
         .from('objection_reviews')
         .update({
           status: 'needs_review',
-        model: 'gpt-4o-mini',
+        model: 'deepseek-chat',
         prompt_version: PROMPT_VERSION,
         error: 'AI output failed validation',
         })
@@ -256,7 +256,7 @@ export async function POST(
       .from('objection_reviews')
       .update({
         status: 'needs_review',
-        model: 'gpt-4o-mini',
+        model: 'deepseek-chat',
         prompt_version: PROMPT_VERSION,
         error: null,
       })
@@ -279,7 +279,7 @@ export async function POST(
         review_id: reviewId,
         status: 'needs_review',
         items_count: validated.data.items.length,
-        model: 'gpt-4o-mini',
+        model: 'deepseek-chat',
         prompt_version: PROMPT_VERSION,
       },
     })
@@ -310,7 +310,7 @@ async function setErrorStatus(
     .from('objection_reviews')
     .update({
       status: 'needs_review',
-      model: 'gpt-4o-mini',
+      model: 'deepseek-chat',
       prompt_version: PROMPT_VERSION,
       error: errorMessage,
     })

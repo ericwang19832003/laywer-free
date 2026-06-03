@@ -15,7 +15,7 @@ Write clearly, professionally, and in plain English. Follow Texas procedural rul
 This is general legal information to help self-represented litigants — not a substitute for legal advice.`
 
 export function createDraftDocumentTool({ caseId, disputeType, role, saveDraft }: DraftDocumentConfig) {
-  const llm = new ChatOpenAI({ model: 'gpt-4o', temperature: 0.3 })
+  const llm = new ChatOpenAI({ model: 'deepseek-chat', temperature: 0.3, openAIApiKey: process.env.DEEPSEEK_API_KEY, configuration: { baseURL: 'https://api.deepseek.com' } })
 
   return tool(
     async (input: { documentType: string; instructions: string }) => {

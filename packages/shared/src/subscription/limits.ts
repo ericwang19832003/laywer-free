@@ -2,7 +2,7 @@ export const TIER_LIMITS = {
   free: {
     maxCases: 1,
     aiGenerationsPerMonth: 5,
-    aiModel: 'gpt-4o-mini',
+    aiModel: 'deepseek-chat',
     discovery: false,
     trialBinders: false,
     research: 3,
@@ -14,7 +14,7 @@ export const TIER_LIMITS = {
   essentials: {
     maxCases: Infinity,
     aiGenerationsPerMonth: Infinity,
-    aiModel: 'gpt-4o-mini',
+    aiModel: 'deepseek-chat',
     discovery: false,
     trialBinders: false,
     research: Infinity,
@@ -26,7 +26,7 @@ export const TIER_LIMITS = {
   pro: {
     maxCases: Infinity,
     aiGenerationsPerMonth: Infinity,
-    aiModel: 'gpt-4o',
+    aiModel: 'deepseek-chat',
     discovery: true,
     trialBinders: true,
     research: Infinity,
