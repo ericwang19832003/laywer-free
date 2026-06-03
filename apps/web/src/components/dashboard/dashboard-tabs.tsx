@@ -1,36 +1,27 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useRef } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 
 const TABS = ['Focus', 'Overview', 'Tools'] as const
 type Tab = (typeof TABS)[number]
 
 interface DashboardTabsProps {
+  activeTab: 'focus' | 'overview' | 'tools'
   focus: React.ReactNode
   overview: React.ReactNode
   tools: React.ReactNode
 }
 
-export function DashboardTabs({ focus, overview, tools }: DashboardTabsProps) {
-  const [active, setActive] = useState<Tab>('Focus')
+export function DashboardTabs({ activeTab, focus, overview, tools }: DashboardTabsProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const active = TABS.find((t) => t.toLowerCase() === activeTab) ?? 'Focus'
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({})
 
-  // Restore active tab from URL on mount without triggering a server re-render
-  useEffect(() => {
-    const raw = new URLSearchParams(window.location.search).get('tab') ?? ''
-    const fromUrl = TABS.find((t) => t.toLowerCase() === raw.toLowerCase())
-    if (fromUrl) setActive(fromUrl)
-  }, [])
-
   function changeTab(tab: Tab) {
-    setActive(tab)
-    try {
-      const url = new URL(window.location.href)
-      url.searchParams.set('tab', tab.toLowerCase())
-      window.history.replaceState(null, '', url.toString())
-    } catch {
-      // no-op in environments without full URL support
-    }
+    router.push(`${pathname}?tab=${tab.toLowerCase()}`, { scroll: false })
+    tabRefs.current[tab]?.focus()
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -40,7 +31,6 @@ export function DashboardTabs({ focus, overview, tools }: DashboardTabsProps) {
     if (e.key === 'ArrowLeft') next = TABS[(idx - 1 + TABS.length) % TABS.length]
     if (next) {
       changeTab(next)
-      tabRefs.current[next]?.focus()
     }
   }
 
@@ -58,7 +48,7 @@ export function DashboardTabs({ focus, overview, tools }: DashboardTabsProps) {
             id={`tab-${tab.toLowerCase()}`}
             role="tab"
             aria-selected={active === tab}
-            aria-controls={`panel-${tab.toLowerCase()}`}
+            aria-controls={`panel-${activeTab}`}
             tabIndex={active === tab ? 0 : -1}
             onClick={() => changeTab(tab)}
             className={`flex-1 text-center px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
@@ -71,18 +61,14 @@ export function DashboardTabs({ focus, overview, tools }: DashboardTabsProps) {
           </button>
         ))}
       </div>
-      {TABS.map((tab) => (
-        <div
-          key={tab}
-          id={`panel-${tab.toLowerCase()}`}
-          role="tabpanel"
-          tabIndex={0}
-          aria-labelledby={`tab-${tab.toLowerCase()}`}
-          hidden={active !== tab}
-        >
-          {tab === 'Focus' ? focus : tab === 'Overview' ? overview : tools}
-        </div>
-      ))}
+      <div
+        id={`panel-${activeTab}`}
+        role="tabpanel"
+        tabIndex={0}
+        aria-labelledby={`tab-${activeTab}`}
+      >
+        {active === 'Focus' ? focus : active === 'Overview' ? overview : tools}
+      </div>
     </div>
   )
 }
