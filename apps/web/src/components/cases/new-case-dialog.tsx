@@ -308,6 +308,7 @@ export function NewCaseDialog() {
   }, [open])
   const [loading, setLoading] = useState(false)
   const [caseName, setCaseName] = useState('')
+  const [situationDescription, setSituationDescription] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -422,6 +423,7 @@ export function NewCaseDialog() {
             ? { secondary_dispute_types: state.secondaryDisputeTypes }
             : {}),
           ...(caseName.trim() ? { description: caseName.trim() } : {}),
+          ...(situationDescription.trim() ? { situation_description: situationDescription.trim() } : {}),
         }),
       })
 
@@ -468,6 +470,7 @@ export function NewCaseDialog() {
     if (!nextOpen) {
       dispatch({ type: 'RESET' })
       setCaseName('')
+      setSituationDescription('')
       setError(null)
       setLoading(false)
     }
@@ -776,9 +779,10 @@ export function NewCaseDialog() {
           <DisputeTypeStep
             value={state.disputeType}
             selectedState={selectedState}
-            onSelect={(disputeType, cardId, secondaryTypes, subTypeSuggestion, roleSuggestion) =>
+            onSelect={(disputeType, cardId, secondaryTypes, subTypeSuggestion, roleSuggestion, situationDesc) => {
               dispatch({ type: 'SET_DISPUTE_TYPE', disputeType, cardId, secondaryTypes, subTypeSuggestion, roleSuggestion })
-            }
+              if (situationDesc) setSituationDescription(situationDesc)
+            }}
           />
         )}
 

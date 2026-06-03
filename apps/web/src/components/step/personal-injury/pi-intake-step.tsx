@@ -11,6 +11,7 @@ interface PIIntakeStepProps {
   taskId: string
   existingMetadata?: Record<string, unknown>
   piSubType?: string
+  savedIncidentDescription?: string
 }
 
 export function PIIntakeStep({
@@ -18,6 +19,7 @@ export function PIIntakeStep({
   taskId,
   existingMetadata,
   piSubType,
+  savedIncidentDescription,
 }: PIIntakeStepProps) {
   const meta = existingMetadata ?? {}
   const isPropertyDamage = PROPERTY_DAMAGE_SUB_TYPES.includes(
@@ -31,7 +33,7 @@ export function PIIntakeStep({
     (meta.incident_location as string) ?? ''
   )
   const [incidentDescription, setIncidentDescription] = useState(
-    (meta.incident_description as string) ?? ''
+    (meta.incident_description as string) || savedIncidentDescription || ''
   )
   const [policeReportFiled, setPoliceReportFiled] = useState<boolean | null>(
     (meta.police_report_filed as boolean | null) ?? null

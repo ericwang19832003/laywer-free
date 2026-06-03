@@ -1,6 +1,71 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
+
+type InfoSegment =
+  | { type: 'header'; content: string }
+  | { type: 'bullets'; content: string[] }
+  | { type: 'text'; content: string }
+
+function parseInfoText(text: string): InfoSegment[] {
+  const lines = text.split('\n').filter((l) => l.trim())
+  const segments: InfoSegment[] = []
+  let pendingBullets: string[] = []
+
+  const flush = () => {
+    if (pendingBullets.length) {
+      segments.push({ type: 'bullets', content: pendingBullets })
+      pendingBullets = []
+    }
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (/^[A-Z][A-Z\s&'(),./—-]{3,}:/.test(trimmed)) {
+      flush()
+      segments.push({ type: 'header', content: trimmed.replace(/:$/, '') })
+    } else if (trimmed.startsWith('•') || trimmed.startsWith('•')) {
+      pendingBullets.push(trimmed.replace(/^[••]\s*/, ''))
+    } else {
+      flush()
+      segments.push({ type: 'text', content: trimmed })
+    }
+  }
+  flush()
+  return segments
+}
+
+function InfoText({ text }: { text: string }) {
+  const segments = parseInfoText(text)
+  return (
+    <div className="space-y-2">
+      {segments.map((seg, i) => {
+        if (seg.type === 'header') {
+          return (
+            <p key={i} className="text-xs font-semibold text-calm-indigo uppercase tracking-wide pt-1">
+              {seg.content}
+            </p>
+          )
+        }
+        if (seg.type === 'bullets') {
+          return (
+            <ul key={i} className="space-y-1.5">
+              {seg.content.map((b, j) => (
+                <li key={j} className="flex items-start gap-2 text-sm text-warm-text">
+                  <span className="text-calm-indigo mt-0.5 shrink-0 font-bold">•</span>
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        return <p key={i} className="text-sm text-warm-text">{seg.content}</p>
+      })}
+    </div>
+  )
+}
+
+
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { SkipForward } from 'lucide-react'
@@ -235,11 +300,9 @@ export function GuidedStep({
                 /* Info type: styled info box */
                 <div>
                   <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 mb-4">
-                    <p className="text-sm text-warm-text">
-                      {currentQuestion.prompt}
-                    </p>
+                    <InfoText text={currentQuestion.prompt} />
                     {currentQuestion.helpText && (
-                      <p className="text-sm text-warm-muted mt-2">
+                      <p className="text-sm text-warm-muted mt-3">
                         {currentQuestion.helpText}
                       </p>
                     )}
@@ -421,6 +484,26 @@ export function GuidedStep({
           </Card>
         </>
       ) : null}
+
+      {config.references && config.references.length > 0 && (
+        <div className="mt-6 pt-5 border-t border-warm-border">
+          <p className="text-xs font-medium text-warm-muted uppercase tracking-wide mb-2">References</p>
+          <ul className="space-y-1.5">
+            {config.references.map((ref, i) => (
+              <li key={i}>
+                <a
+                  href={ref.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-calm-indigo hover:underline"
+                >
+                  {ref.label} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

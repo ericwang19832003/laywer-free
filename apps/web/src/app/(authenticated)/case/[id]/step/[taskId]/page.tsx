@@ -1215,13 +1215,14 @@ export default async function StepPage({
     // Personal injury task chain steps
     case 'pi_intake': {
       const { data: piDetails } = await supabase
-        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
+        .from('personal_injury_details').select('pi_sub_type, incident_description').eq('case_id', id).maybeSingle()
       return (
         <PIIntakeStep
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
           piSubType={piDetails?.pi_sub_type ?? undefined}
+          savedIncidentDescription={piDetails?.incident_description ?? undefined}
         />
       )
     }
