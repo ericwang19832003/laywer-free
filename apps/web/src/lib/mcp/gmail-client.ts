@@ -60,6 +60,45 @@ async function callTool(name: string, args: Record<string, unknown> = {}): Promi
   }
 }
 
+// ----- Text format parsers for @gongrzhe/server-gmail-autoauth-mcp -----
+// search_emails response: repeated blocks of "ID: ...\nSubject: ...\nFrom: ...\nDate: ...\n"
+// read_email response:    "Thread ID: ...\nSubject: ...\nFrom: ...\nTo: ...\nDate: ...\n\n<body>"
+
+function parseHeaderLine(text: string, key: string): string {
+  const regex = new RegExp(`^${key}:\\s*(.*)$`, 'm')
+  return text.match(regex)?.[1]?.trim() ?? ''
+}
+
+function parseSearchResults(text: string): GmailMessageSummary[] {
+  // Each message block ends with a blank line; split on double-newline
+  const blocks = text.split(/\n{2,}/).filter((b) => b.includes('ID:'))
+  return blocks.map((block) => ({
+    id: parseHeaderLine(block, 'ID'),
+    threadId: parseHeaderLine(block, 'Thread ID') || parseHeaderLine(block, 'ID'),
+    from: parseHeaderLine(block, 'From'),
+    subject: parseHeaderLine(block, 'Subject') || '(no subject)',
+    date: parseHeaderLine(block, 'Date'),
+    snippet: '',
+  }))
+}
+
+function parseReadEmail(text: string, fallbackId: string): GmailMessage {
+  // Header block ends at first blank line; everything after is body
+  const blankIdx = text.indexOf('\n\n')
+  const header = blankIdx !== -1 ? text.slice(0, blankIdx) : text
+  const body = blankIdx !== -1 ? text.slice(blankIdx + 2) : ''
+
+  return {
+    id: fallbackId,
+    threadId: parseHeaderLine(header, 'Thread ID') || fallbackId,
+    from: parseHeaderLine(header, 'From'),
+    to: parseHeaderLine(header, 'To'),
+    subject: parseHeaderLine(header, 'Subject') || '(no subject)',
+    date: parseHeaderLine(header, 'Date'),
+    body: body.trim(),
+  }
+}
+
 // ----- Typed wrappers -----
 
 export interface GmailProfile {
@@ -87,9 +126,13 @@ export interface GmailMessage {
 
 export async function getGmailProfile(): Promise<GmailProfile | null> {
   try {
-    const text = await callTool('gmail_get_profile')
-    const data = JSON.parse(text)
-    return { email: data.emailAddress ?? data.email ?? 'unknown' }
+    // Fetch one sent message to read the user's own From address
+    const text = await callTool('search_emails', { query: 'in:sent', maxResults: 1 })
+    const from = parseHeaderLine(text, 'From')
+    // Extract bare email from "Display Name <email>" or plain "email"
+    const match = from.match(/<([^>]+)>/) ?? from.match(/\S+@\S+/)
+    const email = match ? (match[1] ?? match[0]) : from
+    return { email: email || 'unknown' }
   } catch {
     return null
   }
@@ -98,92 +141,26 @@ export async function getGmailProfile(): Promise<GmailProfile | null> {
 export async function searchMessages(
   query: string,
   maxResults = 20,
-  pageToken?: string
 ): Promise<{ messages: GmailMessageSummary[]; nextPageToken?: string }> {
-  const args: Record<string, unknown> = { q: query, maxResults }
-  if (pageToken) args.pageToken = pageToken
-
-  const text = await callTool('gmail_search_messages', args)
-
-  try {
-    const data = JSON.parse(text)
-    const messages: GmailMessageSummary[] = (data.messages ?? []).map(
-      (msg: Record<string, unknown>) => ({
-        id: msg.id ?? '',
-        threadId: msg.threadId ?? '',
-        from: (msg.from ?? '') as string,
-        subject: (msg.subject ?? '(no subject)') as string,
-        date: (msg.date ?? '') as string,
-        snippet: (msg.snippet ?? '') as string,
-      })
-    )
-    return { messages, nextPageToken: data.nextPageToken }
-  } catch {
-    // Non-JSON response — return empty with raw text for debugging
-    console.warn('[gmail-mcp] Non-JSON search response:', text.slice(0, 200))
-    return { messages: [] }
-  }
+  const text = await callTool('search_emails', { query, maxResults })
+  return { messages: parseSearchResults(text) }
 }
 
 export async function readMessage(messageId: string): Promise<GmailMessage> {
-  const text = await callTool('gmail_read_message', { messageId })
-
-  try {
-    const data = JSON.parse(text)
-    return {
-      id: data.id ?? messageId,
-      threadId: data.threadId ?? '',
-      from: data.from ?? '',
-      to: data.to ?? '',
-      subject: data.subject ?? '',
-      date: data.date ?? '',
-      body: data.body ?? data.text ?? text,
-    }
-  } catch {
-    // Non-JSON — use raw text as body
-    return {
-      id: messageId,
-      threadId: '',
-      from: '',
-      to: '',
-      subject: '',
-      date: '',
-      body: text,
-    }
-  }
+  const text = await callTool('read_email', { messageId })
+  return parseReadEmail(text, messageId)
 }
 
 export async function readThread(threadId: string): Promise<{ id: string; messages: GmailMessage[] }> {
-  const text = await callTool('gmail_read_thread', { threadId })
-
-  try {
-    const data = JSON.parse(text)
-    const messages: GmailMessage[] = (data.messages ?? []).map(
-      (msg: Record<string, unknown>) => ({
-        id: (msg.id ?? '') as string,
-        threadId,
-        from: (msg.from ?? '') as string,
-        to: (msg.to ?? '') as string,
-        subject: (msg.subject ?? '') as string,
-        date: (msg.date ?? '') as string,
-        body: (msg.body ?? msg.text ?? '') as string,
-      })
-    )
-    return { id: threadId, messages }
-  } catch {
-    // Non-JSON — return single message with raw text
-    return {
-      id: threadId,
-      messages: [
-        { id: threadId, threadId, from: '', to: '', subject: '', date: '', body: text },
-      ],
-    }
-  }
+  // Phase 1: read_email fetches a single message; treat it as a one-message thread
+  const text = await callTool('read_email', { messageId: threadId })
+  const msg = parseReadEmail(text, threadId)
+  return { id: threadId, messages: [msg] }
 }
 
 /**
  * Get raw thread text for AI context (no parsing needed).
  */
 export async function getThreadTextForAI(threadId: string): Promise<string> {
-  return callTool('gmail_read_thread', { threadId })
+  return callTool('read_email', { messageId: threadId })
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
-import { isGmailMcpConfigured, readMessage, readThread } from '@/lib/mcp/gmail-client'
+import { isGmailMcpConfigured, readMessage } from '@/lib/mcp/gmail-client'
 
 export async function GET(
   _request: NextRequest,
@@ -16,11 +16,10 @@ export async function GET(
 
   try {
     const message = await readMessage(messageId)
-    const thread = await readThread(message.threadId)
 
     return NextResponse.json({
       threadId: message.threadId,
-      messages: thread.messages,
+      messages: [message],
     })
   } catch (err) {
     console.error('[gmail-mcp] Read error:', err)

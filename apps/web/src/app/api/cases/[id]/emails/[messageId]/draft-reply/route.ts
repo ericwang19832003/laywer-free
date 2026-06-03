@@ -39,7 +39,7 @@ export async function POST(
     const message = await readMessage(messageId)
 
     // Get full thread text for AI context
-    const threadText = await getThreadTextForAI(message.threadId)
+    const threadText = await getThreadTextForAI(messageId)
 
     const roleLabel = caseRow.role === 'plaintiff' ? 'plaintiff' : 'defendant'
     const disputeLabel = (caseRow.dispute_type ?? 'civil').replace(/_/g, ' ')
