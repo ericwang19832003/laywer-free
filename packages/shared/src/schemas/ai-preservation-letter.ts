@@ -12,6 +12,12 @@ export const aiPreservationLetterRequestSchema = z.object({
   defendant_description: z.string().optional(), // e.g. "commercial truck rental company"
   reference_numbers: z.string().optional(),      // claim #, ticket #, case #, police report #
   legal_claims: z.array(z.string()).default([]), // e.g. ["Negligence", "Gross negligence"]
+  // Confirmed case analysis from the analyze step — when provided, AI uses this as ground truth
+  case_analysis: z.object({
+    defendant_type: z.string(),
+    defendant_systems: z.array(z.string()),
+    deletion_risks: z.array(z.string()),
+  }).optional(),
 })
 
 export type AiPreservationLetterRequest = z.infer<typeof aiPreservationLetterRequestSchema>
