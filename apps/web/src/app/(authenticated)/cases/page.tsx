@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { LegalDisclaimer } from '@/components/layout/legal-disclaimer'
 import { NewCaseDialog } from '@/components/cases/new-case-dialog'
 import { CasesWithStats } from '@/components/cases/cases-with-stats'
-import { TodaysActionCard } from '@/components/cases/todays-action-card'
 import { Clock, Shield, FileText } from 'lucide-react'
 import Image from 'next/image'
 import { CasesPageClient } from './cases-page-client'
@@ -146,8 +145,6 @@ export default async function CasesPage() {
         {hasCases ? (
           /* ── Has cases: hero action + stats + cards ── */
           <>
-            <TodaysActionCard />
-
             <CasesWithStats
               activeCases={totalCaseCount ?? cases.length}
               tasksCompleted={totalCompleted}
