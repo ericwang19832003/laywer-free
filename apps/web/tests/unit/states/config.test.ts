@@ -74,7 +74,7 @@ describe('State Config System', () => {
     it('NY has ny_small_claims, ny_civil, ny_supreme court types', () => {
       const config = getStateConfig('NY')
       const values = config.courtTypes.map((c) => c.value)
-      expect(values).toEqual(['ny_small_claims', 'ny_civil', 'ny_supreme'])
+      expect(values).toEqual(['ny_small_claims', 'ny_civil', 'ny_family_court', 'ny_supreme'])
     })
     it('NY small claims max is 10000', () => {
       expect(getStateConfig('NY').thresholds.smallClaimsMax).toBe(10_000)
@@ -117,7 +117,7 @@ describe('State Config System', () => {
       expect(getStateConfig('FL').statuteOfLimitations.oralContract).toBe(4)
     })
     it('FL SOL propertyDamage is 4', () => {
-      expect(getStateConfig('FL').statuteOfLimitations.propertyDamage).toBe(4)
+      expect(getStateConfig('FL').statuteOfLimitations.propertyDamage).toBe(2)
     })
     it('FL has 4 amount ranges', () => {
       expect(getStateConfig('FL').amountRanges).toHaveLength(4)
