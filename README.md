@@ -1,6 +1,6 @@
-# Lawyer Free — Texas Pro Se Litigation Assistant
+# Lawyer Free — Pro Se Litigation Assistant
 
-A TurboTax-style case dashboard that helps self-represented litigants in Texas organize their cases, track deadlines, and prepare documents — one step at a time.
+A TurboTax-style case dashboard that helps self-represented litigants organize their cases, track deadlines, and prepare documents — one step at a time. Supports TX, CA, NY, and FL court systems.
 
 > **Important:** This tool provides general legal information and organization — not legal advice. For legal advice, please consult a licensed attorney.
 
@@ -73,7 +73,7 @@ Visit [http://localhost:3000](http://localhost:3000)
 npm run test:unit
 ```
 
-Tests Zod schemas, business logic (reminder date calculations), and status transitions.
+Tests Zod schemas, business logic (reminder date calculations, state configs, venue rules), status transitions, and dashboard UI components.
 
 ### RLS isolation tests
 
@@ -134,6 +134,14 @@ tests/
 | `task_events` | Immutable audit log / timeline |
 | `deadlines` | Date-based deadlines with source tracking |
 | `reminders` | Scheduled reminder records (sending not yet implemented) |
+| `evidence_items` | Evidence items attached to a case |
+| `exhibit_sets` | Exhibit binder sets for trial preparation |
+
+## Further Reading
+
+- [API Reference](docs/api-reference.md) — all HTTP endpoints with request/response shapes
+- [Design System](DESIGN.md) — color tokens, component patterns, accessibility requirements
+- [UX Copy Style Guide](docs/ux-copy-style-guide.md) — approved phrases, forbidden words, tone guidelines
 
 ## How to Verify RLS
 
