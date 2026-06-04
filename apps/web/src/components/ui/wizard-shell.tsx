@@ -133,62 +133,19 @@ export function WizardShell({
   const isStepCompleted = (index: number) => completedSteps.includes(index)
 
   const StepSidebar = () => (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header + slim progress track */}
       <div>
-        <h3 className="text-xs font-semibold text-warm-muted uppercase tracking-wider mb-3">
-          Filing Progress
-        </h3>
-        <div className="space-y-2">
-          {steps.map((s, index) => {
-            const isCompleted = isStepCompleted(index)
-            const isCurrent = index === currentStep
-            const isClickable = isCompleted || index <= currentStep + 1
-
-            return (
-              <button
-                key={s.id}
-                onClick={() => isClickable && onStepChange(index)}
-                disabled={!isClickable}
-                aria-current={isCurrent ? 'step' : undefined}
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-all',
-                  isCurrent && 'bg-primary/10 border border-primary/20',
-                  isCompleted && 'bg-calm-green/5',
-                  !isCurrent && !isCompleted && 'hover:bg-warm-border/30',
-                  !isClickable && 'opacity-40 cursor-not-allowed'
-                )}
-              >
-                <div className={cn(
-                  'w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0',
-                  isCompleted && 'bg-calm-green text-white',
-                  isCurrent && 'bg-primary text-white',
-                  !isCompleted && !isCurrent && 'bg-warm-border text-warm-muted'
-                )}>
-                  {isCompleted ? (
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                  ) : (
-                    <span className="text-xs font-medium">{index + 1}</span>
-                  )}
-                </div>
-                <span className={cn(
-                  'text-sm truncate',
-                  isCurrent ? 'font-medium text-warm-text' : 'text-warm-muted'
-                )}>
-                  {s.title}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="pt-4 border-t border-warm-border">
-        <div className="flex items-center justify-between text-sm mb-2">
-          <span className="text-warm-muted">Overall Progress</span>
-          <span className="font-medium text-warm-text">{Math.round(overallProgress)}%</span>
+        <div className="flex items-center justify-between mb-1.5">
+          <h3 className="text-[11px] font-bold text-warm-text/50 uppercase tracking-[0.08em]">
+            Filing Progress
+          </h3>
+          <span className="text-[11px] font-semibold tabular-nums text-warm-muted">
+            {Math.round(overallProgress)}%
+          </span>
         </div>
         <div
-          className="h-2 bg-warm-border rounded-full overflow-hidden"
+          className="h-[3px] bg-warm-border/60 rounded-full overflow-hidden"
           role="progressbar"
           aria-valuenow={Math.round(overallProgress)}
           aria-valuemin={0}
@@ -202,20 +159,75 @@ export function WizardShell({
         </div>
       </div>
 
+      {/* Step list */}
+      <div className="space-y-0.5">
+        {steps.map((s, index) => {
+          const isCompleted = isStepCompleted(index)
+          const isCurrent = index === currentStep
+          const isClickable = isCompleted || index <= currentStep + 1
+
+          return (
+            <button
+              key={s.id}
+              onClick={() => isClickable && onStepChange(index)}
+              disabled={!isClickable}
+              aria-current={isCurrent ? 'step' : undefined}
+              className={cn(
+                'w-full flex items-center gap-2.5 pr-3 py-2 rounded-md text-left transition-all',
+                isCurrent ? 'bg-warm-border/40 pl-[10px] border-l-2 border-calm-indigo' : 'pl-3',
+                isCompleted && 'bg-calm-green/5',
+                !isCurrent && !isCompleted && isClickable && 'hover:bg-warm-border/25',
+                !isClickable && 'opacity-60 cursor-not-allowed'
+              )}
+            >
+              <div className={cn(
+                'flex items-center justify-center flex-shrink-0 rounded-full',
+                isCurrent
+                  ? 'w-6 h-6 bg-calm-indigo text-white shadow-sm'
+                  : isCompleted
+                  ? 'w-6 h-6 bg-calm-green text-white'
+                  : 'w-5 h-5 border border-warm-border/80 bg-white text-warm-muted'
+              )}>
+                {isCompleted ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  <span className={cn(
+                    'font-semibold leading-none',
+                    isCurrent ? 'text-[11px]' : 'text-[10px]'
+                  )}>
+                    {index + 1}
+                  </span>
+                )}
+              </div>
+              <span className={cn(
+                'truncate leading-snug',
+                isCurrent
+                  ? 'text-sm font-semibold text-warm-text'
+                  : isCompleted
+                  ? 'text-sm text-warm-muted/70'
+                  : 'text-sm text-warm-muted'
+              )}>
+                {s.title}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
       {sidebarLearnMore.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-warm-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+        <div className="pt-3 border-t border-warm-border/50">
+          <h3 className="text-[11px] font-bold text-warm-text/50 uppercase tracking-[0.08em] mb-3 flex items-center gap-2">
             <BookOpen className="h-3.5 w-3.5" />
             Learn More
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {sidebarLearnMore.map((item) => (
               <details key={item.topic} className="group">
                 <summary className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-warm-border/30 cursor-pointer list-none text-sm text-warm-muted">
                   <span className="text-xs">+</span>
                   {item.topic}
                 </summary>
-                <div className="mt-2 px-3 py-2 bg-primary/5 rounded-md text-xs text-warm-muted">
+                <div className="mt-1 px-3 py-2 bg-primary/5 rounded-md text-xs text-warm-muted">
                   {item.content}
                 </div>
               </details>
