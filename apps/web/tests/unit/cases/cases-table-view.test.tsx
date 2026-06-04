@@ -58,7 +58,8 @@ describe('CasesTableView', () => {
 
     const headers = within(table).getAllByRole('columnheader')
     const headerTexts = headers.map(h => h.textContent?.trim())
-    expect(headerTexts).toEqual(['Case Name', 'Type', 'Progress', 'Next Deadline', 'Last Activity'])
+    // The last column is an empty actions column (for delete button)
+    expect(headerTexts).toEqual(['Case Name', 'Type', 'Progress', 'Next Deadline', 'Last Activity', ''])
   })
 
   it('renders one row per case', () => {

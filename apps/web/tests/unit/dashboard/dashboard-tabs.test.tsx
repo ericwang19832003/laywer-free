@@ -1,62 +1,90 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DashboardTabs } from '@/components/dashboard/dashboard-tabs'
 
+const mockPush = vi.fn()
+const mockPathname = '/case/test-id'
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+  usePathname: () => mockPathname,
+}))
+
 describe('DashboardTabs', () => {
-  function setup() {
+  beforeEach(() => {
+    mockPush.mockClear()
+  })
+
+  function setup(activeTab: 'focus' | 'overview' | 'tools' = 'focus') {
     return render(
       <DashboardTabs
-        focus={<div>focus content</div>}
-        overview={<div>overview content</div>}
-        tools={<div>tools content</div>}
+        activeTab={activeTab}
+        focus={activeTab === 'focus' ? <div>focus content</div> : null}
+        overview={activeTab === 'overview' ? <div>overview content</div> : null}
+        tools={activeTab === 'tools' ? <div>tools content</div> : null}
       />
     )
   }
 
-  it('shows Focus tab content by default', () => {
-    setup()
-    expect(screen.getByText('focus content')).toBeVisible()
-    expect(screen.getByText('overview content')).not.toBeVisible()
-    expect(screen.getByText('tools content')).not.toBeVisible()
+  it('shows Focus tab content when activeTab is focus', () => {
+    setup('focus')
+    expect(screen.getByText('focus content')).toBeInTheDocument()
+    expect(screen.queryByText('overview content')).not.toBeInTheDocument()
+    expect(screen.queryByText('tools content')).not.toBeInTheDocument()
   })
 
-  it('switches to Overview tab on click', () => {
-    setup()
-    fireEvent.click(screen.getByRole('tab', { name: 'Overview' }))
-    expect(screen.getByText('overview content')).toBeVisible()
-    expect(screen.getByText('focus content')).not.toBeVisible()
+  it('shows Overview tab content when activeTab is overview', () => {
+    setup('overview')
+    expect(screen.getByText('overview content')).toBeInTheDocument()
+    expect(screen.queryByText('focus content')).not.toBeInTheDocument()
   })
 
-  it('switches to Tools tab on click', () => {
-    setup()
-    fireEvent.click(screen.getByRole('tab', { name: 'Tools' }))
-    expect(screen.getByText('tools content')).toBeVisible()
-    expect(screen.getByText('focus content')).not.toBeVisible()
+  it('shows Tools tab content when activeTab is tools', () => {
+    setup('tools')
+    expect(screen.getByText('tools content')).toBeInTheDocument()
   })
 
   it('marks the active tab as selected', () => {
-    setup()
+    setup('focus')
     expect(screen.getByRole('tab', { name: 'Focus' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getByRole('tab', { name: 'Tools' })).toHaveAttribute('aria-selected', 'false')
+  })
+
+  it('calls router.push with correct tab param on click', () => {
+    setup('focus')
     fireEvent.click(screen.getByRole('tab', { name: 'Overview' }))
-    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'Focus' })).toHaveAttribute('aria-selected', 'false')
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=overview', { scroll: false })
   })
 
-  it('navigates tabs with arrow keys', () => {
-    setup()
-    const focusTab = screen.getByRole('tab', { name: 'Focus' })
-    focusTab.focus()
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
-    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true')
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
-    expect(screen.getByRole('tab', { name: 'Tools' })).toHaveAttribute('aria-selected', 'true')
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
-    expect(screen.getByRole('tab', { name: 'Focus' })).toHaveAttribute('aria-selected', 'true')
+  it('calls router.push for Tools tab', () => {
+    setup('focus')
+    fireEvent.click(screen.getByRole('tab', { name: 'Tools' }))
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=tools', { scroll: false })
   })
 
-  it('navigates tabs with ArrowLeft', () => {
-    setup()
+  it('navigates to next tab with ArrowRight', () => {
+    setup('focus')
+    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=overview', { scroll: false })
+  })
+
+  it('navigates to previous tab with ArrowLeft', () => {
+    setup('focus')
     fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowLeft' })
-    expect(screen.getByRole('tab', { name: 'Tools' })).toHaveAttribute('aria-selected', 'true')
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=tools', { scroll: false })
+  })
+
+  it('wraps ArrowRight from Tools back to Focus', () => {
+    setup('tools')
+    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=focus', { scroll: false })
+  })
+
+  it('renders tabpanel with correct aria-labelledby', () => {
+    setup('focus')
+    const panel = screen.getByRole('tabpanel')
+    expect(panel).toHaveAttribute('aria-labelledby', 'tab-focus')
+    expect(panel).toHaveAttribute('tabindex', '0')
   })
 })

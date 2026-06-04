@@ -6,6 +6,7 @@ import ProSeBanner from '@/components/dashboard/pro-se-banner'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
 import { SavingsCard } from '@/components/dashboard/savings-card'
+import { getSubscription } from '@/lib/subscription/check'
 import type { DashboardData, SharedCaseData } from './types'
 
 export async function FocusTab({
@@ -20,7 +21,12 @@ export async function FocusTab({
   try {
     const supabase = await createClient()
 
-    const dashboardResult = await supabase.rpc('get_case_dashboard', { p_case_id: caseId })
+    const [{ data: { user } }, dashboardResult] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.rpc('get_case_dashboard', { p_case_id: caseId }),
+    ])
+    const subscription = user ? await getSubscription(supabase, user.id).catch(() => null) : null
+    const userTier = subscription?.tier ?? 'free'
     const dashboard = dashboardResult.data as DashboardData | null
 
     const [
@@ -79,7 +85,7 @@ export async function FocusTab({
           currentOutcome={outcome}
           allTasksDone={totalTasks > 0 && completedTasks === totalTasks}
         />
-        <SavingsCard disputeType={disputeType} outcome={outcome} userTier="free" />
+        <SavingsCard disputeType={disputeType} outcome={outcome} userTier={userTier} />
       </div>
     )
   } catch (error) {

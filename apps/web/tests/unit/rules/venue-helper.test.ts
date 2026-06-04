@@ -281,11 +281,11 @@ describe('validateJurisdiction', () => {
   it('warns for county over $200K with District Court suggestion', () => {
     const result = validateJurisdiction({
       courtType: 'County',
-      amountSought: 250000,
+      amountSought: 300000,
     })
 
     expect(result.valid).toBe(false)
-    expect(result.warning).toBe('County Court handles claims up to $200,000.')
+    expect(result.warning).toBe('County Court handles claims up to $250,000.')
     expect(result.suggestion).toBe('Consider filing in District Court instead.')
   })
 

@@ -27,6 +27,8 @@ Every design decision should make them feel supported, not overwhelmed.
 - Button variants: default (primary), outline, ghost, destructive
 - Progress bar for wizard completion
 - Toast notifications (sonner) for feedback
+- Tabbed workbench (`DashboardTabs`): three-tab layout (Focus / Overview / Tools) with URL-driven active tab (`?tab=focus|overview|tools`). Only the active tab renders server-side, cutting DB queries by ~40% on non-focus tabs. Tab state persists across page refreshes and is shareable via URL.
+- `MoreSection`: collapsible grouping for lower-priority tools within a tab (e.g., e-filing guide, fee calculator, binder CTA). Use when a tab has more than 4 primary cards.
 
 ## Interaction States
 Every new feature must specify: loading, empty, error, success, partial states.
@@ -42,6 +44,7 @@ See the interaction state table in the CEO plan for the required format.
 - ARIA live regions for dynamic content
 - Focus management in modals and wizards
 - Color contrast: WCAG AA minimum
+- Tab panels: use `role="tabpanel"` with `tabIndex={0}` and `aria-labelledby` pointing to the active tab button. Arrow key navigation (ArrowLeft/ArrowRight) moves focus between tabs and triggers URL navigation. Tab buttons use `tabIndex={active ? 0 : -1}` (roving tabindex pattern).
 
 ## Spacing Scale
 All spacing uses a 4px base unit. Use these values consistently:

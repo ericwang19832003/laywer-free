@@ -15,10 +15,16 @@ import type { ReminderEscalation } from '@lawyer-free/shared/schemas/reminder-es
 
 export default async function DashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { id } = await params
+  const { tab } = await searchParams
+  const rawTab = Array.isArray(tab) ? tab[0] : tab
+  const activeTab: 'focus' | 'overview' | 'tools' =
+    rawTab === 'overview' || rawTab === 'tools' ? rawTab : 'focus'
   const supabase = await createClient()
 
   const [
@@ -161,21 +167,22 @@ export default async function DashboardPage({
         </div>
 
         <DashboardTabs
-          focus={
+          activeTab={activeTab}
+          focus={activeTab === 'focus' ? (
             <Suspense fallback={<TabSkeleton />}>
               <FocusTab {...shared} />
             </Suspense>
-          }
-          overview={
+          ) : null}
+          overview={activeTab === 'overview' ? (
             <Suspense fallback={<TabSkeleton />}>
-              <OverviewTab caseId={id} />
+              <OverviewTab caseId={id} disputeType={shared.disputeType} createdAt={shared.createdAt} />
             </Suspense>
-          }
-          tools={
+          ) : null}
+          tools={activeTab === 'tools' ? (
             <Suspense fallback={<TabSkeleton />}>
-              <ToolsTab caseId={id} />
+              <ToolsTab caseId={id} courtType={shared.courtType} county={shared.county} jurisdiction={shared.jurisdiction} />
             </Suspense>
-          }
+          ) : null}
         />
 
         <LegalDisclaimer />

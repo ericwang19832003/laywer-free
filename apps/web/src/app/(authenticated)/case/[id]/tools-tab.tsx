@@ -4,18 +4,34 @@ import { DiscoveryCard } from '@/components/dashboard/discovery-card'
 import { EmailsCard } from '@/components/dashboard/emails-card'
 import { NotesCard } from '@/components/dashboard/notes-card'
 import { ShareCaseCard } from '@/components/dashboard/share-case-card'
+import { AgentAdvisorCard } from '@/components/dashboard/agent-advisor-card'
+import { BinderCta } from '@/components/binders/binder-cta'
+import { MoreSection } from '@/components/dashboard/more-section'
+import { EfilingGuide } from '@/components/filing/efiling-guide'
+import { FeeCalculator } from '@/components/filing/fee-calculator'
+import { getSubscription } from '@/lib/subscription/check'
 
-export async function ToolsTab({ caseId }: { caseId: string }) {
+interface ToolsTabProps {
+  caseId: string
+  courtType: string
+  county: string | null
+  jurisdiction: string
+}
+
+export async function ToolsTab({ caseId, courtType, county, jurisdiction }: ToolsTabProps) {
   try {
     const supabase = await createClient()
 
     const [
+      { data: { user } },
       authorityResult,
       packsResult,
       discoveryTaskResult,
       notesResult,
       sharingResult,
+      exhibitSetResult,
     ] = await Promise.all([
+      supabase.auth.getUser(),
       supabase
         .from('case_authorities')
         .select('id', { count: 'exact', head: true })
@@ -42,7 +58,15 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
         .select('share_token, share_enabled')
         .eq('case_id', caseId)
         .maybeSingle(),
+      supabase
+        .from('exhibit_sets')
+        .select('id')
+        .eq('case_id', caseId)
+        .maybeSingle(),
     ])
+
+    const subscription = user ? await getSubscription(supabase, user.id).catch(() => null) : null
+    const isPro = subscription?.tier === 'pro' || subscription?.tier === 'essentials'
 
     const packs = packsResult.data ?? []
     const packCount = packs.length
@@ -57,8 +81,24 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
       packItemsResult = { count: result.count }
     }
 
+    const exhibitSetId = exhibitSetResult.data?.id ?? null
+    const SUPPORTED_STATES = ['TX', 'CA'] as const
+    const state = (SUPPORTED_STATES as readonly string[]).includes(jurisdiction) ? (jurisdiction as 'TX' | 'CA') : null
+    const normalizedCourtType = courtType.toUpperCase()
+    const isFederal = normalizedCourtType === 'FEDERAL'
+    // CA DB court types (limited_civil, unlimited_civil) need mapping to fee table keys
+    const CA_COURT_MAP: Record<string, string> = {
+      UNLIMITED_CIVIL: 'SUPERIOR',
+      LIMITED_CIVIL: 'SMALL_CLAIMS',
+      SUPERIOR: 'SUPERIOR',
+      SMALL_CLAIMS: 'SMALL_CLAIMS',
+    }
+    const feeCourtType = state === 'CA' ? (CA_COURT_MAP[normalizedCourtType] ?? null) : normalizedCourtType
+    const showFiling = !!(state && !isFederal && feeCourtType)
+
     return (
       <div className="space-y-6">
+        <AgentAdvisorCard caseId={caseId} isPro={isPro} />
         <ResearchCard caseId={caseId} authorityCount={authorityResult.count ?? 0} />
         <DiscoveryCard
           caseId={caseId}
@@ -69,11 +109,16 @@ export async function ToolsTab({ caseId }: { caseId: string }) {
         />
         <EmailsCard caseId={caseId} />
         <NotesCard caseId={caseId} initialNotes={notesResult.data ?? []} />
-        <ShareCaseCard
-          caseId={caseId}
-          initialEnabled={sharingResult.data?.share_enabled ?? false}
-          initialToken={sharingResult.data?.share_token ?? null}
-        />
+        <MoreSection>
+          {showFiling && <EfilingGuide state={state!} courtType={feeCourtType!} county={county ?? undefined} />}
+          {showFiling && <FeeCalculator courtType={feeCourtType!} county={county ?? ''} state={state!} />}
+          <BinderCta caseId={caseId} exhibitSetId={exhibitSetId} />
+          <ShareCaseCard
+            caseId={caseId}
+            initialEnabled={sharingResult.data?.share_enabled ?? false}
+            initialToken={sharingResult.data?.share_token ?? null}
+          />
+        </MoreSection>
       </div>
     )
   } catch (error) {

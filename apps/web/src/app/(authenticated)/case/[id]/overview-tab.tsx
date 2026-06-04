@@ -4,10 +4,17 @@ import { InsightsCard } from '@/components/dashboard/insights-card'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { ConfidenceScoreCard } from '@/components/dashboard/confidence-score-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
+import { CaseComparisonCard } from '@/components/dashboard/case-comparison-card'
 import type { ConfidenceBreakdown } from '@/lib/confidence/types'
 import type { TimelineEvent } from '@/components/dashboard/timeline-card'
 
-export async function OverviewTab({ caseId }: { caseId: string }) {
+interface OverviewTabProps {
+  caseId: string
+  disputeType: string
+  createdAt: string | null
+}
+
+export async function OverviewTab({ caseId, disputeType, createdAt }: OverviewTabProps) {
   try {
     const supabase = await createClient()
     const ago7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -21,6 +28,8 @@ export async function OverviewTab({ caseId }: { caseId: string }) {
       strategyResult,
       confidenceResult,
       eventsResult,
+      tasksResult,
+      evidenceResult,
     ] = await Promise.all([
       supabase
         .from('case_risk_scores')
@@ -71,7 +80,24 @@ export async function OverviewTab({ caseId }: { caseId: string }) {
         .eq('case_id', caseId)
         .order('created_at', { ascending: false })
         .limit(10),
+      supabase
+        .from('tasks')
+        .select('status')
+        .eq('case_id', caseId),
+      supabase
+        .from('evidence_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('case_id', caseId),
     ])
+
+    const tasks = tasksResult.data ?? []
+    const totalTasks = tasks.length
+    const doneTasks = tasks.filter((t) => t.status === 'completed' || t.status === 'skipped').length
+    const taskCompletionRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0
+    const evidenceCount = evidenceResult.count ?? 0
+    const daysSinceCreation = createdAt
+      ? Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24)))
+      : 0
 
     const strategyRecs =
       (
@@ -109,6 +135,12 @@ export async function OverviewTab({ caseId }: { caseId: string }) {
           generatedAt={strategyResult.data?.generated_at ?? null}
         />
         <TimelineCard caseId={caseId} events={events} />
+        <CaseComparisonCard
+          taskCompletionRate={taskCompletionRate}
+          evidenceCount={evidenceCount}
+          daysSinceCreation={daysSinceCreation}
+          disputeType={disputeType}
+        />
       </div>
     )
   } catch (error) {

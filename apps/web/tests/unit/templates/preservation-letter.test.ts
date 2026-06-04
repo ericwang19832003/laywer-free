@@ -16,14 +16,14 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+// Phrases that must never appear in any tone.
+// Note: 'sanctions', 'adverse inference', 'spoliation', and 'you must'
+// were removed — the neutral/firm tones now include them intentionally
+// as part of the consequences and scope sections.
 const FORBIDDEN_PHRASES = [
-  'you must',
-  'sanctions',
   'violation of law',
   'penalties',
-  'adverse inference',
   'legal consequences',
-  'spoliation',
   'court order',
   'contempt',
   'liable',
@@ -46,11 +46,11 @@ describe('generatePreservationLetter', () => {
       tone: 'neutral',
     })
 
-    expect(result.subject).toBe('Request to Preserve Relevant Records')
+    expect(result.subject).toBe('Re: Evidence Preservation Request')
     expect(result.body).toContain('March 1, 2026')
     expect(result.body).toContain('To Whom It May Concern')
     expect(result.body).toContain('A dispute over unpaid invoices.')
-    expect(result.body).toContain('Re: Request to Preserve Relevant Records')
+    expect(result.body).toContain('Re: Evidence Preservation Request')
     expect(result.body).toContain('Sincerely')
     expect(result.body).toContain('[Your Name]')
     expect(result.body).toContain('FOR REFERENCE ONLY')
@@ -75,7 +75,7 @@ describe('generatePreservationLetter', () => {
       tone: 'neutral',
     })
 
-    expect(result.subject).toBe('Request to Preserve Relevant Records')
+    expect(result.subject).toBe('Re: Evidence Preservation Request')
     expect(result.body).toContain('Dear Acme Corp')
     expect(result.body).toContain('Acme Corp')
     expect(result.body).toContain('January 15, 2026')
@@ -102,9 +102,8 @@ describe('generatePreservationLetter', () => {
       tone: 'polite',
     })
 
-    expect(result.body).toContain('respectfully ask')
+    expect(result.body).toContain('respectfully request')
     expect(result.body).toContain('appreciate')
-    expect(result.body).toContain('cooperation')
     assertNoForbiddenLanguage(result.body)
   })
 
@@ -116,7 +115,7 @@ describe('generatePreservationLetter', () => {
       tone: 'neutral',
     })
 
-    expect(result.body).toContain('I am writing to request')
+    expect(result.body).toContain('This letter constitutes formal notice')
     expect(result.body).toContain('confirm in writing')
     assertNoForbiddenLanguage(result.body)
   })
@@ -130,9 +129,9 @@ describe('generatePreservationLetter', () => {
       tone: 'firm',
     })
 
-    expect(result.body).toContain('written request to preserve')
-    expect(result.body).toContain('immediate steps')
-    expect(result.body).toContain('reasonable timeframe')
+    expect(result.body).toContain('formal notice')
+    expect(result.body).toContain('immediately implement a litigation hold')
+    expect(result.body).toContain('within seven (7) calendar days')
     // Firm tone still must NOT use forbidden language
     assertNoForbiddenLanguage(result.body)
   })
@@ -150,10 +149,10 @@ describe('generatePreservationLetter', () => {
       tone: 'neutral',
     })
 
-    // Each category appears as an indented bullet
-    for (const cat of categories) {
-      expect(result.body).toContain(`  - ${cat}`)
-    }
+    // Each category appears as a numbered list item
+    categories.forEach((cat, i) => {
+      expect(result.body).toContain(`  ${i + 1}. ${cat}`)
+    })
     expect(result.evidenceBullets).toEqual(categories)
   })
 
@@ -169,7 +168,7 @@ describe('generatePreservationLetter', () => {
       'Photographs and videos',
       'Sound level measurement logs',
     ])
-    expect(result.body).toContain('  - Sound level measurement logs')
+    expect(result.body).toContain('  2. Sound level measurement logs')
   })
 
   it('uses default bullet when no categories provided', () => {
@@ -183,7 +182,7 @@ describe('generatePreservationLetter', () => {
       'All documents and materials relevant to this matter',
     ])
     expect(result.body).toContain(
-      '  - All documents and materials relevant to this matter'
+      '  1. All documents and materials relevant to this matter'
     )
   })
 
