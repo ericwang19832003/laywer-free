@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Circle, BookOpen, Save } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Circle, BookOpen, Save, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -151,7 +151,7 @@ export function WizardShell({
                 disabled={!isClickable}
                 aria-current={isCurrent ? 'step' : undefined}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all',
+                  'w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-all',
                   isCurrent && 'bg-primary/10 border border-primary/20',
                   isCompleted && 'bg-calm-green/5',
                   !isCurrent && !isCompleted && 'hover:bg-warm-border/30',
@@ -211,11 +211,11 @@ export function WizardShell({
           <div className="space-y-2">
             {sidebarLearnMore.map((item) => (
               <details key={item.topic} className="group">
-                <summary className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-warm-border/30 cursor-pointer list-none text-sm text-warm-muted">
+                <summary className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-warm-border/30 cursor-pointer list-none text-sm text-warm-muted">
                   <span className="text-xs">+</span>
                   {item.topic}
                 </summary>
-                <div className="mt-2 px-3 py-2 bg-primary/5 rounded-lg text-xs text-warm-muted">
+                <div className="mt-2 px-3 py-2 bg-primary/5 rounded-md text-xs text-warm-muted">
                   {item.content}
                 </div>
               </details>
@@ -263,7 +263,7 @@ export function WizardShell({
             />
             <div
               id="mobile-sidebar"
-              className="fixed bottom-16 left-4 right-4 z-40 bg-white rounded-xl shadow-xl p-4 max-h-[60vh] overflow-y-auto lg:hidden"
+              className="fixed bottom-16 left-4 right-4 z-40 bg-white rounded-lg shadow-xl p-4 max-h-[60vh] overflow-y-auto lg:hidden"
               role="dialog"
               aria-label="Filing progress"
             >
@@ -277,7 +277,7 @@ export function WizardShell({
             {/* Desktop sidebar */}
             <aside className="hidden lg:block w-52 flex-shrink-0">
               <div className="sticky top-8">
-                <div className="bg-white rounded-xl border border-warm-border p-4">
+                <div className="bg-white rounded-md border border-warm-border p-4">
                   <StepSidebar />
                 </div>
               </div>
@@ -307,9 +307,10 @@ export function WizardShell({
               <Card className="mt-6 border-warm-border">
                 <CardContent className="pt-6">
                   {step.subtitle && (
-                    <p className="text-sm text-warm-muted mb-6 italic">
-                      &ldquo;{step.subtitle}&rdquo;
-                    </p>
+                    <div className="mb-6 rounded-md border border-warm-border bg-warm-border/20 px-4 py-3 flex items-start gap-2.5">
+                      <Info className="h-4 w-4 text-warm-muted shrink-0 mt-0.5" />
+                      <p className="text-sm text-warm-text leading-relaxed">{step.subtitle}</p>
+                    </div>
                   )}
 
                   {children}

@@ -257,9 +257,9 @@ export function GuidedStep({
   )
 
   const statusIcon: Record<SummaryItem['status'], { icon: string; color: string }> = {
-    done: { icon: '\u2713', color: 'text-green-600' },
+    done: { icon: '\u2713', color: 'text-calm-green' },
     needed: { icon: '\u26A0', color: 'text-amber-500' },
-    info: { icon: '\u2139', color: 'text-indigo-500' },
+    info: { icon: '\u2139', color: 'text-calm-indigo' },
   }
 
   return (
@@ -271,10 +271,10 @@ export function GuidedStep({
         &larr; Back to dashboard
       </Link>
 
-      <h1 className="text-2xl font-semibold text-warm-text mb-1">
+      <h1 className="text-2xl font-bold text-warm-text mb-1">
         {config.title}
       </h1>
-      <p className="text-warm-muted mb-8">{config.reassurance}</p>
+      <p className="text-sm text-warm-muted mb-8 leading-relaxed">{config.reassurance}</p>
 
       {phase === 'questions' && currentQuestion ? (
         <>
@@ -299,7 +299,7 @@ export function GuidedStep({
               {currentQuestion.type === 'info' ? (
                 /* Info type: styled info box */
                 <div>
-                  <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 mb-4">
+                  <div className="rounded-md border border-warm-border bg-warm-border/30 p-4 mb-4">
                     <InfoText text={currentQuestion.prompt} />
                     {currentQuestion.helpText && (
                       <p className="text-sm text-warm-muted mt-3">
@@ -363,13 +363,13 @@ export function GuidedStep({
                       <>
                         <button
                           onClick={() => handleAnswer('yes')}
-                          className="rounded-lg border border-warm-border p-4 text-left text-sm font-medium text-warm-text hover:border-calm-indigo hover:bg-calm-indigo/5 transition-colors"
+                          className="rounded-md border border-warm-border p-4 text-left text-sm font-medium text-warm-text hover:border-calm-indigo hover:bg-calm-indigo/5 transition-colors"
                         >
                           Yes
                         </button>
                         <button
                           onClick={() => handleAnswer('no')}
-                          className="rounded-lg border border-warm-border p-4 text-left text-sm font-medium text-warm-text hover:border-calm-indigo hover:bg-calm-indigo/5 transition-colors"
+                          className="rounded-md border border-warm-border p-4 text-left text-sm font-medium text-warm-text hover:border-calm-indigo hover:bg-calm-indigo/5 transition-colors"
                         >
                           No
                         </button>
@@ -387,7 +387,7 @@ export function GuidedStep({
                         <button
                           key={opt.value}
                           onClick={() => handleAnswer(opt.value)}
-                          className="rounded-lg border border-warm-border p-4 text-left text-sm font-medium text-warm-text hover:border-calm-indigo hover:bg-calm-indigo/5 transition-colors"
+                          className="rounded-md border border-warm-border p-4 text-left text-sm font-medium text-warm-text hover:border-calm-indigo hover:bg-calm-indigo/5 transition-colors"
                         >
                           {opt.label}
                         </button>

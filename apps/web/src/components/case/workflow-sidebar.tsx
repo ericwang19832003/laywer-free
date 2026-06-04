@@ -225,7 +225,7 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
         </div>
         <div className="h-2 bg-warm-border/40 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-calm-indigo to-[#6366F1] rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-calm-indigo rounded-full transition-all duration-500 ease-out"
             style={{ width: `${percentage}%` }}
           />
         </div>
@@ -254,7 +254,7 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
               {/* Phase header */}
               <button
                 onClick={() => togglePhase(phaseIdx)}
-                className="flex items-center justify-between w-full px-2 py-2 text-left rounded-lg hover:bg-warm-border/20 transition-colors duration-150 group"
+                className="flex items-center justify-between w-full px-2 py-2 text-left rounded-md hover:bg-warm-border/20 transition-colors duration-150 group"
               >
                 <div className="flex items-center gap-2">
                   <span className={`transition-transform duration-200 ${isCollapsed ? '' : 'rotate-0'}`}>
@@ -300,7 +300,7 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
 
                     const content = (
                       <div
-                        className={`relative flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-all duration-150 ${
+                        className={`relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all duration-150 ${
                           isActive
                             ? 'bg-calm-indigo/[0.07] shadow-[inset_3px_0_0_0] shadow-calm-indigo'
                             : isCurrent
