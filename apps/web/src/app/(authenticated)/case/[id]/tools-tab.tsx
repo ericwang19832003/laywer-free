@@ -99,8 +99,8 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
         <EmailsCard caseId={caseId} />
         <NotesCard caseId={caseId} initialNotes={notesResult.data ?? []} />
         <MoreSection>
-          {state && <EfilingGuide state={state} courtType={courtType} county={county ?? undefined} />}
-          {state && <FeeCalculator courtType={courtType} county={county ?? ''} state={state} />}
+          {state && <EfilingGuide state={state} courtType={courtType.toUpperCase()} county={county ?? undefined} />}
+          {state && <FeeCalculator courtType={courtType.toUpperCase()} county={county ?? ''} state={state} />}
           <BinderCta caseId={caseId} exhibitSetId={exhibitSetId} />
           <ShareCaseCard
             caseId={caseId}

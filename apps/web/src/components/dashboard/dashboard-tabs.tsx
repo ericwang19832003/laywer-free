@@ -48,7 +48,7 @@ export function DashboardTabs({ activeTab, focus, overview, tools }: DashboardTa
             id={`tab-${tab.toLowerCase()}`}
             role="tab"
             aria-selected={active === tab}
-            aria-controls={`panel-${tab.toLowerCase()}`}
+            aria-controls={active === tab ? `panel-${tab.toLowerCase()}` : undefined}
             tabIndex={active === tab ? 0 : -1}
             onClick={() => changeTab(tab)}
             className={`flex-1 text-center px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${

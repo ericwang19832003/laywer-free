@@ -96,7 +96,7 @@ export async function OverviewTab({ caseId, disputeType, createdAt }: OverviewTa
     const taskCompletionRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0
     const evidenceCount = evidenceResult.count ?? 0
     const daysSinceCreation = createdAt
-      ? Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24)))
       : 0
 
     const strategyRecs =
