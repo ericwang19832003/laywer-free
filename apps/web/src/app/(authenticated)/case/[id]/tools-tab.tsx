@@ -84,6 +84,17 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
     const exhibitSetId = exhibitSetResult.data?.id ?? null
     const SUPPORTED_STATES = ['TX', 'CA'] as const
     const state = (SUPPORTED_STATES as readonly string[]).includes(jurisdiction) ? (jurisdiction as 'TX' | 'CA') : null
+    const normalizedCourtType = courtType.toUpperCase()
+    const isFederal = normalizedCourtType === 'FEDERAL'
+    // CA DB court types (limited_civil, unlimited_civil) need mapping to fee table keys
+    const CA_COURT_MAP: Record<string, string> = {
+      UNLIMITED_CIVIL: 'SUPERIOR',
+      LIMITED_CIVIL: 'SMALL_CLAIMS',
+      SUPERIOR: 'SUPERIOR',
+      SMALL_CLAIMS: 'SMALL_CLAIMS',
+    }
+    const feeCourtType = state === 'CA' ? (CA_COURT_MAP[normalizedCourtType] ?? null) : normalizedCourtType
+    const showFiling = !!(state && !isFederal && feeCourtType)
 
     return (
       <div className="space-y-6">
@@ -99,8 +110,8 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
         <EmailsCard caseId={caseId} />
         <NotesCard caseId={caseId} initialNotes={notesResult.data ?? []} />
         <MoreSection>
-          {state && <EfilingGuide state={state} courtType={courtType.toUpperCase()} county={county ?? undefined} />}
-          {state && <FeeCalculator courtType={courtType.toUpperCase()} county={county ?? ''} state={state} />}
+          {showFiling && <EfilingGuide state={state!} courtType={feeCourtType!} county={county ?? undefined} />}
+          {showFiling && <FeeCalculator courtType={feeCourtType!} county={county ?? ''} state={state!} />}
           <BinderCta caseId={caseId} exhibitSetId={exhibitSetId} />
           <ShareCaseCard
             caseId={caseId}
