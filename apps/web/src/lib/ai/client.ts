@@ -115,7 +115,7 @@ export class AIClient {
 
   constructor(config: AIClientConfig = {}) {
     this.provider = config.provider ?? 'openai'
-    this.model = config.model ?? 'gpt-4o-mini'
+    this.model = config.model ?? 'deepseek-chat'
     this.maxRetries = config.maxRetries ?? 2
     this.timeoutMs = config.timeoutMs ?? 30_000
   }
@@ -229,12 +229,12 @@ export class AIClient {
     model: string
     usage?: { promptTokens: number; completionTokens: number; totalTokens: number }
   }> {
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = process.env.DEEPSEEK_API_KEY
     if (!apiKey) {
-      throw new AIConfigError('OPENAI_API_KEY is not set')
+      throw new AIConfigError('DEEPSEEK_API_KEY is not set')
     }
 
-    const openai = new OpenAI({ apiKey })
+    const openai = new OpenAI({ apiKey, baseURL: 'https://api.deepseek.com' })
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs)

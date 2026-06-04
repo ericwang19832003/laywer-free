@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Zap, Clock, RefreshCw } from 'lucide-react'
 import type { TodaysAction } from '@/app/api/cases/todays-action/route'
 
-export function TodaysActionCard() {
+export function TodaysActionCard({ refreshKey }: { refreshKey?: number }) {
   const [action, setAction] = useState<TodaysAction | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -29,7 +29,8 @@ export function TodaysActionCard() {
 
   useEffect(() => {
     fetchAction()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey])
 
   if (loading) {
     return (

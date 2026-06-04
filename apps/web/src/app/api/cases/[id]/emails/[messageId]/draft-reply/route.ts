@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { isGmailMcpConfigured, getThreadTextForAI, readMessage } from '@/lib/mcp/gmail-client'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-const AI_MODEL = 'claude-sonnet-4-20250514'
+const AI_MODEL = 'deepseek-chat'
 
 export async function POST(
   _request: NextRequest,
@@ -39,7 +39,7 @@ export async function POST(
     const message = await readMessage(messageId)
 
     // Get full thread text for AI context
-    const threadText = await getThreadTextForAI(message.threadId)
+    const threadText = await getThreadTextForAI(messageId)
 
     const roleLabel = caseRow.role === 'plaintiff' ? 'plaintiff' : 'defendant'
     const disputeLabel = (caseRow.dispute_type ?? 'civil').replace(/_/g, ' ')
@@ -61,18 +61,17 @@ Guidelines:
 
     const userPrompt = `Here is the email thread:\n\n${threadText}\n\nPlease draft a reply to the most recent message.`
 
-    const anthropic = new Anthropic()
-    const response = await anthropic.messages.create({
+    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
+    const response = await deepseek.chat.completions.create({
       model: AI_MODEL,
       max_tokens: 1500,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
     })
 
-    const draft = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
+    const draft = response.choices[0]?.message?.content ?? ''
 
     // Audit log (no email content stored)
     console.log(`[email-reply-audit] user=${user.id} case=${caseId} subject="${message.subject ?? 'unknown'}"`)

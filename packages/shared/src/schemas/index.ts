@@ -1,4 +1,5 @@
 export * from './ai-preservation-letter'
+export * from './ai-preservation-letter-analyze'
 export * from './ai-risk-explanation'
 export * from './case-file'
 export * from './case'

@@ -328,7 +328,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.DEEPSEEK_API_KEY) {
     return NextResponse.json(
       { error: 'Document generation is temporarily unavailable. Please try again later.' },
       { status: 503 }
@@ -455,11 +455,11 @@ export async function POST(
       }
     }
 
-    const openai = new OpenAI()
+    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
     let fullText: string
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o',
+      const completion = await deepseek.chat.completions.create({
+        model: 'deepseek-chat',
         max_tokens: 4096,
         messages: [
           { role: 'system', content: prompt.system },

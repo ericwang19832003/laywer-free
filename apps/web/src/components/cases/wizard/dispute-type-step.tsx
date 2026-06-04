@@ -81,7 +81,7 @@ function getDisputeOptions(selectedState: State): DisputeOption[] {
 interface DisputeTypeStepProps {
   value: DisputeType | ''
   selectedState?: State
-  onSelect: (type: DisputeType, cardId: string, secondaryTypes: DisputeType[], subTypeSuggestion?: string, roleSuggestion?: string) => void
+  onSelect: (type: DisputeType, cardId: string, secondaryTypes: DisputeType[], subTypeSuggestion?: string, roleSuggestion?: string, situationDescription?: string) => void
 }
 
 const TEXTAREA_CLS =
@@ -167,6 +167,7 @@ export function DisputeTypeStep({ value, selectedState = 'TX', onSelect }: Dispu
       secondaryTypes,
       aiSuggestion?.suggested_sub_type ?? undefined,
       aiSuggestion?.suggested_role ?? undefined,
+      description.trim() || undefined,
     )
   }
 

@@ -21,9 +21,15 @@ export interface SummaryItem {
   text: string
 }
 
+export interface StepReference {
+  label: string
+  url: string
+}
+
 export interface GuidedStepConfig {
   title: string
   reassurance: string
   questions: QuestionDef[]
   generateSummary: (answers: Record<string, string>) => SummaryItem[]
+  references?: StepReference[]
 }

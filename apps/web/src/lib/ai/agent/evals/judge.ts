@@ -15,13 +15,13 @@ export async function judgeResponse(
   agentResponse: string,
   rubric: string
 ): Promise<JudgeResult> {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) throw new Error('OPENAI_API_KEY is required')
+  const apiKey = process.env.DEEPSEEK_API_KEY
+  if (!apiKey) throw new Error('DEEPSEEK_API_KEY is required')
 
-  const openai = new OpenAI({ apiKey })
+  const openai = new OpenAI({ apiKey, baseURL: 'https://api.deepseek.com' })
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'deepseek-chat',
     temperature: 0,
     response_format: { type: 'json_object' },
     messages: [

@@ -1,3 +1,8 @@
+## Deployment Rules
+
+- **Push to GitHub only** — never push to Vercel or trigger a Vercel deployment unless the user explicitly says to deploy to Vercel.
+- Git push → GitHub remote only. Do not run `vercel`, `vercel deploy`, or any Vercel CLI commands unless explicitly requested.
+
 ## gstack
 
 Use /browse from gstack for all web browsing. Never use mcp__claude-in-chrome__* tools.

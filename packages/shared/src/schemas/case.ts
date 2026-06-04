@@ -187,6 +187,7 @@ export const createCaseSchema = z.object({
   other_sub_type: z.enum(OTHER_SUB_TYPES).optional(),
   secondary_dispute_types: z.array(z.enum(DISPUTE_TYPES)).optional(),
   description: z.string().max(80).optional(),
+  situation_description: z.string().max(2000).optional(),
 })
 
 export type CreateCaseInput = z.infer<typeof createCaseSchema>

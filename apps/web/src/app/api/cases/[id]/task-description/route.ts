@@ -14,7 +14,7 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-const AI_MODEL = 'gpt-4o-mini'
+const AI_MODEL = 'deepseek-chat'
 
 export async function GET(
   request: NextRequest,
@@ -74,7 +74,7 @@ export async function GET(
       .eq('status', 'completed')
 
     // Try AI
-    if (process.env.OPENAI_API_KEY) {
+    if (process.env.DEEPSEEK_API_KEY) {
       try {
         const userPrompt = buildTaskDescriptionPrompt({
           task_key: taskKey,

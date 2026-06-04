@@ -51,6 +51,24 @@ export const piComparativeFaultConfig: GuidedStepConfig = {
         "EVIDENCE TO ESTABLISH THE DEFENDANT'S FAULT:\n\u2022 Police accident report \u2014 the officer's determination of who was at fault is persuasive (though not binding)\n\u2022 Photos and video \u2014 dashcam, traffic cameras, security cameras, cell phone photos from the scene\n\u2022 Witness statements \u2014 passengers, bystanders, other drivers who saw the accident\n\u2022 Phone records \u2014 showing the defendant was texting or on a call at the time of impact\n\u2022 Vehicle damage patterns \u2014 where the damage is on each vehicle tells a story about how the accident happened\n\u2022 Accident reconstruction expert \u2014 can analyze skid marks, damage, and physics to determine fault\n\u2022 Toxicology or BAC results \u2014 if the defendant was intoxicated",
     },
     {
+      id: 'has_police_report',
+      type: 'yes_no',
+      prompt: 'Do you have a police report from the accident?',
+      helpText: 'The officer\'s at-fault determination is your most persuasive single piece of evidence.',
+    },
+    {
+      id: 'has_witnesses',
+      type: 'yes_no',
+      prompt: 'Are there any witnesses you can contact?',
+      helpText: 'Passengers, bystanders, or other drivers who saw what happened.',
+    },
+    {
+      id: 'defendant_cited',
+      type: 'yes_no',
+      prompt: 'Was the defendant ticketed or cited for the accident?',
+      helpText: 'A traffic citation is strong \u2014 though not conclusive \u2014 evidence of fault.',
+    },
+    {
       id: 'common_defense_arguments',
       type: 'info',
       prompt:
@@ -85,10 +103,41 @@ export const piComparativeFaultConfig: GuidedStepConfig = {
       })
     }
 
-    items.push({
-      status: 'info',
-      text: 'Key evidence: police report, photos/video, witness statements, phone records, vehicle damage patterns.',
-    })
+    if (answers.has_police_report === 'yes') {
+      items.push({
+        status: 'done',
+        text: 'Police report secured \u2014 the officer\'s at-fault determination is your strongest single piece of evidence.',
+      })
+    } else if (answers.has_police_report === 'no') {
+      items.push({
+        status: 'needed',
+        text: 'No police report \u2014 request a copy from the responding agency now. Without it, you\'ll rely more on photos and witness accounts.',
+      })
+    }
+
+    if (answers.has_witnesses === 'yes') {
+      items.push({
+        status: 'done',
+        text: 'Witnesses available \u2014 collect written or recorded statements as soon as possible while memories are fresh.',
+      })
+    } else if (answers.has_witnesses === 'no') {
+      items.push({
+        status: 'needed',
+        text: 'No witnesses identified \u2014 check for nearby traffic or security cameras. Review the police report for any witnesses the officer noted.',
+      })
+    }
+
+    if (answers.defendant_cited === 'yes') {
+      items.push({
+        status: 'done',
+        text: 'Defendant was cited \u2014 a traffic citation strongly supports your fault argument, though it is not conclusive at trial.',
+      })
+    } else if (answers.defendant_cited === 'no') {
+      items.push({
+        status: 'info',
+        text: 'No citation issued \u2014 not unusual. Build your fault case through physical evidence, photos, and witness statements.',
+      })
+    }
 
     items.push({
       status: 'info',
@@ -102,4 +151,15 @@ export const piComparativeFaultConfig: GuidedStepConfig = {
 
     return items
   },
+
+  references: [
+    {
+      label: 'Tex. Civ. Prac. & Rem. Code Ch. 33 — Proportionate Responsibility',
+      url: 'https://statutes.capitol.texas.gov/Docs/CP/htm/CP.33.htm',
+    },
+    {
+      label: 'Texas Law Help — Comparative Fault in Texas',
+      url: 'https://texaslawhelp.org/resource/proportionate-responsibility',
+    },
+  ],
 }

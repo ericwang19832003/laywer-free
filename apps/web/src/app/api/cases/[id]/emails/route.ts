@@ -41,10 +41,9 @@ export async function GET(
   }
 
   const fromQuery = filters.map((f) => `from:${f.email_address}`).join(' OR ')
-  const pageToken = request.nextUrl.searchParams.get('pageToken') ?? undefined
 
   try {
-    const result = await searchMessages(fromQuery, 20, pageToken)
+    const result = await searchMessages(fromQuery, 20)
 
     // If the MCP server returned summaries with IDs but missing details,
     // fetch individual messages to fill in the data

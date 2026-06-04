@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       family_sub_type, small_claims_sub_type, landlord_tenant_sub_type,
       debt_sub_type, pi_sub_type, business_sub_type, contract_sub_type,
       property_sub_type, other_sub_type, re_sub_type, secondary_dispute_types,
-      description,
+      description, situation_description,
     } = parsed.data
 
     // Atomic case + detail creation via database transaction
@@ -92,6 +92,14 @@ export async function POST(request: NextRequest) {
     if (Object.keys(extraUpdates).length > 0 && newCase) {
       await supabase.from('cases').update(extraUpdates).eq('id', caseId)
       Object.assign(newCase, extraUpdates)
+    }
+
+    // Pre-populate PI incident description from the "What's your situation?" answer
+    if (situation_description && dispute_type === 'personal_injury') {
+      await supabase
+        .from('personal_injury_details')
+        .update({ incident_description: situation_description })
+        .eq('case_id', caseId)
     }
 
     // Fetch auto-created tasks (created by the seed_case_tasks trigger)

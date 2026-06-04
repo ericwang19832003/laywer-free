@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { StatsCards } from '@/components/cases/stats-cards'
 import { PaginatedCaseList } from '@/components/cases/paginated-case-list'
+import { TodaysActionCard } from '@/components/cases/todays-action-card'
 import type { CaseCardData } from '@/components/cases/case-cards'
 
 interface CasesWithStatsProps {
@@ -32,6 +33,7 @@ export function CasesWithStats({
   const [totalCount, setTotalCount] = useState(initialTotalCount)
   const [tasksCompleted, setTasksCompleted] = useState(initialTasksCompleted)
   const [tasksTotal, setTasksTotal] = useState(initialTasksTotal)
+  const [actionRefreshKey, setActionRefreshKey] = useState(0)
 
   const handleCasesDeleted = useCallback((count: number) => {
     setActiveCases(prev => {
@@ -43,10 +45,12 @@ export function CasesWithStats({
       return next
     })
     setTotalCount(prev => Math.max(0, prev - count))
+    setActionRefreshKey(k => k + 1)
   }, [])
 
   return (
     <>
+      <TodaysActionCard refreshKey={actionRefreshKey} />
       <StatsCards
         activeCases={activeCases}
         tasksCompleted={tasksCompleted}

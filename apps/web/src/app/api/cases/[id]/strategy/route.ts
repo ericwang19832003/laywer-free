@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   strategyRecommendationSchema,
@@ -83,9 +83,9 @@ export async function GET(
 
     const risk = riskResult.data
 
-    // Try Claude
+    // Try DeepSeek
     try {
-      const anthropic = new Anthropic()
+      const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
       const prompt = buildStrategyPrompt({
         court_type: caseData.court_type ?? 'unknown',
         dispute_type: caseData.dispute_type,
@@ -109,17 +109,16 @@ export async function GET(
         days_since_creation: daysSinceCreation,
       })
 
-      const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+      const message = await deepseek.chat.completions.create({
+        model: 'deepseek-chat',
         max_tokens: 1024,
-        system: prompt.system,
-        messages: [{ role: 'user', content: prompt.user }],
+        messages: [
+          { role: 'system', content: prompt.system },
+          { role: 'user', content: prompt.user },
+        ],
       })
 
-      const text = message.content
-        .filter((block) => block.type === 'text')
-        .map((block) => block.text)
-        .join('\n')
+      const text = message.choices[0]?.message?.content ?? ''
 
       // Extract JSON from response (may be wrapped in markdown code blocks)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
