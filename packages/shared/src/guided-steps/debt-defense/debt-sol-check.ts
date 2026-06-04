@@ -117,6 +117,13 @@ export const debtSolCheckConfig: GuidedStepConfig = {
     },
   ],
 
+  references: [
+    { label: 'Texas Civ. Prac. & Rem. Code § 16 — Limitations', url: 'https://statutes.capitol.texas.gov/Docs/CP/htm/CP.16.htm' },
+    { label: 'CFPB — Statute of Limitations on Debt Explained', url: 'https://www.consumerfinance.gov/ask-cfpb/what-is-a-statute-of-limitations-on-a-debt-en-1389/' },
+    { label: 'Texas Law Help — Time Limits on Debt Lawsuits', url: 'https://texaslawhelp.org/article/time-limits-credit-card-lawsuits-texas' },
+    { label: 'FTC — Time-Barred Debts', url: 'https://consumer.ftc.gov/articles/time-barred-debts' },
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

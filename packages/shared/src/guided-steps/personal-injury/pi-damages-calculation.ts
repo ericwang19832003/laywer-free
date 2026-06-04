@@ -148,6 +148,13 @@ export function createPiDamagesCalculationConfig(piSubType?: string): GuidedStep
     },
   ],
 
+  references: [
+    { label: 'Texas Law Help — Types of Damages in Civil Cases', url: 'https://texaslawhelp.org/article/damages-civil-cases' },
+    { label: 'Texas Civ. Prac. & Rem. Code § 41 — Damages', url: 'https://statutes.capitol.texas.gov/Docs/CP/htm/CP.41.htm' },
+    { label: 'NOLO — Calculating Pain and Suffering Damages', url: 'https://www.nolo.com/legal-encyclopedia/pain-suffering-damages.html' },
+    { label: 'Texas Work Comp — Lost Wages Guidance', url: 'https://www.tdi.texas.gov/wc/index.html' },
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

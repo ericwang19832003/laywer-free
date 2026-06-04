@@ -85,6 +85,13 @@ export const piInsuranceCommunicationPropertyConfig: GuidedStepConfig = {
     },
   ],
 
+  references: [
+    { label: 'TDI — What to Do After an Auto Accident', url: 'https://www.tdi.texas.gov/consumer/autoaccident.html' },
+    { label: 'TDI — Auto Insurance Consumer Guide', url: 'https://www.tdi.texas.gov/consumer/auto-insurance.html' },
+    { label: 'TDI — File an Insurance Complaint', url: 'https://www.tdi.texas.gov/consumer/complain.html' },
+    { label: 'Texas Law Help — Property Damage Claims', url: 'https://texaslawhelp.org/resource/personal-injury' },
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

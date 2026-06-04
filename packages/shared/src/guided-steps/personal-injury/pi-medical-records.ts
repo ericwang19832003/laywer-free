@@ -115,6 +115,12 @@ export const piMedicalRecordsConfig: GuidedStepConfig = {
     },
   ],
 
+  references: [
+    { label: 'HHS — Your Right to Access Your Medical Records (HIPAA)', url: 'https://www.hhs.gov/hipaa/for-individuals/medical-records/index.html' },
+    { label: 'Texas Medical Records — How to Request', url: 'https://texaslawhelp.org/article/medical-records' },
+    { label: 'Texas Law Help — Maximum Medical Improvement (MMI)', url: 'https://texaslawhelp.org/resource/personal-injury' },
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

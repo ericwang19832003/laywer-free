@@ -157,6 +157,13 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     },
   ],
 
+  references: [
+    { label: 'FTC — Fair Debt Collection Practices Act (FDCPA)', url: 'https://consumer.ftc.gov/articles/debt-collectors' },
+    { label: 'CFPB — Debt Collection Rules & Your Rights', url: 'https://www.consumerfinance.gov/consumer-tools/debt-collection/' },
+    { label: 'Texas Finance Code § 392 — Texas Debt Collection Act', url: 'https://statutes.capitol.texas.gov/Docs/FI/htm/FI.392.htm' },
+    { label: 'Texas Law Help — Dealing With Debt Collectors', url: 'https://texaslawhelp.org/article/debt-collectors-and-your-rights' },
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 

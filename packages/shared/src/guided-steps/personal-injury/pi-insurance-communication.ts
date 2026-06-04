@@ -85,6 +85,13 @@ export const piInsuranceCommunicationConfig: GuidedStepConfig = {
     },
   ],
 
+  references: [
+    { label: 'TDI — What to Do After an Auto Accident', url: 'https://www.tdi.texas.gov/consumer/autoaccident.html' },
+    { label: 'TDI — Auto Insurance Consumer Guide', url: 'https://www.tdi.texas.gov/consumer/auto-insurance.html' },
+    { label: 'CFPB — How to Handle Insurance After an Accident', url: 'https://www.consumerfinance.gov/about-us/blog/what-to-do-if-youre-in-an-auto-accident/' },
+    { label: 'Texas Law Help — Personal Injury Claims', url: 'https://texaslawhelp.org/resource/personal-injury' },
+  ],
+
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 
