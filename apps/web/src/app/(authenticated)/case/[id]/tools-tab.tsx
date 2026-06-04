@@ -22,11 +22,8 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
   try {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
-    const subscription = user ? await getSubscription(supabase, user.id) : null
-    const isPro = subscription?.tier === 'pro' || subscription?.tier === 'essentials'
-
     const [
+      { data: { user } },
       authorityResult,
       packsResult,
       discoveryTaskResult,
@@ -34,6 +31,7 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
       sharingResult,
       exhibitSetResult,
     ] = await Promise.all([
+      supabase.auth.getUser(),
       supabase
         .from('case_authorities')
         .select('id', { count: 'exact', head: true })
@@ -67,6 +65,9 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
         .maybeSingle(),
     ])
 
+    const subscription = user ? await getSubscription(supabase, user.id).catch(() => null) : null
+    const isPro = subscription?.tier === 'pro' || subscription?.tier === 'essentials'
+
     const packs = packsResult.data ?? []
     const packCount = packs.length
     const servedCount = packs.filter((p) => p.status === 'served').length
@@ -81,7 +82,8 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
     }
 
     const exhibitSetId = exhibitSetResult.data?.id ?? null
-    const state = jurisdiction === 'TX' ? 'TX' : jurisdiction === 'CA' ? 'CA' : 'TX'
+    const SUPPORTED_STATES = ['TX', 'CA'] as const
+    const state = (SUPPORTED_STATES as readonly string[]).includes(jurisdiction) ? (jurisdiction as 'TX' | 'CA') : null
 
     return (
       <div className="space-y-6">
@@ -97,8 +99,8 @@ export async function ToolsTab({ caseId, courtType, county, jurisdiction }: Tool
         <EmailsCard caseId={caseId} />
         <NotesCard caseId={caseId} initialNotes={notesResult.data ?? []} />
         <MoreSection>
-          <EfilingGuide state={state} courtType={courtType} county={county ?? undefined} />
-          <FeeCalculator courtType={courtType} county={county ?? ''} state={state} />
+          {state && <EfilingGuide state={state} courtType={courtType} county={county ?? undefined} />}
+          {state && <FeeCalculator courtType={courtType} county={county ?? ''} state={state} />}
           <BinderCta caseId={caseId} exhibitSetId={exhibitSetId} />
           <ShareCaseCard
             caseId={caseId}

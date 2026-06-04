@@ -21,11 +21,12 @@ export async function FocusTab({
   try {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
-    const subscription = user ? await getSubscription(supabase, user.id) : null
+    const [{ data: { user } }, dashboardResult] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.rpc('get_case_dashboard', { p_case_id: caseId }),
+    ])
+    const subscription = user ? await getSubscription(supabase, user.id).catch(() => null) : null
     const userTier = subscription?.tier ?? 'free'
-
-    const dashboardResult = await supabase.rpc('get_case_dashboard', { p_case_id: caseId })
     const dashboard = dashboardResult.data as DashboardData | null
 
     const [
