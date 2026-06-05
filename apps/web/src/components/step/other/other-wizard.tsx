@@ -95,7 +95,7 @@ export function OtherWizard({ caseId, taskId, existingMetadata, otherDetails, ca
   const [genError, setGenError] = useState<string | null>(null)
   const [draftPhase, setDraftPhase] = useState(false)
   const [confirming, setConfirming] = useState(false)
-  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>((meta.filing_method as 'online' | 'in_person' | '') ?? '')
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | 'mail' | ''>((meta.filing_method as 'online' | 'in_person' | 'mail' | '') ?? '')
 
   /* ---- Build helpers ---- */
 

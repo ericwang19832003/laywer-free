@@ -251,6 +251,7 @@ export function generateDeadlines(
 
     // --- Determine the reference date ---
     let referenceDate: Date
+    let referenceLabel = 'task completion'
 
     if (
       rule.reference === 'metadata_field' &&
@@ -260,9 +261,13 @@ export function generateDeadlines(
       // Use the date from task metadata
       const metaValue = input.taskMetadata[rule.metadata_field] as string
       referenceDate = parseToLocalNoon(metaValue)
+      referenceLabel = rule.metadata_field
     } else {
       // Default: use the task completion date
       referenceDate = parseToLocalNoon(input.completedAt)
+      if (rule.reference === 'metadata_field' && rule.metadata_field) {
+        referenceLabel = `task completion because ${rule.metadata_field} was not recorded`
+      }
     }
 
     // --- Compute raw due date: reference + offset_days calendar days ---
@@ -298,7 +303,7 @@ export function generateDeadlines(
       label: rule.deadline_label,
       due_at: toISOString(dueDate),
       source: 'system',
-      rationale: `Auto-generated: ${rule.deadline_label} (${rule.offset_days} days from ${rule.reference === 'metadata_field' ? rule.metadata_field : 'task completion'}${rule.apply_rule_4 ? ', adjusted per Texas Rule 4' : ''})`,
+      rationale: `Auto-generated: ${rule.deadline_label} (${rule.offset_days} days from ${referenceLabel}${rule.apply_rule_4 ? ', adjusted per Texas Rule 4' : ''})`,
       consequence: rule.consequence,
       auto_generated: true,
       offset_days_used: rule.offset_days,

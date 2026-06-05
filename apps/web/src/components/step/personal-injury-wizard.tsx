@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Shield, Receipt } from 'lucide-react'
+import { ChevronLeft, Loader2, Plus, Trash2, AlertTriangle, Camera, FileText, Shield, Receipt, Check, Info, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { StepAuthoritySidebar } from './step-authority-sidebar'
 import { isPropertyDamageSubType } from '@lawyer-free/shared/guided-steps/personal-injury/constants'
@@ -73,6 +73,7 @@ interface PersonalInjuryWizardProps {
 /* ------------------------------------------------------------------ */
 
 const MOTOR_VEHICLE_TYPES = ['auto_accident', 'pedestrian_cyclist', 'rideshare', 'uninsured_motorist']
+const PI_WIZARD_VERSION = 2
 
 function formatDateForDisplay(isoDate: string): string {
   if (!isoDate) return ''
@@ -130,7 +131,7 @@ function getPreflightTip(subType: string): string {
 /*  Dynamic steps                                                      */
 /* ------------------------------------------------------------------ */
 
-function getStepsForSubType(subType: string, isFederal: boolean): WizardStep[] {
+export function getStepsForSubType(subType: string, isFederal: boolean): WizardStep[] {
   const preflight: WizardStep = { id: 'preflight', title: 'Before You Start', subtitle: "We'll review your case timeline, court selection, and make sure you're filing in the right place." }
   const incident: WizardStep = { id: 'incident', title: 'What Happened', subtitle: 'Describe the accident or incident. Be specific about date, location, and what happened — courts need clear facts.' }
   const otherDriver: WizardStep = { id: 'other_driver', title: 'Other Driver Info', subtitle: 'Provide information about the party responsible. Their name and contact details help identify the defendant.' }
@@ -156,12 +157,11 @@ function getStepsForSubType(subType: string, isFederal: boolean): WizardStep[] {
 
   // Property damage cases: no injuries/medical steps
   if (isPropertyDamageSubType(subType)) {
-    if (subType === 'vehicle_damage') {
-      const vehicleDamageDefendant: WizardStep = { id: 'other_driver', title: 'Defendant Info', subtitle: 'Provide information about the party responsible for the damage (e.g., other driver, rental company, fleet operator).' }
-      const federalSteps = isFederal ? [defendantDetails, vehicleIdentifiers, investigators, prelitigation] : []
-      return [...common, vehicleDamageDefendant, damageDetails, damages, insurance, venue, ...federalSteps, howToFile, review]
-    }
-    const federalSteps = isFederal ? [defendantDetails, prelitigation] : []
+    const federalSteps = isFederal
+      ? subType === 'vehicle_damage'
+        ? [defendantDetails, vehicleIdentifiers, investigators, prelitigation]
+        : [defendantDetails, prelitigation]
+      : []
     return [...common, damageDetails, damages, insurance, venue, ...federalSteps, howToFile, review]
   }
 
@@ -295,6 +295,8 @@ export function PersonalInjuryWizard({
   const piSubType = personalInjuryDetails?.pi_sub_type ?? 'other_injury'
   const isPropertyDamage = isPropertyDamageSubType(piSubType)
   const totalEstimateMinutes = 35
+
+  const [checkedPreflight, setCheckedPreflight] = useState<Set<number>>(new Set())
 
   /* ---- isFederal must be declared before steps (steps depends on it) ---- */
   const [isFederal, setIsFederal] = useState<boolean>(
@@ -445,6 +447,11 @@ export function PersonalInjuryWizard({
   const [causeNumber, setCauseNumber] = useState<string>(
     (meta.cause_number as string) ?? ''
   )
+  const [requestJuryTrial, setRequestJuryTrial] = useState<boolean>(
+    typeof meta.request_jury_trial === 'boolean'
+      ? meta.request_jury_trial
+      : Boolean(meta.draft_text)
+  )
 
   /* ---- Federal court (isFederal is declared above steps) ---- */
   const [federalDistrict, setFederalDistrict] = useState<string>(
@@ -517,13 +524,16 @@ export function PersonalInjuryWizard({
   )
 
   /* ---- Filing method ---- */
-  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
-    (meta.filing_method as 'online' | 'in_person') ?? ''
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | 'mail' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | 'mail') ?? ''
   )
 
   /* ---- Wizard / draft state ---- */
+  const initialWizardStep = typeof meta._wizard_step === 'number' && meta._wizard_version === PI_WIZARD_VERSION
+    ? Math.min(Math.max(meta._wizard_step, 0), Math.max(steps.length - 1, 0))
+    : 0
   const [currentStep, setCurrentStep] = useState(
-    typeof meta._wizard_step === 'number' ? meta._wizard_step : 0
+    initialWizardStep
   )
   const hasTransitionedRef = useRef(initialTaskStatus !== 'todo')
   const [draft, setDraft] = useState<string>((meta.draft_text as string) ?? '')
@@ -632,7 +642,7 @@ export function PersonalInjuryWizard({
     const opposingParties = []
 
     // Add opposing party based on sub-type
-    if ((MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && otherDriverName) {
+    if ((MOTOR_VEHICLE_TYPES.includes(piSubType) || isPropertyDamage) && otherDriverName) {
       opposingParties.push({ full_name: otherDriverName })
     } else if (piSubType === 'slip_and_fall' && premisesOwnerName) {
       opposingParties.push({ full_name: premisesOwnerName })
@@ -654,6 +664,7 @@ export function PersonalInjuryWizard({
       court_type: isFederal ? 'federal' : courtType as 'jp' | 'county' | 'district',
       county: county || '',
       cause_number: causeNumber || undefined,
+      request_jury_trial: requestJuryTrial,
       // Federal court fields
       is_federal: isFederal,
       ...(isFederal ? {
@@ -730,6 +741,7 @@ export function PersonalInjuryWizard({
     courtType,
     county,
     causeNumber,
+    requestJuryTrial,
     federalDistrict,
     federalDivision,
     civilActionNumber,
@@ -824,6 +836,7 @@ export function PersonalInjuryWizard({
       county: county || null,
       court_type: courtType || null,
       cause_number: causeNumber || null,
+      request_jury_trial: requestJuryTrial,
       // Federal court
       is_federal: isFederal,
       federal_district: federalDistrict || null,
@@ -858,6 +871,7 @@ export function PersonalInjuryWizard({
       annotations,
       // Wizard position
       _wizard_step: currentStep,
+      _wizard_version: PI_WIZARD_VERSION,
     }),
     [
       incidentDate,
@@ -902,6 +916,7 @@ export function PersonalInjuryWizard({
       county,
       courtType,
       causeNumber,
+      requestJuryTrial,
       isFederal,
       federalDistrict,
       federalDivision,
@@ -947,13 +962,14 @@ export function PersonalInjuryWizard({
     }
   }
 
-  async function generateDraft() {
+  async function generateDraft(): Promise<void> {
     // For vehicle_damage cases, defendant name is required to avoid "Unknown Defendant" in the petition
-    if ((MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && !otherDriverName.trim()) {
+    if (MOTOR_VEHICLE_TYPES.includes(piSubType) && !otherDriverName.trim()) {
+      const message = 'Please enter the defendant\'s name before generating the petition.'
       const otherDriverStepIdx = steps.findIndex(s => s.id === 'other_driver')
       if (otherDriverStepIdx >= 0) setCurrentStep(otherDriverStepIdx)
-      setGenError('Please enter the defendant\'s name before generating the petition.')
-      return
+      setGenError(message)
+      throw new Error(message)
     }
     setGenerating(true)
     setGenError(null)
@@ -969,14 +985,27 @@ export function PersonalInjuryWizard({
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to generate document')
+        const details = Array.isArray(data.details)
+          ? data.details
+              .map((issue: { path?: unknown[]; message?: string }) => {
+                const field = Array.isArray(issue.path) && issue.path.length > 0
+                  ? issue.path.join('.')
+                  : 'field'
+                return `${field}: ${issue.message ?? 'invalid value'}`
+              })
+              .slice(0, 3)
+              .join('; ')
+          : ''
+        throw new Error(details ? `${data.error || 'Failed to generate document'} — ${details}` : (data.error || 'Failed to generate document'))
       }
       const data = await res.json()
       setDraft(data.draft)
       setAnnotations(data.annotations ?? [])
       setDraftPhase(true)
     } catch (err) {
-      setGenError(err instanceof Error ? err.message : 'Failed to generate document')
+      const message = err instanceof Error ? err.message : 'Failed to generate document'
+      setGenError(message)
+      throw new Error(message)
     } finally {
       setGenerating(false)
     }
@@ -995,14 +1024,20 @@ export function PersonalInjuryWizard({
   }, [buildMetadata]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = useCallback(async () => {
-    const metadata = buildMetadata()
-    if (!hasTransitionedRef.current) {
-      await patchTask('in_progress', metadata)
-      hasTransitionedRef.current = true
-    } else {
-      await patchTask(undefined, metadata)
+    try {
+      const metadata = buildMetadata()
+      if (!hasTransitionedRef.current) {
+        await patchTask('in_progress', metadata)
+        hasTransitionedRef.current = true
+      } else {
+        await patchTask(undefined, metadata)
+      }
+      await generateDraft()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Petition generation failed'
+      setGenError(message)
+      throw Object.assign(new Error(message), { suppressToast: true })
     }
-    await generateDraft()
   }, [buildMetadata, buildFacts]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFinalConfirm = useCallback(async () => {
@@ -1117,55 +1152,92 @@ export function PersonalInjuryWizard({
       /* ============================================================ */
       /*  PREFLIGHT                                                    */
       /* ============================================================ */
-      case 'preflight':
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-warm-muted">
-              Before we begin preparing your {getSubTypeLabel(piSubType).toLowerCase()} petition,
-              gather these items if you have them:
-            </p>
+      case 'preflight': {
+        const preflightItems = isPropertyDamage
+          ? [
+              { icon: Camera, label: 'Photos of the damage', hint: 'Multiple angles, close-up and wide' },
+              { icon: FileText, label: 'Repair estimates or invoices', hint: 'Even a rough quote helps' },
+              { icon: Shield, label: 'Police report', hint: 'If one was filed' },
+              { icon: Shield, label: 'Insurance information', hint: 'Yours and the other party\'s' },
+              { icon: Receipt, label: 'Receipts for damaged property', hint: 'Or for repairs already paid' },
+            ]
+          : [
+              { icon: Camera, label: 'Photos of injuries and scene', hint: 'Date-stamped if possible' },
+              { icon: FileText, label: 'Medical records and bills', hint: 'All treatment related to the injury' },
+              { icon: Shield, label: 'Police report', hint: 'If one was filed' },
+              { icon: Shield, label: 'Insurance information', hint: 'Yours and the other party\'s' },
+              { icon: Receipt, label: 'Bills and receipts for expenses', hint: 'Lost wages, travel, other costs' },
+            ]
 
-            <div className="space-y-3">
-              {(isPropertyDamage
-                ? [
-                    { icon: Camera, label: 'Photos of the damage (multiple angles)' },
-                    { icon: FileText, label: 'Repair estimates or invoices' },
-                    { icon: Shield, label: 'Police report (if filed)' },
-                    { icon: Shield, label: 'Insurance information (yours and theirs)' },
-                    { icon: Receipt, label: 'Receipts for damaged property or repairs' },
-                  ]
-                : [
-                    { icon: Camera, label: 'Photos of injuries and scene' },
-                    { icon: FileText, label: 'Medical records and bills' },
-                    { icon: Shield, label: 'Police report (if filed)' },
-                    { icon: Shield, label: 'Insurance information (yours and theirs)' },
-                    { icon: Receipt, label: 'Bills and receipts for expenses' },
-                  ]
-              ).map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-calm-indigo/10 flex items-center justify-center shrink-0">
-                    <Icon className="h-4 w-4 text-calm-indigo" />
-                  </div>
-                  <span className="text-sm text-warm-text">{label}</span>
-                </div>
-              ))}
+        return (
+          <div className="space-y-5">
+            {/* Callout */}
+            <div className="flex gap-3 px-4 py-3.5 rounded-xl bg-calm-indigo/[0.07] border border-calm-indigo/[0.12]">
+              <Info className="h-4.5 w-4.5 text-calm-indigo shrink-0 mt-0.5" />
+              <p className="text-[15px] leading-relaxed text-warm-text font-medium">
+                We&apos;ll walk through your case timeline together, pick the right court, and make sure everything&apos;s filed in the right place. Take your time — nothing is submitted until you say so.
+              </p>
             </div>
 
-            <div className="rounded-lg border border-calm-amber bg-calm-amber/5 p-3 mt-4">
-              <div className="flex gap-2">
-                <AlertTriangle className="h-4 w-4 text-calm-amber shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-warm-text">Tip for {getSubTypeLabel(piSubType)} cases</p>
-                  <p className="text-xs text-warm-muted mt-1">{getPreflightTip(piSubType)}</p>
-                </div>
+            {/* Lead */}
+            <p className="text-[15px] leading-relaxed text-warm-muted">
+              Before we begin your {getSubTypeLabel(piSubType).toLowerCase()} petition, it helps to
+              gather these items. Don&apos;t worry if you&apos;re missing a few — you can always add
+              them later.
+            </p>
+
+            {/* Interactive checklist */}
+            <ul className="space-y-2.5">
+              {preflightItems.map(({ icon: Icon, label, hint }, i) => {
+                const on = checkedPreflight.has(i)
+                return (
+                  <li
+                    key={label}
+                    onClick={() => setCheckedPreflight(prev => {
+                      const next = new Set(prev)
+                      if (next.has(i)) next.delete(i); else next.add(i)
+                      return next
+                    })}
+                    className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border-[1.5px] cursor-pointer select-none transition-all duration-150 hover:-translate-y-px ${
+                      on
+                        ? 'border-calm-green bg-calm-green/[0.07]'
+                        : 'border-warm-border bg-warm-bg hover:border-warm-border/70'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-150 ${
+                      on
+                        ? 'bg-calm-green border-calm-green text-white'
+                        : 'bg-white border-warm-border text-calm-indigo'
+                    }`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-semibold text-warm-text leading-snug">{label}</p>
+                      <p className="text-[13px] text-warm-muted mt-0.5">{hint}</p>
+                    </div>
+                    <div className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center border-[1.8px] transition-all duration-150 ${
+                      on ? 'bg-calm-green border-calm-green' : 'border-warm-border/80'
+                    }`}>
+                      {on && <Check className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+
+            {/* Tip box */}
+            <div className="flex gap-3.5 px-5 py-4 rounded-2xl bg-calm-amber/[0.09] border border-calm-amber/30">
+              <div className="w-[34px] h-[34px] rounded-xl flex items-center justify-center shrink-0 bg-calm-amber/20 text-[#8a5012]">
+                <Lightbulb className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-warm-text">Tip for {getSubTypeLabel(piSubType)} cases</p>
+                <p className="text-[13px] text-warm-muted mt-1 leading-relaxed">{getPreflightTip(piSubType)}</p>
               </div>
             </div>
-
-            <p className="text-xs text-warm-muted">
-              Don&apos;t have everything? That&apos;s okay. You can always come back and update later.
-            </p>
           </div>
         )
+      }
 
       /* ============================================================ */
       /*  INCIDENT                                                     */
@@ -1173,6 +1245,21 @@ export function PersonalInjuryWizard({
       case 'incident':
         return (
           <div className="space-y-4">
+            {isPropertyDamage && (
+              <div className="space-y-2">
+                <Label htmlFor="responsible-party">Who caused the damage?</Label>
+                <Input
+                  id="responsible-party"
+                  placeholder="Person or company name, if known"
+                  value={otherDriverName}
+                  onChange={(e) => setOtherDriverName(e.target.value)}
+                />
+                <p className="text-xs text-warm-muted">
+                  If you do not know the full legal name yet, describe the person or business in your story below.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="incident-date">Incident Date</Label>
               <Input
@@ -1884,6 +1971,29 @@ export function PersonalInjuryWizard({
                 </div>
               </div>
             )}
+
+            {isPropertyDamage && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="their-insurance">Their Insurance Carrier</Label>
+                  <Input
+                    id="their-insurance"
+                    placeholder="If known"
+                    value={otherDriverInsurance}
+                    onChange={(e) => setOtherDriverInsurance(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="their-policy">Their Policy Number</Label>
+                  <Input
+                    id="their-policy"
+                    placeholder="Optional"
+                    value={otherDriverPolicyNumber}
+                    onChange={(e) => setOtherDriverPolicyNumber(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )
 
@@ -2084,6 +2194,33 @@ export function PersonalInjuryWizard({
                 </div>
               </>
             )}
+
+            <div className="space-y-2 rounded-lg border border-warm-border bg-warm-surface/40 p-3">
+              <Label>Do you want to request a jury trial?</Label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant={!requestJuryTrial ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestJuryTrial(false)}
+                  className="justify-start"
+                >
+                  No jury trial
+                </Button>
+                <Button
+                  type="button"
+                  variant={requestJuryTrial ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestJuryTrial(true)}
+                  className="justify-start"
+                >
+                  Request jury trial
+                </Button>
+              </div>
+              <p className="text-xs text-warm-muted">
+                A jury demand can add filing requirements and fees. Choose it only if you want the petition to include that request.
+              </p>
+            </div>
           </div>
         )
       }
@@ -2121,12 +2258,13 @@ export function PersonalInjuryWizard({
             >
               <ReviewRow label="Date" value={formatDateForDisplay(incidentDate) || 'Not provided'} />
               <ReviewRow label="Location" value={incidentLocation || 'Not provided'} />
+              {isPropertyDamage && <ReviewRow label="Responsible party" value={otherDriverName || 'Not provided'} />}
               <ReviewRow label="Description" value={incidentDescription || 'Not provided'} />
               <ReviewRow label="Police report" value={policeReportFiled === true ? `Yes${policeReportNumber ? ` (#${policeReportNumber})` : ''}` : policeReportFiled === false ? 'No' : 'Not answered'} />
             </ReviewSection>
 
             {/* Sub-type-specific section */}
-            {(MOTOR_VEHICLE_TYPES.includes(piSubType) || piSubType === 'vehicle_damage') && (
+            {MOTOR_VEHICLE_TYPES.includes(piSubType) && (
               <ReviewSection
                 title="Other Driver"
                 stepId="other_driver"
@@ -2260,6 +2398,12 @@ export function PersonalInjuryWizard({
                   <ReviewRow label="UM/UIM coverage" value={umUimCoverage ? 'Yes' : 'No'} />
                 </>
               )}
+              {isPropertyDamage && (
+                <>
+                  <ReviewRow label="Their carrier" value={otherDriverInsurance || 'Not provided'} />
+                  <ReviewRow label="Their policy #" value={otherDriverPolicyNumber || 'Not provided'} />
+                </>
+              )}
             </ReviewSection>
 
             {/* Venue */}
@@ -2269,17 +2413,26 @@ export function PersonalInjuryWizard({
               onEdit={handleReviewEdit}
             >
               <ReviewRow label="Your name" value={yourName || 'Not provided'} />
+              <ReviewRow label="Jury trial" value={requestJuryTrial ? 'Requested' : 'Not requested'} />
               {isFederal ? (
                 <>
                   <ReviewRow label="Court" value="Federal District Court" />
                   <ReviewRow label="District" value={federalDistrict || 'Not selected'} />
                   <ReviewRow label="Division" value={federalDivision || 'Not selected'} />
+                  <ReviewRow
+                    label="Filing method"
+                    value={filingMethod === 'online' ? 'Online' : filingMethod === 'in_person' ? 'In person' : filingMethod === 'mail' ? 'By mail' : 'Not selected'}
+                  />
                   {civilActionNumber && <ReviewRow label="Civil action #" value={civilActionNumber} />}
                 </>
               ) : (
                 <>
                   <ReviewRow label="County" value={county || 'Not provided'} />
                   <ReviewRow label="Court type" value={courtType ? courtTypeLabel(courtType) : 'Not selected'} />
+                  <ReviewRow
+                    label="Filing method"
+                    value={filingMethod === 'online' ? 'Online' : filingMethod === 'in_person' ? 'In person' : filingMethod === 'mail' ? 'By mail' : 'Not selected'}
+                  />
                   {causeNumber && <ReviewRow label="Cause #" value={causeNumber} />}
                 </>
               )}
@@ -2728,14 +2881,14 @@ export function PersonalInjuryWizard({
   /* ---- Wizard phase layout ---- */
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <StepAuthoritySidebar
-        caseId={caseId}
-        mode="select"
-        selectedClusterIds={selectedAuthorityIds}
-        onSelectionChange={setSelectedAuthorityIds}
-      />
-      <div className="mt-6">
+    <div className="-mx-4 min-h-[calc(100vh-3.5rem)] bg-[#f7f5f1] sm:-mx-6 lg:-mx-8">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <StepAuthoritySidebar
+          caseId={caseId}
+          mode="select"
+          selectedClusterIds={selectedAuthorityIds}
+          onSelectionChange={setSelectedAuthorityIds}
+        />
         <WizardShell
           caseId={caseId}
           title={`Prepare Your ${getDocumentTitle(piSubType)}`}
@@ -2748,17 +2901,32 @@ export function PersonalInjuryWizard({
           totalEstimateMinutes={totalEstimateMinutes}
           completeButtonLabel={generating ? 'Generating...' : 'Generate My Petition'}
           completedSteps={Array.from({ length: currentStep }, (_, i) => i)}
+          presentation="workbench"
         >
-          {generating ? (
-            <div className="flex items-center gap-3 py-12 justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
-              <p className="text-sm text-warm-muted">
-                Generating your {getSubTypeLabel(piSubType).toLowerCase()} petition... This may take a moment.
-              </p>
-            </div>
-          ) : (
-            renderStep()
-          )}
+          <div className="space-y-4">
+            {genError && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                <div className="flex gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-destructive">Petition generation failed</p>
+                    <p className="text-sm text-destructive">{genError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {generating ? (
+              <div className="flex items-center gap-3 py-12 justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-warm-muted" />
+                <p className="text-sm text-warm-muted">
+                  Generating your {getSubTypeLabel(piSubType).toLowerCase()} petition... This may take a moment.
+                </p>
+              </div>
+            ) : (
+              renderStep()
+            )}
+          </div>
         </WizardShell>
       </div>
     </div>

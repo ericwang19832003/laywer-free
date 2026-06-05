@@ -62,8 +62,8 @@ export default async function CaseLayout({
 
   return (
     <>
-      <div className="flex min-h-[calc(100vh-3.5rem)] pb-24 lg:pb-0">
-        <aside className="hidden lg:block w-64 shrink-0 bg-warm-bg shadow-[1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <div className="grid min-h-[calc(100vh-3.5rem)] grid-cols-1 pb-24 lg:grid-cols-[16rem_minmax(0,1fr)] lg:pb-0">
+        <aside className="hidden bg-warm-bg shadow-[1px_0_3px_0_rgba(0,0,0,0.04)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto lg:block">
           <WorkflowSidebar caseId={id} tasks={taskList} phases={phases} />
         </aside>
 

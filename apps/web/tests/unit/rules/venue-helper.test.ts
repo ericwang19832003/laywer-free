@@ -278,10 +278,10 @@ describe('validateJurisdiction', () => {
     expect(result.warning).toBeUndefined()
   })
 
-  it('warns for county over $200K with District Court suggestion', () => {
+  it('warns for county over $250K with District Court suggestion', () => {
     const result = validateJurisdiction({
       courtType: 'County',
-      amountSought: 300000,
+      amountSought: 250001,
     })
 
     expect(result.valid).toBe(false)

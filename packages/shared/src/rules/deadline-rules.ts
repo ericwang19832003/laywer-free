@@ -136,6 +136,20 @@ function buildAnswerRules(): DeadlineRule[] {
 
 function buildDisputeSpecificRules(): DeadlineRule[] {
   return [
+    // Personal injury litigation checkpoint: after the user confirms
+    // file-stamped filing and service facts, calculate from the actual
+    // service date instead of the day they clicked "complete".
+    {
+      trigger_task: 'pi_wait_for_answer',
+      deadline_key: 'answer_deadline_estimated',
+      deadline_label: 'Estimated Answer Deadline',
+      offset_days: 20,
+      reference: 'metadata_field' as const,
+      metadata_field: 'service_completed_date',
+      apply_rule_4: true,
+      consequence: ANSWER_CONSEQUENCE,
+      condition_event: 'answer_filed',
+    },
     // Divorce 60-day waiting period
     {
       trigger_task: 'divorce_file_with_court',

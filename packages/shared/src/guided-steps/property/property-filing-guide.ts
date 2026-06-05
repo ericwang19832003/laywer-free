@@ -113,7 +113,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       id: 'venue_info',
       type: 'info',
       prompt:
-        'VENUE: File in the county where the property is located (Tex. Civ. Prac. & Rem. Code \u00a715.011 for real property) or where the defendant lives.',
+        'VENUE: For vehicle or personal property damage, file in a county connected to the dispute, such as where the damage happened or where the defendant lives or does business. Only use the real-property venue rule (Tex. Civ. Prac. & Rem. Code \u00a715.011) when the lawsuit directly concerns land or real property, such as title, possession, or damage to real estate.',
     },
   ],
 
@@ -195,7 +195,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
     // Venue reminder
     items.push({
       status: 'info',
-      text: 'File in the county where the property is located or where the defendant lives (Tex. Civ. Prac. & Rem. Code \u00a715.011).',
+      text: 'For vehicle or personal property damage, confirm venue based on where the damage happened or where the defendant lives or does business. Only use the real-property venue rule for land or real estate disputes.',
     })
 
     return items

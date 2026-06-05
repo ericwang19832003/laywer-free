@@ -101,6 +101,7 @@ const BASE_REQUEST = {
 
 describe('AIClient', () => {
   beforeEach(() => {
+    vi.stubEnv('OPENAI_API_KEY', 'test-key-123')
     vi.stubEnv('DEEPSEEK_API_KEY', 'test-key-123')
     vi.useFakeTimers({ shouldAdvanceTime: true })
     mockCreate.mockReset()
@@ -272,8 +273,9 @@ describe('AIClient', () => {
       await expect(client.complete(BASE_REQUEST)).rejects.toThrow(AIResponseError)
     })
 
-    it('throws AIConfigError when DEEPSEEK_API_KEY is missing', async () => {
+    it('throws AIConfigError when no generation provider key is configured', async () => {
       vi.stubEnv('DEEPSEEK_API_KEY', '')
+      vi.stubEnv('OPENAI_API_KEY', '')
       // AIConfigError is thrown before the mock is called
       const client = new AIClient({ maxRetries: 0 })
 

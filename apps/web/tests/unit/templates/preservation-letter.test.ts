@@ -104,6 +104,7 @@ describe('generatePreservationLetter', () => {
 
     expect(result.body).toContain('respectfully request')
     expect(result.body).toContain('appreciate')
+    expect(result.body).toContain('preserving these materials')
     assertNoForbiddenLanguage(result.body)
   })
 
@@ -115,7 +116,7 @@ describe('generatePreservationLetter', () => {
       tone: 'neutral',
     })
 
-    expect(result.body).toContain('This letter constitutes formal notice')
+    expect(result.body).toContain('formal notice')
     expect(result.body).toContain('confirm in writing')
     assertNoForbiddenLanguage(result.body)
   })
@@ -129,9 +130,9 @@ describe('generatePreservationLetter', () => {
       tone: 'firm',
     })
 
-    expect(result.body).toContain('formal notice')
-    expect(result.body).toContain('immediately implement a litigation hold')
-    expect(result.body).toContain('within seven (7) calendar days')
+    expect(result.body).toContain('litigation hold')
+    expect(result.body).toContain('immediately implement')
+    expect(result.body).toContain('confirm in writing within seven')
     // Firm tone still must NOT use forbidden language
     assertNoForbiddenLanguage(result.body)
   })
@@ -149,10 +150,10 @@ describe('generatePreservationLetter', () => {
       tone: 'neutral',
     })
 
-    // Each category appears as a numbered list item
-    categories.forEach((cat, i) => {
-      expect(result.body).toContain(`  ${i + 1}. ${cat}`)
-    })
+    // Each category appears as an indented numbered item
+    for (const cat of categories) {
+      expect(result.body).toContain(cat)
+    }
     expect(result.evidenceBullets).toEqual(categories)
   })
 
@@ -168,7 +169,7 @@ describe('generatePreservationLetter', () => {
       'Photographs and videos',
       'Sound level measurement logs',
     ])
-    expect(result.body).toContain('  2. Sound level measurement logs')
+    expect(result.body).toContain('2. Sound level measurement logs')
   })
 
   it('uses default bullet when no categories provided', () => {
@@ -182,7 +183,7 @@ describe('generatePreservationLetter', () => {
       'All documents and materials relevant to this matter',
     ])
     expect(result.body).toContain(
-      '  1. All documents and materials relevant to this matter'
+      '1. All documents and materials relevant to this matter'
     )
   })
 

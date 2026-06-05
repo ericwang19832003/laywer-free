@@ -15,7 +15,7 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       id: 'court_info',
       type: 'info',
       prompt:
-        'Most employment cases are filed in state district court. Discrimination claims with a right-to-sue letter can be filed in federal court. If your employer is a government entity, different rules may apply.',
+        'Most employment cases are filed in state district court. Discrimination claims with a right-to-sue letter may be filed in state or federal court depending on the claim and deadline. If your employer is a government entity, different notice and venue rules may apply.',
       showIf: (answers) => answers.know_court === 'no',
     },
     {
@@ -44,6 +44,13 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       showIf: (answers) => answers.has_right_to_sue_letter === 'no',
     },
     {
+      id: 'documents_ready',
+      type: 'yes_no',
+      prompt: 'Do you have your employment filing packet ready?',
+      helpText:
+        'Prepare: petition or complaint, civil cover sheet, right-to-sue letter if discrimination is claimed, termination letter or write-ups, pay records, employment agreement or handbook, complaint/HR records, key emails/texts, witness list, and copies for service.',
+    },
+    {
       id: 'filing_method',
       type: 'single_choice',
       prompt: 'How will you file?',
@@ -52,6 +59,19 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
         { value: 'online', label: 'Online (e-filing)' },
         { value: 'mail', label: 'By mail' },
       ],
+    },
+    {
+      id: 'efile_info',
+      type: 'info',
+      prompt:
+        'Online filing checklist:\n1. Go to eFileTexas.gov and choose a service provider\n2. Create an account or sign in\n3. Select the correct court and employment/civil case type\n4. Upload the petition or complaint, civil cover sheet, right-to-sue letter if required, and exhibits as PDFs\n5. Pay the filing fee or submit a fee-waiver request\n6. Save the envelope number, filing receipt, and clerk acceptance email',
+      showIf: (answers) => answers.filing_method === 'online',
+    },
+    {
+      id: 'service_packet_info',
+      type: 'info',
+      prompt:
+        'After filing, each defendant must be served. For an employer entity, confirm the legal business name and registered agent before preparing copies for service.',
     },
   ],
 
@@ -105,9 +125,18 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       })
     }
 
+    if (answers.documents_ready === 'yes') {
+      items.push({ status: 'done', text: 'Employment filing packet is ready.' })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Prepare the petition or complaint, civil cover sheet, right-to-sue letter if needed, pay records, termination letter or write-ups, HR records, and copies for service.',
+      })
+    }
+
     items.push({
       status: 'info',
-      text: 'Keep copies of all filed documents and your receipt or confirmation number.',
+      text: 'Keep copies of all filed documents, the e-filing envelope number or clerk receipt, and proof that each defendant was served.',
     })
 
     return items

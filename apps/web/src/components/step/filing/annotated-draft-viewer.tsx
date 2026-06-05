@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Download, Printer, BookOpen } from 'lucide-react'
+import { Download, Printer, BookOpen, Gauge, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { generateDocumentPdf } from '@/lib/pdf/generate-document-pdf'
+import { scorePetitionDraft } from '@/lib/petition-quality'
 
 export interface DraftAnnotation {
   id: number
@@ -43,6 +44,13 @@ export function AnnotatedDraftViewer({
   const [showMobileAnnotations, setShowMobileAnnotations] = useState(false)
   const [versionSaveError, setVersionSaveError] = useState<string | null>(null)
   const [savingVersion, setSavingVersion] = useState(false)
+  const showPetitionQuality = !!documentTitle && /petition|complaint/i.test(documentTitle)
+  const quality = useMemo(() => scorePetitionDraft(draft), [draft])
+  const scoreTone = quality.score >= 80
+    ? 'text-green-700 bg-green-50 border-green-200'
+    : quality.score >= 65
+      ? 'text-calm-amber bg-calm-amber/5 border-calm-amber/30'
+      : 'text-destructive bg-destructive/5 border-destructive/30'
 
   async function handleDownloadPdf() {
     setDownloading(true)
@@ -130,6 +138,47 @@ export function AnnotatedDraftViewer({
           This is a computer-generated starting point. Review and edit before filing.
         </p>
       </div>
+
+      {showPetitionQuality && (
+      <div className={`rounded-lg border p-3 print:hidden ${scoreTone}`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-2">
+            <Gauge className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold">Petition Quality: {quality.score}/100</p>
+              <p className="text-xs opacity-80">{quality.grade}</p>
+            </div>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={handleRegenerate} disabled={regenerating || savingVersion}>
+            Ask AI to improve
+          </Button>
+        </div>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div>
+            <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Strong points
+            </div>
+            <ul className="space-y-1 text-xs opacity-90">
+              {(quality.strengths.length ? quality.strengths.slice(0, 3) : ['No strong sections detected yet.']).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              Improve before filing
+            </div>
+            <ul className="space-y-1 text-xs opacity-90">
+              {(quality.improvements.length ? quality.improvements.slice(0, 4) : ['No major structure gaps detected.']).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+      )}
 
       {/* Two-column layout */}
       <div className="flex gap-4">

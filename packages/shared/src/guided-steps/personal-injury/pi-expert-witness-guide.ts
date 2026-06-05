@@ -1,6 +1,7 @@
 import type { GuidedStepConfig } from '../types'
+import { isPropertyDamageSubType } from './constants'
 
-export const piExpertWitnessGuideConfig: GuidedStepConfig = {
+const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
   title: 'Do You Need Expert Witnesses?',
   reassurance:
     'Expert witnesses can strengthen your case significantly. This guide helps you determine if you need one and how to find affordable options.',
@@ -131,3 +132,121 @@ export const piExpertWitnessGuideConfig: GuidedStepConfig = {
     return items
   },
 }
+
+const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
+  title: 'Do You Need Expert Witnesses?',
+  reassurance:
+    'Expert witnesses can help prove repair cost, diminished value, causation, and responsibility in property damage cases.',
+
+  questions: [
+    {
+      id: 'when_experts_needed',
+      type: 'info',
+      prompt:
+        "WHEN ARE EXPERT WITNESSES NEEDED?\nExperts are not required in every property damage case, but they can be important when:\n• The repair estimate is disputed — an independent mechanic, contractor, engineer, or estimator can explain the reasonable cost of repair\n• The property lost market value after repair — an appraiser can support a diminished value claim\n• The cause of the damage is disputed — an accident reconstructionist, engineer, or qualified inspector can connect the damage to the incident\n• The defendant argues the damage was old, unrelated, or caused by normal wear — an expert can compare photos, inspections, repair records, and physical evidence\n\nStraightforward cases with photos, receipts, and a clear admission of fault may not need an expert.",
+    },
+    {
+      id: 'repair_disputed',
+      type: 'yes_no',
+      prompt: 'Is the other side disputing your repair estimate or replacement cost?',
+      helpText:
+        'This is common when the estimate is high, the defendant says repairs are unnecessary, or the insurer offers much less than your repair shop or contractor.',
+    },
+    {
+      id: 'repair_expert_info',
+      type: 'info',
+      prompt:
+        "REPAIR COST EXPERT:\n• What they do: Inspect the damaged property and explain the reasonable repair or replacement cost\n• Vehicle damage: independent auto appraiser, body shop estimator, or mechanic\n• Home/property damage: licensed contractor, engineer, remediation specialist, or property inspector\n• Typical cost: often $250–$1,500 for an estimate or report; more for deposition or trial testimony\n• Budget option: Get 2–3 independent written estimates and ask the estimator whether they can testify if needed.",
+      showIf: (answers) => answers.repair_disputed === 'yes',
+    },
+    {
+      id: 'diminished_value',
+      type: 'yes_no',
+      prompt: 'Are you claiming diminished value after repairs are completed?',
+      helpText:
+        'Diminished value means the property is worth less even after repair, such as a vehicle with accident history or a structure with repaired but market-affecting damage.',
+    },
+    {
+      id: 'appraiser_info',
+      type: 'info',
+      prompt:
+        "APPRAISER / DIMINISHED VALUE EXPERT:\n• What they do: Compare the property value before and after the damage and repair history\n• Vehicle damage: diminished value appraiser or licensed independent adjuster\n• Real property: licensed real estate appraiser or broker price opinion when allowed\n• Typical cost: $300–$1,500 for a report, depending on property type and complexity\n• Bring: photos, repair invoices, prior condition records, market listings, and any insurer valuation.",
+      showIf: (answers) => answers.diminished_value === 'yes',
+    },
+    {
+      id: 'causation_disputed',
+      type: 'yes_no',
+      prompt: 'Might the defense argue the damage was old, unrelated, or caused by normal wear?',
+      helpText:
+        'If causation is disputed, expert analysis can connect the damage pattern to the incident and rule out unrelated causes.',
+    },
+    {
+      id: 'causation_expert_info',
+      type: 'info',
+      prompt:
+        "CAUSATION EXPERT:\n• What they do: Explain how the incident caused the specific damage pattern\n• Vehicle cases: accident reconstruction expert, mechanic, or auto damage analyst\n• Building/property cases: engineer, contractor, remediation specialist, or inspector\n• Best evidence: before/after photos, inspection reports, maintenance records, repair invoices, weather or incident records, and witness statements\n• Budget option: A detailed written estimate that explains causation may be enough for negotiation, even if you do not retain a formal expert.",
+      showIf: (answers) => answers.causation_disputed === 'yes',
+    },
+    {
+      id: 'finding_affordable_experts',
+      type: 'info',
+      prompt:
+        "FINDING AFFORDABLE EXPERTS:\n• Start with the professionals already involved: repair shop, contractor, inspector, adjuster, or appraiser\n• Ask for a written report that explains scope, cause, and cost in plain language\n• Get more than one estimate when possible\n• Ask whether the expert can appear remotely, by affidavit, or only live in court\n• Confirm fees for inspection, written report, deposition, and trial separately.",
+    },
+  ],
+
+  generateSummary(answers) {
+    const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
+
+    if (answers.repair_disputed === 'yes') {
+      items.push({
+        status: 'needed',
+        text: 'Repair cost is disputed — consider an independent repair estimate or property damage expert.',
+      })
+    } else if (answers.repair_disputed === 'no') {
+      items.push({
+        status: 'done',
+        text: 'Repair cost is not disputed — a repair-cost expert may not be needed.',
+      })
+    }
+
+    if (answers.diminished_value === 'yes') {
+      items.push({
+        status: 'needed',
+        text: 'Diminished value is claimed — consider an appraiser or diminished value report.',
+      })
+    } else if (answers.diminished_value === 'no') {
+      items.push({
+        status: 'done',
+        text: 'No diminished value claim — an appraiser may not be needed for that issue.',
+      })
+    }
+
+    if (answers.causation_disputed === 'yes') {
+      items.push({
+        status: 'needed',
+        text: 'Causation may be disputed — gather before/after evidence and consider a causation expert.',
+      })
+    } else if (answers.causation_disputed === 'no') {
+      items.push({
+        status: 'done',
+        text: 'Causation is not disputed — photos, receipts, and estimates may be enough.',
+      })
+    }
+
+    items.push({
+      status: 'info',
+      text: 'Budget options: start with repair shops, contractors, inspectors, adjusters, or appraisers already familiar with the damage.',
+    })
+
+    return items
+  },
+}
+
+export function createPiExpertWitnessGuideConfig(piSubType?: string): GuidedStepConfig {
+  return isPropertyDamageSubType(piSubType)
+    ? propertyDamageExpertWitnessGuideConfig
+    : bodilyInjuryExpertWitnessGuideConfig
+}
+
+export const piExpertWitnessGuideConfig = createPiExpertWitnessGuideConfig()

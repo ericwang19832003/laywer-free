@@ -1,102 +1,119 @@
 import type { GuidedStepConfig } from '../types'
 
 export const piDiscoveryResponsesConfig: GuidedStepConfig = {
-  title: 'Respond to Opposing Discovery',
+  title: 'Review Discovery Responses',
   reassurance:
-    'The defendant will likely send you discovery requests too. We\'ll help you understand what\'s required and how to respond properly.',
+    'Use this step after the defendant responds to your discovery. We review each response for evasive answers, boilerplate objections, missing documents, privilege-log problems, and admissions that narrow the case.',
 
   questions: [
     {
-      id: 'received_discovery',
+      id: 'received_responses',
       type: 'single_choice',
-      prompt: 'Has opposing counsel sent you discovery requests?',
+      prompt: 'Has the defendant served responses to your discovery requests?',
       options: [
         { value: 'yes', label: 'Yes' },
         { value: 'no', label: 'No' },
-        { value: 'not_yet', label: 'Not yet, but I expect them' },
+        { value: 'not_due_yet', label: 'Not yet, the deadline has not passed' },
+        { value: 'overdue', label: 'No, and the deadline passed' },
       ],
     },
     {
-      id: 'discovery_type',
+      id: 'response_set',
       type: 'single_choice',
-      prompt: 'What type of discovery requests did you receive? (select primary type)',
-      showIf: (answers) => answers.received_discovery === 'yes',
+      prompt: 'Which response set are you reviewing?',
+      showIf: (answers) => answers.received_responses === 'yes',
       options: [
-        { value: 'interrogatories', label: 'Interrogatories (written questions)' },
-        { value: 'rfps', label: 'Requests for production (documents)' },
-        { value: 'rfas', label: 'Requests for admission (confirm/deny)' },
-        { value: 'deposition', label: 'Deposition notice' },
+        { value: 'interrogatories', label: 'Interrogatories' },
+        { value: 'rfps', label: 'Requests for production' },
+        { value: 'rfas', label: 'Requests for admission' },
+        { value: 'mixed', label: 'A mixed set' },
       ],
     },
     {
-      id: 'know_deadline',
+      id: 'bare_denials',
       type: 'yes_no',
-      prompt: 'Do you know your response deadline?',
-      showIf: (answers) => answers.received_discovery === 'yes',
+      prompt: 'Did any interrogatory response give only a bare denial instead of stating facts?',
+      showIf: (answers) => answers.received_responses === 'yes',
     },
     {
-      id: 'deadline_info',
+      id: 'bare_denial_info',
       type: 'info',
       prompt:
-        'In Texas, you generally have 30 days from the date you receive discovery requests to respond. For requests for admission, if you don\'t respond within 30 days, they are automatically deemed admitted — this can be devastating to your case.',
-      showIf: (answers) => answers.know_deadline === 'no',
+        'Flag this for a motion to compel. A party that denies fault or damages usually must state the facts supporting that position, not just repeat the denial.',
+      showIf: (answers) => answers.bare_denials === 'yes',
     },
     {
-      id: 'objectionable_questions',
+      id: 'boilerplate_objections',
       type: 'single_choice',
-      prompt: 'Are there any questions or requests that seem objectionable or overly broad?',
-      showIf: (answers) => answers.received_discovery === 'yes',
+      prompt: 'Did they use objections like "vague," "overly broad," or "calls for expert opinion" without a real explanation?',
+      showIf: (answers) => answers.received_responses === 'yes',
       options: [
         { value: 'yes', label: 'Yes' },
         { value: 'no', label: 'No' },
-        { value: 'not_sure', label: 'I\'m not sure what\'s objectionable' },
+        { value: 'not_sure', label: 'I\'m not sure' },
       ],
     },
     {
-      id: 'objections_info',
+      id: 'objection_info',
       type: 'info',
       prompt:
-        'Common objections include: overly broad (asks for too much), not relevant to the case, privileged (attorney-client or medical), unduly burdensome, or vague. You can object to specific requests while still answering the rest.',
-      showIf: (answers) => answers.objectionable_questions === 'yes' || answers.objectionable_questions === 'not_sure',
+        'Boilerplate objections often are not enough. If they disputed repair costs or fault, they should usually explain the factual basis and produce responsive non-privileged documents.',
+      showIf: (answers) => answers.boilerplate_objections === 'yes' || answers.boilerplate_objections === 'not_sure',
     },
     {
-      id: 'ime_requested',
+      id: 'missing_documents',
       type: 'yes_no',
-      prompt: 'Has the defendant requested an independent medical examination (IME)?',
-      showIf: (answers) => answers.received_discovery === 'yes',
+      prompt: 'Did they withhold documents you requested, such as estimates, photos, appraisals, invoices, or insurer communications?',
+      showIf: (answers) => answers.received_responses === 'yes',
     },
     {
-      id: 'ime_info',
+      id: 'privilege_log',
+      type: 'single_choice',
+      prompt: 'If they claimed privilege, did they provide a privilege log?',
+      showIf: (answers) => answers.missing_documents === 'yes',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+        { value: 'no_privilege_claimed', label: 'No privilege claim' },
+        { value: 'not_sure', label: 'Not sure' },
+      ],
+    },
+    {
+      id: 'meet_and_confer_info',
       type: 'info',
       prompt:
-        'An IME is an examination by a doctor chosen by the defendant. You have the right to: know the doctor\'s name and specialty in advance, have the exam recorded, receive a copy of the report, and object if the exam is unreasonable. The exam should be limited to the injuries in your case.',
-      showIf: (answers) => answers.ime_requested === 'yes',
+        'Before filing a motion to compel, most courts require a good-faith meet-and-confer. Keep the letter, email, call notes, date, and what the defendant refused to fix.',
+      showIf: (answers) => answers.received_responses === 'yes' || answers.received_responses === 'overdue',
     },
   ],
 
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 
-    if (answers.received_discovery === 'yes') {
-      items.push({ status: 'info', text: `Received discovery requests: ${answers.discovery_type?.replace(/_/g, ' ') ?? 'type noted'}.` })
+    if (answers.received_responses === 'yes') {
+      items.push({ status: 'done', text: `Reviewing discovery responses: ${answers.response_set?.replace(/_/g, ' ') ?? 'set noted'}.` })
 
-      if (answers.know_deadline === 'no') {
-        items.push({ status: 'needed', text: 'Determine your 30-day response deadline. Missing it can have serious consequences.' })
-      } else {
-        items.push({ status: 'done', text: 'Response deadline is known.' })
+      if (answers.bare_denials === 'yes') {
+        items.push({ status: 'needed', text: 'Include bare denials in the meet-and-confer letter and possible motion to compel.' })
       }
 
-      if (answers.objectionable_questions === 'yes') {
-        items.push({ status: 'info', text: 'Some requests may be objectionable. Prepare written objections for those specific items.' })
+      if (answers.boilerplate_objections === 'yes' || answers.boilerplate_objections === 'not_sure') {
+        items.push({ status: 'needed', text: 'Review boilerplate objections and demand a clearer response where the objection lacks support.' })
       }
-    } else if (answers.received_discovery === 'not_yet') {
-      items.push({ status: 'info', text: 'Expect to receive discovery requests from opposing counsel. You\'ll have 30 days to respond.' })
+
+      if (answers.missing_documents === 'yes') {
+        items.push({ status: 'needed', text: 'List each missing document category and ask for production or a valid privilege log.' })
+      }
+    } else if (answers.received_responses === 'overdue') {
+      items.push({ status: 'needed', text: 'Responses appear overdue. Send a meet-and-confer letter before asking the court to compel responses.' })
+    } else if (answers.received_responses === 'not_due_yet') {
+      items.push({ status: 'info', text: 'Keep monitoring the response deadline.' })
     } else {
-      items.push({ status: 'info', text: 'No discovery requests received yet.' })
+      items.push({ status: 'info', text: 'No defendant discovery responses received yet.' })
     }
 
-    if (answers.ime_requested === 'yes') {
-      items.push({ status: 'needed', text: 'Prepare for the independent medical examination. You may request it be recorded.' })
+    if (answers.privilege_log === 'no') {
+      items.push({ status: 'needed', text: 'Privilege was claimed without a log. Flag this as a motion-to-compel issue.' })
     }
 
     return items

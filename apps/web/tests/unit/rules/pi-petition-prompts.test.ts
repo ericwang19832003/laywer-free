@@ -52,6 +52,27 @@ describe('piPetitionFactsSchema', () => {
     expect(result.success).toBe(true)
   })
 
+  it('leaves missing request_jury_trial undefined for legacy regeneration compatibility', () => {
+    const result = piPetitionFactsSchema.parse({
+      your_info: { full_name: 'Jane Doe', address: '123 Main St', city: 'Austin', state: 'TX', zip: '78701' },
+      opposing_parties: [{ full_name: 'John Smith', address: '456 Oak Ave', city: 'Austin', state: 'TX', zip: '78702' }],
+      court_type: 'county',
+      county: 'Travis',
+      cause_number: 'C-2025-1234',
+      pi_sub_type: 'auto_accident',
+      incident_date: '2025-06-15',
+      incident_location: 'I-35 and 51st Street, Austin, TX',
+      incident_description: 'Defendant rear-ended plaintiff at a red light causing whiplash and vehicle damage.',
+      injuries_description: 'Whiplash, cervical strain, lower back pain, headaches lasting 3 months.',
+      injury_severity: 'moderate',
+      damages: { medical: 7700, lost_wages: 2400, property_damage: 3200, pain_suffering: 23100, total: 36400 },
+      negligence_theory: 'Defendant failed to maintain a proper lookout and rear-ended plaintiff while plaintiff was stopped at a red light.',
+      prior_demand_sent: true,
+      demand_date: '2025-11-01',
+    })
+    expect(result.request_jury_trial).toBeUndefined()
+  })
+
   it('accepts federal court_type', () => {
     const result = piPetitionFactsSchema.safeParse({
       your_info: { full_name: 'Jane Doe' },
@@ -161,10 +182,23 @@ describe('buildPiPetitionPrompt', () => {
     expect(result.system).toContain('PRAYER FOR RELIEF')
   })
 
-  it('system includes jury demand', () => {
+  it('does not include a jury demand section unless the user requests one', () => {
+    const result = buildPiPetitionPrompt(makeFacts({ request_jury_trial: false }))
+    expect(result.system).not.toContain('JURY DEMAND')
+    expect(result.system).toContain('Do NOT include a jury demand section')
+    expect(result.user).toContain('Request jury trial: No')
+  })
+
+  it('preserves jury demand for legacy facts without a request_jury_trial value', () => {
     const result = buildPiPetitionPrompt(makeFacts())
-    const systemLower = result.system.toLowerCase()
-    expect(systemLower).toContain('jury')
+    expect(result.system).toContain('JURY DEMAND')
+    expect(result.user).toContain('Request jury trial: Yes')
+  })
+
+  it('includes a jury demand section when the user requests one', () => {
+    const result = buildPiPetitionPrompt(makeFacts({ request_jury_trial: true }))
+    expect(result.system).toContain('JURY DEMAND')
+    expect(result.user).toContain('Request jury trial: Yes')
   })
 
   it('system includes annotations instructions', () => {
@@ -235,7 +269,7 @@ describe('buildPiPetitionPrompt', () => {
   // Federal court tests
 
   it('system uses federal format for federal court_type', () => {
-    const result = buildPiPetitionPrompt(makeFacts({ court_type: 'federal' }))
+    const result = buildPiPetitionPrompt(makeFacts({ court_type: 'federal', request_jury_trial: true }))
     expect(result.system).toContain('UNITED STATES DISTRICT COURT')
     expect(result.system).toContain('COMPLAINT')
     expect(result.system).toContain('PRELIMINARY STATEMENT')

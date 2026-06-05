@@ -100,7 +100,7 @@ export function RealEstateWizard({
   const [evidenceNotes, setEvidenceNotes] = useState((meta.evidence_notes as string) ?? '')
   /* ---- Legal / Filing / Draft ---- */
   const [selectedBases, setSelectedBases] = useState<string[]>((meta.selected_bases as string[]) ?? [])
-  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>((meta.filing_method as 'online' | 'in_person' | '') ?? '')
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | 'mail' | ''>((meta.filing_method as 'online' | 'in_person' | 'mail' | '') ?? '')
   const [documentType, setDocumentType] = useState<'demand_letter' | 'petition'>((meta.document_type as 'demand_letter' | 'petition') ?? 'demand_letter')
   const [currentStep, setCurrentStep] = useState(typeof meta._wizard_step === 'number' ? meta._wizard_step : 0)
   const [draft, setDraft] = useState<string>((meta.draft_text as string) ?? '')

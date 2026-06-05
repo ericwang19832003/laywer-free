@@ -3,12 +3,16 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Clock, CheckCircle2, Circle, BookOpen, Save, Info } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, CheckCircle2, BookOpen, Save, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { toast } from '@/lib/toast'
+
+interface WizardError extends Error {
+  suppressToast?: boolean
+}
 
 export interface WizardStep {
   id: string
@@ -32,6 +36,7 @@ interface WizardShellProps {
   showSidebar?: boolean
   completedSteps?: number[]
   sidebarLearnMore?: { topic: string; content: React.ReactNode }[]
+  presentation?: 'default' | 'workbench'
 }
 
 export function WizardShell({
@@ -49,6 +54,7 @@ export function WizardShell({
   showSidebar = true,
   completedSteps = [],
   sidebarLearnMore = [],
+  presentation = 'default',
 }: WizardShellProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -99,7 +105,9 @@ export function WizardShell({
         await onComplete()
         toast.success('Step completed! Check your dashboard for what\'s next.')
       } catch (error) {
-        toast.error('Failed to complete step')
+        if (!(error instanceof Error && (error as WizardError).suppressToast)) {
+          toast.error(error instanceof Error ? error.message : 'Failed to complete step')
+        }
       } finally {
         setLoading(false)
       }
@@ -239,6 +247,141 @@ export function WizardShell({
   )
 
   if (showSidebar) {
+    const isWorkbench = presentation === 'workbench'
+
+    if (isWorkbench) {
+      return (
+        <section className="mt-6">
+          {/* Screen reader announcement for step changes */}
+          <div
+            ref={stepAnnouncementRef}
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            Step {currentStep + 1} of {steps.length}: {step.title}
+          </div>
+
+          {/* Tablet/mobile progress toggle */}
+          <div className="mb-4 lg:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSidebarMobile(!showSidebarMobile)}
+              className="gap-2 bg-white shadow-sm"
+              aria-expanded={showSidebarMobile}
+              aria-controls="mobile-sidebar"
+            >
+              {showSidebarMobile ? 'Hide' : 'Show'} Filing Progress
+            </Button>
+          </div>
+
+          {showSidebarMobile && (
+            <div
+              id="mobile-sidebar"
+              className="mb-4 rounded-xl border border-warm-border bg-white p-4 shadow-sm lg:hidden"
+              role="region"
+              aria-label="Filing progress"
+            >
+              <StepSidebar />
+            </div>
+          )}
+
+          <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <aside className="hidden lg:block">
+              <div className="sticky top-20 rounded-xl border border-warm-border bg-white p-5 shadow-sm">
+                <StepSidebar />
+              </div>
+            </aside>
+
+            <main className="min-w-0 rounded-2xl border border-warm-border bg-white p-5 shadow-sm sm:p-7">
+              <Link
+                href={`/case/${caseId}`}
+                className="mb-4 inline-flex items-center gap-1 text-sm text-warm-muted hover:text-warm-text"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back to dashboard
+              </Link>
+
+              <div className="flex flex-col gap-3 border-b border-warm-border pb-5 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-warm-muted">
+                    Step {currentStep + 1} of {steps.length}
+                  </p>
+                  <h1 className="text-3xl font-semibold leading-tight tracking-normal text-warm-text">
+                    {title}
+                  </h1>
+                </div>
+
+                {totalEstimateMinutes && (
+                  <div className="flex items-center gap-1 rounded-full border border-warm-border bg-warm-bg px-3 py-1.5 text-sm">
+                    <Clock className="h-3.5 w-3.5 text-warm-muted" />
+                    <span className="text-sm text-warm-muted">
+                      ~{totalEstimateMinutes} min estimated
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-6">
+                {step.subtitle && (
+                  <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-calm-indigo/15 bg-calm-indigo/[0.04] px-4 py-3">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-calm-indigo" />
+                    <p className="text-sm leading-relaxed text-warm-text">{step.subtitle}</p>
+                  </div>
+                )}
+
+                {children}
+
+                <div className="mt-8 flex flex-col gap-4 border-t border-warm-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <Button variant="ghost" size="sm" onClick={handleBack}>
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Back
+                  </Button>
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    {saving && (
+                      <span className="text-xs text-warm-muted flex items-center gap-1">
+                        <Save className="h-3.5 w-3.5 animate-pulse" />
+                        Saving...
+                      </span>
+                    )}
+                    {onSave && (
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="text-sm text-warm-muted hover:text-warm-text transition-colors disabled:opacity-50"
+                      >
+                        Save for later
+                      </button>
+                    )}
+                    <Button
+                      onClick={handleNext}
+                      disabled={!canAdvance || loading}
+                      size="sm"
+                      className="gap-1"
+                    >
+                      {loading ? (
+                        'Saving...'
+                      ) : isLastStep ? (
+                        completeButtonLabel
+                      ) : (
+                        <>
+                          Continue
+                          <ChevronRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </section>
+      )
+    }
+
     return (
       <div className="min-h-screen bg-warm-bg">
         {/* Screen reader announcement for step changes */}

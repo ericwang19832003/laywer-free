@@ -237,6 +237,24 @@ export default async function StepPage({
     .eq('id', id)
     .maybeSingle()
   const caseState = caseStateData?.state ?? undefined
+  const getFamilySubType = async () => {
+    const { data: familyDetails } = await supabase
+      .from('family_case_details')
+      .select('family_sub_type')
+      .eq('case_id', id)
+      .maybeSingle()
+
+    return familyDetails?.family_sub_type ?? undefined
+  }
+  const getPiSubType = async () => {
+    const { data: piDetails } = await supabase
+      .from('personal_injury_details')
+      .select('pi_sub_type')
+      .eq('case_id', id)
+      .maybeSingle()
+
+    return piDetails?.pi_sub_type ?? undefined
+  }
 
   switch (task.task_key) {
     case 'welcome':
@@ -991,16 +1009,17 @@ export default async function StepPage({
 
     // Personal injury depth steps
     case 'pi_damages_calculation': {
-      const { data: piDetails } = await supabase
-        .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()
-      return <DynamicGuidedStep taskKey="pi_damages_calculation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piDetails?.pi_sub_type ?? undefined} />
+      const piSubType = await getPiSubType()
+      return <DynamicGuidedStep taskKey="pi_damages_calculation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piSubType} />
     }
     case 'pi_pip_claim':
       return <DynamicGuidedStep taskKey="pi_pip_claim" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_medical_improvement':
       return <DynamicGuidedStep taskKey="pi_medical_improvement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
-    case 'pi_filing_guide':
-      return <DynamicGuidedStep taskKey="pi_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'pi_filing_guide': {
+      const piSubType = await getPiSubType()
+      return <DynamicGuidedStep taskKey="pi_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piSubType} />
+    }
     case 'pi_service_guide':
       return <DynamicGuidedStep taskKey="pi_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_courtroom_guide':
@@ -1009,8 +1028,10 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="pi_comparative_fault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_lien_resolution':
       return <DynamicGuidedStep taskKey="pi_lien_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
-    case 'pi_expert_witness_guide':
-      return <DynamicGuidedStep taskKey="pi_expert_witness_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'pi_expert_witness_guide': {
+      const piSubType = await getPiSubType()
+      return <DynamicGuidedStep taskKey="pi_expert_witness_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piSubType} />
+    }
 
     // Landlord-tenant depth steps
     case 'lt_repair_request':
@@ -1053,8 +1074,10 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="lt_code_enforcement" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Family law depth steps
-    case 'family_filing_guide':
-      return <DynamicGuidedStep taskKey="family_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'family_filing_guide': {
+      const familySubType = await getFamilySubType()
+      return <DynamicGuidedStep taskKey="family_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} familySubType={familySubType} />
+    }
     case 'family_service_guide':
       return <DynamicGuidedStep taskKey="family_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'family_courtroom_guide':
@@ -1299,10 +1322,14 @@ export default async function StepPage({
       return <PIServeDefendantStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_wait_for_answer':
       return <PIWaitForAnswerStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_review_answer':
-      return <PIReviewAnswerStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_discovery_prep':
-      return <PIDiscoveryPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_review_answer': {
+      const piSubType = await getPiSubType()
+      return <PIReviewAnswerStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piSubType} />
+    }
+    case 'pi_discovery_prep': {
+      const piSubType = await getPiSubType()
+      return <PIDiscoveryPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piSubType} />
+    }
     case 'pi_discovery_responses':
       return <PIDiscoveryResponsesStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_scheduling_conference':

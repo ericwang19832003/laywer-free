@@ -27,7 +27,7 @@ import { createPostDecreeConfig } from '@lawyer-free/shared/guided-steps/family/
 import { propertyDivisionConfig as familyPropertyDivisionConfig } from '@lawyer-free/shared/guided-steps/family/family-property-division'
 import { existingOrderReviewConfig } from '@lawyer-free/shared/guided-steps/family/family-existing-order-review'
 import { poHearingConfig } from '@lawyer-free/shared/guided-steps/family/po-hearing'
-import { familyFilingGuideConfig } from '@lawyer-free/shared/guided-steps/family/family-filing-guide'
+import { createFamilyFilingGuideConfig } from '@lawyer-free/shared/guided-steps/family/family-filing-guide'
 import { familyServiceGuideConfig } from '@lawyer-free/shared/guided-steps/family/family-service-guide'
 import { familyCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/family/family-courtroom-guide'
 import { familyMediationPrepConfig } from '@lawyer-free/shared/guided-steps/family/family-mediation-prep'
@@ -118,12 +118,12 @@ import { debtAppealProcessConfig } from '@lawyer-free/shared/guided-steps/debt-d
 // ── Personal Injury: depth steps ────────────────────────────────────────────
 import { piDamagesCalculationConfig, createPiDamagesCalculationConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-damages-calculation'
 import { piPipClaimConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pip-claim'
-import { piFilingGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-filing-guide'
+import { createPiFilingGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-filing-guide'
 import { piServiceGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-service-guide'
 import { piCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-courtroom-guide'
 import { piComparativeFaultConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-lien-resolution'
-import { piExpertWitnessGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-expert-witness-guide'
+import { createPiExpertWitnessGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-expert-witness-guide'
 
 // ── Real Estate ─────────────────────────────────────────────────────────────
 import { reEvidenceVaultConfig } from '@lawyer-free/shared/guided-steps/real-estate/re-evidence-vault'
@@ -242,7 +242,12 @@ import { piMedicalImprovementConfig } from '@lawyer-free/shared/guided-steps/per
  * Factory-based configs accept a sub-type encoded in the task key itself.
  * Pass `state` (e.g. 'CA', 'NY') for state-aware configs; defaults to 'TX'.
  */
-function resolveConfig(taskKey: string, state?: string, piSubType?: string): GuidedStepConfig | null {
+function resolveConfig(
+  taskKey: string,
+  state?: string,
+  piSubType?: string,
+  familySubType?: string | null
+): GuidedStepConfig | null {
   switch (taskKey) {
     // ── Family: Divorce ─────────────────────────────────────────────────────
     case 'divorce_intake': return createFamilyIntakeConfig('divorce')
@@ -321,7 +326,7 @@ function resolveConfig(taskKey: string, state?: string, piSubType?: string): Gui
     case 'mod_post_decree': return createPostDecreeConfig('modification')
 
     // ── Family: depth steps ─────────────────────────────────────────────────
-    case 'family_filing_guide': return familyFilingGuideConfig
+    case 'family_filing_guide': return createFamilyFilingGuideConfig(familySubType)
     case 'family_service_guide': return familyServiceGuideConfig
     case 'family_courtroom_guide': return familyCourtroomGuideConfig
     case 'family_mediation_prep': return familyMediationPrepConfig
@@ -408,12 +413,12 @@ function resolveConfig(taskKey: string, state?: string, piSubType?: string): Gui
     case 'pi_damages_calculation': return createPiDamagesCalculationConfig(piSubType)
     case 'pi_pip_claim': return piPipClaimConfig
     case 'pi_medical_improvement': return piMedicalImprovementConfig
-    case 'pi_filing_guide': return piFilingGuideConfig
+    case 'pi_filing_guide': return createPiFilingGuideConfig(piSubType)
     case 'pi_service_guide': return piServiceGuideConfig
     case 'pi_courtroom_guide': return piCourtroomGuideConfig
     case 'pi_comparative_fault': return piComparativeFaultConfig
     case 'pi_lien_resolution': return piLienResolutionConfig
-    case 'pi_expert_witness_guide': return piExpertWitnessGuideConfig
+    case 'pi_expert_witness_guide': return createPiExpertWitnessGuideConfig(piSubType)
 
     // ── Real Estate: chain ──────────────────────────────────────────────────
     case 're_evidence_vault': return reEvidenceVaultConfig
@@ -632,6 +637,11 @@ interface DynamicGuidedStepProps {
    */
   piSubType?: string
   /**
+   * Family sub-type (e.g. 'custody', 'protective_order') for generic family
+   * depth guides that need to avoid divorce-only language.
+   */
+  familySubType?: string | null
+  /**
    * Optional override for skippable. When provided, takes precedence over the
    * built-in SKIPPABLE_TASK_KEYS set. Useful for task keys whose skippable
    * state depends on runtime data (e.g. biz_employment_eeoc).
@@ -639,8 +649,8 @@ interface DynamicGuidedStepProps {
   skippable?: boolean
 }
 
-export function DynamicGuidedStep({ taskKey, caseId, taskId, existingAnswers, state, piSubType, skippable }: DynamicGuidedStepProps) {
-  const config = resolveConfig(taskKey, state, piSubType)
+export function DynamicGuidedStep({ taskKey, caseId, taskId, existingAnswers, state, piSubType, familySubType, skippable }: DynamicGuidedStepProps) {
+  const config = resolveConfig(taskKey, state, piSubType, familySubType)
 
   if (!config) {
     // Unrecognised task key — should not happen in practice

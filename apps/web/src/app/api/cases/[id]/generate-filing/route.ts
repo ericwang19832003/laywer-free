@@ -324,13 +324,39 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
+function getGenerationProvider() {
+  const deepseekKey = process.env.DEEPSEEK_API_KEY?.trim()
+  if (deepseekKey) {
+    return {
+      name: 'deepseek',
+      client: new OpenAI({ apiKey: deepseekKey, baseURL: 'https://api.deepseek.com' }),
+      model: 'deepseek-chat',
+    }
+  }
+
+  const openaiKey = process.env.OPENAI_API_KEY?.trim()
+  if (openaiKey) {
+    return {
+      name: 'openai',
+      client: new OpenAI({ apiKey: openaiKey }),
+      model: process.env.OPENAI_GENERATION_MODEL?.trim() || 'gpt-4o-mini',
+    }
+  }
+
+  return null
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!process.env.DEEPSEEK_API_KEY) {
+  const provider = getGenerationProvider()
+  if (!provider) {
+    const message = process.env.NODE_ENV === 'production'
+      ? 'Document generation is temporarily unavailable. Please try again later.'
+      : 'Document generation is not configured. Set DEEPSEEK_API_KEY or OPENAI_API_KEY in the server environment, then restart the dev server.'
     return NextResponse.json(
-      { error: 'Document generation is temporarily unavailable. Please try again later.' },
+      { error: message },
       { status: 503 }
     )
   }
@@ -455,11 +481,10 @@ export async function POST(
       }
     }
 
-    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
     let fullText: string
     try {
-      const completion = await deepseek.chat.completions.create({
-        model: 'deepseek-chat',
+      const completion = await provider.client.chat.completions.create({
+        model: provider.model,
         max_tokens: 4096,
         messages: [
           { role: 'system', content: prompt.system },
@@ -468,7 +493,7 @@ export async function POST(
       })
       fullText = completion.choices[0]?.message?.content ?? ''
     } catch (err) {
-      console.error('[generate-filing] OpenAI API error:', err)
+      console.error(`[generate-filing] ${provider.name} API error:`, err)
       return NextResponse.json(
         { error: 'Document generation failed. Please check your inputs and try again.' },
         { status: 502 }
@@ -530,8 +555,8 @@ export async function POST(
 
     const durationMs = Date.now() - startTime
     metrics.increment(METRIC.AI_GENERATION_SUCCESS)
-    metrics.timing(METRIC.AI_GENERATION_DURATION, durationMs, { document_type: auditDocType })
-    logger.info('ai.generate-filing succeeded', { caseId, auditDocType, durationMs })
+    metrics.timing(METRIC.AI_GENERATION_DURATION, durationMs, { document_type: auditDocType, provider: provider.name })
+    logger.info('ai.generate-filing succeeded', { caseId, auditDocType, durationMs, provider: provider.name })
 
     return NextResponse.json({ draft, annotations })
   } catch (err) {

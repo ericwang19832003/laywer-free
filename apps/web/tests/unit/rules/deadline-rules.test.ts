@@ -79,6 +79,22 @@ describe('getDeadlineRulesForTask', () => {
     expect(answerRule!.reference).toBe('task_completed_at')
   })
 
+  it('returns PI answer deadline rule from confirmed service date', () => {
+    const rules = getDeadlineRulesForTask('pi_wait_for_answer')
+
+    const answerRules = rules.filter(
+      (r) => r.deadline_key === 'answer_deadline_estimated'
+    )
+    expect(answerRules).toHaveLength(1)
+    const answerRule = answerRules[0]
+    expect(answerRule).toBeDefined()
+    expect(answerRule.offset_days).toBe(20)
+    expect(answerRule.apply_rule_4).toBe(true)
+    expect(answerRule.condition_event).toBe('answer_filed')
+    expect(answerRule.reference).toBe('metadata_field')
+    expect(answerRule.metadata_field).toBe('service_completed_date')
+  })
+
   it('returns divorce waiting period for divorce_file_with_court', () => {
     const rules = getDeadlineRulesForTask('divorce_file_with_court')
 

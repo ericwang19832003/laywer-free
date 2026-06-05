@@ -47,7 +47,7 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       id: 'in_person_info',
       type: 'info',
       prompt:
-        'Bring your original petition plus copies, your lease agreement, and be prepared to pay the filing fee by cash, check, or money order. The clerk will stamp your copies and assign a cause number.',
+        'Bring your original petition plus copies, your lease or proof of tenancy, and be prepared to pay the filing fee by cash, check, or money order. The clerk will stamp your copies and assign a cause number.',
       showIf: (answers) => answers.filing_method === 'in_person',
     },
     {
@@ -68,11 +68,11 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       showIf: (answers) => answers.fee_paid === 'no' || answers.fee_paid === 'need_waiver',
     },
     {
-      id: 'lease_attached',
+      id: 'tenancy_proof_ready',
       type: 'yes_no',
-      prompt: 'Did you attach a copy of the lease to your filing?',
+      prompt: 'Did you attach or prepare your lease or proof of tenancy?',
       helpText:
-        'The lease is critical evidence. Attach it to your petition if the court rules allow it, or bring copies to present at the hearing.',
+        'A written lease is helpful, but proof of tenancy can also include rent receipts, payment records, texts, emails, move-in records, or utility bills. Attach it if court rules allow it, or bring copies to the hearing.',
     },
     {
       id: 'confirmation_received',
@@ -114,10 +114,10 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       items.push({ status: 'needed', text: 'Pay the filing fee.' })
     }
 
-    if (answers.lease_attached === 'yes') {
-      items.push({ status: 'done', text: 'Lease attached to filing.' })
+    if (answers.tenancy_proof_ready === 'yes') {
+      items.push({ status: 'done', text: 'Lease or proof of tenancy is ready.' })
     } else {
-      items.push({ status: 'needed', text: 'Attach the lease agreement to your filing or bring copies to the hearing.' })
+      items.push({ status: 'needed', text: 'Prepare your lease or proof of tenancy, such as rent receipts, payment records, texts, emails, move-in records, or utility bills.' })
     }
 
     if (answers.confirmation_received === 'yes') {

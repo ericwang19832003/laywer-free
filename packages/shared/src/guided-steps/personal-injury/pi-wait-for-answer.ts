@@ -1,15 +1,34 @@
 import type { GuidedStepConfig } from '../types'
 
 export const piWaitForAnswerConfig: GuidedStepConfig = {
-  title: 'Wait for the Answer',
+  title: 'Await the Defendant Answer',
   reassurance:
-    'After the defendant is served, they have a limited time to file an answer with the court. This step helps you track that deadline.',
+    'Now that your petition is filed, this step turns the case into a deadline tracker. We confirm filing and service facts, then watch for the defendant answer or a possible default.',
 
   questions: [
+    {
+      id: 'file_stamp_confirmed',
+      type: 'yes_no',
+      prompt: 'Do you have a file-stamped petition from the court?',
+    },
+    {
+      id: 'file_stamp_info',
+      type: 'info',
+      prompt:
+        'The litigation file should not start until the court has accepted the petition. Look for the court stamp, filing date, and case or cause number on the first page.',
+      showIf: (answers) => answers.file_stamp_confirmed === 'no',
+    },
+    {
+      id: 'case_number_recorded',
+      type: 'yes_no',
+      prompt: 'Have you recorded the court case number?',
+      showIf: (answers) => answers.file_stamp_confirmed === 'yes',
+    },
     {
       id: 'petition_filed_date',
       type: 'single_choice',
       prompt: 'When did you file your petition with the court?',
+      showIf: (answers) => answers.file_stamp_confirmed === 'yes',
       options: [
         { value: 'less_than_week', label: 'Less than a week ago' },
         { value: 'one_to_two_weeks', label: '1–2 weeks ago' },
@@ -21,18 +40,25 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       id: 'defendant_served',
       type: 'yes_no',
       prompt: 'Has the defendant been officially served?',
+      showIf: (answers) => answers.file_stamp_confirmed === 'yes',
     },
     {
       id: 'serve_first_info',
       type: 'info',
       prompt:
-        'The defendant must be served before the answer deadline starts. Go back to the "Serve the Defendant" step if service has not been completed.',
+        'The defendant must be served before the answer deadline starts. Go back to the "Serve the Defendant" step and record the service completion date, service method, and who was served.',
       showIf: (answers) => answers.defendant_served === 'no',
+    },
+    {
+      id: 'service_method_recorded',
+      type: 'yes_no',
+      prompt: 'Do you know the service method and the exact person or entity served?',
+      showIf: (answers) => answers.defendant_served === 'yes',
     },
     {
       id: 'service_date',
       type: 'single_choice',
-      prompt: 'Approximately when was the defendant served?',
+      prompt: 'What is the service completion date shown on the return of service?',
       showIf: (answers) => answers.defendant_served === 'yes',
       options: [
         { value: 'less_than_week', label: 'Less than a week ago' },
@@ -45,7 +71,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       id: 'deadline_info',
       type: 'info',
       prompt:
-        'In Texas, the defendant generally has until the first Monday after 20 days from the date of service to file an answer. If the 20th day falls on a weekend, the deadline extends to the following Monday.',
+        'In Texas state court, the defendant generally has until 10:00 a.m. on the first Monday after 20 days from service to file an answer. Federal court is different: Rule 12(a) is usually 21 days after service. Use the court type before relying on a deadline.',
       showIf: (answers) => answers.defendant_served === 'yes',
     },
     {
@@ -103,8 +129,25 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
   generateSummary(answers) {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 
+    if (answers.file_stamp_confirmed === 'yes') {
+      items.push({ status: 'done', text: 'File-stamped petition confirmed.' })
+    } else {
+      items.push({ status: 'needed', text: 'Confirm the court accepted the petition before tracking litigation deadlines.' })
+    }
+
+    if (answers.case_number_recorded === 'yes') {
+      items.push({ status: 'done', text: 'Court case number recorded.' })
+    } else if (answers.file_stamp_confirmed === 'yes') {
+      items.push({ status: 'needed', text: 'Record the case or cause number from the filed petition.' })
+    }
+
     if (answers.defendant_served === 'yes') {
       items.push({ status: 'done', text: 'Defendant has been served.' })
+      if (answers.service_method_recorded === 'yes') {
+        items.push({ status: 'done', text: 'Service method and served party are recorded.' })
+      } else {
+        items.push({ status: 'needed', text: 'Record the service method and exact person or entity served.' })
+      }
     } else {
       items.push({ status: 'needed', text: 'Defendant must be served before the answer deadline begins.' })
     }
@@ -130,7 +173,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
 
     items.push({
       status: 'info',
-      text: 'In Texas, the defendant has until the first Monday after 20 days from service to file an answer.',
+      text: 'Use the court type to calculate the answer deadline: Texas state court uses the Monday-after-20-days rule; federal court usually uses 21 days after service.',
     })
 
     return items

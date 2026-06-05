@@ -88,6 +88,46 @@ describe('generateDeadlines', () => {
     expect(dueDate.getDate()).toBe(6) // Monday
   })
 
+  it('uses confirmed PI service date when generating answer deadline from wait step', () => {
+    const input = makeInput({
+      taskKey: 'pi_wait_for_answer',
+      completedAt: new Date(2026, 5, 20, 12, 0, 0).toISOString(),
+      taskMetadata: {
+        service_completed_date: '2026-06-04',
+      },
+    })
+    const results = generateDeadlines(input)
+
+    const answer = results.find((d) => d.key === 'answer_deadline_estimated')
+    expect(answer).toBeDefined()
+    expect(answer!.rationale).toContain('service_completed_date')
+
+    const dueDate = new Date(answer!.due_at)
+    expect(dueDate.getFullYear()).toBe(2026)
+    expect(dueDate.getMonth()).toBe(5) // June
+    expect(dueDate.getDate()).toBe(24) // Thursday: Jun 4 + 20 days
+  })
+
+  it('falls back to task completion when PI service date metadata is missing', () => {
+    const input = makeInput({
+      taskKey: 'pi_wait_for_answer',
+      completedAt: new Date(2026, 5, 20, 12, 0, 0).toISOString(),
+      taskMetadata: {},
+    })
+    const results = generateDeadlines(input)
+
+    const answer = results.find((d) => d.key === 'answer_deadline_estimated')
+    expect(answer).toBeDefined()
+    expect(answer!.rationale).toContain(
+      'task completion because service_completed_date was not recorded'
+    )
+
+    const dueDate = new Date(answer!.due_at)
+    expect(dueDate.getFullYear()).toBe(2026)
+    expect(dueDate.getMonth()).toBe(6) // July
+    expect(dueDate.getDate()).toBe(10) // Friday: Jun 20 + 20 days
+  })
+
   it('returns empty array for tasks with no rules', () => {
     const input = makeInput({ taskKey: 'welcome' })
     const results = generateDeadlines(input)

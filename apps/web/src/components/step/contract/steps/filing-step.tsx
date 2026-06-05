@@ -44,8 +44,8 @@ interface FilingStepProps {
   onCourtTypeChange: (v: string) => void
   causeNumber: string
   onCauseNumberChange: (v: string) => void
-  filingMethod: 'online' | 'in_person' | ''
-  onFilingMethodChange: (v: 'online' | 'in_person') => void
+  filingMethod: 'online' | 'in_person' | 'mail' | ''
+  onFilingMethodChange: (v: 'online' | 'in_person' | 'mail') => void
   grandTotal: number
   state?: string
 }

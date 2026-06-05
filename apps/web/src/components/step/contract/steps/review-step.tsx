@@ -209,7 +209,7 @@ export function ReviewStep({
         <ReviewRow label="Your name" value={yourName || 'Not provided'} />
         <ReviewRow label="County" value={county || 'Not provided'} />
         <ReviewRow label="Court type" value={courtTypeLabel(courtType)} />
-        <ReviewRow label="Filing method" value={filingMethod === 'online' ? 'Online (e-filing)' : filingMethod === 'in_person' ? 'In Person' : 'Not selected'} />
+        <ReviewRow label="Filing method" value={filingMethod === 'online' ? 'Online (e-filing)' : filingMethod === 'in_person' ? 'In Person' : filingMethod === 'mail' ? 'By Mail' : 'Not selected'} />
         {causeNumber && <ReviewRow label="Cause number" value={causeNumber} />}
       </ReviewSection>
 

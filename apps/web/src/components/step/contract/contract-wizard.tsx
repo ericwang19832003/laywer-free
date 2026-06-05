@@ -154,8 +154,8 @@ export function ContractWizard({
   const [causeNumber, setCauseNumber] = useState<string>(
     (meta.cause_number as string) ?? ''
   )
-  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
-    (meta.filing_method as 'online' | 'in_person') ?? ''
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | 'mail' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | 'mail') ?? ''
   )
 
   /* ---- Wizard / draft state ---- */

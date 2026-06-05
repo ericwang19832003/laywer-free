@@ -48,6 +48,7 @@ export const piPetitionFactsSchema = z.object({
   negligence_theory: z.string().min(10),
   prior_demand_sent: z.boolean(),
   demand_date: z.string().optional(),
+  request_jury_trial: z.boolean().optional(),
   // Federal court fields (optional — used when court_type === 'federal')
   is_federal: z.boolean().optional(),
   federal_district: z.string().optional(),
@@ -344,6 +345,14 @@ function buildFederalSystemPrompt(facts: PiPetitionFacts): string {
   const preservationText = facts.vehicle_vin
     ? `all documents and electronically stored information relating to the subject vehicle (VIN: ${facts.vehicle_vin}), including but not limited to: maintenance logs, inspection records, pre-trip inspection reports, repair orders, work orders, driver qualification files, hours-of-service records, electronic logging device (ELD) data, telematics and GPS data, dash camera footage, photographs, communications between Defendant and any insurer or claims adjuster, and any prior complaints or claims involving the same vehicle or fleet. Defendant shall immediately suspend any document retention/destruction policies with respect to these materials.`
     : `all documents and electronically stored information relating to the events described herein, including but not limited to: [list specific categories relevant to the facts, e.g., maintenance records, inspection logs, contracts, communications, insurance policies, photographs, and any prior complaints or claims involving the same subject matter]. Defendant shall immediately suspend any document retention/destruction policies with respect to these materials.`
+  const requestJuryTrial = facts.request_jury_trial !== false
+  const juryDemandSection = requestJuryTrial
+    ? `VI. JURY DEMAND
+"Plaintiff demands a trial by jury pursuant to Federal Rule of Civil Procedure 38."`
+    : `Do NOT include a jury demand section. The plaintiff has not requested a jury trial.`
+  const juryAnnotation = requestJuryTrial
+    ? '- Jury Demand (your right to a jury trial in federal court)'
+    : null
 
   // Assemble factual background section
   const factualBackgroundParts: string[] = [
@@ -372,6 +381,7 @@ CRITICAL RULES:
 - Use ONLY the facts provided. Do NOT invent, assume, or embellish additional facts.
 - Do NOT predict outcomes or make strategic recommendations.
 - Use clear, professional legal language. Federal complaints are more formal and detailed than state court petitions.
+- Draft in an attorney-style pleading voice: restrained, specific, organized, and free of tutorial labels or explanatory filler.
 - Use CONTINUOUS paragraph numbering throughout the entire document (1, 2, 3... through the end). Do NOT restart numbering in each section.
 - Use Roman numeral section headings (I., II., III., IV., etc.).
 - Do NOT use markdown syntax (**bold**, *italic*, # headings, or --- horizontal rule separators) in the document body. Plain text only. Write headings in ALL CAPS. The ---ANNOTATIONS--- section marker and [N] annotation format at the end are required and must appear exactly as specified.
@@ -398,7 +408,7 @@ v.                             §
 Then centered: PLAINTIFF'S ORIGINAL COMPLAINT
 
 PRELIMINARY STATEMENT:
-Write 2–4 concise paragraphs (numbered continuously) summarizing the entire case: what happened, what went wrong, and why the plaintiff is suing. This should be a tight narrative overview. Start with: "1. On [DATE], Defendant..."
+Write 2–4 concise numbered paragraphs summarizing the entire case: what happened, what went wrong, and why the plaintiff is suing. This should be a tight narrative overview. Do not label these as "Paragraph 1" or explain what the section is. Start with: "1. On [DATE], Defendant..."
 
 I. JURISDICTION AND VENUE
 Numbered paragraphs continuing from the Preliminary Statement:
@@ -443,8 +453,7 @@ ${damagesGuidance}
 V. PRESERVATION OF EVIDENCE
 "Defendant is on notice to preserve ${preservationText}"
 
-VI. JURY DEMAND
-"Plaintiff demands a trial by jury pursuant to Federal Rule of Civil Procedure 38."
+${juryDemandSection}
 
 PRAYER FOR RELIEF
 Use the federal prayer format:
@@ -493,7 +502,7 @@ Number annotations sequentially starting from 1. Cover these sections at minimum
 - Causes of Action (the legal theories — explain each COUNT in plain English)
 - Damages (what money you’re asking for)
 - Preservation of Evidence (telling the other side not to destroy records)
-- Jury Demand (your right to a jury trial in federal court)
+${juryAnnotation ?? ''}
 - Prayer for Relief (the formal ask to the court)
 - Certificate of Service (confirmation that you notified the other side by filing through the court's electronic system)
 
@@ -523,6 +532,16 @@ Do NOT include medical expenses, lost wages, or pain and suffering \u2014 this i
   const conditionsPrecedent = facts.prior_demand_sent
     ? `Include that all conditions precedent have been performed or have occurred. Note that Plaintiff timely notified Defendant and attempted to resolve this matter informally.${facts.demand_date ? ` Reference the demand/notification date.` : ''}`
     : `Include that all conditions precedent to Plaintiff\u2019s right of recovery have been performed or have occurred.`
+  const requestJuryTrial = facts.request_jury_trial !== false
+  const juryDemandSection = requestJuryTrial
+    ? `9. JURY DEMAND
+"Plaintiff requests a trial by jury and will pay the jury fee as required by law."`
+    : `Do NOT include a jury demand section. The plaintiff has not requested a jury trial.`
+  const prayerSectionNumber = requestJuryTrial ? '10' : '9'
+  const signatureSectionNumber = requestJuryTrial ? '11' : '10'
+  const juryAnnotation = requestJuryTrial
+    ? '- Jury Demand (your right to have a jury decide the case)'
+    : null
 
   return `You are a legal document formatting assistant specializing in Texas civil court filings. Generate a professional ${docTitle} that matches the quality and structure of a real Texas court filing prepared by an experienced attorney. This document is for a self-represented (pro se) plaintiff.
 
@@ -532,6 +551,7 @@ CRITICAL RULES:
 - Use ONLY the facts provided. Do NOT invent, assume, or embellish additional facts.
 - Do NOT predict outcomes or make strategic recommendations.
 - Use clear, professional legal language appropriate for a Texas court filing.
+- Draft in an attorney-style pleading voice: restrained, specific, organized, and free of tutorial labels or explanatory filler.
 - Number ALL paragraphs and sub-paragraphs (1., 2.1, 2.2, 3.1, 4.1, 4.2, etc.).
 - Do NOT add [VERIFY:], [CHECK:], or any bracketed annotation markers. Use statutes and rules exactly as given.
 - Do NOT leave unfilled placeholder text. If a required value is not provided, omit that element entirely.
@@ -548,7 +568,7 @@ COURT CAPTION:
 - Then an opening paragraph: "Plaintiff [FULL NAME] ("Plaintiff"), appearing pro se, files this Original Petition against Defendant [FULL NAME] ("[SHORT NAME]" or "Defendant"), and would respectfully show the Court as follows:"
 
 PRELIMINARY STATEMENT:
-Write 2-3 short paragraphs (labeled "Preliminary Statement -- Paragraph 1:", etc.) providing a narrative overview of the case: who the parties are, what happened, and what the plaintiff is seeking. This orients the court before the formal numbered sections. Start with: "This is an action by [Plaintiff name] against [Defendant name] arising from [brief description]."
+Write 2-3 short numbered paragraphs providing a narrative overview of the case: who the parties are, what happened, and what the plaintiff is seeking. Do not label these as "Preliminary Statement -- Paragraph 1" or use tutorial-style labels. Start with: "This is an action by [Plaintiff name] against [Defendant name] arising from [brief description]."
 
 1. DISCOVERY CONTROL PLAN
 "Plaintiff intends that discovery be conducted under ${discoveryLevel}."
@@ -600,14 +620,13 @@ ${damagesGuidance}
 8. REQUEST FOR DISCLOSURE
 "Under Texas Rule of Civil Procedure 194, Plaintiff requests that Defendant disclose, within 50 days, the information and material described in Rule 194.2."
 
-9. JURY DEMAND
-"Plaintiff requests a trial by jury and will pay the jury fee as required by law."
+${juryDemandSection}
 
-10. PRAYER FOR RELIEF
+${prayerSectionNumber}. PRAYER FOR RELIEF
 Use the standard Texas prayer format:
 "WHEREFORE, PREMISES CONSIDERED, Plaintiff prays that Defendant be cited to appear and answer, and that upon final trial Plaintiff have judgment against Defendant for: (a) actual damages; (b) consequential damages; (c) exemplary damages (if gross negligence is alleged); (d) pre-judgment and post-judgment interest as allowed by law; (e) costs of court; and (f) such other and further relief, at law or in equity, to which Plaintiff may be justly entitled."
 
-11. SIGNATURE BLOCK
+${signatureSectionNumber}. SIGNATURE BLOCK
 "Respectfully submitted,"
 Then Plaintiff's name with "(Pro Se)" designation, followed by address on separate lines.
 
@@ -635,7 +654,7 @@ Number annotations sequentially starting from 1. Cover these sections at minimum
 - Damages (the specific dollar amounts you're asking for)
 - Preservation of Evidence (telling the other side not to destroy records)
 - Request for Disclosure (a formal request for the other side to share basic information)
-- Jury Demand (your right to have a jury decide the case)
+${juryAnnotation ?? ''}
 - Prayer (what you're asking the court to give you at the end of the case)
 
 Use simple language a high school student could understand. Do NOT use legal jargon in the explanations.`
@@ -750,6 +769,7 @@ function buildUserPrompt(facts: PiPetitionFacts): string {
     `Court type: ${facts.court_type}`,
     `County: ${facts.county}`,
     facts.cause_number ? `Cause number: ${facts.cause_number}` : null,
+    `Request jury trial: ${facts.request_jury_trial === false ? 'No' : 'Yes'}`,
   ]
     .filter(Boolean)
     .join('\n')

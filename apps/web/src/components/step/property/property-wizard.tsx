@@ -142,8 +142,8 @@ export function PropertyWizard({
   )
 
   /* ---- Filing / draft state ---- */
-  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | ''>(
-    (meta.filing_method as 'online' | 'in_person' | '') ?? ''
+  const [filingMethod, setFilingMethod] = useState<'online' | 'in_person' | 'mail' | ''>(
+    (meta.filing_method as 'online' | 'in_person' | 'mail' | '') ?? ''
   )
   const [documentType, setDocumentType] = useState<'demand_letter' | 'petition'>(
     (meta.document_type as 'demand_letter' | 'petition') ?? 'demand_letter'
