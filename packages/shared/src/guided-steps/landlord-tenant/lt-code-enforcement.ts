@@ -11,6 +11,7 @@ export const ltCodeEnforcementConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If your landlord refuses to repair dangerous conditions, you can file a complaint with your city or county code enforcement department. This creates an official record AND can result in the city ORDERING the landlord to repair.',
+      acknowledgeLabel: 'I understand how code enforcement complaints work and what they can accomplish',
     },
     {
       id: 'condition_type',
@@ -35,6 +36,7 @@ export const ltCodeEnforcementConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO FILE — Contact your city\'s code compliance department (search "[your city] code enforcement" online). You can usually file by phone, online, or in person. Provide: the property address, your name and contact info, a description of the violations, and photos if available.',
+      acknowledgeLabel: "I understand — I'll look up my city's code enforcement department and file a complaint",
     },
     {
       id: 'complaint_filed',
@@ -46,6 +48,7 @@ export const ltCodeEnforcementConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHAT HAPPENS NEXT — The city will schedule an inspection. If violations are found, the landlord receives a notice to repair. Failure to comply can result in fines. IMPORTANT: Keep your complaint receipt and any inspection reports — these are powerful evidence for your case AND trigger the 6-month retaliation protection (§ 92.331).',
+      acknowledgeLabel: "I understand — I'll save my complaint receipt and all inspection reports as evidence",
       showIf: (answers) => answers.complaint_filed === 'yes',
     },
     {
@@ -53,6 +56,7 @@ export const ltCodeEnforcementConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FILE SOON — A code enforcement complaint creates an official government record of the conditions. This is valuable evidence for habitability claims, repair requests, and constructive eviction. It also triggers the 6-month retaliation protection under § 92.331.',
+      acknowledgeLabel: "I understand the importance of filing — I'll file a code enforcement complaint promptly",
       showIf: (answers) => answers.complaint_filed === 'no',
     },
     {
@@ -60,6 +64,7 @@ export const ltCodeEnforcementConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RETALIATION PROTECTION — Filing a code enforcement complaint is a protected activity. If your landlord retaliates (eviction, rent increase, service decrease) within 6 months, the law presumes it\'s retaliation (§ 92.331).',
+      acknowledgeLabel: 'I understand my 6-month retaliation protection under § 92.331 after filing this complaint',
     },
   ],
 

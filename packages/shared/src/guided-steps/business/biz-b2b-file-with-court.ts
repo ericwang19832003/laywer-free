@@ -16,6 +16,7 @@ export const bizB2bFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check your contract for a forum selection clause - it may specify where disputes must be filed. Also confirm the defendant business name, entity status, and registered agent before filing. For interstate disputes, consider whether federal diversity jurisdiction applies (disputes over $75,000 between businesses in different states).',
+      acknowledgeLabel: "I'll check the contract for a forum clause and verify the defendant's registered agent",
       showIf: (answers) => answers.know_court === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const bizB2bFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If your business cannot afford filing costs, ask whether a Statement of Inability to Afford Payment of Court Costs is available. Some courts scrutinize business fee-waiver requests more closely than individual requests.',
+      acknowledgeLabel: "I'll ask the clerk about a fee waiver and be prepared for additional scrutiny",
       showIf: (answers) => answers.have_filing_fee === 'no',
     },
     {
@@ -45,6 +47,7 @@ export const bizB2bFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Online filing checklist:\n1. Go to eFileTexas.gov and choose a service provider\n2. Create an account or sign in\n3. Select the correct court and case type\n4. Upload the petition, civil cover sheet, and exhibits as PDFs\n5. Pay the filing fee or submit any fee-waiver request\n6. Save the envelope number, filing receipt, and clerk acceptance email',
+      acknowledgeLabel: "I'll follow this checklist and save the envelope number and clerk receipt",
       showIf: (answers) => answers.filing_method === 'online',
     },
     {
@@ -59,6 +62,7 @@ export const bizB2bFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After filing, you must serve each defendant. Prepare copies for service, confirm the defendant business legal name, and use the registered agent or other authorized recipient required by law.',
+      acknowledgeLabel: "I'll confirm the defendant's legal name and registered agent before serving",
     },
   ],
 

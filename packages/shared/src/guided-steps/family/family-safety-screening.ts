@@ -28,12 +28,14 @@ export function createSafetyScreeningConfig(subType: SafetySubType): GuidedStepC
         prompt: subType === 'protective_order'
           ? 'Based on your responses, filing for a protective order is the right step. The court can grant an emergency ex parte order the same day you file. There is no filing fee.'
           : 'If you answered yes to any question, consider requesting a protective order. The National DV Hotline is 1-800-799-7233. You can also request the court to keep your address confidential.',
+        acknowledgeLabel: subType === 'protective_order' ? 'I\'m ready to file →' : 'I\'ll seek help →',
         showIf: (a) => a.physical_violence === 'yes' || a.threats === 'yes' || a.controlling_behavior === 'yes',
       },
       {
         id: 'safe_info',
         type: 'info',
         prompt: 'No safety concerns identified. If your situation changes at any time, you can request protective measures.',
+        acknowledgeLabel: 'Good to know — let\'s continue →',
         showIf: (a) => a.physical_violence === 'no' && a.threats === 'no' && a.controlling_behavior === 'no',
       },
     ],

@@ -16,6 +16,7 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most employment cases are filed in state district court. Discrimination claims with a right-to-sue letter may be filed in state or federal court depending on the claim and deadline. If your employer is a government entity, different notice and venue rules may apply.',
+      acknowledgeLabel: "I'll confirm the correct court for my employment claim type",
       showIf: (answers) => answers.know_court === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you cannot afford the filing fee, you can file a Statement of Inability to Afford Payment of Court Costs (formerly "pauper\'s affidavit") to request a fee waiver.',
+      acknowledgeLabel: "I'll file a Statement of Inability to Afford Payment to request a fee waiver",
       showIf: (answers) => answers.have_filing_fee === 'no',
     },
     {
@@ -41,6 +43,7 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If your claim involves discrimination, harassment, or retaliation, you must have a right-to-sue letter from the EEOC or TWC before filing. Complete the EEOC step first.',
+      acknowledgeLabel: "I'll obtain my right-to-sue letter from the EEOC or TWC before filing",
       showIf: (answers) => answers.has_right_to_sue_letter === 'no',
     },
     {
@@ -65,6 +68,7 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Online filing checklist:\n1. Go to eFileTexas.gov and choose a service provider\n2. Create an account or sign in\n3. Select the correct court and employment/civil case type\n4. Upload the petition or complaint, civil cover sheet, right-to-sue letter if required, and exhibits as PDFs\n5. Pay the filing fee or submit a fee-waiver request\n6. Save the envelope number, filing receipt, and clerk acceptance email',
+      acknowledgeLabel: "I'll follow this e-filing checklist and save the envelope number and receipt",
       showIf: (answers) => answers.filing_method === 'online',
     },
     {
@@ -72,6 +76,7 @@ export const bizEmploymentFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After filing, each defendant must be served. For an employer entity, confirm the legal business name and registered agent before preparing copies for service.',
+      acknowledgeLabel: "I'll confirm the employer's registered agent before preparing service copies",
     },
   ],
 

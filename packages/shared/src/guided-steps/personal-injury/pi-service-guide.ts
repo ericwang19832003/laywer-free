@@ -16,6 +16,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Let's build your service plan.\n\nStart with what you know. If you only know the truck/company/person involved, we will help turn that into a service target. The goal is to answer four questions:\n1. Has the court accepted the petition?\n2. Has citation been issued?\n3. Who or what business should receive service?\n4. Which county's sheriff, constable, or process server should receive the packet?\n\nDo not serve the insurance company unless it is named as a defendant in your lawsuit. You cannot serve the papers yourself.",
+      acknowledgeLabel: 'Ready to build my service plan →',
     },
     {
       id: 'filing_accepted',
@@ -34,6 +35,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Wait for court acceptance before arranging service. Once accepted, the clerk can issue citation and you can send the citation plus petition to a sheriff, constable, or process server.',
+      acknowledgeLabel: 'I\'ll wait for acceptance →',
       showIf: (answers) =>
         answers.filing_accepted === 'submitted_only' ||
         answers.filing_accepted === 'not_sure',
@@ -56,6 +58,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you do not know whether citation was issued:\n1. Contact the clerk for the court where you filed\n2. Ask: "Has citation been issued for each defendant in cause number [your case number]?"\n3. Ask how to download it from eFileTexas or pick it up\n4. Do not send papers to a sheriff or process server until the packet includes both the citation and petition',
+      acknowledgeLabel: 'I\'ll get the citation first →',
       showIf: (answers) =>
         answers.citation_status === 'no' || answers.citation_status === 'not_sure',
     },
@@ -102,6 +105,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For a company such as Penske, service usually goes to the company through its registered agent or another authorized business recipient. The user does not need to personally know the legal recipient at first; the next task is to look up the registered agent and service address, then give that information to the sheriff, constable, or process server.',
+      acknowledgeLabel: 'I\'ll look up the registered agent →',
       showIf: (answers) =>
         answers.known_defendant_source === 'rental_truck_company' ||
         answers.known_defendant_source === 'business',
@@ -111,6 +115,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Usually you do not serve the insurance company unless the insurance company is named as a defendant in your petition. If your petition names the driver, company, or property owner, service should be directed to that named defendant instead.',
+      acknowledgeLabel: 'I understand — serve the named defendant →',
       showIf: (answers) => answers.known_defendant_source === 'insurance_company',
     },
     {
@@ -118,6 +123,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you are not sure who to serve, compare the petition caption to your evidence. For a driver, use the driver named as defendant. For a company, look up the legal entity and registered agent. Do not serve only an adjuster, claim representative, or insurance company unless that entity is listed as a defendant.',
+      acknowledgeLabel: 'I\'ll check the petition caption →',
       showIf: (answers) => answers.known_defendant_source === 'not_sure',
     },
     {
@@ -125,6 +131,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "For an individual defendant, give the server the person's full name, physical address, phone number if known, workplace if known, vehicle description if useful, and any best times to find them. The server should personally deliver the citation and petition.",
+      acknowledgeLabel: 'I have the defendant\'s details →',
       showIf: (answers) =>
         answers.known_defendant_source === 'individual' ||
         answers.defendant_type === 'individual',
@@ -134,6 +141,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "For a business defendant, search for the registered agent and registered office before service. The process server or sheriff usually serves the registered agent. If the business is a sole proprietorship, you may need to serve the owner personally.",
+      acknowledgeLabel: 'I\'ll find the registered agent →',
       showIf: (answers) =>
         answers.known_defendant_source === 'business' ||
         answers.known_defendant_source === 'rental_truck_company' ||
@@ -144,6 +152,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For an out-of-state defendant, ask the clerk or a process server about the correct method before sending papers. Depending on the facts, service may be handled by an out-of-state process server, certified mail if allowed by the court, or the Texas Secretary of State under the long-arm process.',
+      acknowledgeLabel: 'I\'ll confirm the out-of-state method →',
       showIf: (answers) => answers.defendant_type === 'out_of_state',
     },
     {
@@ -158,6 +167,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Find a service address before ordering service:\n1. Check the crash report, repair records, contract, emails, or prior letters\n2. For a business, search the Secretary of State or Comptroller records for the registered agent\n3. For a person, consider a workplace address if home address is unknown\n4. Document every attempt if you cannot locate the defendant',
+      acknowledgeLabel: 'I\'ll find the address →',
       showIf: (answers) => answers.service_address_known === 'no',
     },
     {
@@ -217,6 +227,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Private process server instructions:\n1. Contact a certified process server in the county where service will happen\n2. Send the court-issued citation, file-stamped petition, defendant name, address, phone number if known, and any helpful locating details\n3. Ask how many attempts are included and what the fee covers\n4. After service, confirm the server will file a Return of Service with the court\n5. Save the return and the invoice/receipt',
+      acknowledgeLabel: 'I\'ll contact a process server →',
       showIf: (answers) => answers.service_method === 'process_server',
     },
     {
@@ -224,6 +235,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Sheriff or constable instructions:\n1. Ask the clerk which sheriff or constable handles service for the address\n2. Pay the service fee if required\n3. Provide the citation, petition, defendant name, and service address\n4. Ask how to track attempts\n5. Confirm the officer will file a Return of Service with the court",
+      acknowledgeLabel: 'I\'ll arrange service with the sheriff →',
       showIf: (answers) => answers.service_method === 'sheriff_constable',
     },
     {
@@ -231,6 +243,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Special service methods need extra care. Ask the clerk, a process server, or legal aid before using Secretary of State service, substituted service, publication, or certified mail. Some methods require a motion, affidavit, court order, or extra fee.',
+      acknowledgeLabel: 'I\'ll confirm the method first →',
       showIf: (answers) =>
         answers.service_method === 'secretary_of_state' ||
         answers.service_method === 'not_sure',
@@ -243,10 +256,18 @@ export const piServiceGuideConfig: GuidedStepConfig = {
         'Your service packet should include the court-issued citation, file-stamped petition, any required attachments, defendant name, service address, helpful locating details, your contact information, and payment for service if required.',
     },
     {
-      id: 'service_packet_info',
-      type: 'info',
-      prompt:
-        'Prepare the service packet:\n- Court-issued citation for each defendant\n- File-stamped petition and required attachments\n- Defendant name and physical service address\n- Registered agent information for a business defendant\n- Helpful details such as phone number, workplace, vehicle, or best service times\n- Your contact information and service fee payment if required',
+      id: 'service_packet_items',
+      type: 'multi_select',
+      prompt: 'Check each item as you add it to your service packet:',
+      options: [
+        { value: 'citation', label: 'Court-issued citation for each defendant' },
+        { value: 'petition', label: 'File-stamped petition and required attachments' },
+        { value: 'defendant_address', label: 'Defendant name and physical service address' },
+        { value: 'registered_agent', label: 'Registered agent information (for a business defendant)' },
+        { value: 'locating_details', label: 'Helpful locating details (phone, workplace, vehicle, best times)' },
+        { value: 'contact_and_fee', label: 'Your contact information and service fee payment if required' },
+      ],
+      noneLabel: "Haven't started assembling yet",
       showIf: (answers) => answers.service_packet_ready === 'no',
     },
     {
@@ -261,6 +282,7 @@ export const piServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After service is completed:\n1. Get a copy of the Return of Service\n2. Confirm it was filed with the court\n3. Record the service completed date, service method, and defendant name served\n4. Use that date to calculate the answer deadline\n\nThe answer deadline does not start until service is completed.',
+      acknowledgeLabel: 'I\'ll confirm the Return of Service →',
     },
   ],
 
@@ -397,10 +419,21 @@ export const piServiceGuideConfig: GuidedStepConfig = {
     if (answers.service_packet_ready === 'yes') {
       items.push({ status: 'done', text: 'Service packet is ready.' })
     } else {
-      items.push({
-        status: 'needed',
-        text: 'Prepare the service packet with citation, petition, address, locating details, and service fee if required.',
-      })
+      const packetItems = answers.service_packet_items
+        ? answers.service_packet_items.split(',').filter((v: string) => v && v !== 'none')
+        : []
+      const requiredPacketItems = ['citation', 'petition', 'defendant_address', 'contact_and_fee']
+      const missingPacket = requiredPacketItems.filter(i => !packetItems.includes(i))
+      if (packetItems.length > 0 && missingPacket.length === 0) {
+        items.push({ status: 'done', text: 'Service packet items assembled.' })
+      } else if (packetItems.length > 0) {
+        items.push({ status: 'needed', text: `${missingPacket.length} required service packet item(s) still needed.` })
+      } else {
+        items.push({
+          status: 'needed',
+          text: 'Prepare the service packet with citation, petition, address, locating details, and service fee if required.',
+        })
+      }
     }
 
     if (answers.return_of_service_plan === 'yes') {

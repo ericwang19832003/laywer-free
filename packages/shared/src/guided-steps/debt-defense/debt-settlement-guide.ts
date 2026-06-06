@@ -9,6 +9,7 @@ export const debtSettlementGuideConfig: GuidedStepConfig = {
     {
       id: 'why_settle_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — let\'s negotiate →',
       prompt:
         'WHY SETTLE? About 80% of debt cases end in settlement. Settling can save you time, stress, and money. But ONLY settle if the terms are favorable.',
     },
@@ -21,18 +22,21 @@ export const debtSettlementGuideConfig: GuidedStepConfig = {
     {
       id: 'negotiation_targets_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know what to target →',
       prompt:
         'NEGOTIATION TARGETS:\n- Offer 25-40% of the claimed amount as a lump sum (collectors often accept this)\n- If you can\'t pay lump sum, propose monthly payments over 12-24 months\n- ALWAYS demand: (1) Debt marked "paid in full" or "settled", (2) Deletion from credit reports, (3) Written agreement BEFORE any payment, (4) Case dismissal with prejudice',
     },
     {
       id: 'red_flags_info',
       type: 'info',
+      acknowledgeLabel: 'I\'ll watch for these red flags →',
       prompt:
         'RED FLAGS — WALK AWAY IF:\n- Collector refuses to put agreement in writing\n- Collector demands payment before sending written agreement\n- Agreement says "partial payment" instead of "settled in full"\n- No credit report deletion clause\n- Collector pressures you to decide immediately',
     },
     {
       id: 'settlement_template_info',
       type: 'info',
+      acknowledgeLabel: 'Got the template →',
       prompt:
         'SETTLEMENT LETTER TEMPLATE:\n\n[Date]\n[Collector Name]\n[Address]\n\nRe: Account #[number], [Your Name]\n\nI am writing to propose a settlement of the above-referenced account.\n\nI offer to pay $[amount] as full and final settlement, subject to the following conditions:\n1. This payment constitutes settlement in full of all claims.\n2. You will file a Dismissal with Prejudice within 10 days of payment.\n3. You will request deletion of this account from all credit bureaus within 30 days.\n4. You will provide written confirmation of this agreement before payment.\n\nThis offer expires in 14 days. Please respond in writing.\n\n[Your Name]',
     },
@@ -49,6 +53,7 @@ export const debtSettlementGuideConfig: GuidedStepConfig = {
     {
       id: 'before_hearing_info',
       type: 'info',
+      acknowledgeLabel: 'I\'ll send the letter now →',
       prompt:
         'Before the hearing is the BEST time to settle. The collector wants to avoid trial costs too. Send your settlement letter now. If they don\'t respond, follow up by phone 5-7 days later. Always confirm any phone agreement in writing before paying.',
       showIf: (answers) => answers.negotiation_timing === 'before_hearing',
@@ -56,6 +61,7 @@ export const debtSettlementGuideConfig: GuidedStepConfig = {
     {
       id: 'at_hearing_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll arrive early →',
       prompt:
         'Many cases settle in the hallway before trial. Arrive early and ask to speak with the plaintiff\'s attorney. Be calm and professional. Have your settlement terms ready in writing. If you reach an agreement, ask the judge to enter an "Agreed Judgment" or dismiss the case with prejudice.',
       showIf: (answers) => answers.negotiation_timing === 'at_hearing',
@@ -63,6 +69,7 @@ export const debtSettlementGuideConfig: GuidedStepConfig = {
     {
       id: 'after_judgment_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll still try to settle →',
       prompt:
         'After a judgment, you have less leverage — but settlement is still possible. Collectors prefer getting paid over chasing exemptions. Offer a lump sum at a discount. In Texas, wages cannot be garnished for consumer debt, so the collector knows enforcement is limited. Use that as leverage.',
       showIf: (answers) => answers.negotiation_timing === 'after_judgment',

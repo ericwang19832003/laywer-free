@@ -24,18 +24,21 @@ export function createContractServiceGuideConfig(state?: string): GuidedStepConf
         id: 'individual_info',
         type: 'info',
         prompt: "Process server or sheriff delivers to their home or workplace. You will need the individual's full legal name and current address. Check the contract for the name and address they used when signing.",
+        acknowledgeLabel: "I have their address and will use it for service →",
         showIf: (answers) => answers.defendant_type === 'individual',
       },
       {
         id: 'business_info',
         type: 'info',
         prompt: `Serve their registered agent. Find the agent at the ${ct.sosName} website: ${ct.sosUrl}. Search by company name. The registered agent is the person or company legally designated to accept lawsuits on the business's behalf.`,
+        acknowledgeLabel: "I'll look up the registered agent on the Secretary of State website →",
         showIf: (answers) => answers.defendant_type === 'business',
       },
       {
         id: 'out_of_state_info',
         type: 'info',
         prompt: `You can still sue in your state if the contract was performed or made here, or if the defendant does business here. Service on an out-of-state defendant can be done by:\n\n1. Hiring a process server in their state\n2. Certified mail with return receipt\n3. Serving the Secretary of State as their agent (${ct.sosStatute}) — the Secretary then forwards the papers to the defendant\n\nOut-of-state service takes longer. Allow extra time before your court deadlines.`,
+        acknowledgeLabel: "I'll arrange out-of-state service and allow extra time for court deadlines →",
         showIf: (answers) => answers.defendant_type === 'out_of_state',
       },
 
@@ -55,24 +58,28 @@ export function createContractServiceGuideConfig(state?: string): GuidedStepConf
         id: 'process_server_info',
         type: 'info',
         prompt: 'A private process server will deliver the papers to the defendant. Cost: typically $50–150. They are usually faster than the sheriff and offer flexible scheduling. After delivery, they will provide you with an affidavit of service to file with the court.',
+        acknowledgeLabel: "I'll hire a process server and file their affidavit of service →",
         showIf: (answers) => answers.service_method === 'process_server',
       },
       {
         id: 'sheriff_info',
         type: 'info',
         prompt: "The sheriff or constable will deliver the papers. Cost: typically $75–100. Request service through the court clerk when you file your petition — they will forward the citation to the sheriff's office. The sheriff files the return of service automatically.",
+        acknowledgeLabel: "I'll request sheriff service through the court clerk when I file →",
         showIf: (answers) => answers.service_method === 'sheriff',
       },
       {
         id: 'certified_mail_info',
         type: 'info',
         prompt: "Certified mail with return receipt requested can be used in some courts. Cost: under $10. The risk: if the defendant refuses to sign or the mail is unclaimed, service fails and you'll need to use another method.",
+        acknowledgeLabel: "I'll send certified mail with return receipt and switch methods if it fails →",
         showIf: (answers) => answers.service_method === 'certified_mail',
       },
       {
         id: 'not_sure_method_info',
         type: 'info',
         prompt: "For most contract cases, a sheriff/constable or process server is the most reliable option. Certified mail is cheaper but can be refused. If you're unsure, ask the court clerk what works best for your court.",
+        acknowledgeLabel: "I'll choose between sheriff/process server and certified mail based on reliability needs →",
         showIf: (answers) => answers.service_method === 'not_sure',
       },
 
@@ -80,12 +87,14 @@ export function createContractServiceGuideConfig(state?: string): GuidedStepConf
         id: 'certificate_of_service_info',
         type: 'info',
         prompt: 'After service is completed, a certificate (or return) of service must be filed with the court. This document proves the defendant was properly notified.\n\n• Sheriff/constable: They file it automatically.\n• Process server: They provide an affidavit of service — you may need to file it yourself.\n• Certified mail: The signed return receipt (green card) serves as proof.',
+        acknowledgeLabel: "I'll ensure the certificate of service is filed with the court →",
       },
 
       {
         id: 'self_service_warning',
         type: 'info',
         prompt: 'You CANNOT serve the papers yourself. Service must be made by a third party — the sheriff, a constable, a private process server, or any person authorized by court order who is not a party to the suit.',
+        acknowledgeLabel: "I'll arrange for a third party to handle service — not do it myself →",
       },
     ],
 

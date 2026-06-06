@@ -11,6 +11,7 @@ export const propertyPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'MOTION FOR SUMMARY JUDGMENT:\nIf the facts are undisputed (e.g., survey clearly shows boundary, deed is unambiguous), you can ask the judge to rule without a trial. This is common in boundary and title disputes.',
+      acknowledgeLabel: "I understand how summary judgment works",
     },
     {
       id: 'clear_documentary_evidence',
@@ -25,6 +26,7 @@ export const propertyPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FILING A SUMMARY JUDGMENT MOTION:\n1. Draft a motion stating there are no genuine issues of material fact\n2. Attach supporting evidence (survey, deed, photos, expert reports)\n3. Include affidavits from surveyors or other experts if available\n4. File with the court and serve on the other party\n5. The other party has 21 days to respond (Texas Rules)\n6. The judge will hold a hearing — no jury, just legal arguments\n\nThis can resolve your case in weeks instead of months.',
+      acknowledgeLabel: "I'll prepare and file a summary judgment motion",
       showIf: (answers) => answers.clear_documentary_evidence === 'yes',
     },
     {
@@ -32,6 +34,7 @@ export const propertyPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the facts are disputed (e.g., both sides disagree about where the boundary is, or what caused the damage), summary judgment is unlikely to succeed. Focus on building the strongest trial case instead.',
+      acknowledgeLabel: "I'll focus on building my trial case instead",
       showIf: (answers) => answers.clear_documentary_evidence === 'no',
     },
     {
@@ -39,6 +42,7 @@ export const propertyPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'MOTION FOR TEMPORARY INJUNCTION:\nIf the damage is ONGOING (neighbor keeps trespassing, tree keeps dropping branches on your property, HOA keeps fining you), you can ask the court to ORDER them to stop while the case is pending.',
+      acknowledgeLabel: "I understand how a temporary injunction can stop ongoing damage",
     },
     {
       id: 'damage_ongoing',
@@ -52,6 +56,7 @@ export const propertyPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TEMPORARY INJUNCTION REQUIREMENTS:\nTo get a temporary injunction in Texas, you must show:\n\n1. IRREPARABLE HARM: The damage cannot be adequately compensated by money alone (e.g., ongoing trespass, destruction of trees, continued encroachment)\n2. LIKELIHOOD OF SUCCESS: You are likely to win at trial based on the evidence\n3. BALANCE OF HARDSHIPS: The harm to you without the injunction outweighs the burden on the defendant\n\nYou will need to post a bond (amount set by the judge). The court will hold a hearing — bring all evidence of ongoing damage, photos with dates, and any communications showing you asked them to stop.',
+      acknowledgeLabel: "I'll gather dated photos and communications to support my injunction request",
       showIf: (answers) => answers.damage_ongoing === 'yes',
     },
     {
@@ -59,6 +64,7 @@ export const propertyPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the damage already occurred and is not continuing, a temporary injunction is not appropriate. Focus on documenting the damage thoroughly for trial and pursuing monetary damages for the harm already done.',
+      acknowledgeLabel: "I'll focus on documenting the existing damage for trial",
       showIf: (answers) => answers.damage_ongoing === 'no',
     },
   ],

@@ -16,6 +16,7 @@ export const contractProvisionsCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ARBITRATION CLAUSE: You may be REQUIRED to go to arbitration instead of court. Arbitration is a private process with a hired arbitrator (not a judge). It\'s usually binding. Check:\n- Is arbitration mandatory or optional?\n- Which organization? (AAA, JAMS, other)\n- Who pays the arbitrator? (often split)\n- You may need to file in arbitration first, then confirm the award in court.',
+      acknowledgeLabel: "I understand — I may need to arbitrate instead of going to court",
       showIf: (answers) => answers.has_arbitration === 'yes',
     },
     {
@@ -28,6 +29,7 @@ export const contractProvisionsCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'This caps the damages you can recover. For example: \'Liability shall not exceed the contract price.\' This is enforceable in Texas unless it\'s unconscionable. Adjust your damages demand accordingly.',
+      acknowledgeLabel: "I'll adjust my damages demand for the cap",
       showIf: (answers) => answers.has_liability_cap === 'yes',
     },
     {
@@ -40,6 +42,7 @@ export const contractProvisionsCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GOOD NEWS: Texas follows the \'American Rule\' (each side pays their own fees) UNLESS the contract says otherwise. A fee-shifting clause means the losing party pays the winner\'s attorney fees. This strengthens your demand letter — they risk paying your costs too.',
+      acknowledgeLabel: "I'll use the fee-shifting clause as leverage",
       showIf: (answers) => answers.has_attorney_fees === 'yes',
     },
     {
@@ -52,6 +55,7 @@ export const contractProvisionsCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A choice-of-law clause means another state\'s laws may govern. This affects: statute of limitations, available damages, and procedural rules. If it says a state other than Texas, you should research that state\'s contract law.',
+      acknowledgeLabel: "I'll research the governing state's contract law",
       showIf: (answers) => answers.has_choice_of_law === 'yes',
     },
     {
@@ -64,6 +68,7 @@ export const contractProvisionsCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Liquidated damages pre-set the penalty for breach. Enforceable in Texas if: (1) damages were hard to estimate at contract time, and (2) the amount is a reasonable forecast of actual damages. If the amount is unreasonably large, a court may void it as a \'penalty.\'',
+      acknowledgeLabel: "I understand the liquidated damages clause",
       showIf: (answers) => answers.has_liquidated_damages === 'yes',
     },
   ],

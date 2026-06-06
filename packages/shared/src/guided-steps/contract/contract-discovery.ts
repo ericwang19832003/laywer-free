@@ -11,6 +11,7 @@ export const contractDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In a contract dispute, discovery typically includes: requests for production (documents), interrogatories (written questions), requests for admission (confirm/deny facts), and depositions (sworn testimony). Focus on getting documents that prove the contract, the breach, and your damages.',
+      acknowledgeLabel: "I understand the four discovery tools and will focus on the contract and breach →",
     },
     {
       id: 'sent_rfps',
@@ -27,6 +28,7 @@ export const contractDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For contract cases, request: the signed contract, all amendments, emails and correspondence between the parties, invoices and payment records, internal communications about the contract, and any documents showing why they claim they did not breach.',
+      acknowledgeLabel: "I'll send requests for production covering all contract-related documents →",
       showIf: (answers) => answers.sent_rfps === 'not_familiar' || answers.sent_rfps === 'no',
     },
     {
@@ -44,6 +46,7 @@ export const contractDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Interrogatories are written questions the defendant must answer under oath. For contract cases, ask about: their understanding of the contract terms, why they stopped performing, what they claim you owe them, and who was involved in the decision. Texas limits you to 25 interrogatories (including subparts).',
+      acknowledgeLabel: "I'll draft interrogatories targeting contract performance and breach →",
       showIf: (answers) => answers.sent_interrogatories === 'not_familiar',
     },
     {
@@ -61,6 +64,7 @@ export const contractDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Requests for admission ask the defendant to admit or deny specific facts. In a contract case, these are very powerful: "Admit that you signed the contract dated [date]." "Admit that you received payment of $X on [date]." If they don\'t respond within 30 days, the facts are deemed admitted.',
+      acknowledgeLabel: "I'll use requests for admission to lock in undisputed contract facts →",
       showIf: (answers) => answers.sent_rfas === 'not_familiar' || answers.sent_rfas === 'no',
     },
     {
@@ -78,6 +82,7 @@ export const contractDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Depositions are live, sworn testimony recorded by a court reporter. In contract cases, you might depose: the person who signed the contract, the person responsible for performance, and anyone who made the decision to breach. Depositions can be expensive but are very effective for locking in testimony.',
+      acknowledgeLabel: "I'll evaluate whether depositions are worth the cost for my case →",
       showIf: (answers) => answers.planning_depositions !== 'yes',
     },
   ],

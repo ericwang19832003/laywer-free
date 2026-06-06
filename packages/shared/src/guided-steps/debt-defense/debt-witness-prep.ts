@@ -16,6 +16,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'no_witnesses_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll focus on documents →',
       showIf: (answers) => answers.has_witnesses === 'no',
       prompt:
         "That's OK \u2014 most debt cases are decided on documents, not witnesses. Focus on your documentary evidence: bank statements, letters, call logs, and any correspondence with the collector.",
@@ -35,6 +36,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'fdcpa_witness_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll prepare them →',
       showIf: (answers) =>
         answers.has_witnesses === 'yes' && answers.witness_topic === 'fdcpa_violation',
       prompt:
@@ -43,6 +45,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'payment_witness_info',
       type: 'info',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) =>
         answers.has_witnesses === 'yes' && answers.witness_topic === 'payment_history',
       prompt:
@@ -51,6 +54,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'identity_witness_info',
       type: 'info',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) =>
         answers.has_witnesses === 'yes' && answers.witness_topic === 'identity_error',
       prompt:
@@ -59,6 +63,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'other_witness_info',
       type: 'info',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) =>
         answers.has_witnesses === 'yes' && answers.witness_topic === 'other',
       prompt:
@@ -67,6 +72,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'witness_rules_info',
       type: 'info',
+      acknowledgeLabel: 'Understood the rules →',
       showIf: (answers) => answers.has_witnesses === 'yes',
       prompt:
         'RULES FOR WITNESSES:\n- You CAN review the facts with them beforehand\n- You CANNOT tell them what to say (that\'s coaching, and it\'s unethical)\n- They must testify from their own memory\n- They should stick to what they personally saw or heard\n- They should dress appropriately and address the judge respectfully',
@@ -74,6 +80,7 @@ export const debtWitnessPrepConfig: GuidedStepConfig = {
     {
       id: 'subpoena_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I can subpoena if needed →',
       showIf: (answers) => answers.has_witnesses === 'yes',
       prompt:
         'SUBPOENAING A WITNESS:\nIf your witness is unwilling to come voluntarily, you can subpoena them (force them to attend). Ask the court clerk for a subpoena form. File it with the clerk, then have it served on the witness at least 48 hours before the hearing.',

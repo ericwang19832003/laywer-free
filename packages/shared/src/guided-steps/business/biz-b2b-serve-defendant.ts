@@ -16,6 +16,7 @@ export const bizB2bServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can look up a business\'s registered agent on the Secretary of State website for the state where the business is registered.',
+      acknowledgeLabel: "I'll look up the registered agent on the Secretary of State website",
       showIf: (answers) => answers.know_registered_agent === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const bizB2bServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For out-of-state businesses, you may be able to use the Texas long-arm statute to serve them if they have sufficient contacts with Texas (e.g., doing business here, committing a tort here).',
+      acknowledgeLabel: "I understand — I'll use the Texas long-arm statute to serve the out-of-state business",
       showIf: (answers) => answers.is_out_of_state === 'yes',
     },
     {

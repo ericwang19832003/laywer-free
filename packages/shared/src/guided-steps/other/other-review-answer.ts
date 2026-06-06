@@ -16,6 +16,7 @@ export const otherReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Read the entire answer carefully, including any attached exhibits. Note which of your claims they admit, deny, or claim insufficient knowledge about.',
+      acknowledgeLabel: "I'll read the full answer and note every admission, denial, and objection",
       showIf: (answers) => answers.read_answer === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const otherReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Common affirmative defenses include: statute of limitations, failure to state a claim, comparative fault, waiver, or estoppel. Each defense shifts some burden to the other party to prove. Make a list of every defense raised so you can address each one.',
+      acknowledgeLabel: "I'll list every affirmative defense and research how to counter each one",
       showIf: (answers) => answers.raises_defenses === 'yes',
     },
     {
@@ -40,6 +42,7 @@ export const otherReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A counterclaim means the other party is now suing you as part of the same case. You will need to file a response to their counterclaim, usually within the same timeframe they had to answer your claims. Take this seriously even if you believe it has no merit.',
+      acknowledgeLabel: "I understand — I'll file my response to the counterclaim within the deadline",
       showIf: (answers) => answers.has_counterclaims === 'yes',
     },
     {
@@ -52,6 +55,7 @@ export const otherReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After the answer is filed, cases typically move into discovery (exchanging documents and information), followed by possible mediation, pre-trial motions, and eventually trial. The court may set a scheduling conference to establish deadlines.',
+      acknowledgeLabel: "I understand the case progression — I'm ready to move into discovery",
       showIf: (answers) => answers.understand_next_steps === 'no',
     },
   ],

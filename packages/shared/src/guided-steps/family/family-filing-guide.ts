@@ -165,6 +165,7 @@ export function createFamilyFilingGuideConfig(
         id: 'jurisdiction_info',
         type: 'info',
         prompt: copy.jurisdiction,
+        acknowledgeLabel: 'I know where to file →',
       },
       {
         id: 'filing_method',
@@ -180,24 +181,28 @@ export function createFamilyFilingGuideConfig(
         id: 'efile_instructions',
         type: 'info',
         prompt: `E-FILING INSTRUCTIONS:\n1. Go to eFileTexas.gov and choose a service provider\n2. Create or sign in to your account\n3. Select your county and the family court or district clerk\n4. Upload your ${copy.caseLabel} filing documents as PDFs\n5. Submit payment or a fee waiver if a fee applies\n6. Save the envelope number, acceptance email, and cause number once assigned\n\nTip: Many Texas counties require e-filing. If you are unsure, call the clerk before filing.`,
+        acknowledgeLabel: 'Got it — I\'ll e-file →',
         showIf: (answers) => answers.filing_method === 'efile',
       },
       {
         id: 'in_person_instructions',
         type: 'info',
         prompt: `IN-PERSON FILING:\n1. Go to the District Clerk's office or the clerk named by your county for family cases\n2. Bring the signed filing documents, copies, and any required local forms\n3. Bring the filing fee or fee waiver unless this is a no-fee filing\n4. Ask the clerk to file-stamp your copy and assign or confirm the cause number\n5. Ask about local rules, standing orders, and service options`,
+        acknowledgeLabel: 'Got it — I\'ll file in person →',
         showIf: (answers) => answers.filing_method === 'in_person',
       },
       {
         id: 'mail_instructions',
         type: 'info',
         prompt: `FILING BY MAIL:\n1. Mail the signed filing documents, cover sheet, any filing fee or fee waiver, and a self-addressed stamped envelope\n2. Send by certified mail so you have proof of delivery\n3. The clerk should return file-stamped copies in your envelope\n4. This method is slower. Allow 1-2 weeks for processing and call the clerk to confirm acceptance.\n\nNote: Some counties may not accept mail filings. Call first to confirm.`,
+        acknowledgeLabel: 'Got it — I\'ll file by mail →',
         showIf: (answers) => answers.filing_method === 'mail',
       },
       {
         id: 'filing_fee_info',
         type: 'info',
         prompt: `FILING FEES: ${copy.feeInfo}`,
+        acknowledgeLabel: 'Got it — I know the fees →',
       },
       ...(copy.noFee
         ? []
@@ -214,6 +219,7 @@ export function createFamilyFilingGuideConfig(
               type: 'info' as const,
               prompt:
                 'FEE WAIVER: File a "Statement of Inability to Afford Payment of Court Costs" with your filing. The form asks for income, benefits, expenses, and dependents. File it at the same time as your petition or motion.',
+              acknowledgeLabel: 'Got it — I\'ll file the fee waiver →',
               showIf: (answers: Record<string, string>) =>
                 answers.can_afford_fee === 'no',
             },
@@ -235,6 +241,7 @@ export function createFamilyFilingGuideConfig(
         type: 'info',
         prompt:
           'eFILETEXAS ACCOUNT SETUP:\n1. Go to eFileTexas.gov and choose a service provider\n2. Register with your name, email, and password\n3. Add a payment method if a fee applies\n4. Start a new envelope, select the court, upload PDFs, and submit\n5. Save the envelope number and acceptance confirmation',
+        acknowledgeLabel: 'Got it — I\'ll set up my account →',
         showIf: (answers) =>
           answers.filing_method === 'efile' && answers.efile_account === 'no',
       },

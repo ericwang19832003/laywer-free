@@ -16,6 +16,7 @@ export const piServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "You may need to use a skip tracing service or check public records to find the defendant's address.",
+      acknowledgeLabel: "I'll use a skip tracing service or public records to locate the defendant",
       showIf: (answers) => answers.know_defendant_address === 'no',
     },
     {
@@ -34,6 +35,7 @@ export const piServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A constable or private process server is most reliable. Certified mail is cheaper but the defendant can refuse to sign.',
+      acknowledgeLabel: "I'll use a constable or process server for the most reliable service",
       showIf: (answers) => answers.service_method === 'not_sure',
     },
     {
@@ -53,6 +55,7 @@ export const piServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Service must be completed within 120 days of filing your petition, or the court may dismiss your case.',
+      acknowledgeLabel: "I understand the 120-day service deadline — I'll complete service well before it expires",
     },
   ],
 

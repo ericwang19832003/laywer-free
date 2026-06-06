@@ -27,6 +27,7 @@ export const ltHearingDayConfig: GuidedStepConfig = {
         'The judge will call your case. Both sides will be sworn in. Present your evidence calmly. Don\'t interrupt the other party. Let the judge guide the process.',
       helpText:
         'Landlord-tenant hearings in JP Court are usually 15\u201330 minutes. The judge may ask questions to both sides.',
+      acknowledgeLabel: "I understand the hearing procedure \u2014 I'll stay calm, present my evidence, and let the judge guide the process",
     },
     {
       id: 'possible_outcomes_info',
@@ -35,6 +36,7 @@ export const ltHearingDayConfig: GuidedStepConfig = {
         'Possible outcomes: the judge may rule in your favor, rule against you, or order mediation. For evictions, the judge may grant a "writ of possession" giving the tenant time to move.',
       helpText:
         'If the other party doesn\'t show up, you may win by default judgment.',
+      acknowledgeLabel: 'I understand the possible outcomes and what each one means for my next steps',
     },
   ],
 

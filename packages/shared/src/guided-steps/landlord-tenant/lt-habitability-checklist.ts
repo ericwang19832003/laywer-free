@@ -68,6 +68,7 @@ export const ltHabitabilityChecklistConfig: GuidedStepConfig = {
         'Under Texas Property Code § 92.052, these conditions may constitute a breach of the implied warranty of habitability. Document everything with dates, photos, and written communications.',
       helpText:
         'Thorough documentation is your strongest tool when pursuing remedies.',
+      acknowledgeLabel: "I understand the legal standard — I'll document everything",
     },
     {
       id: 'sent_written_notice',
@@ -83,6 +84,7 @@ export const ltHabitabilityChecklistConfig: GuidedStepConfig = {
         'Texas law requires written notice to your landlord before you can pursue remedies like repair-and-deduct or lease termination. Send a dated letter or email describing each issue and requesting repair within a reasonable time.',
       helpText:
         'Keep a copy of the notice and any proof of delivery (certified mail receipt, email confirmation).',
+      acknowledgeLabel: "I'll send written notice to my landlord",
       showIf: (answers) => answers.sent_written_notice === 'no',
     },
   ],

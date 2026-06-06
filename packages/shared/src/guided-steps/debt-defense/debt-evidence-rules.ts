@@ -11,36 +11,42 @@ export const debtEvidenceRulesConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "RULE 1: HEARSAY \u2014 You can't use a document to prove what it says unless the author testifies or it falls under an exception. Example: A bill from the collector is hearsay \u2014 the collector must bring a witness who can authenticate it. But YOUR bank statements are YOUR records (business records exception).",
+      acknowledgeLabel: 'Got it, next rule \u2192',
     },
     {
       id: 'rule_authentication',
       type: 'info',
       prompt:
         'RULE 2: AUTHENTICATION \u2014 Before a document can be evidence, someone must confirm it\'s real. For your documents: "Your Honor, this is my bank statement from [date]. I downloaded it from my bank\'s website." For collector documents: Ask "Can you prove this document is authentic? Who created it?"',
+      acknowledgeLabel: 'Got it, next rule \u2192',
     },
     {
       id: 'rule_best_evidence',
       type: 'info',
       prompt:
         "RULE 3: BEST EVIDENCE \u2014 Use originals, not copies, when possible. If you only have copies, explain why: \"The original is in the collector's possession.\" Judges usually accept copies in small debt cases.",
+      acknowledgeLabel: 'Got it, next rule \u2192',
     },
     {
       id: 'rule_relevance',
       type: 'info',
       prompt:
         "RULE 4: RELEVANCE \u2014 Every piece of evidence must relate to a fact in the case. Don't bring your entire filing cabinet. Bring ONLY documents that prove your specific defenses.",
+      acknowledgeLabel: 'Got it, next rule \u2192',
     },
     {
       id: 'rule_objections',
       type: 'info',
       prompt:
         "RULE 5: OBJECTIONS YOU CAN MAKE:\n- \"Objection, hearsay\" \u2014 when collector uses a document without testimony\n- \"Objection, lack of foundation\" \u2014 when collector hasn't proven a document is real\n- \"Objection, relevance\" \u2014 when evidence doesn't relate to the case\n\nDon't be afraid to object. If the judge overrules you, that's OK \u2014 it shows you're paying attention.",
+      acknowledgeLabel: "Got it, I'll use these objections \u2192",
     },
     {
       id: 'jp_court_tip',
       type: 'info',
       prompt:
         'PRO TIP FOR JP COURT: Judges in JP court are often more relaxed about evidence rules. But in County and District court, rules are strictly enforced. Know which court you\'re in.',
+      acknowledgeLabel: 'Got it, I know my court →',
     },
   ],
 

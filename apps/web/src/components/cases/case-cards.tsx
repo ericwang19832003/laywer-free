@@ -313,183 +313,114 @@ function CaseCardView({ caseData, onAction, isSelected, onSelect }: { caseData: 
   const isOverdue = daysUntil !== null && daysUntil < 0
   const progress = caseData.progress ?? 0
 
+  // Circular progress ring
+  const ringSize = 48
+  const strokeWidth = 3.5
+  const radius = (ringSize - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const ringOffset = circumference - (progress / 100) * circumference
+  const ringColorClass = progress >= 70 ? 'text-calm-green' : progress >= 40 ? 'text-calm-amber' : 'text-warm-muted'
+
   return (
-    <Card className={cn('group hover:shadow-lg hover:border-primary/30 transition-all duration-300', isSelected && 'ring-2 ring-calm-indigo')}>
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <button
-            onClick={() => onSelect?.(!isSelected)}
-            className={cn(
-              'w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors',
-              isSelected ? 'bg-calm-indigo border-calm-indigo' : 'border-warm-border hover:border-calm-indigo/50'
-            )}
-          >
-            {isSelected && (
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-          </button>
-          <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border shrink-0', colorClass)}>
-            <Icon className="h-6 w-6" />
-          </div>
+    <Link href={`/case/${caseData.id}`} className="block group">
+      <Card className={cn('hover:border-calm-indigo/30 hover:shadow-sm transition-all duration-200', isSelected && 'ring-2 ring-calm-indigo border-calm-indigo/30')}>
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4">
+            {/* Select checkbox */}
+            <button
+              onClick={(e) => { e.preventDefault(); onSelect?.(!isSelected) }}
+              className={cn(
+                'w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
+                isSelected ? 'bg-calm-indigo border-calm-indigo' : 'border-warm-border hover:border-calm-indigo/50'
+              )}
+            >
+              {isSelected && (
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-warm-text truncate pr-4">
-                  {caseData.description || 'Your Case'}
-                </h3>
-                {caseData.yourName && (
-                  <p className="text-xs text-warm-muted mt-0.5">
-                    Filed by {caseData.yourName}
-                  </p>
-                )}
-                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                  {caseData.county && (
-                    <Badge variant="outline" className="text-xs">
-                      {caseData.county}
-                    </Badge>
-                  )}
-                  <Badge className={cn('text-xs', colorClass)}>
-                    {DISPUTE_LABELS[caseData.dispute_type] || 'Case'}
-                  </Badge>
-                  <Badge variant={caseData.role === 'plaintiff' ? 'default' : 'secondary'} className="text-xs">
-                    {caseData.role === 'plaintiff' ? 'Plaintiff' : 'Defendant'}
-                  </Badge>
-                  <Badge className={cn('text-xs', statusColorClass)}>
-                    {STATUS_LABELS[status]}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="relative">
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="p-2 rounded-lg hover:bg-warm-border/40 transition-colors"
-                >
-                  <MoreVertical className="h-4 w-4 text-warm-muted" />
-                </button>
-                {showMenu && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                    <div className="absolute right-0 top-full mt-1 z-20 w-40 rounded-lg border bg-popover shadow-lg py-1">
-                      <Link
-                        href={`/case/${caseData.id}`}
-                        className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-warm-border/40 transition-colors"
-                        onClick={() => setShowMenu(false)}
-                      >
-                        <Eye className="h-4 w-4" />
-                        View Details
-                      </Link>
-                      <QuickNoteDialog caseId={caseData.id} />
-                      <SetReminderDialog caseId={caseData.id} />
-                      {onAction && (
-                        <>
-                          <hr className="my-1 border-warm-border" />
-                          <button
-                            onClick={() => {
-                              onAction('archive')
-                              setShowMenu(false)
-                            }}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-warm-muted hover:bg-warm-border/40 w-full transition-colors"
-                          >
-                            <FileCheck className="h-4 w-4" />
-                            Archive
-                          </button>
-                          <button
-                            onClick={() => {
-                              onAction('delete')
-                              setShowMenu(false)
-                            }}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/5 w-full transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+            {/* Case icon */}
+            <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center border shrink-0', colorClass)}>
+              <Icon className="h-5 w-5" />
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-4">
-              <div className="text-center p-2 bg-warm-bg/50 rounded-lg">
-                <p className="text-xs text-warm-muted">Case Age</p>
-                <p className="text-sm font-semibold text-warm-text">{caseAge} days</p>
-              </div>
-              <div className="text-center p-2 bg-warm-bg/50 rounded-lg">
-                <p className="text-xs text-warm-muted">Progress</p>
-                <p className="text-sm font-semibold text-warm-text">{progress}%</p>
-              </div>
-              <div className="text-center p-2 bg-warm-bg/50 rounded-lg">
-                <p className="text-xs text-warm-muted">Last Activity</p>
-                <p className="text-sm font-semibold text-warm-text truncate">
-                  {caseData.lastActivity ? formatRelativeDate(caseData.lastActivity) : 'None'}
-                </p>
-              </div>
-            </div>
-
-            {caseData.opposingParty && (
-              <div className="mt-3 flex items-center gap-2 text-sm text-warm-muted">
-                <UsersIcon className="h-4 w-4" />
-                <span>vs. {caseData.opposingParty}</span>
-              </div>
-            )}
-
-            {(caseData.nextAction || caseData.deadline) && (
-              <div className="mt-3 pt-3 border-t border-warm-border">
-                {caseData.nextAction && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <FileCheck className="h-4 w-4 text-primary" />
-                    <span className="text-warm-muted">Next:</span>
-                    <span className="text-warm-text font-medium">{caseData.nextAction}</span>
-                  </div>
-                )}
-                {caseData.deadline && (
-                  <div className={cn(
-                    'flex items-center gap-2 text-sm mt-1.5',
-                    isOverdue && 'text-calm-amber',
-                    isUrgent && 'text-calm-amber',
-                    !isOverdue && !isUrgent && 'text-warm-muted'
-                  )}>
-                    {isOverdue ? (
-                      <AlertCircle className="h-4 w-4" />
-                    ) : (
-                      <Clock className="h-4 w-4" />
-                    )}
-                    <span className="truncate">
-                      {isOverdue
-                        ? `Overdue: ${caseData.deadline.label}`
-                        : `${caseData.deadline.label}: ${formatDate(caseData.deadline.due_at)}`
-                      }
-                      {daysUntil !== null && !isOverdue && (
-                        <span className="ml-1 font-medium">
-                          ({daysUntil === 0 ? 'Today' : `${daysUntil}d left`})
-                        </span>
-                      )}
+            {/* Case identity */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-warm-text truncate">
+                {caseData.description || (DISPUTE_LABELS[caseData.dispute_type]
+                  ? `${DISPUTE_LABELS[caseData.dispute_type]} ${caseData.role === 'plaintiff' ? 'claim' : 'defense'}`
+                  : 'Your Case')}
+              </h3>
+              <p className="text-xs text-warm-muted mt-0.5">
+                {[caseData.county, caseData.court_type, caseData.role === 'plaintiff' ? 'Plaintiff' : 'Defendant']
+                  .filter(Boolean).join(' · ')}
+              </p>
+              {caseData.nextAction && (
+                <p className="text-xs text-warm-text mt-1.5">
+                  <span className="text-warm-muted">Next: </span>
+                  <span className="font-medium">{caseData.nextAction}</span>
+                  {caseData.deadline && (
+                    <span className={cn(
+                      'ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+                      isUrgent || isOverdue ? 'bg-calm-amber/10 text-calm-amber' : 'bg-warm-border text-warm-muted'
+                    )}>
+                      {daysUntil === null ? '' : isOverdue ? `${Math.abs(daysUntil)}d overdue` : daysUntil === 0 ? 'today' : `in ${daysUntil}d`}
                     </span>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </p>
+              )}
+            </div>
 
-            <div className="mt-4 flex items-center gap-2">
-              <Link href={`/case/${caseData.id}`} className="flex-1">
-                <Button className="w-full gap-1" size="sm">
-                  Continue
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <QuickNoteDialog caseId={caseData.id} />
-              <SetReminderDialog caseId={caseData.id} />
+            {/* Circular progress ring */}
+            <div className="relative shrink-0" style={{ width: ringSize, height: ringSize }}>
+              <svg width={ringSize} height={ringSize} viewBox={`0 0 ${ringSize} ${ringSize}`} className="-rotate-90">
+                <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-warm-border" />
+                <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={ringOffset} strokeLinecap="round" className={ringColorClass} />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className={`text-xs font-semibold tabular-nums ${ringColorClass}`}>{progress}%</span>
+              </div>
+            </div>
+
+            {/* Menu */}
+            <div className="relative shrink-0">
+              <button
+                onClick={(e) => { e.preventDefault(); setShowMenu(!showMenu) }}
+                className="p-1.5 rounded-lg hover:bg-warm-border/40 transition-colors"
+              >
+                <MoreVertical className="h-4 w-4 text-warm-muted" />
+              </button>
+              {showMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={(e) => { e.preventDefault(); setShowMenu(false) }} />
+                  <div className="absolute right-0 top-full mt-1 z-20 w-40 rounded-lg border bg-popover shadow-lg py-1">
+                    <Link href={`/case/${caseData.id}`} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-warm-border/40 transition-colors" onClick={() => setShowMenu(false)}>
+                      <Eye className="h-4 w-4" />
+                      View Details
+                    </Link>
+                    {onAction && (
+                      <>
+                        <hr className="my-1 border-warm-border" />
+                        <button onClick={(e) => { e.preventDefault(); onAction('archive'); setShowMenu(false) }} className="flex items-center gap-2 px-3 py-2 text-sm text-warm-muted hover:bg-warm-border/40 w-full transition-colors">
+                          <Archive className="h-4 w-4" />
+                          Archive
+                        </button>
+                        <button onClick={(e) => { e.preventDefault(); onAction('delete'); setShowMenu(false) }} className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/5 w-full transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 

@@ -27,6 +27,7 @@ export const understandRemovalConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Cases are usually removed because: the amount exceeds $75,000 AND parties are from different states (diversity jurisdiction), or the case involves a federal question.',
+      acknowledgeLabel: 'I understand why it was removed →',
       showIf: (answers) =>
         answers.case_removed === 'yes' && answers.understand_why !== 'yes',
     },
@@ -41,6 +42,7 @@ export const understandRemovalConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can: file a motion to remand (send it back to state court), continue in federal court, or file an amended complaint to defeat diversity jurisdiction.',
+      acknowledgeLabel: 'Got it — I know my response options →',
       showIf: (answers) => answers.know_options === 'no',
     },
     {

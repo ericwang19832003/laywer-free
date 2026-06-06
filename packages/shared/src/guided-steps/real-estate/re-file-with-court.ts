@@ -18,6 +18,7 @@ export const reFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your petition should include: the property address, legal description of the property, names of all parties, the facts of the dispute, the legal basis for your claim, and the specific relief you are seeking.',
+      acknowledgeLabel: "I'll include all required property details, parties, facts, and relief in my petition",
       showIf: (answers) => answers.have_petition === 'no',
     },
     {
@@ -30,6 +31,7 @@ export const reFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Filing fees vary by county, typically $250\u2013$350 for district court. If you cannot afford the fee, you can apply for a fee waiver by filing a Statement of Inability to Afford Payment of Court Costs.',
+      acknowledgeLabel: "I'll obtain the filing fee or file for a fee waiver before going to the courthouse",
       showIf: (answers) => answers.have_filing_fee === 'no',
     },
     {
@@ -47,6 +49,7 @@ export const reFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas requires e-filing in most courts. Visit efiletexas.gov to create an account, select your court, upload your petition and supporting documents, and pay the filing fee online.',
+      acknowledgeLabel: "I'll create an account at efiletexas.gov and upload my documents there",
       showIf: (answers) =>
         answers.filing_method === 'online' || answers.filing_method === 'not_sure',
     },
@@ -60,6 +63,7 @@ export const reFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After filing, you will receive a cause number. This is your case identifier for all future filings and communications with the court. Keep copies of everything you file. Your next step is to serve the defendant.',
+      acknowledgeLabel: "I've recorded my cause number and I'm ready to serve the defendant",
       showIf: (answers) => answers.filed_case === 'yes',
     },
   ],

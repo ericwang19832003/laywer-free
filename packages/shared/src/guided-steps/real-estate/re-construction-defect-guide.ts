@@ -11,6 +11,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'THE RCLA (Tex. Property Code Ch. 27):\nThe Texas Residential Construction Liability Act applies to virtually all claims against residential builders and contractors for construction defects. Before you can file a lawsuit, you MUST follow a pre-suit notice process. Skipping this step can result in your case being dismissed or your damages being reduced.',
+      acknowledgeLabel: 'I understand the RCLA requirements →',
     },
     {
       id: 'defect_type',
@@ -29,6 +30,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'STRUCTURAL DEFECTS:\n• Statute of limitations: 10 years from substantial completion of the original construction\n• These are the most serious claims — foundation cracks, framing failures, roof structural issues\n• An expert structural engineer report is typically required to prove the defect and causation\n• Damages can include cost to repair, diminished property value, and relocation costs during repair',
+      acknowledgeLabel: 'Understood — structural defect rules →',
       showIf: (answers) => answers.defect_type === 'structural' || answers.defect_type === 'multiple',
     },
     {
@@ -36,6 +38,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'NON-STRUCTURAL / COSMETIC DEFECTS:\n• Statute of limitations: 2 years from the date you discovered (or should have discovered) the defect\n• These claims have a shorter window — act quickly\n• Document everything with photographs and written descriptions\n• Get at least one independent repair estimate',
+      acknowledgeLabel: 'Understood — act quickly on cosmetic defects →',
       showIf: (answers) => answers.defect_type === 'cosmetic' || answers.defect_type === 'multiple',
     },
     {
@@ -43,6 +46,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'MECHANICAL / SYSTEMS DEFECTS:\n• Plumbing, electrical, and HVAC defects may be structural or non-structural depending on severity\n• Check your builder warranty — many systems have specific warranty periods\n• Document failures with dates, repair invoices, and photographs\n• A licensed inspector or engineer can classify the defect for statute of limitations purposes',
+      acknowledgeLabel: 'Understood — mechanical defect rules →',
       showIf: (answers) => answers.defect_type === 'mechanical' || answers.defect_type === 'multiple',
     },
     {
@@ -50,6 +54,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WATER INTRUSION DEFECTS:\n• Water intrusion can cause both structural and cosmetic damage — document both\n• Mold remediation costs can be substantial and are recoverable\n• Get a moisture survey from a qualified inspector\n• Photograph the water damage progression over time if possible',
+      acknowledgeLabel: 'Understood — documenting water intrusion →',
       showIf: (answers) => answers.defect_type === 'water_intrusion' || answers.defect_type === 'multiple',
     },
     {
@@ -64,6 +69,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'REQUIRED: RCLA PRE-SUIT NOTICE (60 days before filing):\n1. Draft a written notice describing each defect in reasonable detail\n2. Send it to the builder by certified mail, return receipt requested\n3. The builder then has 35 days to request an inspection of the property\n4. After inspection, the builder has 45 days from receiving the notice to make a written offer to repair, settle, or reject the claim\n5. You may not file suit until the 60-day period expires\n6. KEEP YOUR CERTIFIED MAIL RECEIPT — you will need to prove you sent the notice',
+      acknowledgeLabel: 'I will send the 60-day RCLA notice →',
       showIf: (answers) => answers.sent_notice === 'no',
     },
     {
@@ -84,6 +90,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "BUILDER OFFERED TO REPAIR:\n• You may accept or reject the offer. If you reject a reasonable offer, a court may limit your damages.\n• If you accept, the builder must complete repairs within a reasonable time (the offer should specify a timeline).\n• Document the repair work — photograph before, during, and after.\n• If the repairs are inadequate, you can then file suit for the remaining defects.\n• Get an independent inspection after the builder's repairs are complete.",
+      acknowledgeLabel: 'I understand the repair offer rules →',
       showIf: (answers) => answers.builder_response === 'offered_repair',
     },
     {
@@ -91,6 +98,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'BUILDER REJECTED OR DID NOT RESPOND:\n• You may now file suit once the 60-day period has expired.\n• You will need an expert affidavit — Texas courts generally require an affidavit from a qualified expert (engineer, architect, or inspector) describing the defect, its cause, and the cost to repair.\n• Gather your evidence: inspection reports, repair estimates, photographs, the RCLA notice and certified mail receipt, and any communications with the builder.',
+      acknowledgeLabel: 'Ready to proceed to filing →',
       showIf: (answers) =>
         answers.builder_response === 'rejected' || answers.builder_response === 'no_response',
     },
@@ -104,6 +112,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'EXPERT AFFIDAVIT REQUIREMENT:\n• Most construction defect cases require an expert affidavit identifying the defect, explaining why it constitutes a construction defect, and estimating the cost to repair.\n• Qualified experts include: licensed professional engineers, registered architects, licensed home inspectors.\n• Get multiple repair estimates to support your damages claim.\n• The expert may need to physically inspect the property — coordinate access.',
+      acknowledgeLabel: 'I will retain an expert →',
       showIf: (answers) => answers.has_expert === 'no',
     },
     {
@@ -122,6 +131,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RECOVERABLE DAMAGES UNDER THE RCLA:\n• Cost to repair: The primary measure of damages — what it costs to fix the defect properly.\n• Diminished value: If the property is worth less even after repair, you can recover the difference.\n• Relocation costs: If you must move out during repairs, temporary housing and moving expenses are recoverable.\n• Engineering/inspection fees: Costs of expert inspections and reports.\n• Note: The RCLA limits certain damages — you generally cannot recover mental anguish or punitive damages under the RCLA alone (but you may have other claims, such as DTPA violations, that allow additional damages).',
+      acknowledgeLabel: 'I understand RCLA damages →',
       showIf: (answers) => answers.damages_type === 'multiple_damages',
     },
     {
@@ -129,6 +139,7 @@ export const reConstructionDefectGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'STATUTE OF REPOSE:\nTexas has a 10-year statute of repose for construction defect claims (Tex. Civ. Prac. & Rem. Code §16.009). After 10 years from substantial completion of the improvement, you generally cannot bring a claim regardless of when the defect was discovered. This is an absolute outer limit — do not confuse it with the statute of limitations.',
+      acknowledgeLabel: 'I understand the 10-year deadline →',
     },
   ],
 

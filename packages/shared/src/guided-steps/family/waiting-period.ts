@@ -16,6 +16,7 @@ export const waitingPeriodConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas Family Code requires a 60-day waiting period from the date the petition was filed before the court can finalize a divorce.',
+      acknowledgeLabel: "I understand the 60-day waiting period requirement",
     },
     {
       id: 'using_time_wisely',
@@ -27,6 +28,7 @@ export const waitingPeriodConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'During the waiting period: gather financial documents, inventory community property, research custody arrangements, and consider temporary orders if needed.',
+      acknowledgeLabel: "I'll use the waiting period to gather documents and prepare my case",
       showIf: (answers) => answers.using_time_wisely === 'no',
     },
   ],

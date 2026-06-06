@@ -25,6 +25,7 @@ export const settlementConferencePrepConfig: GuidedStepConfig = {
       id: 'authority_info',
       type: 'info',
       prompt: 'You may need someone available by phone with authority to approve a settlement during the conference.',
+      acknowledgeLabel: 'Got it — I\'ll arrange for someone with authority →',
       showIf: (answers) => answers.settlement_authority === 'no',
     },
     {
@@ -36,6 +37,7 @@ export const settlementConferencePrepConfig: GuidedStepConfig = {
       id: 'value_factors',
       type: 'info',
       prompt: 'Consider: damages, liability strength, evidence quality, cost of trial, time to resolution, and risk of losing.',
+      acknowledgeLabel: 'Got it — I\'ll calculate my case value →',
       showIf: (answers) => answers.case_value_calculated === 'no',
     },
     {
@@ -57,6 +59,7 @@ export const settlementConferencePrepConfig: GuidedStepConfig = {
       id: 'BATNA_info',
       type: 'info',
       prompt: 'Your BATNA is what happens if settlement fails. Consider: trial costs, time, stress, evidence gaps, and procedural risk.',
+      acknowledgeLabel: 'Got it — I\'ll think through my BATNA →',
       showIf: (answers) => answers.BATNA_considered === 'no',
     },
     {
@@ -68,6 +71,7 @@ export const settlementConferencePrepConfig: GuidedStepConfig = {
       id: 'terms_info',
       type: 'info',
       prompt: 'Beyond money, consider: payment timing, confidentiality, releases, dismissals, and non-disparagement clauses.',
+      acknowledgeLabel: 'Got it — I\'ll consider all my terms →',
       showIf: (answers) => answers.settlement_terms === 'no',
     },
     {

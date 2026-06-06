@@ -11,6 +11,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TWO TYPES OF BREACH:\n\n1. MATERIAL BREACH: The other party failed to do something essential. You didn\'t get the substantial benefit of the contract. Example: contractor was paid to build a garage but never started.\n\n2. MINOR BREACH: The other party did most of what was promised but missed a detail. Example: contractor built the garage but used a slightly different paint color.\n\nWHY IT MATTERS: A material breach lets you cancel the contract AND sue for damages. A minor breach only lets you sue for the cost to fix the deficiency.',
+      acknowledgeLabel: "I understand the difference between material and minor breach",
     },
     {
       id: 'contract_promise',
@@ -35,6 +36,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TOTAL NON-PERFORMANCE: This is almost certainly a material breach. The other party failed entirely. You can cancel the contract, demand a full refund of anything you paid, and sue for additional damages (such as the cost to hire someone else).',
+      acknowledgeLabel: "I understand — I can cancel and sue for a full refund",
       showIf: (answers) => answers.what_happened === 'nothing_done',
     },
     {
@@ -42,6 +44,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'PARTIAL PERFORMANCE: This is likely a material breach if the incomplete work deprives you of the substantial benefit. Key question: can you use what was delivered? If the partial work is essentially useless without completion, it\'s material. If it has standalone value, it may be minor.',
+      acknowledgeLabel: "I understand — it depends on whether I got substantial value",
       showIf: (answers) => answers.what_happened === 'partial_performance',
     },
     {
@@ -49,6 +52,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COMPLETED WITH DEFECTS: This is usually a minor breach — you received the substantial benefit but with imperfections. Your remedy is the cost to fix the defects, not cancellation. Exception: if the defects are so severe the work is essentially unusable, it could be material.',
+      acknowledgeLabel: "I understand — my remedy is the cost to fix the defects",
       showIf: (answers) => answers.what_happened === 'completed_with_defects',
     },
     {
@@ -56,6 +60,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'LATE PERFORMANCE: Usually a minor breach unless "time was of the essence." If the contract explicitly states a deadline is critical (e.g., wedding venue, event supplies), late performance can be material. Otherwise, you can recover damages caused by the delay but cannot cancel.',
+      acknowledgeLabel: "I understand — I can claim damages from the delay",
       showIf: (answers) => answers.what_happened === 'late_performance',
     },
     {
@@ -63,6 +68,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WRONG THING DELIVERED: This is typically a material breach. You contracted for something specific and received something different. You can reject what was delivered, cancel the contract, and sue for damages — including the cost to obtain what was actually promised.',
+      acknowledgeLabel: "I understand — I can reject this and cancel the contract",
       showIf: (answers) => answers.what_happened === 'wrong_thing_delivered',
     },
     {
@@ -75,6 +81,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you received substantial benefit, the breach may be considered minor. You can still recover damages for the deficiencies but cannot cancel the entire contract.',
+      acknowledgeLabel: "I understand — I'll claim the cost to fix deficiencies",
       showIf: (answers) => answers.received_benefit === 'yes',
     },
     {
@@ -82,6 +89,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you received no substantial benefit, this is likely a material breach. You can cancel the contract, demand a full refund, and sue for additional damages.',
+      acknowledgeLabel: "I understand — this is a material breach and I can cancel",
       showIf: (answers) => answers.received_benefit === 'no',
     },
     {
@@ -89,6 +97,7 @@ export const contractBreachAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ANTICIPATORY BREACH: If the other party has told you (or their actions show) they WON\'T perform in the future, that\'s an anticipatory breach. You can treat the contract as broken NOW — you don\'t have to wait until the performance deadline.',
+      acknowledgeLabel: "I understand — I don't have to wait for the deadline",
     },
   ],
 

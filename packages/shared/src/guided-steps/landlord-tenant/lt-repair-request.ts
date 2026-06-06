@@ -56,6 +56,7 @@ export function createLtRepairRequestConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt: `Under ${lt.repairStatute}, your landlord must make a diligent effort to repair conditions that materially affect health or safety. You must give written notice, and the landlord has a reasonable time to repair.`,
         helpText: 'Written notice is a legal requirement before you can pursue remedies like repair-and-deduct or lease termination.',
+        acknowledgeLabel: 'I understand my right to request repairs',
       },
       {
         id: 'has_documentation',
@@ -68,6 +69,7 @@ export function createLtRepairRequestConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt: 'Documenting the issue with photos or video is critical. Take dated photos showing the problem, any damage, and the overall condition. This evidence supports your repair request and protects you if the issue escalates.',
         helpText: 'Even phone photos with timestamps can serve as strong evidence.',
+        acknowledgeLabel: "I'll take photos to document the issue",
         showIf: (answers) => answers.has_documentation === 'no',
       },
     ],

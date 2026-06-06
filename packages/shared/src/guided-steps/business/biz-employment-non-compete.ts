@@ -11,6 +11,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TEXAS NON-COMPETE LAW (Bus. & Com. Code \u00a715.50-52):\nA non-compete is ONLY enforceable if:\n1. It\'s part of an otherwise enforceable agreement (employment contract with consideration)\n2. It\'s reasonable in: TIME (typically 1-2 years max), GEOGRAPHY (specific area, not nationwide), SCOPE (specific activities, not all competition)\n3. It protects a legitimate business interest (trade secrets, customer relationships)',
+      acknowledgeLabel: 'Understood the law \u2192',
     },
     {
       id: 'has_written_non_compete',
@@ -22,6 +23,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GOOD NEWS: Without a written agreement, a non-compete is almost certainly unenforceable in Texas. Verbal non-compete agreements are extremely difficult to enforce because:\n- The statute of frauds generally requires agreements lasting over one year to be in writing\n- The employer would need to prove the exact terms were agreed to\n- Courts strongly disfavor restricting someone\'s ability to earn a living without clear written terms\n\nIf your former employer is threatening to enforce a verbal non-compete, they likely have no legal basis.',
+      acknowledgeLabel: 'That\'s a relief →',
       showIf: (answers) => answers.has_written_non_compete === 'no',
     },
     {
@@ -29,6 +31,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Having a written non-compete doesn\'t mean it\'s enforceable. Texas courts examine three key factors to determine if the restrictions are reasonable. Let\'s analyze yours.',
+      acknowledgeLabel: 'Analyze my agreement →',
       showIf: (answers) => answers.has_written_non_compete === 'yes',
     },
     {
@@ -48,6 +51,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TIME ANALYSIS: 6 months to 1 year is generally considered reasonable by Texas courts. This factor likely favors enforceability.',
+      acknowledgeLabel: 'Continue analysis →',
       showIf: (answers) =>
         answers.restriction_period === 'six_months' || answers.restriction_period === 'one_year',
     },
@@ -56,6 +60,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TIME ANALYSIS: 2 years is at the outer edge of what Texas courts consider reasonable. It may be enforceable depending on the industry and your role, but courts are more likely to narrow it.',
+      acknowledgeLabel: 'Continue analysis →',
       showIf: (answers) => answers.restriction_period === 'two_years',
     },
     {
@@ -63,6 +68,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TIME ANALYSIS: More than 2 years is generally considered unreasonable by Texas courts. A court is likely to either void this restriction or use the "blue pencil" doctrine to reduce it to a reasonable period (typically 1-2 years).',
+      acknowledgeLabel: 'Continue analysis →',
       showIf: (answers) => answers.restriction_period === 'over_two_years',
     },
     {
@@ -83,6 +89,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GEOGRAPHY ANALYSIS: A city or county restriction is generally reasonable and likely enforceable, especially if it matches where you actually worked and served customers.',
+      acknowledgeLabel: 'Continue analysis →',
       showIf: (answers) => answers.geographic_scope === 'city' || answers.geographic_scope === 'county',
     },
     {
@@ -90,6 +97,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GEOGRAPHY ANALYSIS: A statewide restriction can be reasonable for employees with statewide customer relationships or access to statewide trade secrets. Otherwise, it may be overbroad.',
+      acknowledgeLabel: 'Continue analysis →',
       showIf: (answers) => answers.geographic_scope === 'state',
     },
     {
@@ -97,6 +105,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GEOGRAPHY ANALYSIS: Nationwide or unlimited geographic restrictions are very difficult to enforce in Texas. Courts typically find these unreasonable unless the employee had truly national responsibilities. A court is likely to narrow this significantly.',
+      acknowledgeLabel: 'Continue analysis →',
       showIf: (answers) =>
         answers.geographic_scope === 'nationwide' || answers.geographic_scope === 'no_limit',
     },
@@ -105,6 +114,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'BLUE PENCIL DOCTRINE: Texas courts can REWRITE unreasonable non-competes to make them enforceable. They reduce the scope, geography, or duration rather than voiding the entire agreement. This means even if your non-compete seems too broad, a court might narrow it rather than throw it out.',
+      acknowledgeLabel: 'Understood — show my options →',
       showIf: (answers) => answers.has_written_non_compete === 'yes',
     },
     {
@@ -112,6 +122,7 @@ export const bizEmploymentNonCompeteConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'YOUR OPTIONS:\n1. CHALLENGE: File a declaratory judgment action asking the court to void or narrow the non-compete\n2. NEGOTIATE: Propose a reasonable modification (shorter time, smaller area)\n3. COMPLY: Follow the restrictions to avoid litigation risk\n4. SEEK INJUNCTION: If your former employer threatens to enforce, seek court order',
+      acknowledgeLabel: 'I\'ve reviewed my options →',
     },
   ],
 

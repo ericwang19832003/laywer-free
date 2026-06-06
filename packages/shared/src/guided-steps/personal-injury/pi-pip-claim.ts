@@ -18,6 +18,7 @@ export const piPipClaimConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Without auto insurance, PIP is not available to you. However, you can still pursue a claim directly against the at-fault driver. Skip ahead to the demand letter or filing steps.',
+      acknowledgeLabel: 'I\'ll pursue the at-fault driver directly →',
       showIf: (answers) => answers.has_auto_insurance === 'no',
     },
     {
@@ -25,6 +26,7 @@ export const piPipClaimConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas PIP coverage:\n- Pays up to your policy limit for medical expenses\n- Pays 80% of lost wages (up to $10,000 typically)\n- Covers funeral expenses\n- Available regardless of fault\n- Must file within 2 years',
+      acknowledgeLabel: 'I understand my PIP coverage →',
       showIf: (answers) => answers.has_auto_insurance === 'yes',
     },
     {
@@ -38,6 +40,7 @@ export const piPipClaimConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Good — make sure you follow up regularly. Your insurer must respond within 15 business days of receiving your claim. If they deny or delay, you may have a bad faith claim against them.',
+      acknowledgeLabel: 'I\'ll follow up in 15 days →',
       showIf: (answers) =>
         answers.has_auto_insurance === 'yes' && answers.pip_already_filed === 'yes',
     },
@@ -46,6 +49,7 @@ export const piPipClaimConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO FILE:\n1. Call your auto insurance company (number on your insurance card)\n2. Say: \'I was in an accident and I need to file a PIP claim\'\n3. They\'ll send forms — fill out completely\n4. Attach: police report, medical bills, proof of lost wages\n5. Submit within 30 days of the accident for fastest processing\n\nIMPORTANT: Filing a PIP claim does NOT affect your rates. It is YOUR coverage that YOU paid for.',
+      acknowledgeLabel: 'I\'m ready to file my PIP claim →',
       showIf: (answers) =>
         answers.has_auto_insurance === 'yes' && answers.pip_already_filed === 'no',
     },
@@ -62,6 +66,7 @@ export const piPipClaimConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the at-fault driver has no insurance (or not enough), YOUR UM/UIM coverage pays the difference up to your policy limit.\n\nThis is especially important because roughly 1 in 5 Texas drivers is uninsured. Your UM/UIM claim is against YOUR insurance company, but they must treat it fairly under Texas law.',
+      acknowledgeLabel: 'I understand my UM/UIM rights →',
       showIf: (answers) =>
         answers.has_auto_insurance === 'yes' && answers.has_um_uim === 'yes',
     },
@@ -70,6 +75,7 @@ export const piPipClaimConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Without UM/UIM coverage, if the at-fault driver is uninsured or underinsured, you may only be able to recover what they personally can pay — which is often very little. Consider adding UM/UIM to your policy for future protection.',
+      acknowledgeLabel: 'I\'ll add UM/UIM protection going forward →',
       showIf: (answers) =>
         answers.has_auto_insurance === 'yes' && answers.has_um_uim === 'no',
     },

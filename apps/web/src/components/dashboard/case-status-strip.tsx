@@ -20,7 +20,8 @@ function deadlineText(deadlines: Array<{ due_at: string; label: string | null }>
 }
 
 function progressText(tasksSummary: Record<string, number>): string {
-  const total = Object.values(tasksSummary).reduce((s, v) => s + v, 0)
+  const locked = tasksSummary['locked'] ?? 0
+  const total = Object.values(tasksSummary).reduce((s, v) => s + v, 0) - locked
   const done = (tasksSummary['completed'] ?? 0) + (tasksSummary['skipped'] ?? 0)
   if (total === 0) return 'Getting started'
   return `${done} of ${total} steps done`

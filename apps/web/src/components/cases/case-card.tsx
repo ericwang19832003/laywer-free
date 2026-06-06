@@ -1,11 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { ArrowRight } from 'lucide-react'
 import { getDisputeLabel, getCourtLabel } from '@/lib/labels'
 import { getHealthLabel } from '@/lib/health-labels'
+import { ArrowRight } from 'lucide-react'
 
 interface CaseCardProps {
   id: string
@@ -20,83 +18,123 @@ interface CaseCardProps {
   tasksTotal: number
   nextDeadline: string | null
   lastActivity: string | null
+  nextAction?: string | null
 }
 
-function relativeDate(dateStr: string): string {
+function relativeDeadline(dateStr: string): string {
   const now = new Date()
   const date = new Date(dateStr)
   const diffDays = Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays < 0) return `${Math.abs(diffDays)}d overdue`
   if (diffDays === 0) return 'today'
   if (diffDays === 1) return 'tomorrow'
-  if (diffDays > 1 && diffDays <= 7) return `in ${diffDays} days`
+  if (diffDays <= 7) return `in ${diffDays} days`
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function timeAgo(dateStr: string): string {
-  const now = new Date()
-  const date = new Date(dateStr)
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffHours < 1) return 'just now'
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays === 1) return '1d ago'
-  if (diffDays < 30) return `${diffDays}d ago`
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+function CircularProgress({ percentage, healthScore, colorClass }: { percentage: number; healthScore: number | null; colorClass: string }) {
+  const size = 48
+  const strokeWidth = 3.5
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percentage / 100) * circumference
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-warm-border"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className={colorClass}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className={`text-xs font-semibold tabular-nums ${colorClass}`}>
+          {healthScore !== null ? healthScore : `${percentage}%`}
+        </span>
+      </div>
+    </div>
+  )
 }
 
 export function CaseCard({
-  id, county, role, courtType, disputeType, piSubType, createdAt,
-  healthScore, tasksCompleted, tasksTotal, nextDeadline, lastActivity,
+  id, county, role, courtType, disputeType, piSubType,
+  healthScore, tasksCompleted, tasksTotal, nextDeadline, nextAction,
 }: CaseCardProps) {
   const healthInfo = getHealthLabel(healthScore)
-  const displayCounty = county ? `${county} County` : 'County not set'
   const courtLabel = getCourtLabel(courtType) || null
   const roleLabel = role === 'plaintiff' ? 'Plaintiff' : 'Defendant'
   const disputeLabel = disputeType ? getDisputeLabel(disputeType, piSubType) : null
   const percentage = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0
 
+  const displayName = disputeLabel
+    ? `${disputeLabel}${piSubType ? '' : ''} ${roleLabel === 'Defendant' ? 'defense' : 'claim'}`
+    : county
+    ? `${county} County`
+    : 'Case'
+  const displayLocation = [county ? `${county} County` : null, courtLabel].filter(Boolean).join(' · ')
+
+  const isDeadlineUrgent = nextDeadline
+    ? Math.round((new Date(nextDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) <= 7
+    : false
+
+  const progressColorClass = healthScore !== null && healthScore >= 70
+    ? 'text-calm-green'
+    : healthScore !== null && healthScore >= 40
+    ? 'text-calm-amber'
+    : healthScore !== null
+    ? 'text-destructive'
+    : 'text-warm-muted'
+
   return (
-    <Link href={`/case/${id}`} className="block">
-      <Card className="bg-white hover:shadow-sm transition-shadow">
-        <CardContent className="py-4 px-5">
-          <div className="flex items-center gap-4">
-            {/* Health score */}
-            <div className="shrink-0 text-center w-14">
-              <p className={`text-lg font-semibold ${healthInfo.colorClass}`}>
-                {healthScore !== null ? healthScore : '—'}
-              </p>
-              <p className={`text-[10px] ${healthInfo.colorClass}`}>
-                {healthInfo.label}
-              </p>
-            </div>
-
-            {/* Case identity */}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-warm-text truncate">
-                {displayCounty}{courtLabel ? ` · ${courtLabel}` : ''}
-              </p>
-              <p className="text-xs text-warm-muted">
-                {roleLabel}{disputeLabel ? ` · ${disputeLabel}` : ''} · Started {new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                {lastActivity && <> · {timeAgo(lastActivity)}</>}
-              </p>
-            </div>
-
-            {/* Progress */}
-            <div className="shrink-0 w-32 hidden sm:block">
-              <div className="flex items-center justify-between text-xs text-warm-muted mb-1">
-                <span>{tasksCompleted}/{tasksTotal}</span>
+    <Link href={`/case/${id}`} className="block group">
+      <div className="rounded-xl border border-warm-border bg-white px-5 py-4 hover:border-calm-indigo/30 hover:shadow-sm transition-all">
+        <div className="flex items-center gap-4">
+          {/* Case identity */}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-warm-text truncate capitalize">{displayName}</p>
+            <p className="text-xs text-warm-muted mt-0.5">{displayLocation}</p>
+            {nextAction && (
+              <p className="text-xs text-warm-text mt-1.5">
+                <span className="text-warm-muted">Next: </span>
+                <span className="font-medium">{nextAction}</span>
                 {nextDeadline && (
-                  <span className="text-amber-600 font-medium">{relativeDate(nextDeadline)}</span>
+                  <span className={`ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                    isDeadlineUrgent ? 'bg-calm-amber/10 text-calm-amber' : 'bg-warm-border text-warm-muted'
+                  }`}>
+                    {relativeDeadline(nextDeadline)}
+                  </span>
                 )}
-              </div>
-              <Progress value={percentage} className="h-1.5" />
-            </div>
-
-            <ArrowRight className="h-4 w-4 text-warm-muted shrink-0" />
+              </p>
+            )}
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Circular progress ring */}
+          <CircularProgress
+            percentage={percentage}
+            healthScore={healthScore}
+            colorClass={progressColorClass}
+          />
+
+          <ArrowRight className="h-4 w-4 text-warm-muted shrink-0 group-hover:text-calm-indigo transition-colors" />
+        </div>
+      </div>
     </Link>
   )
 }

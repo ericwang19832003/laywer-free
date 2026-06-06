@@ -28,6 +28,7 @@ export const propertyPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For property disputes, it is critical to record any agreement, judgment, or deed modification with the county clerk\'s office. This makes the resolution binding on future owners and provides public notice of the changed property rights.',
+      acknowledgeLabel: "I'll record the settlement agreement with the county clerk",
       showIf: (answers) => answers.case_outcome === 'settled' && answers.agreement_recorded === 'no',
     },
     {
@@ -41,6 +42,7 @@ export const propertyPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Record the judgment with the county clerk to provide public notice. For boundary or title rulings, you may also need to file an amended deed or plat reflecting the court\'s decision.',
+      acknowledgeLabel: "I'll record the judgment and file any amended deed or plat",
       showIf: (answers) => answers.case_outcome === 'won_trial' && answers.judgment_recorded === 'no',
     },
     {
@@ -60,6 +62,7 @@ export const propertyPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party does not comply, you may need to file a motion to enforce the judgment or hold them in contempt. For monetary judgments, collection methods include property liens, wage garnishment, or bank levies. For injunctive relief (remove a structure), the court can hold them in contempt.',
+      acknowledgeLabel: "I'll file a motion to enforce if the other party doesn't comply",
       showIf: (answers) => answers.enforcement_complied === 'no',
     },
     {
@@ -73,6 +76,7 @@ export const propertyPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the resolution changed any boundaries or property rights, get an updated survey to reflect the new state. This protects you if the property is ever sold or refinanced.',
+      acknowledgeLabel: "I'll get an updated property survey to reflect the resolution",
       showIf: (answers) => answers.survey_updated === 'no',
     },
     {
@@ -86,6 +90,7 @@ export const propertyPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, you must file a notice of appeal within 30 days of the judgment. An appeal must show the trial court made a legal error — simply disagreeing with the outcome is not enough. Property cases can involve complex factual findings that are difficult to overturn on appeal.',
+      acknowledgeLabel: "I'll file my notice of appeal within the 30-day deadline",
       showIf: (answers) => answers.considering_appeal === 'yes',
     },
     {
@@ -99,6 +104,7 @@ export const propertyPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If your property dispute involved a title defect, lien, or encumbrance that should have been caught, your title insurance policy may cover your losses. Contact your title company to file a claim.',
+      acknowledgeLabel: "I'll contact my title company to file a claim",
       showIf: (answers) => answers.title_insurance_claim === 'no',
     },
   ],

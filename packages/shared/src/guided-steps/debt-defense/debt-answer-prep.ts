@@ -7,16 +7,25 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
 
   questions: [
     {
-      id: 'what_is_answer',
+      id: 'answer_what_it_is',
       type: 'info',
       prompt:
-        'AN ANSWER IS YOUR RESPONSE TO THE LAWSUIT.\n\nThe plaintiff filed a petition saying you owe money. Your Answer is your official response to the court. If you don\'t file one by your deadline, the court automatically rules against you (called a "default judgment") — and the collector can start taking money from your bank account.\n\nFiling an Answer forces the plaintiff to PROVE their case. They must show evidence that you owe the money, that the amount is correct, and that they have the right to collect.',
+        'AN ANSWER IS YOUR OFFICIAL RESPONSE TO THE LAWSUIT.\n\nThe plaintiff filed a petition saying you owe money. Your Answer is your response to the court — you tell the court whether you agree or disagree with what they claim.\n\nFiling an Answer forces the plaintiff to PROVE their case. They must show evidence that you owe the money, that the amount is correct, and that they have the right to collect.',
+      acknowledgeLabel: 'Got it — what happens if I don\'t file?',
+    },
+    {
+      id: 'answer_why_required',
+      type: 'info',
+      prompt:
+        'YOUR DEADLINE IS CRITICAL.\n\nIf you don\'t file an Answer by your deadline, the court automatically rules against you — this is called a "default judgment." Once that happens, the collector can start taking money from your bank account without any further court hearing.\n\nDeadlines in Texas:\n- Justice of the Peace (JP) court: 14 days from the date you were served\n- County or District court: the first Monday after 20 days from service\n\nMissing your deadline is the single biggest mistake you can make.',
+      acknowledgeLabel: 'I understand — I need to file before my deadline',
     },
     {
       id: 'general_vs_specific',
       type: 'info',
       prompt:
         'TWO TYPES OF ANSWERS:\n\n1. GENERAL DENIAL (recommended for most people)\nYou deny EVERYTHING the plaintiff claims. This is one sentence: "Defendant generally denies each and every allegation." The plaintiff must then prove every single element of their case. This is the safest option.\n\n2. SPECIFIC ANSWER\nYou respond to each allegation individually — "I admit this, I deny that." This is riskier because anything you admit can\'t be disputed later.\n\nWe recommend General Denial unless you have specific facts you want to raise.',
+      acknowledgeLabel: "I understand the two answer types",
     },
     {
       id: 'have_petition',
@@ -30,6 +39,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "You need to obtain the plaintiff's petition before you can prepare your answer. Contact the court clerk at the courthouse listed on your citation. You can usually get a copy in person or request it by mail. Some courts also have online case lookup systems. The citation you received should have the court name, case number, and address.",
+      acknowledgeLabel: "I'll contact the court clerk to obtain the petition",
       showIf: (answers) => answers.have_petition === 'no',
     },
     {
@@ -44,6 +54,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DEFENSES ARE YOUR REASONS WHY YOU SHOULD WIN.\n\nEven with a general denial, you should list specific defenses. Think of it like this:\n- General denial = "I deny everything" (plaintiff must prove their case)\n- Defenses = "And even if I owed it, here\'s why I still shouldn\'t pay" (you have specific legal reasons)\n\nCommon defenses for debt cases:\n- Statute of limitations expired (they waited too long to sue)\n- They can\'t prove they own the debt (no chain of assignment)\n- The amount is wrong (fees, interest, or principal errors)\n- FDCPA violations (they broke the law while collecting)',
+      acknowledgeLabel: "I understand the common defenses",
     },
     {
       id: 'which_defense',
@@ -78,6 +89,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Statute of limitations defense: In Texas, most debts have a 4-year statute of limitations (6 years for promissory notes). If the creditor waited too long to sue, the case should be dismissed. You must affirmatively raise this defense in your answer — the court will not raise it for you. Include language like: "Plaintiff\'s claims are barred by the applicable statute of limitations, Tex. Civ. Prac. & Rem. Code § 16.004."',
+      acknowledgeLabel: "I'll raise the statute of limitations in my answer",
       showIf: (answers) => answers.which_defense === 'sol_expired',
     },
     {
@@ -85,6 +97,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Wrong party defense: If you are not the person who owes this debt (identity theft, same name, or the debt belongs to a family member), you should deny the allegations and state that you are not the debtor. Request that the plaintiff produce the original signed agreement bearing your signature. Include language like: "Defendant denies being a party to the alleged agreement and demands strict proof thereof."',
+      acknowledgeLabel: "I'll demand proof of the original signed agreement",
       showIf: (answers) => answers.which_defense === 'wrong_party',
     },
     {
@@ -92,6 +105,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Amount disputed defense: If the amount claimed is wrong — inflated fees, incorrect interest, payments not credited — deny the amount and demand an itemized accounting. Include language like: "Defendant disputes the amount alleged and demands strict proof of each charge, fee, and payment credited." Gather your own payment records, bank statements, and any correspondence about the balance.',
+      acknowledgeLabel: "I'll gather my payment records and demand an itemized accounting",
       showIf: (answers) => answers.which_defense === 'amount_disputed',
     },
     {
@@ -99,6 +113,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Already paid defense: If you already paid this debt in full, gather all proof of payment — cancelled checks, bank statements, receipts, confirmation emails. Include language like: "Defendant affirmatively pleads payment as a defense and states the alleged debt has been satisfied in full." Attach copies of your proof to the answer if possible.',
+      acknowledgeLabel: "I'll gather my proof of payment",
       showIf: (answers) => answers.which_defense === 'already_paid',
     },
     {
@@ -106,6 +121,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FDCPA violations defense: If the debt collector violated the Fair Debt Collection Practices Act, you may have a counterclaim for up to $1,000 in statutory damages plus actual damages and attorney fees. This does not eliminate the underlying debt but can be used as leverage and may offset what you owe. You can raise FDCPA violations as an affirmative defense and file a counterclaim in the same case.',
+      acknowledgeLabel: "I'll raise FDCPA violations in my answer and counterclaim",
       showIf: (answers) => answers.which_defense === 'fdcpa_violations',
     },
     {
@@ -113,6 +129,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "General denial: This is the simplest and safest approach. You deny every allegation in the plaintiff's petition, which forces the plaintiff to prove every element of their case — that the debt exists, that you are the debtor, that the amount is correct, and that they have standing to sue. In Texas, a general denial is a single sentence: \"Defendant generally denies each and every allegation contained in Plaintiff's petition.\"",
+      acknowledgeLabel: "I'll file a general denial",
       showIf: (answers) => answers.which_defense === 'general_denial',
     },
     {
@@ -120,6 +137,7 @@ export const debtAnswerPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you are not sure which defense to use, file a general denial. It is always valid, requires no proof from you, and forces the plaintiff to prove their entire case. You can always add specific defenses later through an amended answer. The most important thing is to file something before your deadline.',
+      acknowledgeLabel: "I'll file a general denial before my deadline and add specific defenses later if needed",
       showIf: (answers) => answers.which_defense === 'not_sure',
     },
   ],

@@ -16,6 +16,7 @@ export const otherWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In most state courts, the defendant has 20-30 days after service to file an answer. In federal court, it is typically 21 days. Check the rules for your specific court.',
+      acknowledgeLabel: "I'll look up the answer deadline for my specific court",
       showIf: (answers) => answers.know_answer_deadline === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const otherWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most courts have online docket systems where you can check for new filings. Set a reminder to check weekly. You will also usually receive copies of anything filed by the other side.',
+      acknowledgeLabel: "I'll set a weekly reminder to check the court docket",
       showIf: (answers) => answers.monitoring_docket === 'no',
     },
     {
@@ -45,6 +47,7 @@ export const otherWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party missed their deadline, you may be able to request a default judgment. This means you could win your case without a trial because they failed to respond. Contact the court clerk about filing a motion for default.',
+      acknowledgeLabel: "I'll contact the court clerk to file a motion for default judgment",
       showIf: (answers) => answers.deadline_passed === 'yes_no_answer',
     },
     {
@@ -52,6 +55,7 @@ export const otherWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Now that the other party has answered, the next phase typically involves discovery (exchanging information) and possibly mediation or a trial date. Review their answer carefully for any counterclaims.',
+      acknowledgeLabel: "I'll review the answer for counterclaims and prepare for discovery",
       showIf: (answers) => answers.deadline_passed === 'yes_answered',
     },
   ],

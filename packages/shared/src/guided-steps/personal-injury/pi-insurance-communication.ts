@@ -36,6 +36,7 @@ export const piInsuranceCommunicationConfig: GuidedStepConfig = {
         'You are NOT required to give a recorded statement to the other party\'s insurance company. You can decline and say "I prefer to communicate in writing." If you do give a statement, prepare your answers in advance and stick to basic facts.',
       helpText:
         'Your own insurance policy may require cooperation, but be cautious about what you say.',
+      acknowledgeLabel: 'I understand the risks',
       showIf: (answers) => answers.recorded_statement_requested === 'yes',
     },
     {
@@ -52,6 +53,7 @@ export const piInsuranceCommunicationConfig: GuidedStepConfig = {
         'Early settlement offers are almost always too low. Do not accept any settlement before completing medical treatment. Once you accept, you cannot go back and ask for more, even if your injuries turn out to be worse than expected.',
       helpText:
         'Wait until you reach Maximum Medical Improvement (MMI) to know the true value of your claim.',
+      acknowledgeLabel: 'I will not accept early offers',
       showIf: (answers) => answers.offered_quick_settlement === 'yes',
     },
     {
@@ -82,6 +84,7 @@ export const piInsuranceCommunicationConfig: GuidedStepConfig = {
         'Watch out for common adjuster tactics: offering a lowball settlement before you know your full injuries, calling frequently to pressure you, requesting unnecessary medical authorizations to access your full history, and delaying responses to run out the statute of limitations. Stick to basic facts, say "I\'m still treating" if asked about injuries, and never speculate about fault.',
       helpText:
         'You can always say "I need time to think about it" before agreeing to anything.',
+      acknowledgeLabel: 'I understand these tactics',
     },
   ],
 

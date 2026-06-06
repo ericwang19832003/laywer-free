@@ -26,6 +26,7 @@ export const bizEmploymentEeocConfig: GuidedStepConfig = {
     {
       id: 'needs_eeoc_info',
       type: 'info',
+      acknowledgeLabel: 'I need to file first →',
       prompt:
         'This type of claim requires filing with the EEOC or TWC before you can file a lawsuit. The deadline is 180 days (TWC) or 300 days (EEOC) from the incident.',
       showIf: (answers) =>
@@ -36,6 +37,7 @@ export const bizEmploymentEeocConfig: GuidedStepConfig = {
     {
       id: 'skip_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I can skip this →',
       prompt:
         'Wage claims and non-compete disputes generally don\'t require EEOC filing. You can skip this step.',
       showIf: (answers) => answers.claim_type === 'other',
@@ -48,6 +50,7 @@ export const bizEmploymentEeocConfig: GuidedStepConfig = {
     {
       id: 'filed_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — waiting for my letter →',
       prompt:
         'Good. You\'ll need to wait for a right-to-sue letter, or you can request one after 180 days.',
       showIf: (answers) => answers.charge_filed === 'yes',
@@ -62,6 +65,7 @@ export const bizEmploymentEeocConfig: GuidedStepConfig = {
     {
       id: 'deadline_warning',
       type: 'info',
+      acknowledgeLabel: 'I\'ll file right away →',
       prompt:
         'Act quickly \u2014 the filing deadline is 180 days for TWC or 300 days for EEOC. You can file online at publicportal.eeoc.gov.',
       showIf: (answers) => answers.charge_filed === 'no',
@@ -75,6 +79,7 @@ export const bizEmploymentEeocConfig: GuidedStepConfig = {
     {
       id: 'right_to_sue_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — 90 days to file →',
       prompt:
         'You have 90 days from receiving the right-to-sue letter to file your lawsuit. Don\'t delay.',
       showIf: (answers) => answers.has_right_to_sue === 'yes',

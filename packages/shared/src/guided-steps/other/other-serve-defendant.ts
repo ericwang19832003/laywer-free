@@ -16,6 +16,7 @@ export const otherServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you do not have an address, try checking public records, social media, or the address on any contracts or correspondence. For businesses, search your state\'s business entity database.',
+      acknowledgeLabel: "I'll search public records and business databases to find the address",
       showIf: (answers) => answers.know_defendant_address === 'no',
     },
     {
@@ -34,6 +35,7 @@ export const otherServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The most common methods are personal service (process server or sheriff) and certified mail. Check your court\'s rules to see which methods are allowed. You generally cannot serve the papers yourself.',
+      acknowledgeLabel: "I'll check my court's rules and choose an authorized service method",
       showIf: (answers) => answers.service_method === 'unsure',
     },
     {
@@ -52,6 +54,7 @@ export const otherServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You need a signed return of service (or affidavit of service) to prove the other party was properly served. The process server, sheriff, or mail receipt serves as this proof. File it with the court.',
+      acknowledgeLabel: "I'll obtain the signed return of service and file it with the court",
       showIf: (answers) =>
         answers.service_completed === 'yes' && answers.have_proof_of_service === 'no',
     },
@@ -66,6 +69,7 @@ export const otherServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most courts require service within a specific time after filing (often 90-120 days in state court, 90 days in federal court). Check your court\'s rules to avoid having your case dismissed.',
+      acknowledgeLabel: "I'll check my court's service deadline and complete service in time",
       showIf: (answers) =>
         answers.service_completed === 'no' && answers.service_deadline_aware === 'no',
     },

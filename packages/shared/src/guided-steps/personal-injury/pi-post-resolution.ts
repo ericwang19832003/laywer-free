@@ -29,6 +29,7 @@ export const piPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Before spending settlement funds, check for medical liens \u2014 your health insurer or Medicare may have a right to reimbursement.",
+      acknowledgeLabel: "I'll check for liens first →",
       showIf: (answers) => answers.case_outcome === 'settled',
     },
     {
@@ -42,6 +43,7 @@ export const piPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "If the defendant hasn't paid, you may need to pursue collection through wage garnishment, bank levy, or property lien.",
+      acknowledgeLabel: "I'll pursue collection →",
       showIf: (answers) => answers.defendant_paid === 'no',
     },
     {
@@ -55,6 +57,7 @@ export const piPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Appeals must typically be filed within 30 days. You'll need to show the court made a legal error \u2014 disagreeing with the outcome alone isn't enough.",
+      acknowledgeLabel: "I'll file my appeal within 30 days →",
       showIf: (answers) => answers.considering_appeal === 'yes',
     },
     {
@@ -62,6 +65,7 @@ export const piPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Settlement and judgment proceeds may have tax implications. Compensation for physical injuries is generally tax-free, but punitive damages and interest are taxable.',
+      acknowledgeLabel: 'I\'ll consult a tax professional if needed →',
     },
   ],
 

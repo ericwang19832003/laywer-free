@@ -33,6 +33,7 @@ export const debtCourtTypeGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check the petition or citation you received — the court name and case number are printed at the top of the first page. Justice of the Peace (JP) courts handle most consumer debt cases. Look for "Justice Court," "JP Court," "County Court at Law," or "District Court" in the header.',
+      acknowledgeLabel: "I'll check my petition for the court name",
       showIf: (answers) => answers.court_type === 'not_sure',
     },
     {
@@ -40,6 +41,7 @@ export const debtCourtTypeGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'JP COURT RULES:\n\n• Answer deadline: 14 days from service (NOT the 20-days-plus-first-Monday rule used by other courts)\n• Rules: Texas Rules of Civil Procedure Part V (Rules 500–510) — simpler than higher courts\n• Discovery: Limited — each side gets 15 written discovery requests total (Rule 500.9)\n• No jury by default (you must request one and pay the jury fee)\n• Hearings are informal — judges often allow narrative testimony\n• Appeal: 21 days to file an appeal bond for a de novo trial in county court (a whole new trial)\n• Filing fee for answer: typically $0–$50',
+      acknowledgeLabel: "I understand JP Court rules and my 14-day deadline",
       showIf: (answers) => answers.court_type === 'justice_court',
     },
     {
@@ -47,6 +49,7 @@ export const debtCourtTypeGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COUNTY COURT RULES:\n\n• Answer deadline: 10:00 AM on the first Monday after 20 days from service\n• Full Texas Rules of Civil Procedure apply\n• Full discovery available (interrogatories, requests for production, requests for admissions, depositions)\n• Jury trial available (must request in writing and pay the jury fee)\n• Appeal: 30 days to file notice of appeal (appellate review of the record, not a new trial)\n• More formal procedures than JP court',
+      acknowledgeLabel: "I understand County Court rules and my answer deadline",
       showIf: (answers) => answers.court_type === 'county_court',
     },
     {
@@ -54,6 +57,7 @@ export const debtCourtTypeGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DISTRICT COURT RULES:\n\n• Same procedural rules as county court, but handles the largest cases\n• Answer deadline: 10:00 AM on the first Monday after 20 days from service\n• Full Texas Rules of Civil Procedure apply\n• Full discovery available (interrogatories, requests for production, requests for admissions, depositions)\n• Jury trial available (must request in writing and pay the jury fee)\n• Appeal: 30 days to file notice of appeal to the court of appeals\n• Consumer debt cases in district court are unusual — if your debt is under $250,000, check whether venue is correct (it may be grounds for a transfer)',
+      acknowledgeLabel: "I understand District Court rules and my answer deadline",
       showIf: (answers) => answers.court_type === 'district_court',
     },
     {
@@ -61,6 +65,7 @@ export const debtCourtTypeGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IMPORTANT DEADLINES: Regardless of which court your case is in, if you miss the answer deadline, the plaintiff can request a DEFAULT JUDGMENT against you. A default judgment means you lose automatically without being heard. If you have already missed your deadline, go to your "Set Aside Default Judgment" task immediately.',
+      acknowledgeLabel: "I've marked my answer deadline on my calendar",
     },
   ],
 

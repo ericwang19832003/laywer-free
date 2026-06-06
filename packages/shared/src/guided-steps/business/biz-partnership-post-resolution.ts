@@ -30,6 +30,7 @@ export const bizPartnershipPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other side doesn\u2019t comply voluntarily, you may need to file a motion to enforce the judgment or settlement.',
+      acknowledgeLabel: "I'll file a motion to enforce if the other side fails to comply",
       showIf: (answers) => answers.need_enforcement === 'yes',
     },
     {
@@ -43,6 +44,7 @@ export const bizPartnershipPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File a certificate of termination with the Texas Secretary of State. Settle all debts and distribute remaining assets per your agreement.',
+      acknowledgeLabel: "I'll file the certificate of termination and distribute remaining assets",
       showIf: (answers) => answers.need_dissolution === 'yes',
     },
     {

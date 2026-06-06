@@ -17,6 +17,7 @@ export const bizEmploymentServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can look up a company\'s registered agent on the Texas Secretary of State website (sos.state.tx.us). Search by company name to find the agent and their address.',
+      acknowledgeLabel: "I'll search the Texas Secretary of State website to find the registered agent",
       showIf: (answers) => answers.know_registered_agent === 'no',
     },
     {

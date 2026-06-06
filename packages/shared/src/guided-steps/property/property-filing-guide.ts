@@ -26,6 +26,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in Justice of the Peace (JP) Court. Filing fee: $35\u201375. Simpler process, no jury unless requested. Faster resolution.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.total_damages === 'under_20k',
     },
     {
@@ -33,6 +34,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in County Court at Law. Filing fee: $250\u2013350. More formal, but still manageable for pro se.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.total_damages === '20k_to_250k',
     },
     {
@@ -40,6 +42,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in District Court. Filing fee: $300\u2013400. Most formal. Consider consulting an attorney for complex cases.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.total_damages === 'over_250k',
     },
 
@@ -63,6 +66,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "To file online:\n1. Go to eFileTexas.gov and create a free account\n2. Select your court and case type (property damage)\n3. Upload your Petition as a PDF\n4. Pay the filing fee online (or submit fee waiver)\n5. You'll receive a confirmation email when accepted\n\nTip: Most courts accept e-filed documents within 24 hours.",
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.filing_method === 'efile',
     },
 
@@ -72,6 +76,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "To file in person:\n1. Print 3 copies of your Petition (one for the court, one for you, one to serve)\n2. Go to the court clerk's office during business hours (usually 8am\u20135pm)\n3. Tell the clerk: \"I need to file a Petition for property damage\"\n4. Pay the filing fee (or bring a completed fee waiver form)\n5. The clerk will stamp all copies \u2014 keep your stamped copy as proof\n6. Ask the clerk about service options for the defendant",
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.filing_method === 'in_person',
     },
 
@@ -81,6 +86,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'To file by mail:\n1. Print 3 copies of your Petition\n2. Include a self-addressed stamped envelope for the clerk to return your stamped copy\n3. Mail to the court clerk\'s office via certified mail with return receipt\n4. Include a check or money order for the filing fee (or fee waiver form)\n\nWarning: Mail takes time. Allow at least 7\u201310 business days for processing.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.filing_method === 'mail',
     },
 
@@ -97,15 +103,23 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can file a "Statement of Inability to Afford Payment of Court Costs" (sometimes called Affidavit of Indigency). This is an official Texas form.\n\n1. Download the form from texaslawhelp.org or ask the court clerk\n2. Fill it out honestly \u2014 include your income, expenses, and why you can\'t pay\n3. File it WITH your Petition (same time)\n4. The court will review it \u2014 most are approved within a few days\n5. If approved, you pay $0. If denied, you can appeal the denial.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.can_afford_fee === 'no',
     },
 
     // What to bring checklist
     {
       id: 'what_to_bring',
-      type: 'info',
-      prompt:
-        'Checklist \u2014 what to bring when filing:\n\n\u2022 Your Petition (3 copies, signed)\n\u2022 Evidence: photos, repair estimates, timeline\n\u2022 Filing fee payment or fee waiver form\n\u2022 Government-issued ID\n\u2022 A pen (in case you need to sign anything)',
+      type: 'multi_select',
+      prompt: 'Which items have you prepared for filing?',
+      options: [
+        { value: 'signed_petition', label: 'Signed Petition (3 copies)' },
+        { value: 'evidence', label: 'Evidence: photos, repair estimates, timeline' },
+        { value: 'filing_fee', label: 'Filing fee payment or fee waiver form' },
+        { value: 'photo_id', label: 'Government-issued ID' },
+        { value: 'pen', label: 'Pen (in case you need to sign anything)' },
+      ],
+      noneLabel: "Haven't gathered these yet",
     },
 
     // Venue info
@@ -114,6 +128,7 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'VENUE: For vehicle or personal property damage, file in a county connected to the dispute, such as where the damage happened or where the defendant lives or does business. Only use the real-property venue rule (Tex. Civ. Prac. & Rem. Code \u00a715.011) when the lawsuit directly concerns land or real property, such as title, possession, or damage to real estate.',
+      acknowledgeLabel: 'Got it \u2192',
     },
   ],
 
@@ -190,6 +205,19 @@ export const propertyFilingGuideConfig: GuidedStepConfig = {
         status: 'needed',
         text: 'Determine if you can afford the filing fee. Fee waivers are available if you qualify.',
       })
+    }
+
+    // Filing checklist
+    const bringAnswer = answers.what_to_bring
+    if (bringAnswer && bringAnswer !== 'none') {
+      const brought = new Set(bringAnswer.split(','))
+      if (brought.size >= 4) {
+        items.push({ status: 'done', text: 'Filing materials fully prepared.' })
+      } else {
+        items.push({ status: 'needed', text: `Gather remaining filing materials — ${5 - brought.size} item${5 - brought.size !== 1 ? 's' : ''} not yet checked off.` })
+      }
+    } else {
+      items.push({ status: 'needed', text: 'Prepare filing materials: signed Petition (3 copies), evidence, filing fee or waiver, and government ID.' })
     }
 
     // Venue reminder

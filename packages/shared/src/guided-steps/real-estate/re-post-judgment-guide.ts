@@ -24,6 +24,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FIRST STEP — RECORD THE JUDGMENT:\nIn real estate cases, recording is essential.\n\n1. Get a certified copy of the judgment from the court clerk.\n2. Record the judgment with the county clerk in the county where the property is located.\n3. This creates a public record that puts the world on notice of the court\'s decision.\n4. If the judgment transfers title or establishes a boundary, the recorded judgment is how title companies and future buyers will know about it.\n5. File in EVERY county where affected property is located.',
+      acknowledgeLabel: 'I will record the judgment →',
       showIf: (answers) => answers.outcome === 'won_full' || answers.outcome === 'won_partial',
     },
 
@@ -47,6 +48,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COLLECTING A MONEY JUDGMENT IN REAL ESTATE CASES:\n\n1. ABSTRACT OF JUDGMENT: File with the county clerk to create an automatic lien on ALL real property the defendant owns in that county. File in every county where they own property.\n2. EXECUTION: Request a Writ of Execution from the court — the constable can seize and sell the defendant\'s non-exempt property to satisfy the judgment.\n3. BANK GARNISHMENT: File a Writ of Garnishment to seize funds from the defendant\'s bank accounts.\n4. POST-JUDGMENT INTEREST: 5% per year (Tex. Fin. Code §304.003) from the date of judgment.\n5. POST-JUDGMENT DISCOVERY: If the defendant hides assets, file interrogatories demanding they disclose all bank accounts, property, and income.',
+      acknowledgeLabel: 'I know my collection options →',
       showIf: (answers) => answers.judgment_type === 'money_damages' || answers.judgment_type === 'multiple_remedies',
     },
 
@@ -56,6 +58,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ENFORCING SPECIFIC PERFORMANCE (COURT-ORDERED CLOSING):\n\n1. The court\'s judgment orders the other party to complete the sale. If they refuse, the court can hold them in contempt.\n2. In many cases, the judge will sign a deed on behalf of the non-complying party (Tex. Prop. Code §5.081 allows court-ordered conveyance).\n3. Coordinate with the title company to schedule the closing based on the court order.\n4. Record the judgment and the deed with the county clerk.\n5. If there is a lis pendens on the property, it will be resolved by the judgment — but file a release of lis pendens after closing for a clean record.\n6. The title company may require a title insurance endorsement or new policy reflecting the court-ordered transfer.',
+      acknowledgeLabel: 'I understand how to enforce the closing →',
       showIf: (answers) => answers.judgment_type === 'specific_performance' || answers.judgment_type === 'multiple_remedies',
     },
 
@@ -65,6 +68,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CLEARING TITLE AFTER JUDGMENT:\n\n1. Record the quiet title judgment with the county clerk. This establishes your ownership in the public record.\n2. Provide the recorded judgment to your title insurance company — they will update the title commitment.\n3. If there were adverse claims, liens, or encumbrances that the judgment resolved, make sure the judgment specifically addresses each one.\n4. Order a new title search to confirm the title is clean after recording.\n5. If you plan to sell or refinance, the title company will want to see the recorded judgment as part of the chain of title.',
+      acknowledgeLabel: 'I understand title clearing steps →',
       showIf: (answers) => answers.judgment_type === 'quiet_title' || answers.judgment_type === 'boundary_established' || answers.judgment_type === 'multiple_remedies',
     },
 
@@ -80,6 +84,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'REMOVING THE LIS PENDENS:\n• After the case is resolved, the lis pendens should be released to clear the title.\n• File a "Release of Lis Pendens" or "Notice of Withdrawal of Lis Pendens" with the county clerk where the lis pendens was recorded.\n• If the other party filed the lis pendens and won\'t release it, you can file a motion with the court to expunge it.\n• An unreleased lis pendens will cloud the title and make it difficult to sell or refinance the property.\n• Do this promptly — title companies will not insure over an active lis pendens.',
+      acknowledgeLabel: 'I will release the lis pendens →',
       showIf: (answers) => answers.had_lis_pendens === 'yes',
     },
 
@@ -95,6 +100,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TITLE INSURANCE CLAIM AFTER JUDGMENT:\n• If you had title insurance and the dispute involved a covered title defect, your title insurance company may owe you for losses or legal fees.\n• Submit a claim with the recorded judgment, the title policy, and documentation of your losses.\n• Title insurance covers defects that existed BEFORE the policy was issued (not new issues).\n• Common covered claims: undisclosed liens, forged deeds, missing heirs, recording errors, boundary encroachments.\n• The title company may subrogate — pursue recovery from the party that caused the defect.',
+      acknowledgeLabel: 'I will file my title insurance claim →',
       showIf: (answers) => answers.title_insurance === 'yes',
     },
 
@@ -104,6 +110,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'YOUR OPTIONS AFTER LOSING:\n\n1. APPEAL: You have 30 days from the date the judgment is signed to file a Notice of Appeal.\n2. MOTION FOR NEW TRIAL: File within 30 days if there is newly discovered evidence or procedural errors. The court must rule within 75 days or it is overruled by operation of law.\n3. The appellate court reviews legal errors — it is not a new trial. You must show the trial court made a legal mistake.\n4. You MUST comply with the judgment during the appeal unless you obtain a supersedeas bond (security posted with the court to stay enforcement).\n5. In real estate cases, appealing is especially important if title or possession is at stake — the consequences of losing are often irreversible.',
+      acknowledgeLabel: 'I understand my options after losing →',
       showIf: (answers) => answers.outcome === 'lost',
     },
     {
@@ -117,6 +124,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'APPEAL TIMELINE AND PROCESS:\n• Notice of Appeal: File within 30 days of the judgment being signed.\n• Supersedeas Bond: If you want to stop enforcement during appeal, post a bond with the court (typically 100-150% of the judgment amount for money judgments).\n• Appellate Brief: You will need to file a brief explaining the legal errors.\n• Timeline: Appeals typically take 6-18 months.\n• Standard of Review: The appellate court gives deference to the trial court on factual findings but reviews legal questions independently.\n• Consider consulting an appellate attorney — appellate practice is specialized.',
+      acknowledgeLabel: 'I understand the appeal process →',
       showIf: (answers) => answers.considering_appeal === 'yes',
     },
 
@@ -126,6 +134,7 @@ export const rePostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'AFTER SETTLEMENT IN A REAL ESTATE CASE:\n\n1. Get the settlement agreement in writing and signed by all parties.\n2. If the settlement involves a property transfer, execute and record the deed with the county clerk.\n3. If the settlement resolves a title dispute, record a memorandum of settlement or agreed judgment.\n4. Release any lis pendens that were filed during the lawsuit.\n5. If earnest money was in escrow, ensure it is distributed per the agreement.\n6. File an agreed dismissal with the court to formally end the case.\n7. Update your title insurance company about the resolution.',
+      acknowledgeLabel: 'I understand the post-settlement steps →',
       showIf: (answers) => answers.outcome === 'settled',
     },
   ],

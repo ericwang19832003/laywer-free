@@ -13,6 +13,7 @@ export const agOptionConfig: GuidedStepConfig = {
         'You have two main paths for establishing or enforcing child support in Texas:\n\n' +
         "1. THE AG ROUTE (FREE) — The Texas Attorney General's Child Support Division will open your case, locate the other parent, establish paternity if needed, and get a court order for support. They handle the paperwork, court appearances, and enforcement — all at no cost to you.\n\n" +
         '2. FILE PRIVATELY — You file a Suit Affecting the Parent-Child Relationship (SAPCR) in district court yourself. You control the timeline, the terms you request, and the process. There are filing fees, but you get more flexibility and direct involvement.',
+      acknowledgeLabel: "I understand both paths for establishing child support",
     },
     {
       id: 'filing_path',
@@ -43,6 +44,7 @@ export const agOptionConfig: GuidedStepConfig = {
         "• You'll have less control over the specific terms (visitation schedule, support amount beyond guidelines)\n" +
         '• The AG can locate the other parent, establish paternity through genetic testing, and enforce orders through wage withholding, license suspension, or contempt\n\n' +
         'Best for: Parents who want a no-cost option and are okay with standard guideline support.',
+      acknowledgeLabel: "I understand what the AG Child Support Division handles",
       showIf: (answers) =>
         answers.filing_path === 'ag' || answers.filing_path === 'not_sure',
     },
@@ -58,6 +60,7 @@ export const agOptionConfig: GuidedStepConfig = {
         '• You have more flexibility to negotiate custody, visitation, and support terms beyond the standard guidelines\n' +
         '• Cases often move faster because you control the timeline\n\n' +
         'Best for: Parents who want more control over terms and timeline and can handle the filing process.',
+      acknowledgeLabel: "I understand the costs and responsibilities of filing a SAPCR privately",
       showIf: (answers) =>
         answers.filing_path === 'private' || answers.filing_path === 'not_sure',
     },
@@ -77,6 +80,7 @@ export const agOptionConfig: GuidedStepConfig = {
         "When a child receives Medicaid, SNAP, TANF, or WIC, the state has a legal interest in recovering support costs. The AG's Child Support Division may have already opened a case or may open one automatically.\n\n" +
         "Even if you choose to file privately, you MUST notify the county AG office via certified mail that you are pursuing child support independently. This avoids conflicting court orders and ensures your case doesn't get tangled with a separate AG action.\n\n" +
         "Contact your county's AG Child Support office to check whether a case already exists before filing.",
+      acknowledgeLabel: "I'll notify the county AG office by certified mail before filing privately",
       showIf: (answers) => answers.government_benefits === 'yes',
     },
   ],

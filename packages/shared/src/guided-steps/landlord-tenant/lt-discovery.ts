@@ -23,6 +23,7 @@ export const ltDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'JP court cases generally do not have a formal discovery phase. However, you should still gather all evidence you can on your own: photos, receipts, communications, and witness statements. You can move on to hearing preparation.',
+      acknowledgeLabel: "I understand — I'll gather photos, receipts, and communications on my own and proceed to hearing preparation",
       showIf: (answers) => answers.court_type === 'jp',
     },
     {
@@ -38,6 +39,7 @@ export const ltDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Send a Request for Production of Documents listing each specific document or category you need. The other party typically has 30 days to respond. Be specific about what you want.',
+      acknowledgeLabel: "I understand — I'll send a specific Request for Production of Documents and track the 30-day response deadline",
       showIf: (answers) => answers.documents_to_request === 'yes',
     },
     {
@@ -53,6 +55,7 @@ export const ltDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas allows up to 25 interrogatories (including sub-parts). Focus on key facts: dates, amounts, witnesses, and the basis for their claims or defenses. The other party has 30 days to respond.',
+      acknowledgeLabel: "I understand — I'll draft up to 25 focused interrogatories and track the 30-day deadline for their answers",
       showIf: (answers) => answers.interrogatories_needed === 'yes',
     },
     {

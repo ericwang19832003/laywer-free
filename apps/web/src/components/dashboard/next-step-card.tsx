@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 const SKIPPABLE_TASKS = new Set([
   'prepare_pi_demand_letter',
@@ -86,9 +84,10 @@ interface NextStepCardProps {
     status: string
   } | null
   taskDescription?: { description: string; importance: 'critical' | 'important' | 'helpful' } | null
+  daysUntilDue?: number | null
 }
 
-export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCardProps) {
+export function NextStepCard({ caseId, nextTask, taskDescription, daysUntilDue }: NextStepCardProps) {
   const router = useRouter()
   const [skipping, setSkipping] = useState(false)
 
@@ -96,7 +95,6 @@ export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCard
     if (!nextTask || skipping) return
     setSkipping(true)
     try {
-      // Transition directly to skipped (todo -> skipped is a valid transition)
       const res = await fetch(`/api/tasks/${nextTask.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -111,65 +109,80 @@ export function NextStepCard({ caseId, nextTask, taskDescription }: NextStepCard
       setSkipping(false)
     }
   }
+
   if (!nextTask) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg text-warm-text">Today&apos;s Next Step</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-warm-muted">You&apos;re all caught up. Nice work!</p>
-        </CardContent>
-      </Card>
+      <div className="rounded-xl border border-calm-green/30 bg-calm-green/5 p-6 text-center">
+        <p className="text-warm-muted">You&apos;re all caught up. Nice work!</p>
+      </div>
     )
   }
 
+  const importanceColor = taskDescription?.importance === 'critical' || taskDescription?.importance === 'important'
+    ? 'text-calm-amber'
+    : 'text-white/60'
+  const importanceLabel = taskDescription?.importance === 'critical'
+    ? 'CRITICAL'
+    : taskDescription?.importance === 'important'
+    ? 'IMPORTANT'
+    : 'TODAY\'S NEXT STEP'
+
   return (
-    <Card className="border-calm-indigo/20 bg-calm-indigo/5">
-      <CardHeader>
-        <CardTitle className="text-sm font-medium text-warm-muted uppercase tracking-wide">
-          Today&apos;s Next Step
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <h3 className="text-lg font-semibold text-warm-text mb-1">{nextTask.title}</h3>
-        {taskDescription ? (
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                taskDescription.importance === 'critical'
-                  ? 'bg-amber-100 text-amber-700'
-                  : taskDescription.importance === 'important'
-                  ? 'bg-amber-100 text-amber-700'
-                  : 'bg-blue-100 text-blue-700'
-              }`}>
-                {taskDescription.importance === 'critical' ? 'Critical' :
-                 taskDescription.importance === 'important' ? 'Important' : 'Helpful'}
-              </span>
+    <div className="rounded-xl bg-calm-indigo text-white overflow-hidden">
+      <div className="p-6 flex items-center gap-6">
+        {/* Countdown number */}
+        {daysUntilDue !== null && daysUntilDue !== undefined && (
+          <>
+            <div className="shrink-0 text-center w-16">
+              <p className="text-5xl font-bold tabular-nums leading-none text-white">
+                {daysUntilDue}
+              </p>
+              <p className="text-xs font-medium text-white/60 uppercase tracking-wider mt-1">
+                days{'\n'}left
+              </p>
             </div>
-            <p className="text-sm text-warm-muted">{taskDescription.description}</p>
-          </div>
-        ) : (
-          <p className="text-sm text-warm-muted mb-4">
-            This helps us organize your documents and timeline.
-          </p>
+            <div className="w-px h-16 bg-white/20 shrink-0" />
+          </>
         )}
-        <Button size="lg" asChild className="w-full group">
-          <Link href={`/case/${caseId}/step/${nextTask.id}`}>
-            Review &amp; Continue
-            <span className="inline-block transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true">→</span>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className={`text-xs font-medium uppercase tracking-wider mb-1 ${importanceColor}`}>
+            {importanceLabel}
+          </p>
+          <h3 className="text-lg font-semibold text-white leading-snug mb-1">
+            {nextTask.title}
+          </h3>
+          {taskDescription?.description && (
+            <p className="text-sm text-white/70 line-clamp-2">
+              {taskDescription.description}
+            </p>
+          )}
+        </div>
+
+        {/* CTA */}
+        <div className="shrink-0">
+          <Link
+            href={`/case/${caseId}/step/${nextTask.id}`}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition-colors px-4 py-2.5 text-sm font-medium text-white"
+          >
+            Review &amp; continue
+            <span aria-hidden="true">→</span>
           </Link>
-        </Button>
-        {SKIPPABLE_TASKS.has(nextTask.task_key) && (
+        </div>
+      </div>
+
+      {SKIPPABLE_TASKS.has(nextTask.task_key) && (
+        <div className="px-6 pb-4">
           <button
             onClick={handleSkip}
             disabled={skipping}
-            className="mt-2 text-sm text-warm-muted hover:text-warm-text transition-colors"
+            className="text-xs text-white/50 hover:text-white/80 transition-colors"
           >
             {skipping ? 'Skipping...' : 'Already done this? Skip this step'}
           </button>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   )
 }

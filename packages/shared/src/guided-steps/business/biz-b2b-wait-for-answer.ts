@@ -16,6 +16,7 @@ export const bizB2bWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The other business generally has 20 days after being served to file an answer. If they fail to respond, you may be able to request a default judgment.',
+      acknowledgeLabel: "I'll monitor the 20-day deadline and be ready to request a default judgment",
       showIf: (answers) => answers.answer_received === 'no',
     },
     {
@@ -29,6 +30,7 @@ export const bizB2bWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You will need to file a response to the counterclaim, typically within 20 days. Treat this as seriously as you would a new lawsuit — gather evidence and prepare your defense.',
+      acknowledgeLabel: "I'll file my counterclaim response within 20 days and gather my defense evidence",
       showIf: (answers) => answers.has_counterclaim === 'yes',
     },
   ],

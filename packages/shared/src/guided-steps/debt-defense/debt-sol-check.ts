@@ -26,6 +26,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IMPORTANT: Do NOT call the collector or make any payment before checking your statute of limitations. In Texas, making a payment or written acknowledgment of the debt restarts the clock — giving the collector 4 more years to sue you. Check your records instead of calling.',
+      acknowledgeLabel: "I won't contact the collector yet →",
     },
     {
       id: 'last_activity_date',
@@ -57,7 +58,16 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       id: 'sol_2019_reform',
       type: 'info',
       prompt:
-        '2019 TEXAS REFORM — IMPORTANT PROTECTION:\n\nUnder Texas Finance Code § 392.307 (effective 2019), if a DEBT BUYER is suing you, a partial payment does NOT restart the statute of limitations. This law was specifically designed to stop debt buyers from tricking consumers into making small payments to restart an expired SOL.\n\nThis protection applies to debt buyers and third-party collectors — NOT to original creditors.\n\nIf the SOL had already expired before you made that payment, the debt buyer cannot use the payment to revive the case.',
+        '2019 TEXAS REFORM: Under Texas Finance Code § 392.307 (effective 2019), if a DEBT BUYER is suing you, a partial payment does NOT restart the statute of limitations. This law was specifically designed to stop debt buyers from tricking consumers into making small payments to restart an expired SOL.',
+      acknowledgeLabel: 'Got it — what does this mean for me? →',
+      showIf: (answers) => answers.recent_payment === 'yes' && (answers.who_is_suing === 'debt_buyer' || answers.who_is_suing === 'not_sure'),
+    },
+    {
+      id: 'sol_2019_reform_action',
+      type: 'info',
+      prompt:
+        'This protection applies to debt buyers and third-party collectors — NOT to original creditors. If the SOL had already expired before you made that payment, the debt buyer cannot use the payment to revive the case. Check your original default date: if it was more than 4 years ago, your SOL defense may still be intact.',
+      acknowledgeLabel: 'Understood, this protects me →',
       showIf: (answers) => answers.recent_payment === 'yes' && (answers.who_is_suing === 'debt_buyer' || answers.who_is_suing === 'not_sure'),
     },
     {
@@ -65,6 +75,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Since you made a payment to the original creditor, the statute of limitations may have restarted from that payment date. Use the date of your most recent payment as the start date instead of the original default date.',
+      acknowledgeLabel: "Got it, I'll use the payment date →",
       showIf: (answers) => answers.recent_payment === 'yes' && answers.who_is_suing === 'original_creditor',
     },
     {
@@ -72,12 +83,14 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IMPORTANT DISTINCTION: The statute of limitations (4 years) is different from the credit reporting period (7 years). Even if the SOL has expired and they can\'t sue you, the debt may still appear on your credit report for up to 7 years from the date of first delinquency. These are separate clocks.',
+      acknowledgeLabel: 'Understood the difference →',
     },
     {
       id: 'sol_credit_card_info',
       type: 'info',
       prompt:
         'In Texas, the statute of limitations for credit card debt is 4 years (Tex. Civ. Prac. & Rem. Code § 16.004). If more than 4 years have passed since your last payment or default, the creditor is time-barred from suing you. This is a complete defense — the case should be dismissed.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.debt_type === 'credit_card' && !!answers.last_activity_date,
     },
     {
@@ -85,6 +98,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the statute of limitations for medical debt is 4 years (Tex. Civ. Prac. & Rem. Code § 16.004). If more than 4 years have passed since your last payment or default, the creditor is time-barred from suing you. This is a complete defense.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.debt_type === 'medical' && !!answers.last_activity_date,
     },
     {
@@ -92,6 +106,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the statute of limitations for personal loans is 4 years (Tex. Civ. Prac. & Rem. Code § 16.004). If more than 4 years have passed since your last payment or default, the creditor is time-barred from suing you. This is a complete defense.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.debt_type === 'personal_loan' && !!answers.last_activity_date,
     },
     {
@@ -99,6 +114,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the statute of limitations for auto loans is 4 years (Tex. Civ. Prac. & Rem. Code § 16.004). If more than 4 years have passed since your last payment or default, the creditor is time-barred from suing you. This is a complete defense.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.debt_type === 'auto_loan' && !!answers.last_activity_date,
     },
     {
@@ -106,6 +122,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the statute of limitations for a written promissory note is 6 years (Tex. Civ. Prac. & Rem. Code § 16.004(c)). If more than 6 years have passed since your last payment or default, the creditor is time-barred from suing you. This is a complete defense.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.debt_type === 'promissory_note' && !!answers.last_activity_date,
     },
     {
@@ -113,6 +130,7 @@ export const debtSolCheckConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the statute of limitations for an oral agreement is 4 years (Tex. Civ. Prac. & Rem. Code § 16.004). If more than 4 years have passed since your last payment or default, the creditor is time-barred from suing you. This is a complete defense.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.debt_type === 'oral_agreement' && !!answers.last_activity_date,
     },
   ],

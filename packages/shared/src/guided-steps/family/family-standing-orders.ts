@@ -11,6 +11,7 @@ export const standingOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Many Texas counties — including Harris, Dallas, Travis, Tarrant, Bexar, and Collin — have automatic standing orders (injunctions) that take effect the moment a family case is filed. These orders apply to BOTH parties. Violating a standing order can result in contempt of court.',
+      acknowledgeLabel: 'I understand standing orders apply →',
     },
     {
       id: 'standing_orders_aware',
@@ -24,6 +25,7 @@ export const standingOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'To find out if your county has standing orders: (1) Call or visit your district clerk\'s office and ask. (2) Check your county\'s district court website — look for "Standing Orders" or "Local Rules." (3) Search for "[Your County] family court standing orders." Most counties post them online.',
+      acknowledgeLabel: 'I\'ll check my county\'s standing orders →',
       showIf: (answers) => answers.standing_orders_aware === 'no',
     },
     {
@@ -31,6 +33,7 @@ export const standingOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Typical standing order prohibitions include: • Do not destroy, hide, or transfer community property. • Do not cancel or change insurance policies (health, auto, life). • Do not make extraordinary purchases or incur unusual debt. • Do not harass, threaten, or intimidate the other party. • Do not remove children from the court\'s jurisdiction. • Do not change the locks on the residence (unless you have a protective order). • Do not destroy documents or electronic data. • Do not open or divert the other party\'s mail.',
+      acknowledgeLabel: 'I understand all the restrictions →',
     },
     {
       id: 'understood',

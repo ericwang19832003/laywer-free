@@ -51,6 +51,7 @@ export const evidenceVaultConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Create folders for: Contracts, Communications, Financial Records, Photos/Videos, and Witness Statements. Name files clearly with dates.',
+      acknowledgeLabel: "I'll organize my evidence",
       showIf: (answers) => answers.evidence_organized === 'no',
     },
   ],

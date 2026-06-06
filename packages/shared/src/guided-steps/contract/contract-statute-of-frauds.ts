@@ -11,6 +11,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TEXAS STATUTE OF FRAUDS (Bus. & Com. Code §26.01):\nCertain contracts MUST be in writing to be enforceable:\n1. Contracts for the sale of real property (land, homes)\n2. Contracts that cannot be performed within one year\n3. Contracts to pay someone else\'s debt (guaranty)\n4. Contracts for the sale of goods over $500 (UCC §2.201)\n5. Leases lasting more than one year',
+      acknowledgeLabel: 'I understand the Statute of Frauds',
     },
     {
       id: 'contract_type',
@@ -32,6 +33,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVICES (completable within one year): A writing is generally NOT required. Oral service contracts are enforceable in Texas as long as you can prove the terms. However, a written contract is always stronger evidence.',
+      acknowledgeLabel: 'Got it — oral contract may be enforceable',
       showIf: (answers) => answers.contract_type === 'services',
     },
     {
@@ -39,6 +41,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GOODS UNDER $500: A writing is NOT required. The UCC Statute of Frauds only applies to goods valued at $500 or more. Your oral agreement is enforceable.',
+      acknowledgeLabel: 'Got it — oral agreement is enforceable',
       showIf: (answers) => answers.contract_type === 'goods_under_500',
     },
     {
@@ -46,6 +49,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GOODS OVER $500: A writing IS required under UCC §2.201. The writing must indicate a sale of goods, be signed by the party you\'re suing, and state a quantity. Exception: if the goods were specially manufactured for you, the Statute of Frauds may not apply.',
+      acknowledgeLabel: 'I understand the writing requirement',
       showIf: (answers) => answers.contract_type === 'goods_over_500',
     },
     {
@@ -53,6 +57,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'REAL PROPERTY: A writing IS required. Contracts for the sale of land, homes, or any interest in real property must be in writing. This is one of the strictest applications of the Statute of Frauds. Partial performance (e.g., paying earnest money, taking possession) may create an exception.',
+      acknowledgeLabel: 'I understand the writing requirement',
       showIf: (answers) => answers.contract_type === 'real_property',
     },
     {
@@ -60,6 +65,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'LEASE OVER ONE YEAR: A writing IS required. Leases lasting more than one year fall under the Statute of Frauds. Month-to-month leases and leases under one year do not require a writing.',
+      acknowledgeLabel: 'I understand the writing requirement',
       showIf: (answers) => answers.contract_type === 'lease_over_year',
     },
     {
@@ -67,6 +73,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'EMPLOYMENT OVER ONE YEAR: A writing IS required. If the employment contract cannot be performed within one year from the date it was made, it must be in writing. Note: if the contract COULD be completed within one year (even if unlikely), a writing is not required.',
+      acknowledgeLabel: 'I understand the writing requirement',
       showIf: (answers) => answers.contract_type === 'employment_over_year',
     },
     {
@@ -74,6 +81,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GUARANTY: A writing IS required. A promise to pay someone else\'s debt must be in writing. Exception: the "main purpose" doctrine — if the guarantor\'s main purpose was to benefit themselves (not just help the debtor), the oral promise may be enforceable.',
+      acknowledgeLabel: 'I understand the writing requirement',
       showIf: (answers) => answers.contract_type === 'guaranty',
     },
     {
@@ -81,6 +89,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For other contract types, consider: Can the contract be performed within one year? Does it involve real property, goods over $500, or a guaranty? If none of these apply, a writing is likely not required — but having one always strengthens your case.',
+      acknowledgeLabel: "I'll assess my writing requirement",
       showIf: (answers) => answers.contract_type === 'other',
     },
     {
@@ -93,6 +102,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Even without a written contract, your oral agreement is enforceable for this type of contract. However, you\'ll need to prove the terms through witness testimony, emails, texts, invoices, or other evidence of the agreement.',
+      acknowledgeLabel: "I'll gather evidence of the oral agreement",
       showIf: (answers) =>
         answers.has_written_contract === 'no' &&
         (answers.contract_type === 'services' || answers.contract_type === 'goods_under_500'),
@@ -102,6 +112,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your contract may be subject to the Statute of Frauds. But exceptions exist:\n- PARTIAL PERFORMANCE: If you\'ve already partially performed (paid money, delivered goods, started work), courts may enforce the oral agreement\n- WRITTEN CONFIRMATION: Emails, texts, or letters confirming the agreement may satisfy the \'writing\' requirement\n- PROMISSORY ESTOPPEL: If you reasonably relied on the promise to your detriment\n\nGather all emails, texts, and documents showing the agreement.',
+      acknowledgeLabel: "I'll look for exceptions and gather evidence",
       showIf: (answers) =>
         answers.has_written_contract === 'no' &&
         answers.contract_type !== 'services' &&
@@ -117,6 +128,7 @@ export const contractStatuteOfFraudsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Good — emails and texts CAN satisfy the Statute of Frauds. They must show: the parties, the subject matter, and the essential terms. Print them and include in your evidence.',
+      acknowledgeLabel: "I'll print and organize these communications",
       showIf: (answers) => answers.has_emails_texts === 'yes',
     },
   ],

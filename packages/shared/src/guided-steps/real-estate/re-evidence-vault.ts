@@ -16,6 +16,7 @@ export const reEvidenceVaultConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The purchase agreement is the most important document. Check your email, realtor\'s records, or title company files.',
+      acknowledgeLabel: "I'll check my email, realtor, and title company files",
       showIf: (answers) => answers.has_purchase_agreement === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const reEvidenceVaultConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Contact your title company or closing attorney to obtain a copy.',
+      acknowledgeLabel: "I'll contact my title company or closing attorney",
       showIf: (answers) => answers.has_title_report === 'no',
     },
     {
@@ -72,6 +74,7 @@ export const reEvidenceVaultConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Create folders for: Purchase Agreement, Title Documents, Inspection Reports, Closing Documents, Communications, Photos/Videos, Financial Records. Label files clearly with dates.',
+      acknowledgeLabel: "I'll organize my evidence into folders",
       showIf: (answers) => answers.evidence_organized === 'no',
     },
   ],

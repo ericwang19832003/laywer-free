@@ -16,6 +16,7 @@ export const otherDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You will need a valid mailing address to send a demand letter. For businesses, check their website, state business filings, or the address on any contracts or invoices.',
+      acknowledgeLabel: "I'll locate a valid mailing address before sending",
       showIf: (answers) => answers.know_recipient_address === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const otherDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Write down the key facts: what happened, when it happened, and how it affected you. Stick to facts, not emotions. A clear timeline makes your letter stronger.',
+      acknowledgeLabel: "I'll write a factual timeline of what happened and how it affected me",
       showIf: (answers) => answers.described_complaint === 'no',
     },
     {
@@ -40,6 +42,7 @@ export const otherDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Be specific. Instead of "I want compensation," say "I am requesting $2,500 to cover repair costs." Clear requests are more likely to get a response.',
+      acknowledgeLabel: "I'll state a specific dollar amount or action in my demand",
       showIf: (answers) => answers.know_what_you_want === 'no',
     },
     {
@@ -58,6 +61,7 @@ export const otherDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         '14 days is the most common deadline for a demand letter. It shows urgency without being unreasonable. You can always extend it later if negotiations begin.',
+      acknowledgeLabel: "I'll set a 14-day response deadline in my letter",
       showIf: (answers) => answers.set_deadline === 'unsure',
     },
     {
@@ -76,6 +80,7 @@ export const otherDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Certified mail with return receipt is recommended because it creates proof that the other side received your letter. This can be important if you later go to court.',
+      acknowledgeLabel: "I understand — I'll use certified mail to create proof of delivery",
       showIf: (answers) => answers.sending_method !== 'certified_mail',
     },
   ],

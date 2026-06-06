@@ -87,6 +87,10 @@ const SUB_TYPE_LABELS: Record<string, string> = {
   product_liability: 'Product Liability',
   assault: 'Assault',
   property_damage: 'Property Damage',
+  vehicle_damage: 'Vehicle Damage',
+  property_damage_negligence: 'Property Damage',
+  vandalism: 'Vandalism',
+  other_property_damage: 'Property Damage',
   unpaid_debt: 'Unpaid Debt',
   security_deposit: 'Security Deposit',
   bad_check: 'Bad Check',
@@ -320,12 +324,14 @@ export function NewCaseDialog() {
         state.smallClaimsSubType ||
         state.landlordTenantSubType ||
         state.debtSubType ||
+        (state.piCardId === 'property_damage' ? 'property_damage' : '') ||
         ''
       setCaseName(generateCaseName(state.disputeType, subType))
     }
   }, [
     state.disputeType,
     state.piSubType,
+    state.piCardId,
     state.familySubType,
     state.businessSubType,
     state.smallClaimsSubType,

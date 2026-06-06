@@ -22,18 +22,21 @@ export const debtHearingDayConfig: GuidedStepConfig = {
     {
       id: 'courtroom_etiquette',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll be prepared →',
       prompt:
         "Address the judge as 'Your Honor.' Stand when speaking. Don't interrupt. Dress professionally. Arrive 30 minutes early.",
     },
     {
       id: 'creditor_tactics_info',
       type: 'info',
+      acknowledgeLabel: 'I\'ll watch for these tactics →',
       prompt:
         'Watch for: last-minute document production, requests for continuances, or pressure to settle in the hallway. You can ask the judge for time to review any new documents.',
     },
     {
       id: 'possible_outcomes',
       type: 'info',
+      acknowledgeLabel: 'I\'m ready →',
       prompt:
         'Possible outcomes: case dismissed (you win), judgment for plaintiff (you may owe), judgment for you, or the parties settle. The judge may also continue the case to another date.',
     },

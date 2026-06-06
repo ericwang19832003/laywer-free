@@ -17,6 +17,7 @@ export const debtPreflightConfig: GuidedStepConfig = {
     {
       id: 'fdcpa_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know my rights →',
       prompt:
         'The FDCPA protects you from: harassment, threats, calling before 8am or after 9pm, contacting you at work after you say stop, and misrepresenting the debt amount.',
       showIf: (answers) => answers.know_fdcpa_rights === 'no',
@@ -31,6 +32,7 @@ export const debtPreflightConfig: GuidedStepConfig = {
     {
       id: 'validation_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — validation is powerful →',
       prompt:
         "A validation letter forces the collector to prove: the debt exists, the amount is correct, and they have the right to collect. If they can't prove it, they must stop collection.",
       showIf: (answers) => answers.understand_validation === 'no',
@@ -48,6 +50,7 @@ export const debtPreflightConfig: GuidedStepConfig = {
     {
       id: 'general_denial_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — general denial it is →',
       prompt:
         "A general denial denies every allegation. It's the simplest approach and forces the plaintiff to prove everything.",
       showIf: (answers) => answers.answer_strategy === 'general_denial',
@@ -55,6 +58,7 @@ export const debtPreflightConfig: GuidedStepConfig = {
     {
       id: 'specific_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll use specific defenses →',
       prompt:
         'Specific defenses include: statute of limitations, lack of standing (they don\'t own the debt), payment already made, or FDCPA violations.',
       showIf: (answers) => answers.answer_strategy === 'specific_defenses',
@@ -62,6 +66,7 @@ export const debtPreflightConfig: GuidedStepConfig = {
     {
       id: 'not_sure_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll start with a general denial →',
       prompt:
         'If unsure, start with a general denial. You can always raise specific defenses later.',
       showIf: (answers) => answers.answer_strategy === 'not_sure',

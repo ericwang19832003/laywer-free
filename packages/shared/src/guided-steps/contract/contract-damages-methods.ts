@@ -10,7 +10,8 @@ export const contractDamagesMethodsConfig: GuidedStepConfig = {
       id: 'damages_methods_info',
       type: 'info',
       prompt:
-        'THREE WAYS TO CALCULATE DAMAGES:\n\n1. EXPECTATION DAMAGES (most common)\nPuts you where you\'d be IF the contract had been performed.\nFormula: Value of promised performance - Value of what you received - Costs you saved\nExample: Contract to deliver $10,000 of goods. You paid $10,000. Nothing delivered. Damages = $10,000.\n\n2. RELIANCE DAMAGES\nRecovers what you SPENT in reliance on the contract.\nUsed when the contract value is uncertain (e.g., new business venture).\nExample: You spent $5,000 preparing for a contract that was cancelled. Damages = $5,000.\n\n3. RESTITUTION DAMAGES\nRecovers the value of what YOU gave the other party.\nUsed when the contract is unenforceable (e.g., Statute of Frauds issue).\nExample: You paid $3,000 for work never done. Damages = $3,000.',
+        'HOW COURTS CALCULATE DAMAGES:\n\nThere are 3 ways courts measure what you\'re owed for a breach of contract. The right method depends on your situation.\n\nThe next question will help identify which one applies to you.',
+      acknowledgeLabel: "Got it — let's find my method →",
     },
     {
       id: 'damages_method',
@@ -28,6 +29,7 @@ export const contractDamagesMethodsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'EXPECTATION DAMAGES — YOUR CALCULATION:\n\nStep 1: What is the value of the promised performance? (What would you have if the contract was fulfilled?)\nStep 2: What value did you actually receive? (Anything of value from partial performance?)\nStep 3: What costs did you save because the contract wasn\'t completed? (Money you didn\'t have to spend?)\n\nYour damages = Step 1 - Step 2 - Step 3\n\nDocument each number with receipts, invoices, quotes, or estimates.',
+      acknowledgeLabel: "I'll calculate my expectation damages using the formula",
       showIf: (answers) => answers.damages_method === 'expectation',
     },
     {
@@ -35,6 +37,7 @@ export const contractDamagesMethodsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RELIANCE DAMAGES — YOUR CALCULATION:\n\nList every expense you incurred BECAUSE of the contract:\n- Payments made to the other party\n- Materials purchased\n- Labor costs (your time or hired help)\n- Travel expenses\n- Opportunity costs (other contracts you turned down)\n\nYour damages = Total of all expenses incurred in reliance on the contract\n\nKeep all receipts and invoices. If you turned down other work, document the lost opportunity.',
+      acknowledgeLabel: "I'll list every expense I incurred because of the contract",
       showIf: (answers) => answers.damages_method === 'reliance',
     },
     {
@@ -42,6 +45,7 @@ export const contractDamagesMethodsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RESTITUTION DAMAGES — YOUR CALCULATION:\n\nList everything of value you gave the other party:\n- Cash payments (show bank records, canceled checks)\n- Property transferred\n- Services performed (calculate fair market value)\n- Deposits or down payments\n\nYour damages = Total value of what you gave them\n\nThis method is simplest to prove — focus on documenting every payment or transfer.',
+      acknowledgeLabel: "I'll document everything of value I gave the other party",
       showIf: (answers) => answers.damages_method === 'restitution',
     },
     {
@@ -49,6 +53,7 @@ export const contractDamagesMethodsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'NOT SURE? Use this guide:\n\n- Did you pay for something and get NOTHING? → Expectation or Restitution (they overlap here)\n- Did you pay and get PARTIAL delivery? → Expectation (value of full performance minus what you got)\n- Did you spend money PREPARING for the contract? → Reliance\n- Is the contract unenforceable (no writing, etc.)? → Restitution\n- Were profits uncertain or speculative? → Reliance (easier to prove than lost profits)\n\nWhen in doubt, calculate all three and use the highest amount you can prove.',
+      acknowledgeLabel: "I'll calculate all three methods and use the strongest",
       showIf: (answers) => answers.damages_method === 'unsure',
     },
     {
@@ -63,6 +68,7 @@ export const contractDamagesMethodsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHAT YOU CAN\'T RECOVER:\n- Speculative damages (profits from a business that didn\'t exist yet — unless you can prove them)\n- Unforeseeable damages (losses the other party couldn\'t have predicted when making the contract)\n- Punitive damages (not available in most contract cases — only if there\'s also fraud)\n- Emotional distress (generally not recoverable in contract cases)',
+      acknowledgeLabel: "I understand what I cannot recover",
     },
   ],
 

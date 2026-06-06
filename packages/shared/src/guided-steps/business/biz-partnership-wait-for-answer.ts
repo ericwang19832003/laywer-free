@@ -16,6 +16,7 @@ export const bizPartnershipWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the defendant has 20 days after service (plus next Monday) to file an answer. Monitor the court\u2019s online docket.',
+      acknowledgeLabel: "I'll monitor the court docket weekly for the defendant's answer",
       showIf: (answers) => answers.answer_received === 'no',
     },
     {
@@ -29,6 +30,7 @@ export const bizPartnershipWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A counterclaim means the other side is suing you back. You\u2019ll need to file an answer to the counterclaim.',
+      acknowledgeLabel: "I understand \u2014 I'll file my answer to the counterclaim within the deadline",
       showIf: (answers) => answers.has_counterclaim === 'yes',
     },
   ],

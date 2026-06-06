@@ -24,6 +24,7 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most landlord-tenant cases, including evictions, are filed in JP Court. If your claim exceeds $20,000, you will need county or district court. Check your petition for the court designation.',
+      acknowledgeLabel: "I understand which court to use based on my claim amount",
       showIf: (answers) => answers.court_type === 'not_sure',
     },
     {
@@ -41,6 +42,7 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most Texas courts require e-filing through eFileTexas.gov. Create an account, select your court, upload your petition, and pay the filing fee online. JP courts may still accept in-person filings.',
+      acknowledgeLabel: "I understand — I'll file through eFileTexas.gov and pay the fee online",
       showIf: (answers) => answers.filing_method === 'efiling' || answers.filing_method === 'not_sure',
     },
     {
@@ -48,6 +50,7 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Bring your original petition plus copies, your lease or proof of tenancy, and be prepared to pay the filing fee by cash, check, or money order. The clerk will stamp your copies and assign a cause number.',
+      acknowledgeLabel: "I understand — I'll bring my petition, lease, and payment to the courthouse",
       showIf: (answers) => answers.filing_method === 'in_person',
     },
     {
@@ -65,6 +68,7 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Filing fees vary: JP Court ~$50-75 for eviction, ~$75-100 for repair cases. County Court ~$200-300. You can apply for a fee waiver (Statement of Inability to Afford Payment of Court Costs) if you cannot afford the fee.',
+      acknowledgeLabel: "I understand the fee ranges — I'll apply for a waiver if I can't afford the filing fee",
       showIf: (answers) => answers.fee_paid === 'no' || answers.fee_paid === 'need_waiver',
     },
     {
@@ -84,6 +88,7 @@ export const ltFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After filing, you will receive a cause number. Save this — you need it for all future filings. For e-filing, confirmation usually arrives within 1-2 business days. Your next step is to serve the other party.',
+      acknowledgeLabel: "I understand — I'll save my cause number and prepare to serve the other party",
       showIf: (answers) => answers.confirmation_received === 'no',
     },
   ],

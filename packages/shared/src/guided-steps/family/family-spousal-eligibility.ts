@@ -13,6 +13,7 @@ export const spousalEligibilityConfig: GuidedStepConfig = {
         'Texas recognizes TWO types of spousal support:\n\n' +
         '• Court-ordered maintenance (Texas Family Code § 8.051) — strict eligibility requirements, capped at $5,000/month or 20% of the paying spouse\'s gross monthly income (whichever is less). The court must find the requesting spouse lacks sufficient property and meets a qualifying circumstance.\n\n' +
         '• Contractual alimony — agreed to by the spouses (in a decree or settlement). No eligibility test, no statutory cap, but very hard to modify later. Think of it like a contract, not a court order.',
+      acknowledgeLabel: 'I understand the two types →',
     },
 
     // 2. Financial need
@@ -31,6 +32,7 @@ export const spousalEligibilityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Even without financial need, you can still negotiate contractual alimony as part of your settlement. Many spouses agree to contractual alimony to balance an uneven property division or ease a transition. Since it\'s contractual, there are no eligibility requirements — only what both parties agree to.',
+      acknowledgeLabel: 'Got it — I\'ll negotiate contractual alimony →',
       showIf: (a) => a.financial_need === 'no',
     },
 
@@ -72,6 +74,7 @@ export const spousalEligibilityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Based on your answers, you likely do not qualify for court-ordered maintenance under Texas Family Code § 8.051. However, contractual alimony remains available — it can be negotiated as part of your divorce settlement with no eligibility test or statutory caps. Many divorces include contractual alimony even when court-ordered maintenance is unavailable.',
+      acknowledgeLabel: 'Understood — I\'ll consider contractual alimony →',
       showIf: (a) =>
         a.financial_need === 'yes' && a.qualifying_circumstance === 'none',
     },
@@ -88,6 +91,7 @@ export const spousalEligibilityConfig: GuidedStepConfig = {
         '• Married 30+ years — maximum 10 years\n' +
         '• Disability (spouse or child) — no statutory maximum; continues as long as the disability exists\n\n' +
         'The court may order a shorter duration if it finds the requesting spouse can become self-supporting sooner.',
+      acknowledgeLabel: 'Got it — I know the duration limits →',
       showIf: (a) =>
         a.financial_need === 'yes' &&
         !!a.qualifying_circumstance &&
@@ -106,6 +110,7 @@ export const spousalEligibilityConfig: GuidedStepConfig = {
         '• Death of either spouse\n' +
         '• Remarriage of the receiving spouse\n' +
         '• Cohabitation — the receiving spouse lives with a romantic partner in a permanent place of abode on a continuing, conjugal basis',
+      acknowledgeLabel: 'Got it — I know the cap and termination rules →',
       showIf: (a) =>
         a.financial_need === 'yes' &&
         !!a.qualifying_circumstance &&
@@ -118,6 +123,7 @@ export const spousalEligibilityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Because your eligibility is based on a 10+ year marriage, the court will expect you to make diligent efforts toward becoming self-supporting during the maintenance period. This includes pursuing employment, education, or job training. The court can reduce or terminate maintenance if you are not making a good-faith effort toward self-sufficiency.',
+      acknowledgeLabel: 'Understood — I\'ll pursue self-sufficiency →',
       showIf: (a) =>
         a.financial_need === 'yes' &&
         a.qualifying_circumstance === 'ten_years',

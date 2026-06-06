@@ -24,6 +24,7 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
       showIf: (a) => a.outcome === 'won',
       prompt:
         'Congratulations! Here\'s what to do now:\n\n1. GET A COPY of the court\'s order/judgment from the clerk\n2. CHECK YOUR CREDIT REPORT in 30-60 days — the debt should be removed\n3. If the collector contacts you again, tell them: "The case was dismissed. Do not contact me again." If they continue, that\'s an FDCPA violation worth up to $1,000.\n4. KEEP ALL YOUR DOCUMENTS for at least 2 years in case the collector tries to re-file\n5. If the debt appears on your credit report after dismissal, dispute it with the credit bureaus (Equifax, Experian, TransUnion) by mail with a copy of the court order.',
+      acknowledgeLabel: "I'll get the court order and check my credit report in 30-60 days",
     },
     // LOST
     {
@@ -32,6 +33,7 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
       showIf: (a) => a.outcome === 'lost',
       prompt:
         "Don't panic. You have options:\n\n1. APPEAL: You have 21 days (county/district court) or 5 days (JP court) to file an appeal. An appeal goes to a HIGHER court and you get a new trial.\n2. NEGOTIATE: Contact the plaintiff's attorney to set up a payment plan. Courts prefer payment plans over collections.\n3. PROTECT YOUR ASSETS: Texas law protects:\n   - Your wages (no garnishment for consumer debt in Texas)\n   - Your home (homestead exemption up to $345,000)\n   - Your car (up to $60,000 for a family)\n   - Retirement accounts (fully protected)\n   - Personal property (up to $100,000 for a family)\n4. FILE EXEMPTION CLAIMS: If the creditor tries to seize protected assets, you file a \"Claim of Exemption\" with the court. This is a short form that lists what they're trying to take and why it's protected.",
+      acknowledgeLabel: "I understand my options and Texas asset protections after a judgment",
     },
     // Appeal process
     {
@@ -41,11 +43,31 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
       prompt: 'Do you want to learn about the appeal process?',
     },
     {
-      id: 'appeal_info',
-      type: 'info',
+      id: 'which_court_lost',
+      type: 'single_choice',
+      prompt: 'Which court entered the judgment against you?',
       showIf: (a) => a.outcome === 'lost' && a.want_to_appeal === 'yes',
+      options: [
+        { value: 'jp', label: 'Justice of the Peace (JP) Court' },
+        { value: 'county_district', label: 'County Court or District Court' },
+        { value: 'not_sure', label: "I'm not sure" },
+      ],
+    },
+    {
+      id: 'appeal_info_jp',
+      type: 'info',
+      showIf: (a) => a.outcome === 'lost' && a.want_to_appeal === 'yes' && (a.which_court_lost === 'jp' || a.which_court_lost === 'not_sure'),
       prompt:
-        'HOW TO APPEAL:\n\nFrom JP Court (5 days to file):\n1. File a "Notice of Appeal" at the JP court clerk\n2. Pay the appeal bond (usually the judgment amount, or file inability-to-pay affidavit)\n3. Case transfers to County Court for a brand new trial (called "trial de novo")\n4. You start completely fresh — everything is re-heard\n\nFrom County/District Court (30 days to file):\n1. File a "Notice of Appeal" at the trial court clerk\n2. The appeals court reviews the RECORD (transcript) — no new trial\n3. You must show the judge made a legal ERROR\n4. Consider consulting a legal aid attorney for this step\n\nFree legal aid in Texas:\n- Lone Star Legal Aid: 1-800-733-8394\n- Texas RioGrande Legal Aid: 1-888-988-9996\n- texaslawhelp.org — find legal aid by county',
+        'APPEAL FROM JP COURT (5 days to file):\n1. File a "Notice of Appeal" at the JP court clerk\n2. Pay the appeal bond (usually the judgment amount, or file an inability-to-pay affidavit)\n3. The case transfers to County Court for a brand new trial ("trial de novo")\n4. You start completely fresh — everything is re-heard from the beginning',
+      acknowledgeLabel: "I'll file my Notice of Appeal within 5 days →",
+    },
+    {
+      id: 'appeal_info_county',
+      type: 'info',
+      showIf: (a) => a.outcome === 'lost' && a.want_to_appeal === 'yes' && (a.which_court_lost === 'county_district' || a.which_court_lost === 'not_sure'),
+      prompt:
+        'APPEAL FROM COUNTY / DISTRICT COURT (30 days to file):\n1. File a "Notice of Appeal" at the trial court clerk\n2. The appeals court reviews the RECORD (transcript) — there is no new trial\n3. You must show the judge made a legal ERROR\n4. Consider consulting a legal aid attorney for this step\n\nFree legal aid in Texas:\n- Lone Star Legal Aid: 1-800-733-8394\n- Texas RioGrande Legal Aid: 1-888-988-9996\n- texaslawhelp.org — find legal aid by county',
+      acknowledgeLabel: "I'll file my Notice of Appeal within 30 days →",
     },
     // SETTLED
     {
@@ -54,6 +76,7 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
       showIf: (a) => a.outcome === 'settled',
       prompt:
         'Important steps after a settlement:\n\n1. GET IT IN WRITING — Never agree to anything verbal. The agreement should state:\n   - The exact amount you\'ll pay\n   - The payment schedule\n   - That the debt is "satisfied in full" upon completion\n   - That the plaintiff will file a dismissal with the court\n   - That the plaintiff will request deletion from credit reports\n2. KEEP EVERY PAYMENT RECEIPT\n3. After final payment, get a "Satisfaction of Judgment" letter from the plaintiff\n4. File the satisfaction with the court clerk\n5. Check your credit report 30-60 days later to confirm removal',
+      acknowledgeLabel: "I'll get the settlement in writing and keep every payment receipt",
     },
     // CONTINUED
     {
@@ -62,6 +85,7 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
       showIf: (a) => a.outcome === 'continued',
       prompt:
         "Your hearing was postponed. Here's what to do:\n\n1. CONFIRM THE NEW DATE — Ask the clerk or check online for your new hearing date\n2. DON'T RELAX — Use this time to strengthen your case:\n   - Gather more evidence\n   - Review your defenses\n   - Check if new FDCPA violations occurred\n3. The continuance does NOT change your defenses or the strength of your case\n4. Show up on the new date — missing it means automatic judgment against you",
+      acknowledgeLabel: "I'll confirm my new hearing date and use the time to strengthen my case",
     },
     // Credit report
     {
@@ -69,6 +93,7 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ABOUT YOUR CREDIT REPORT:\n\nA judgment stays on your credit report for up to 7 years from the filing date.\n\nTo dispute:\n1. Get your free report at annualcreditreport.com\n2. Write a dispute letter to each bureau (Equifax, Experian, TransUnion)\n3. Include a copy of any court order (dismissal, satisfaction)\n4. They have 30 days to investigate and respond\n5. If the debt is inaccurate, they must remove it',
+      acknowledgeLabel: "I'll monitor my credit report and dispute any inaccurate entries",
     },
   ],
   generateSummary(answers) {
@@ -88,9 +113,10 @@ export const debtPostJudgmentGuideConfig: GuidedStepConfig = {
         text: 'Judgment entered against you.',
       })
       if (answers.want_to_appeal === 'yes') {
+        const deadline = answers.which_court_lost === 'jp' ? '5 days (JP Court)' : answers.which_court_lost === 'county_district' ? '30 days (County/District Court)' : '5 days (JP) or 30 days (County/District)'
         items.push({
           status: 'needed' as const,
-          text: 'File Notice of Appeal within deadline (5 days JP, 30 days county/district).',
+          text: `File Notice of Appeal within deadline: ${deadline}.`,
         })
       }
       items.push({

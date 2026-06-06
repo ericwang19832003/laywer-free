@@ -20,6 +20,7 @@ export const bizB2bContractBreachConfig: GuidedStepConfig = {
     {
       id: 'ucc_note',
       type: 'info',
+      acknowledgeLabel: 'Understood — UCC applies →',
       prompt:
         'Because your contract involves the sale of goods, the Uniform Commercial Code (UCC) applies. The UCC provides additional remedies like the right to "cover" (buy substitute goods) and recover the price difference.',
       showIf: (answers) =>
@@ -52,6 +53,7 @@ export const bizB2bContractBreachConfig: GuidedStepConfig = {
     {
       id: 'notice_warning',
       type: 'info',
+      acknowledgeLabel: 'I\'ll send notice now →',
       prompt:
         'You should send formal notice of breach immediately. Failing to comply with a contractual notice requirement can bar your claims. Send via certified mail and email to the address specified in the contract.',
       showIf: (answers) =>
@@ -85,6 +87,7 @@ export const bizB2bContractBreachConfig: GuidedStepConfig = {
     {
       id: 'cover_note',
       type: 'info',
+      acknowledgeLabel: 'Understood →',
       prompt:
         'Under UCC §2-712, a buyer can "cover" by purchasing substitute goods in good faith and recover the difference between the cover price and the contract price, plus incidental and consequential damages.',
       showIf: (answers) =>
@@ -120,6 +123,7 @@ export const bizB2bContractBreachConfig: GuidedStepConfig = {
     {
       id: 'demand_letter_template',
       type: 'info',
+      acknowledgeLabel: 'Got the template →',
       prompt:
         'Sample B2B Demand Letter Structure:\n\n1. Identify the parties and the contract (date, title, subject)\n2. State the specific obligations breached (cite contract sections)\n3. Describe the notice and cure period compliance\n4. Quantify damages with supporting documentation\n5. Demand specific performance or monetary relief\n6. Set a deadline for response (typically 15–30 days)\n7. State that litigation will follow if unresolved\n8. Send via certified mail AND email to the contract notice address',
     },

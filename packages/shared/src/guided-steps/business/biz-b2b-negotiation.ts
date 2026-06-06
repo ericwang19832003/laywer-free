@@ -36,6 +36,7 @@ export const bizB2bNegotiationConfig: GuidedStepConfig = {
     {
       id: 'relationship_tip',
       type: 'info',
+      acknowledgeLabel: 'Good advice — got it →',
       prompt:
         'When preserving the relationship matters, frame demands as corrections rather than accusations. Focus on how to move forward.',
       showIf: (answers) => answers.ongoing_relationship === 'yes',

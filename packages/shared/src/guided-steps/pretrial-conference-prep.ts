@@ -15,6 +15,7 @@ export const pretrialConferencePrepConfig: GuidedStepConfig = {
       id: 'order_info',
       type: 'info',
       prompt: 'Pre-trial orders typically require: witness lists, exhibit lists, motions in limine, proposed jury instructions, and trial brief.',
+      acknowledgeLabel: 'Got it — I\'ll review the pre-trial requirements →',
       showIf: (answers) => answers.scheduling_order_reviewed === 'no',
     },
     {
@@ -26,6 +27,7 @@ export const pretrialConferencePrepConfig: GuidedStepConfig = {
       id: 'witness_list_info',
       type: 'info',
       prompt: 'List all witnesses you plan to call, including fact witnesses and expert witnesses. Include their expected testimony.',
+      acknowledgeLabel: 'Got it — I\'ll prepare my witness list →',
       showIf: (answers) => answers.witness_list_prepared === 'no',
     },
     {
@@ -47,6 +49,7 @@ export const pretrialConferencePrepConfig: GuidedStepConfig = {
       id: 'motions_info',
       type: 'info',
       prompt: 'Motions in limine exclude evidence that might be prejudicial. Common ones: exclude settlement talks, prior convictions, character evidence.',
+      acknowledgeLabel: 'Got it — I\'ll file my motions in limine →',
       showIf: (answers) => answers.motions_in_limine === 'yes',
     },
     {
@@ -63,6 +66,7 @@ export const pretrialConferencePrepConfig: GuidedStepConfig = {
       id: 'trial_brief_info',
       type: 'info',
       prompt: 'A trial brief outlines your legal theories, key facts, and anticipated arguments. Check if required by local rules.',
+      acknowledgeLabel: 'Got it — I\'ll check local rules and draft the brief →',
       showIf: (answers) => answers.trial_brief === 'no',
     },
     {

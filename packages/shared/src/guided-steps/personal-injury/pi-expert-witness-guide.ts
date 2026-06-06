@@ -12,6 +12,7 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "WHEN ARE EXPERT WITNESSES NEEDED?\nExperts are not required in every PI case, but they can be critical when:\n\u2022 Liability is disputed \u2014 an accident reconstruction expert can prove who was at fault\n\u2022 Causation is disputed \u2014 a medical expert can testify your injuries were caused by the accident (not pre-existing)\n\u2022 Future damages are claimed \u2014 a life care planner or vocational expert can project future medical costs or lost earning capacity\n\u2022 The injuries are complex \u2014 a medical specialist can explain your condition to the jury in understandable terms\n\nWithout expert testimony on causation, the defense may file a motion for summary judgment arguing there is no competent evidence linking the accident to your injuries.",
+      acknowledgeLabel: 'I understand when experts are needed →',
     },
     {
       id: 'liability_disputed',
@@ -25,6 +26,7 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "ACCIDENT RECONSTRUCTION EXPERT:\n\u2022 What they do: Analyze physical evidence (skid marks, vehicle damage, road conditions, sight lines) and physics to determine how the accident occurred and who was at fault\n\u2022 When needed: Disputed liability, multi-vehicle accidents, hit-and-runs with physical evidence, accidents with no witnesses\n\u2022 Typical cost: $2,000\u2013$5,000 for a report; $3,000\u2013$5,000+ for trial testimony\n\u2022 Where to find: University engineering departments, retired law enforcement accident investigators, professional engineering firms\n\u2022 Budget option: Some retired highway patrol officers do accident reconstruction at lower rates ($1,500\u2013$2,500)",
+      acknowledgeLabel: 'I\u2019ll consider a reconstruction expert →',
       showIf: (answers) => answers.liability_disputed === 'yes',
     },
     {
@@ -39,6 +41,7 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "MEDICAL EXPERT (CAUSATION):\n\u2022 What they do: Review your medical records and testify that your injuries were caused (or worsened) by the accident, not a pre-existing condition\n\u2022 When needed: Prior injuries to the same area, \"low impact\" accidents with significant injuries, complex injuries, defense medical exam (DME) disputes\n\u2022 Typical cost: $1,500\u2013$3,000 for a records review and written report; $2,500\u2013$5,000 for deposition or trial testimony\n\u2022 Where to find: Your treating physician may serve as your expert (often cheaper). Otherwise, look for board-certified specialists in the relevant field.\n\u2022 Budget option: Your treating doctor is the cheapest expert \u2014 they already know your case. Ask if they will write a causation letter or testify.",
+      acknowledgeLabel: 'I\u2019ll pursue a medical expert →',
       showIf: (answers) => answers.causation_concern === 'yes',
     },
     {
@@ -53,6 +56,7 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "VOCATIONAL EXPERT (LOST EARNING CAPACITY):\n\u2022 What they do: Evaluate your education, work history, skills, and physical limitations to determine how the injury affects your future earning ability\n\u2022 When needed: Permanent disability, career change required due to injury, significant gap in work history due to recovery\n\u2022 Typical cost: $2,000\u2013$4,000 for evaluation and report\n\u2022 Where to find: Vocational rehabilitation counselors, university professors in rehabilitation or economics departments\n\u2022 They calculate: pre-injury earning capacity vs. post-injury earning capacity, multiplied by your remaining work-life expectancy\n\nNote: Without a vocational expert, the jury must guess at future lost earnings \u2014 and they often underestimate.",
+      acknowledgeLabel: 'I\u2019ll find a vocational expert →',
       showIf: (answers) => answers.lost_earning_capacity === 'yes',
     },
     {
@@ -60,18 +64,21 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "FINDING AFFORDABLE EXPERTS:\n\u2022 University professors \u2014 often willing to serve as experts at lower rates ($1,500\u2013$3,000) than private consultants\n\u2022 Retired professionals \u2014 retired doctors, engineers, or law enforcement can provide expert testimony at reduced rates\n\u2022 Your treating physician \u2014 already familiar with your case, so less time reviewing records = lower cost\n\u2022 Expert witness directories \u2014 the Texas Bar Association, SEAK, and ExpertPages.com list experts by specialty and location\n\u2022 Payment timing \u2014 many experts will defer payment until your case settles (especially in PI cases). Ask about contingency or deferred fee arrangements.\n\nTypical total expert costs: $1,500\u2013$5,000 per expert for reports. Trial testimony adds $2,000\u2013$5,000 per day.",
+      acknowledgeLabel: 'Got the cost guidance →',
     },
     {
       id: 'without_experts_risk',
       type: 'info',
       prompt:
         "WHAT HAPPENS WITHOUT EXPERT WITNESSES?\n\u2022 Causation: If the defense argues your injuries are pre-existing and you have no medical expert to say otherwise, the court may grant summary judgment and dismiss your case. In Texas, lay testimony alone is often insufficient to establish medical causation.\n\u2022 Liability: Without an accident reconstruction expert in a disputed-fault case, it becomes your word against theirs.\n\u2022 Damages: Without a vocational expert, the jury has no framework for calculating future lost earnings and may award far less than you deserve.\n\nBottom line: In straightforward cases (clear liability, well-documented injuries), you may not need experts. In contested cases, the cost of an expert is almost always worth it compared to the risk of losing.",
+      acknowledgeLabel: 'I understand the risks →',
     },
     {
       id: 'expert_reports_at_trial',
       type: 'info',
       prompt:
         "HOW EXPERT REPORTS ARE USED AT TRIAL:\n\u2022 Expert reports must be disclosed to the opposing party during discovery (usually 30 days before trial per local rules)\n\u2022 The expert may testify live at trial, by deposition video, or their written report may be admitted as evidence\n\u2022 The defense can cross-examine your expert and hire their own expert to contradict the findings\n\u2022 Judges may hold a \"Daubert\" or \"Robinson\" hearing (in Texas, Robinson v. Allied Chem. Corp.) to determine if your expert's methodology is reliable before allowing testimony\n\u2022 Prepare your expert by reviewing likely cross-examination questions\n\u2022 The expert should be able to explain their opinions in plain language the jury can understand",
+      acknowledgeLabel: 'I\'m ready to prepare my expert →',
     },
   ],
 
@@ -144,6 +151,7 @@ const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "WHEN ARE EXPERT WITNESSES NEEDED?\nExperts are not required in every property damage case, but they can be important when:\n• The repair estimate is disputed — an independent mechanic, contractor, engineer, or estimator can explain the reasonable cost of repair\n• The property lost market value after repair — an appraiser can support a diminished value claim\n• The cause of the damage is disputed — an accident reconstructionist, engineer, or qualified inspector can connect the damage to the incident\n• The defendant argues the damage was old, unrelated, or caused by normal wear — an expert can compare photos, inspections, repair records, and physical evidence\n\nStraightforward cases with photos, receipts, and a clear admission of fault may not need an expert.",
+      acknowledgeLabel: 'I understand when experts are needed →',
     },
     {
       id: 'repair_disputed',
@@ -157,6 +165,7 @@ const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "REPAIR COST EXPERT:\n• What they do: Inspect the damaged property and explain the reasonable repair or replacement cost\n• Vehicle damage: independent auto appraiser, body shop estimator, or mechanic\n• Home/property damage: licensed contractor, engineer, remediation specialist, or property inspector\n• Typical cost: often $250–$1,500 for an estimate or report; more for deposition or trial testimony\n• Budget option: Get 2–3 independent written estimates and ask the estimator whether they can testify if needed.",
+      acknowledgeLabel: 'I\'ll get an independent estimate →',
       showIf: (answers) => answers.repair_disputed === 'yes',
     },
     {
@@ -171,6 +180,7 @@ const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "APPRAISER / DIMINISHED VALUE EXPERT:\n• What they do: Compare the property value before and after the damage and repair history\n• Vehicle damage: diminished value appraiser or licensed independent adjuster\n• Real property: licensed real estate appraiser or broker price opinion when allowed\n• Typical cost: $300–$1,500 for a report, depending on property type and complexity\n• Bring: photos, repair invoices, prior condition records, market listings, and any insurer valuation.",
+      acknowledgeLabel: 'I\'ll get a diminished value appraisal →',
       showIf: (answers) => answers.diminished_value === 'yes',
     },
     {
@@ -185,6 +195,7 @@ const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "CAUSATION EXPERT:\n• What they do: Explain how the incident caused the specific damage pattern\n• Vehicle cases: accident reconstruction expert, mechanic, or auto damage analyst\n• Building/property cases: engineer, contractor, remediation specialist, or inspector\n• Best evidence: before/after photos, inspection reports, maintenance records, repair invoices, weather or incident records, and witness statements\n• Budget option: A detailed written estimate that explains causation may be enough for negotiation, even if you do not retain a formal expert.",
+      acknowledgeLabel: 'I\'ll gather causation evidence →',
       showIf: (answers) => answers.causation_disputed === 'yes',
     },
     {
@@ -192,6 +203,7 @@ const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "FINDING AFFORDABLE EXPERTS:\n• Start with the professionals already involved: repair shop, contractor, inspector, adjuster, or appraiser\n• Ask for a written report that explains scope, cause, and cost in plain language\n• Get more than one estimate when possible\n• Ask whether the expert can appear remotely, by affidavit, or only live in court\n• Confirm fees for inspection, written report, deposition, and trial separately.",
+      acknowledgeLabel: 'Got the expert guidance →',
     },
   ],
 

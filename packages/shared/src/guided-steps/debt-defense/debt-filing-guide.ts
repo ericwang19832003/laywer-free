@@ -36,6 +36,7 @@ export const debtFilingGuideConfig: GuidedStepConfig = {
       showIf: (answers) => answers.filing_method === 'efile',
       prompt:
         'To file online:\n1. Go to eFileTexas.gov and create a free account\n2. Select your court and case number (from your citation)\n3. Upload your Answer as a PDF\n4. Submit the filing; there is usually no filing fee to file an Answer\n5. You\'ll receive a confirmation email when accepted\n\nTip: Most courts accept e-filed documents within 24 hours.',
+      acknowledgeLabel: 'Got it, continue →',
     },
 
     // In-person instructions
@@ -45,6 +46,7 @@ export const debtFilingGuideConfig: GuidedStepConfig = {
       showIf: (answers) => answers.filing_method === 'in_person',
       prompt:
         'To file in person:\n1. Print 3 copies of your Answer (one for the court, one for you, one to serve)\n2. Go to the court clerk\'s office during business hours (usually 8am-5pm)\n3. Tell the clerk: "I need to file an Answer in case number [your case number]"\n4. Ask the clerk to file-stamp all copies — keep your stamped copy as proof\n5. Ask the clerk if they can serve the plaintiff\'s attorney for you',
+      acknowledgeLabel: 'Got it, continue →',
     },
 
     // Mail instructions
@@ -54,6 +56,7 @@ export const debtFilingGuideConfig: GuidedStepConfig = {
       showIf: (answers) => answers.filing_method === 'mail',
       prompt:
         'To file by mail:\n1. Print 3 copies of your Answer\n2. Include a self-addressed stamped envelope for the clerk to return your stamped copy\n3. Mail to the court clerk\'s office via certified mail with return receipt\n4. Keep the mailing receipt and confirm the clerk accepted the filing\n\nWarning: Mail takes time. File at least 5 days before your deadline to be safe.',
+      acknowledgeLabel: 'Got it, continue →',
     },
 
     // Answer fee info
@@ -62,14 +65,22 @@ export const debtFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'There is usually no filing fee to file an Answer in a debt case. If you also file a counterclaim or counter-petition, ask the clerk whether a filing fee applies and whether you need a Statement of Inability to Afford Payment of Court Costs.',
+      acknowledgeLabel: 'Got it, continue →',
     },
 
     // What to bring checklist
     {
       id: 'what_to_bring',
-      type: 'info',
-      prompt:
-        'Checklist — what to bring when filing:\n\n- Your Answer (3 copies, signed)\n- Certificate of Service (attached to Answer)\n- Your case number (from the citation you received)\n- Government-issued ID\n- A pen (in case you need to sign anything)\n- The original citation (so you can reference the case number and court)',
+      type: 'multi_select',
+      prompt: 'Which items have you prepared for filing?',
+      options: [
+        { value: 'signed_answer', label: 'Signed Answer (3 copies)' },
+        { value: 'certificate_of_service', label: 'Certificate of Service (attached to Answer)' },
+        { value: 'case_number', label: 'Case number (from the citation)' },
+        { value: 'photo_id', label: 'Government-issued ID' },
+        { value: 'original_citation', label: 'Original citation (for reference)' },
+      ],
+      noneLabel: "Haven't gathered these yet",
     },
   ],
 
@@ -118,11 +129,18 @@ export const debtFilingGuideConfig: GuidedStepConfig = {
       text: 'There is usually no filing fee to file an Answer. If you add a counterclaim, ask the clerk whether a filing fee or fee waiver form is required.',
     })
 
-    // Universal reminders
-    items.push({
-      status: 'needed',
-      text: 'Bring your case number, government-issued ID, and the original citation when filing.',
-    })
+    // Filing checklist
+    const bringAnswer = answers.what_to_bring
+    if (bringAnswer && bringAnswer !== 'none') {
+      const brought = new Set(bringAnswer.split(','))
+      if (brought.size >= 4) {
+        items.push({ status: 'done', text: 'Filing materials fully prepared.' })
+      } else {
+        items.push({ status: 'needed', text: `Gather remaining filing materials — ${5 - brought.size} item${5 - brought.size !== 1 ? 's' : ''} not yet checked off.` })
+      }
+    } else {
+      items.push({ status: 'needed', text: 'Prepare filing materials: signed Answer (3 copies), Certificate of Service, case number, government ID, and original citation.' })
+    }
 
     items.push({
       status: 'info',

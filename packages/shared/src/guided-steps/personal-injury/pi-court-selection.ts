@@ -1,4 +1,9 @@
 import type { GuidedStepConfig, SummaryItem } from '../types'
+import {
+  damageRangeToCourtLevel,
+  getTexasCourtFeeInfo,
+  getTexasCourtContactInfo,
+} from '../../courts/texas-filing-requirements'
 import { STATE_FILING_INFO } from './state-filing-info'
 
 interface DamageOption {
@@ -79,11 +84,95 @@ export function createPiCourtSelectionConfig(piSubType?: string, state?: string)
         id: 'court_info',
         type: 'info',
         prompt: `For a ${claimLabel} matter: ${courtGuide}`,
+        acknowledgeLabel: "I understand the venue and jurisdiction rules",
       },
       {
-        id: 'verified_with_clerk',
-        type: 'yes_no',
-        prompt: 'Have you verified filing requirements with the court clerk or court website?',
+        id: 'court_confirm',
+        type: 'info',
+        prompt: '',
+        promptFn: (answers) => {
+          const county = answers.accident_county || answers.defendant_county || ''
+          const level = damageRangeToCourtLevel(answers.estimated_damages_range)
+          const data = county ? getTexasCourtFeeInfo(county, level) : null
+          if (data) {
+            return (
+              `YOUR COURT\n\n` +
+              `${data.countyName} County — ${data.courtLabel}\n\n` +
+              `FILING FEE: ${data.fee}\n` +
+              `Fee waiver available if you cannot afford filing costs\n` +
+              `(Statement of Inability to Afford Payment)`
+            )
+          }
+          return (
+            `YOUR COURT\n\n` +
+            `Verify the correct court and filing fee with the clerk before filing.\n\n` +
+            `Fee waivers are available if you cannot afford the filing cost\n` +
+            `(Statement of Inability to Afford Payment — OCA form).`
+          )
+        },
+        acknowledgeLabel: "That's the right court →",
+        showIf: (answers) =>
+          !!(answers.accident_county || answers.defendant_county) &&
+          !!answers.estimated_damages_range,
+      },
+      {
+        id: 'court_documents',
+        type: 'multi_select',
+        prompt: 'Which required documents have you prepared so far?',
+        options: [
+          { value: 'petition', label: 'Original Petition (3 copies)' },
+          { value: 'photo_id', label: 'Photo ID (for in-person filing)' },
+          { value: 'fee_payment', label: 'Filing fee payment or fee waiver' },
+          { value: 'case_info_sheet', label: 'Civil Case Information Sheet (Texas OCA form)' },
+        ],
+        noneLabel: "Haven't prepared any yet",
+        showIf: (answers) =>
+          !!(answers.accident_county || answers.defendant_county) &&
+          !!answers.estimated_damages_range,
+      },
+      {
+        id: 'court_formatting',
+        type: 'multi_select',
+        prompt: 'Does your document meet these formatting requirements?',
+        options: [
+          { value: 'pdf', label: 'Text-searchable PDF (not a scanned image)' },
+          { value: 'redacted', label: 'SSN, DOB, and account numbers redacted' },
+          { value: 'font', label: 'Legible font, 12pt or larger' },
+          { value: 'margins', label: '1-inch margins on all sides' },
+        ],
+        noneLabel: "Haven't checked these yet",
+        showIf: (answers) =>
+          !!(answers.accident_county || answers.defendant_county) &&
+          !!answers.estimated_damages_range,
+      },
+      {
+        id: 'court_contact',
+        type: 'info',
+        prompt: '',
+        promptFn: (answers) => {
+          const county = answers.accident_county || answers.defendant_county || ''
+          const level = damageRangeToCourtLevel(answers.estimated_damages_range)
+          const data = county ? getTexasCourtContactInfo(county, level) : null
+          if (data) {
+            return (
+              `WHERE TO FILE\n\n` +
+              `E-FILING: ${data.eFilingUrl}\n` +
+              `CLERK WEBSITE: ${data.clerkWebsite}\n` +
+              `CLERK PHONE: ${data.clerkPhone}\n\n` +
+              `Last verified: ${data.lastVerified} — confirm with the clerk before filing.`
+            )
+          }
+          return (
+            `WHERE TO FILE\n\n` +
+            `E-FILING: https://efiletexas.gov\n\n` +
+            `All Texas courts use efiletexas.gov for online filing.\n` +
+            `Call the clerk's office to confirm your specific court's contact info.`
+          )
+        },
+        acknowledgeLabel: "I have these saved →",
+        showIf: (answers) =>
+          !!(answers.accident_county || answers.defendant_county) &&
+          !!answers.estimated_damages_range,
       },
     ],
     generateSummary(answers) {
@@ -108,16 +197,23 @@ export function createPiCourtSelectionConfig(piSubType?: string, state?: string)
         })
       }
 
-      if (answers.verified_with_clerk === 'yes') {
-        items.push({
-          status: 'done',
-          text: 'Court filing requirements marked as verified.',
-        })
+      if (answers.court_confirm === 'acknowledged') {
+        items.push({ status: 'done', text: 'Court and filing fee confirmed.' })
       } else {
-        items.push({
-          status: 'needed',
-          text: 'Check the court website or clerk instructions before filing.',
-        })
+        items.push({ status: 'needed', text: 'Confirm the correct court and filing fee.' })
+      }
+
+      const preparedDocs = answers.court_documents
+        ? answers.court_documents.split(',').filter(Boolean)
+        : []
+      if (preparedDocs.length > 0 && preparedDocs[0] !== 'none') {
+        items.push({ status: 'done', text: `${preparedDocs.length} required document(s) prepared.` })
+      } else if (answers.court_documents) {
+        items.push({ status: 'needed', text: 'Prepare the required filing documents.' })
+      }
+
+      if (answers.court_contact === 'acknowledged') {
+        items.push({ status: 'done', text: 'Clerk contact information saved.' })
       }
 
       return items

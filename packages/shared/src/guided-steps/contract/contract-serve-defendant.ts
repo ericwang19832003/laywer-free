@@ -16,6 +16,7 @@ export const contractServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can search public records, business registrations, or the Secretary of State website to find addresses. If the defendant is a business, serve their registered agent.',
+      acknowledgeLabel: "I'll search public records and the Secretary of State to find their address →",
       showIf: (a) => a.know_address === 'no',
     },
     {
@@ -32,6 +33,7 @@ export const contractServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For businesses, you must serve the registered agent listed with the Secretary of State. You can look this up on the Texas Secretary of State website (SOSDirect). If no registered agent is listed, serve an officer, director, or manager.',
+      acknowledgeLabel: "I'll look up the registered agent on SOSDirect before serving →",
       showIf: (a) => a.defendant_type === 'business',
     },
     {
@@ -50,6 +52,7 @@ export const contractServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Certified mail is cheapest but can be refused. A constable or process server is more reliable and creates a sworn return of service. For contract cases, process servers are a popular middle ground.',
+      acknowledgeLabel: "I'll choose the most reliable service method for my situation →",
       showIf: (a) => a.service_method === 'not_sure',
     },
     {

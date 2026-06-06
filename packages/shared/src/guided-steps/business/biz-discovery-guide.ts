@@ -35,6 +35,7 @@ export const bizDiscoveryGuideConfig: GuidedStepConfig = {
     {
       id: 'rfp_financial_template',
       type: 'info',
+      acknowledgeLabel: 'Got the financial RFPs →',
       prompt:
         'Sample Requests for Production — Financial Records:\n\nRFP No. 1: All financial statements, including profit and loss statements, balance sheets, and cash flow statements, for [Company Name] for the period [date range].\n\nRFP No. 2: All bank account statements, deposit slips, cancelled checks, and wire transfer records for any account held by or in the name of [Company Name] for the period [date range].\n\nRFP No. 3: All federal and state tax returns, including all schedules and attachments, filed by or on behalf of [Company Name] for tax years [years].\n\nRFP No. 4: All general ledgers, journals, and accounting records maintained by or on behalf of [Company Name] for the period [date range].\n\nRFP No. 5: All invoices, purchase orders, and receipts related to [specific transaction or category] for the period [date range].',
     },
@@ -57,6 +58,7 @@ export const bizDiscoveryGuideConfig: GuidedStepConfig = {
     {
       id: 'rfp_communications_template',
       type: 'info',
+      acknowledgeLabel: 'Got the communications RFPs →',
       prompt:
         'Sample Requests for Production — Communications:\n\nRFP No. 6: All emails, including attachments, sent to or from [person/department] concerning [subject matter] for the period [date range].\n\nRFP No. 7: All text messages, instant messages, and chat communications (including Slack, Microsoft Teams, and WhatsApp) between [persons] concerning [subject matter] for the period [date range].\n\nRFP No. 8: All internal memoranda, reports, and presentations concerning [subject matter] for the period [date range].\n\nTip: Include a litigation hold letter demanding preservation of all electronic communications. Destruction of evidence after litigation is reasonably anticipated can result in spoliation sanctions.',
       showIf: (answers) => answers.communications_needed === 'yes',
@@ -69,6 +71,7 @@ export const bizDiscoveryGuideConfig: GuidedStepConfig = {
     {
       id: 'rfp_contracts_template',
       type: 'info',
+      acknowledgeLabel: 'Got the contracts RFPs →',
       prompt:
         'Sample Requests for Production — Contracts:\n\nRFP No. 9: All contracts, agreements, amendments, addenda, and side letters between [parties] concerning [subject matter], including all drafts and redlines.\n\nRFP No. 10: All documents relating to the negotiation of [specific contract], including correspondence, term sheets, proposals, and meeting notes.',
       showIf: (answers) => answers.contracts_needed === 'yes',
@@ -83,6 +86,7 @@ export const bizDiscoveryGuideConfig: GuidedStepConfig = {
     {
       id: 'interrogatory_template',
       type: 'info',
+      acknowledgeLabel: 'Got the interrogatory templates →',
       prompt:
         'Sample Interrogatories for Business Disputes:\n\nNo. 1: Identify all persons with knowledge of the facts relating to [the dispute/transaction], including their name, title, employer, and the subject of their knowledge.\n\nNo. 2: State in detail the factual basis for each affirmative defense raised in your Answer.\n\nNo. 3: Identify all bank accounts (by institution, account number, and account holder name) into which any revenue from [the business/transaction] was deposited during [date range].\n\nNo. 4: State the total amount of revenue received from [specific source/customer] during [date range], broken down by month.\n\nNo. 5: Identify all damages you claim, the amount of each category of damages, and the method of calculation.\n\nRemember: Texas limits you to 25 interrogatories total (Tex. R. Civ. P. 197.1). Use them wisely.',
       showIf: (answers) => answers.interrogatories_needed === 'yes',
@@ -115,6 +119,7 @@ export const bizDiscoveryGuideConfig: GuidedStepConfig = {
     {
       id: 'privilege_note',
       type: 'info',
+      acknowledgeLabel: 'Understood — I\'ll demand a privilege log →',
       prompt:
         'When the other side claims privilege:\n\n• Demand a privilege log identifying each withheld document, the privilege claimed, and the basis\n• Challenge overbroad privilege claims — the "crime-fraud exception" pierces attorney-client privilege if the communication furthered a crime or fraud\n• For trade secret claims, request a protective order rather than allowing wholesale withholding — the court can order production under a "for attorneys\u2019 eyes only" designation\n• If they claim trade secret privilege over information central to your claims, move to compel with a briefing on why the information is essential',
       showIf: (answers) =>
@@ -152,6 +157,7 @@ export const bizDiscoveryGuideConfig: GuidedStepConfig = {
     {
       id: 'protective_order_note',
       type: 'info',
+      acknowledgeLabel: 'I\'ll draft a protective order →',
       prompt:
         'File an Agreed Protective Order early in the case. Standard provisions should include:\n\n• "Confidential" tier — viewable by attorneys, parties, and testifying experts\n• "Attorneys\u2019 Eyes Only" tier — viewable only by attorneys and consulting experts\n• Prohibition on using confidential information for any purpose outside the litigation\n• Procedure for challenging designations\n• Return or destruction of confidential materials at case conclusion\n\nMost courts prefer agreed protective orders. Draft one and propose it to opposing counsel.',
       showIf: (answers) => answers.protective_order === 'yes',

@@ -19,6 +19,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
         id: 'sc_basics_info',
         type: 'info',
         prompt: `${sc.courtName} handles small claims up to ${sc.limit}. It uses relaxed procedures — no formal discovery is required, evidence rules are relaxed, and hearings are typically 15–30 minutes long.${isTx ? ' (Governed by TRCP Rules 500-507.)' : state === 'FL' ? ' (Governed by the Florida Rules of Small Claims Procedure, Fla. R. Sm. Cl. P. 7.010 et seq.)' : state === 'CA' ? ' (Governed by the California Small Claims Act, CCP §§ 116.110–116.950.)' : state === 'NY' ? ' (Governed by New York City Civil Court Act Article 18 (NYC) or UCCA Article 18 (outside NYC).)' : state === 'PA' ? ' (Governed by Pa.R.Civ.P.M.D.J.)' : ''}`,
+        acknowledgeLabel: `I understand how ${sc.courtAbbrev} works →`,
         showIf: (answers) => answers.know_sc_basics === 'no',
       },
       {
@@ -29,6 +30,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'timeline_info',
         type: 'info',
+        acknowledgeLabel: 'I understand the hearing timeline →',
         prompt: state === 'NY'
           ? 'Once the defendant is served, your hearing in New York Small Claims Court is typically scheduled 30–70 days later (NYC courts) or 30–45 days later (courts outside NYC). The court mails you a Notice of Hearing with the date and time.'
           : state === 'FL'
@@ -46,6 +48,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'judge_decides_info',
         type: 'info',
+        acknowledgeLabel: 'I understand who decides my case →',
         prompt: state === 'NY'
           ? 'The judge (or court-appointed arbitrator) decides your case. New York Small Claims Court does NOT offer jury trials — the decision is by the judge or arbitrator alone. Judges value clear facts and common sense over legal citations.'
           : 'The judge decides your case unless someone requests a jury in writing. Most small claims cases are decided by the judge alone. Judges value clear facts and common sense over legal citations.',
@@ -60,6 +63,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
         id: 'evidence_rules_info',
         type: 'info',
         prompt: `${sc.courtAbbrev} has relaxed evidence rules. You don't need to follow formal rules of evidence. You can present documents, photos, and tell your story in plain language. The judge has wide discretion to consider what's relevant.`,
+        acknowledgeLabel: 'I understand the relaxed evidence rules →',
         showIf: (answers) => answers.know_evidence_rules === 'no',
       },
       {
@@ -70,6 +74,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'service_info',
         type: 'info',
+        acknowledgeLabel: 'I understand how the defendant gets notified →',
         prompt: state === 'NY'
           ? `In New York Small Claims Court, the clerk mails the lawsuit papers to the defendant by certified mail — you just need to provide the defendant's address and pay the filing fee. Service must be done at least 5 days before your hearing.`
           : state === 'FL'
@@ -88,6 +93,7 @@ export function createScCourtGuideConfig(state?: string): GuidedStepConfig {
         id: 'over_limit_info',
         type: 'info',
         prompt: `${sc.courtAbbrev} can only handle claims up to ${sc.limit}. If your claim exceeds this amount, you'll need to file in ${sc.upperCourtName}. You can choose to reduce your claim to ${sc.limit} to stay in ${sc.courtAbbrev}, but you'll give up the excess.`,
+        acknowledgeLabel: 'I understand the claim limit rules →',
         showIf: (answers) => answers.claim_under_limit === 'no',
       },
     ],

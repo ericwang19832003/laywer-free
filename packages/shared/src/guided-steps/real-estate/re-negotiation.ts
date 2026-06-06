@@ -35,6 +35,7 @@ export const reNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'When the other party is hostile, communicate only in writing to create a record. Consider mediation with a neutral third party rather than direct negotiation. Do not engage with threats — document them instead.',
+      acknowledgeLabel: 'I will communicate in writing only →',
       showIf: (answers) => answers.prior_communications === 'hostile',
     },
     {
@@ -49,6 +50,7 @@ export const reNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Mediation uses a neutral third party to help both sides find a resolution. It is less formal, less expensive, and faster than going to trial. Many Texas courts require mediation before trial in real estate disputes. You can find mediators through the Texas Mediator Credentialing Association or your local bar association.',
+      acknowledgeLabel: 'I understand how mediation works →',
       showIf: (answers) => answers.open_to_mediation === 'yes',
     },
     {
@@ -61,6 +63,7 @@ export const reNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Put the agreement in writing immediately. Include specific terms, deadlines, and consequences for non-compliance. Both parties should sign. Have the agreement notarized if possible. If the agreement involves property transfer or liens, record it with the county clerk.',
+      acknowledgeLabel: 'I will get this agreement in writing →',
       showIf: (answers) => answers.agreement_reached === 'yes',
     },
     {
@@ -68,6 +71,7 @@ export const reNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Since negotiation did not resolve the dispute, the next step is to file a petition with the court. Your negotiation attempts demonstrate good faith and strengthen your position.',
+      acknowledgeLabel: 'I am ready to proceed to filing →',
       showIf: (answers) => answers.agreement_reached === 'no',
     },
   ],

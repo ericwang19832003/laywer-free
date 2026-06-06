@@ -21,6 +21,7 @@ export const contractReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A general denial means the defendant denies everything. You will need to prove: (1) a valid contract existed, (2) you performed your obligations, (3) the defendant breached, and (4) you suffered damages.',
+      acknowledgeLabel: 'Understood — I\'ll prove all four elements →',
       showIf: (answers) => answers.denial_type === 'general',
     },
     {
@@ -28,6 +29,7 @@ export const contractReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Specific denials mean the defendant only disputes certain facts. Look carefully at what they admit vs. deny. For example, they may admit the contract exists but deny they breached it, which narrows the issues for trial.',
+      acknowledgeLabel: 'Got it — I\'ll focus on disputed facts →',
       showIf: (answers) => answers.denial_type === 'specific',
     },
     {
@@ -35,6 +37,7 @@ export const contractReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Look at the first page of the answer. If it says "Defendant generally denies each and every allegation," that\'s a general denial. If it addresses specific paragraphs, those are specific denials.',
+      acknowledgeLabel: 'Got it — I\'ll check the first page →',
       showIf: (answers) => answers.denial_type === 'not_sure',
     },
     {
@@ -66,6 +69,7 @@ export const contractReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If they claim you breached first, gather evidence that you performed your obligations under the contract. Emails, receipts, and delivery records are especially useful for rebutting this defense.',
+      acknowledgeLabel: 'Got it — I\'ll gather my performance evidence →',
       showIf: (answers) => answers.which_defenses === 'prior_material_breach',
     },
     {
@@ -73,6 +77,7 @@ export const contractReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the statute of limitations is 4 years for written contracts and 4 years for oral contracts. Calculate from the date of the breach, not the date the contract was signed.',
+      acknowledgeLabel: 'Got it — I\'ll calculate the limitations period →',
       showIf: (answers) => answers.which_defenses === 'statute_of_limitations',
     },
     {
@@ -85,6 +90,7 @@ export const contractReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A counterclaim means the defendant is suing you back for breach of contract. You generally have 30 days to respond. Review their counterclaim carefully and gather evidence to refute their claims.',
+      acknowledgeLabel: 'Understood — I\'ll respond within 30 days →',
       showIf: (answers) => answers.counterclaim === 'yes',
     },
   ],

@@ -22,6 +22,7 @@ export const otherFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most courts now accept or require electronic filing. Check if your court uses a system like eFileTexas.gov, Odyssey, or another e-filing portal. Create an account before your filing date.',
+      acknowledgeLabel: "I'll create an e-filing account before my filing date",
       showIf: (answers) => answers.filing_method === 'efiling' || answers.filing_method === 'unsure',
     },
     {
@@ -29,6 +30,7 @@ export const otherFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'When filing in person, bring your original documents plus at least two copies. The clerk will stamp your copies as "filed." Check the courthouse hours and whether you need an appointment.',
+      acknowledgeLabel: "I'll bring originals plus two copies and confirm courthouse hours",
       showIf: (answers) => answers.filing_method === 'in_person',
     },
     {
@@ -41,6 +43,7 @@ export const otherFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Filing fees vary by court and case type. Call the court clerk or check the court\'s website for the current fee schedule. If you cannot afford the fee, you can apply for a fee waiver (often called an "affidavit of inability to pay").',
+      acknowledgeLabel: "I'll look up the fee schedule or apply for a fee waiver",
       showIf: (answers) => answers.know_filing_fee === 'no',
     },
     {
@@ -53,6 +56,7 @@ export const otherFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before filing, make sure you have: your petition or complaint, a civil case information sheet (if required), any required cover sheets, and copies for each defendant. Double-check that names, addresses, and case details are accurate.',
+      acknowledgeLabel: "I'll complete my documents and double-check all names and addresses",
       showIf: (answers) => answers.documents_complete === 'no',
     },
     {
@@ -65,6 +69,7 @@ export const otherFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After filing, you will receive a cause number (case number). Keep this number for all future filings and communications with the court. Your next step is to serve the other party.',
+      acknowledgeLabel: "I understand — I'll save my cause number and prepare to serve the other party",
       showIf: (answers) => answers.filing_confirmation === 'no',
     },
     {
@@ -72,6 +77,7 @@ export const otherFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Great! Your case is officially on file. Save your confirmation and cause number. The next step is to arrange service on the other party within the required timeframe.',
+      acknowledgeLabel: "I've saved my cause number — ready to arrange service",
       showIf: (answers) => answers.filing_confirmation === 'yes',
     },
   ],

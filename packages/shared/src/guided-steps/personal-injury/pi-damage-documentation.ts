@@ -30,6 +30,7 @@ export const piDamageDocumentationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Get at least two written estimates from licensed, reputable professionals. Written estimates carry more weight than verbal ones. Keep all receipts.',
+      acknowledgeLabel: "I'll get written estimates from licensed professionals",
       showIf: (answers) => answers.has_repair_estimate === 'none' || answers.has_repair_estimate === 'one',
     },
     {
@@ -73,6 +74,7 @@ export const piDamageDocumentationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Keep every receipt related to the damage: repair invoices, rental car costs, temporary housing, storage fees, and any other out-of-pocket expenses. These are all recoverable damages.',
+      acknowledgeLabel: "I'll keep all receipts as evidence",
       showIf: (answers) => answers.repairs_started === 'in_progress' || answers.repairs_started === 'completed',
     },
     {

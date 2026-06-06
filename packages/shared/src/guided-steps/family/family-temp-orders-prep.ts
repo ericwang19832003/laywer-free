@@ -23,6 +23,7 @@ export const familyTempOrdersPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "The court can set interim custody and visitation until the final hearing. Focus on the child's current routine and stability. Bring evidence of who has been the primary caretaker: school pickup records, medical appointment history, and daily schedules.",
+      acknowledgeLabel: "I'll gather evidence of the child's routine and my caretaking involvement",
       showIf: (a) => a.temp_orders_needed === 'custody' || a.temp_orders_needed === 'all',
     },
     {
@@ -30,6 +31,7 @@ export const familyTempOrdersPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The court can order temporary child support and spousal support based on guidelines. Bring income documentation for both parties (pay stubs, tax returns) and a list of monthly expenses. Texas child support guidelines use a percentage of net income.',
+      acknowledgeLabel: "I'll gather income documentation and expense records",
       showIf: (a) => a.temp_orders_needed === 'support' || a.temp_orders_needed === 'all',
     },
     {
@@ -37,6 +39,7 @@ export const familyTempOrdersPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A Standing Order (automatic in many TX counties) prevents either party from hiding, destroying, or spending community assets. If your county does not have one, you can request a Temporary Restraining Order (TRO) to freeze assets.',
+      acknowledgeLabel: "I'll check for a Standing Order or prepare a TRO request",
       showIf: (a) => a.temp_orders_needed === 'property_restraint' || a.temp_orders_needed === 'all',
     },
     {
@@ -44,6 +47,7 @@ export const familyTempOrdersPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "You can request exclusive use of the family home during the case. The court considers: who has primary custody, safety concerns, ability to afford alternative housing. This does NOT affect ownership — it's temporary.",
+      acknowledgeLabel: "I understand — exclusive use is temporary and doesn't affect ownership",
       showIf: (a) => a.temp_orders_needed === 'exclusive_use' || a.temp_orders_needed === 'all',
     },
     {
@@ -51,12 +55,14 @@ export const familyTempOrdersPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHAT TO PRESENT:\n1. Your proposed temporary orders (written out)\n2. Evidence supporting your requests (financial docs, child\'s schedule, safety concerns)\n3. A brief explanation of why these temporary orders are necessary\n\nKeep it brief — temporary orders hearings are usually 30-60 minutes.',
+      acknowledgeLabel: "I'll write out my proposed temporary orders before the hearing",
     },
     {
       id: 'standard_of_proof_info',
       type: 'info',
       prompt:
         "STANDARD OF PROOF: For temporary orders, the standard is 'preponderance of the evidence' (more likely than not). This is LOWER than the standard for final orders.",
+      acknowledgeLabel: 'I understand the preponderance-of-evidence standard',
     },
   ],
 

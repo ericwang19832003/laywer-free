@@ -16,6 +16,7 @@ export const servePlaintiffConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A certificate of service is a document stating when, how, and to whom you sent your answer. It\'s usually attached to the last page of your answer.',
+      acknowledgeLabel: "I'll prepare and attach a certificate of service to my answer",
       showIf: (answers) => answers.certificate_prepared === 'no',
     },
     {
@@ -34,6 +35,7 @@ export const servePlaintiffConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "E-service through the court's e-filing system is the fastest and creates an automatic record.",
+      acknowledgeLabel: "I'll use e-service to create an automatic proof-of-service record",
       showIf: (answers) => answers.service_method === 'e_service',
     },
     {
@@ -46,6 +48,7 @@ export const servePlaintiffConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After service, the plaintiff has the burden to prove their case. Keep your certificate of service and any delivery receipts.',
+      acknowledgeLabel: "I'll keep all service records — the burden of proof is now on the plaintiff",
     },
   ],
 

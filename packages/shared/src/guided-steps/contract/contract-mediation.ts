@@ -21,6 +21,7 @@ export const contractMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Even without formal mediation, you can still negotiate a settlement directly with the defendant or their attorney at any time. Many contract cases settle through informal discussions.',
+      acknowledgeLabel: 'Got it — I\'ll negotiate directly →',
       showIf: (answers) => answers.mediation_status === 'no_mediation',
     },
     {
@@ -34,6 +35,7 @@ export const contractMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Choose a mediator experienced in contract or commercial disputes. Many counties have mediation centers with affordable rates. Both sides must agree on the mediator. The court may also appoint one if you cannot agree.',
+      acknowledgeLabel: 'Got it — I\'ll find a mediator →',
       showIf: (answers) => answers.mediator_selected === 'no',
     },
     {
@@ -52,6 +54,7 @@ export const contractMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your mediation demand should include: the contract amount, payments made, cost to hire a replacement to finish the work, lost profits, incidental damages, and attorney fees if the contract allows them. Organize everything into a clear package with supporting documents.',
+      acknowledgeLabel: 'Got it — I\'ll prepare my demand package →',
       showIf: (answers) => answers.settlement_demand_prepared === 'no' || answers.settlement_demand_prepared === 'working_on_it',
     },
     {
@@ -69,6 +72,7 @@ export const contractMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before mediation, know your bottom line. Consider: your total damages, the strength of your evidence, the cost of going to trial, how long trial would take, and whether the defendant has the ability to pay a judgment.',
+      acknowledgeLabel: 'Got it — I\'ll determine my bottom line →',
       showIf: (answers) => answers.minimum_settlement === 'no',
     },
     {
@@ -87,6 +91,7 @@ export const contractMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Even after an impasse, settlements sometimes happen in the days following mediation. The mediator may follow up with both sides. If no settlement is reached, prepare for trial.',
+      acknowledgeLabel: 'Understood — I\'ll prepare for trial →',
       showIf: (answers) => answers.mediation_outcome === 'impasse',
     },
   ],

@@ -22,6 +22,7 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'JP Court is informal. No jury unless requested. The judge may ask questions directly. You can present evidence without formal rules. Keep it simple and organized — judges appreciate brevity.',
+      acknowledgeLabel: "I understand JP Court is informal — I'll keep it simple",
       showIf: (answers) => answers.which_court === 'jp',
     },
     {
@@ -29,6 +30,7 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'County Court is more formal than JP Court. Rules of evidence apply. You may have a jury. Dress professionally, address the judge as "Your Honor," and be prepared to formally introduce each piece of evidence.',
+      acknowledgeLabel: "I understand County Court uses formal rules of evidence",
       showIf: (answers) => answers.which_court === 'county',
     },
     {
@@ -36,6 +38,7 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'District Court is the most formal. Strict rules of evidence and procedure apply. Jury trials are common. You will need to formally offer each exhibit, lay foundation for evidence, and follow courtroom protocol precisely.',
+      acknowledgeLabel: "I understand District Court has strict procedures",
       showIf: (answers) => answers.which_court === 'district',
     },
     {
@@ -43,6 +46,7 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check your court paperwork — the court name is on your citation or petition. JP Courts handle claims up to $20,000. County Courts handle claims up to $250,000. District Courts handle claims over $250,000.',
+      acknowledgeLabel: "I'll check my court paperwork for the court name",
       showIf: (answers) => answers.which_court === 'unsure',
     },
     {
@@ -50,24 +54,36 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TRIAL STRUCTURE:\n1. Opening statements\n2. YOUR case (you\'re the plaintiff):\n   - Present the contract (Exhibit A)\n   - Testify about what was promised\n   - Show proof of breach (emails, photos, invoices)\n   - Present your damages calculation\n3. Defendant\'s case\n4. Closing arguments\n5. Judge/jury decides',
+      acknowledgeLabel: "I understand the trial flow",
     },
     {
       id: 'sample_testimony',
       type: 'info',
       prompt:
         'SAMPLE TESTIMONY:\n"Your Honor, on [date], I entered into a [written/oral] contract with the defendant for [describe]. The contract required [them to do X]. I performed my obligations by [paying/delivering/etc.]. The defendant breached by [describe breach]. As a result, I suffered damages of $[amount], consisting of [itemize]."',
+      acknowledgeLabel: "I'll use this structure for my testimony",
     },
     {
       id: 'what_not_to_say',
       type: 'info',
       prompt:
         "WHAT NOT TO SAY:\nDon't say \"they lied to me\" unless you're also claiming fraud. Don't discuss the fairness of the contract — courts enforce contracts as written, even if they seem unfair. Don't exaggerate damages — present documented amounts only.",
+      acknowledgeLabel: "I'll avoid these mistakes at trial",
     },
     {
       id: 'what_to_bring',
-      type: 'info',
-      prompt:
-        'WHAT TO BRING TO COURT:\n• 3 copies of everything (you, judge, defendant)\n• The original contract (or best copy available)\n• All communications (emails, texts, letters)\n• Proof of your performance (receipts, photos, delivery confirmations)\n• Proof of breach (missed deadlines, defective work, non-payment)\n• Damages calculation with supporting documents (invoices, estimates, bank statements)\n• Timeline of events (written out)\n• Witness list (if any)',
+      type: 'multi_select',
+      prompt: 'Which of these have you prepared for court?',
+      options: [
+        { value: 'contract_copies', label: '3 copies of the original contract (you, judge, defendant)' },
+        { value: 'communications', label: 'All communications (emails, texts, letters)' },
+        { value: 'performance_proof', label: 'Proof of your performance (receipts, photos, confirmations)' },
+        { value: 'breach_proof', label: 'Proof of breach (missed deadlines, defective work, non-payment)' },
+        { value: 'damages_docs', label: 'Damages calculation with supporting documents' },
+        { value: 'timeline', label: 'Written timeline of events' },
+        { value: 'witness_list', label: 'Witness list (if applicable)' },
+      ],
+      noneLabel: "Haven't gathered these yet",
     },
   ],
 
@@ -91,15 +107,17 @@ export const contractCourtroomGuideConfig: GuidedStepConfig = {
       })
     }
 
-    items.push({
-      status: 'info',
-      text: 'Prepare 3 copies of all evidence (you, judge, defendant).',
-    })
-
-    items.push({
-      status: 'needed',
-      text: 'Organize the contract, all communications, and proof of breach chronologically.',
-    })
+    const bringAnswer = answers.what_to_bring
+    if (bringAnswer && bringAnswer !== 'none') {
+      const brought = new Set(bringAnswer.split(','))
+      if (brought.size >= 6) {
+        items.push({ status: 'done', text: 'Court materials fully prepared.' })
+      } else {
+        items.push({ status: 'needed', text: `Gather remaining court materials — ${7 - brought.size} item${7 - brought.size > 1 ? 's' : ''} not yet checked off.` })
+      }
+    } else {
+      items.push({ status: 'needed', text: 'Prepare court materials: 3 copies of contract, communications, proof of performance and breach, damages documents, and timeline.' })
+    }
 
     items.push({
       status: 'needed',

@@ -24,6 +24,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A boundary line agreement should be in writing, signed by both parties, and recorded with the county clerk. Consider having a surveyor mark the agreed line.',
+      acknowledgeLabel: 'Got it — I\'ll get a surveyor →',
       showIf: (answers) => answers.ideal_resolution === 'boundary_agreement',
     },
     {
@@ -31,6 +32,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'An easement agreement should describe the exact area, permitted uses, maintenance responsibilities, and duration. Record it with the county clerk so it binds future owners.',
+      acknowledgeLabel: 'Got it — I\'ll include all easement terms →',
       showIf: (answers) => answers.ideal_resolution === 'easement_agreement',
     },
     {
@@ -50,6 +52,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Gathering evidence before negotiating strengthens your position. Consider getting a property survey, taking photos of the disputed area, and pulling your deed from the county records.',
+      acknowledgeLabel: 'Got it — I\'ll gather evidence first →',
       showIf: (answers) => answers.evidence_gathered === 'none',
     },
     {
@@ -68,6 +71,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party is hostile, consider communicating only in writing (letters or email) to create a record. You may also want to propose mediation through a neutral third party.',
+      acknowledgeLabel: 'Got it — I\'ll communicate in writing →',
       showIf: (answers) => answers.prior_communications === 'hostile',
     },
     {
@@ -80,6 +84,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Mediation uses a neutral third party to help both sides reach a voluntary agreement. Many Texas courts require mediation before trial in property disputes. It is typically faster and less expensive than going to trial.',
+      acknowledgeLabel: 'Got it — I\'ll propose mediation →',
       showIf: (answers) => answers.open_to_mediation === 'yes',
     },
     {
@@ -92,6 +97,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Put any agreement in writing immediately. For property matters, the agreement should be signed, notarized, and recorded with the county clerk to be enforceable against future owners.',
+      acknowledgeLabel: 'Great — I\'ll get it in writing →',
       showIf: (answers) => answers.agreement_reached === 'yes',
     },
     {
@@ -99,6 +105,7 @@ export const propertyNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If negotiation fails, the next step is to file a petition with the court. We will guide you through preparing and filing your property dispute petition.',
+      acknowledgeLabel: 'Understood — I\'ll prepare to file →',
       showIf: (answers) => answers.agreement_reached === 'no',
     },
   ],

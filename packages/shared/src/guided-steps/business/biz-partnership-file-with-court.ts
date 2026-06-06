@@ -16,6 +16,7 @@ export const bizPartnershipFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Start with the partnership agreement: it may require a specific county, court, arbitration, or pre-suit notice. If no clause controls, file in a court connected to the business, the defendant, or the events. Partnership disputes often need district court if they involve injunctions, accounting, receivership, or ownership rights.',
+      acknowledgeLabel: "I'll review the partnership agreement for venue and arbitration clauses first",
     },
     {
       id: 'have_filing_fee',
@@ -28,6 +29,7 @@ export const bizPartnershipFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you cannot afford filing costs, ask whether a Statement of Inability to Afford Payment of Court Costs is available. Business-related fee waivers may require extra explanation about personal and business resources.',
+      acknowledgeLabel: "I'll ask the clerk about a fee waiver and prepare the required financial documentation",
       showIf: (answers) => answers.have_filing_fee === 'no',
     },
     {
@@ -45,6 +47,7 @@ export const bizPartnershipFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Online filing checklist:\n1. Go to eFileTexas.gov and choose a service provider\n2. Create an account or sign in\n3. Select the correct court and civil case type\n4. Upload the petition, civil cover sheet, and exhibits as PDFs\n5. Pay the filing fee or submit any fee-waiver request\n6. Save the envelope number, filing receipt, and clerk acceptance email',
+      acknowledgeLabel: "I'll follow this checklist and save the envelope number and clerk receipt",
       showIf: (answers) => answers.filing_method === 'online',
     },
     {
@@ -59,6 +62,7 @@ export const bizPartnershipFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After filing, each defendant must be served. Confirm whether you are serving an individual partner, a company, or a registered agent, then prepare copies for service.',
+      acknowledgeLabel: "I'll confirm who I'm serving and prepare the service copies",
     },
   ],
 

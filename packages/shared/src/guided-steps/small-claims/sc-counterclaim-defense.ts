@@ -12,6 +12,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHAT IS A COUNTERCLAIM?\nA counterclaim is the defendant suing YOU back in the same case. Instead of just defending against your claim, they are saying you owe them money too. The judge will hear both sides and decide both claims at the same hearing.',
+      acknowledgeLabel: 'I understand what a counterclaim is →',
     },
 
     // Dispute type
@@ -34,6 +35,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COMMON LANDLORD COUNTERCLAIM:\nIf you sued for your security deposit, the landlord may counterclaim for damages beyond the deposit — unpaid rent, cleaning costs, or repair costs.\n\nYOUR DEFENSE: Show the unit was returned in reasonable condition (move-in/move-out photos), that damage was normal wear and tear, and that the landlord\'s repair estimates are inflated.',
+      acknowledgeLabel: 'I know how to defend against this →',
       showIf: (answers) => answers.dispute_type === 'security_deposit',
     },
 
@@ -42,6 +44,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COMMON CONTRACT COUNTERCLAIM:\nThe other party may claim YOU breached the contract first, or that your breach caused them damages.\n\nYOUR DEFENSE: Show you performed your obligations under the contract, that any issues were minor or caused by the other party, and that their claimed damages are exaggerated or unrelated.',
+      acknowledgeLabel: 'I know how to defend against this →',
       showIf: (answers) => answers.dispute_type === 'contract',
     },
 
@@ -50,6 +53,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COMMON CAR ACCIDENT COUNTERCLAIM:\nThe other driver may claim YOU caused the accident and that their vehicle damage or injuries are your fault.\n\nYOUR DEFENSE: Present the police report, photos of the scene, witness statements, and any evidence showing the other driver was at fault (traffic violations, distracted driving, etc.).',
+      acknowledgeLabel: 'I know how to defend against this →',
       showIf: (answers) => answers.dispute_type === 'car_accident',
     },
 
@@ -58,6 +62,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COMMON PROPERTY DAMAGE COUNTERCLAIM:\nThe other party may claim your property caused damage to theirs, or that you are responsible for the situation.\n\nYOUR DEFENSE: Document the condition of all property involved, gather repair estimates from independent sources, and show the other party\'s negligence or responsibility.',
+      acknowledgeLabel: 'I know how to defend against this →',
       showIf: (answers) => answers.dispute_type === 'property_damage',
     },
 
@@ -67,6 +72,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO RESPOND TO A COUNTERCLAIM:\n1. Deny the allegations — explain why their claims are wrong\n2. Present YOUR evidence — show why your original claim is stronger\n3. Challenge their evidence — point out missing proof, exaggerated amounts, or inconsistencies\n4. Stay focused — address each specific allegation, don\'t get sidetracked\n5. Let the judge know you are prepared to address both your claim AND the counterclaim',
+      acknowledgeLabel: 'I know how to respond →',
     },
 
     // Have evidence for defense
@@ -81,6 +87,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GATHER YOUR DEFENSE EVIDENCE:\n- Documents that disprove their claims (photos, texts, emails, receipts)\n- Evidence that shows your side of the story\n- Proof that their damages are exaggerated or fabricated\n- Witnesses who can support your version of events\n- Any written agreements that contradict their counterclaim',
+      acknowledgeLabel: 'I will gather my defense evidence →',
       showIf: (answers) => answers.have_defense_evidence === 'no',
     },
 
@@ -90,6 +97,7 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'OFFSET — HOW THE JUDGE DECIDES:\nIf BOTH sides have valid claims, the judge may subtract one from the other. For example:\n- You prove they owe you $3,000\n- They prove you owe them $1,000\n- The judge awards you the difference: $2,000\n\nThis is why it\'s important to prove your claim is larger than theirs.',
+      acknowledgeLabel: 'I understand how offsets work →',
     },
 
     // Preparing for both sides
@@ -101,10 +109,19 @@ export const scCounterclaimDefenseConfig: GuidedStepConfig = {
     },
 
     {
-      id: 'dual_preparation_info',
+      id: 'dual_preparation_organize',
       type: 'info',
       prompt:
-        'PREPARING FOR BOTH SIDES OF THE CASE:\n\n1. Organize your evidence into two groups:\n   - YOUR CLAIM: evidence that proves they owe you\n   - YOUR DEFENSE: evidence that disproves what they claim you owe\n\n2. Practice your presentation:\n   - First: present your claim clearly and with evidence\n   - Second: respond to each point in their counterclaim\n\n3. Know your numbers:\n   - Your total damages\n   - Why their claimed damages are wrong or inflated\n   - The net amount the judge should award you',
+        'ORGANIZE YOUR EVIDENCE INTO TWO GROUPS:\n\n- YOUR CLAIM folder: all evidence proving they owe you money\n- YOUR DEFENSE folder: all evidence disproving what they claim you owe\n\nKeep them separate so you can hand the judge the right documents at the right time.',
+      acknowledgeLabel: 'I will organize my evidence into two folders →',
+      showIf: (answers) => answers.prepared_for_both === 'no',
+    },
+    {
+      id: 'dual_preparation_numbers',
+      type: 'info',
+      prompt:
+        'KNOW YOUR NUMBERS BEFORE THE HEARING:\n\n- Your total damages (what they owe you)\n- Why their claimed damages are wrong or inflated\n- The net amount the judge should award you (your claim minus any valid portion of theirs)\n\nPresent your claim first, then respond to each point in their counterclaim.',
+      acknowledgeLabel: 'I know my numbers and presentation order →',
       showIf: (answers) => answers.prepared_for_both === 'no',
     },
 

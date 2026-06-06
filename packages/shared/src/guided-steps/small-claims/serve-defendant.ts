@@ -23,6 +23,7 @@ export function createServeDefendantConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Check public records, social media, or use a skip tracing service.',
+        acknowledgeLabel: "I'll locate the defendant's address before proceeding →",
         showIf: (answers) => answers.know_defendant_address === 'no',
       },
       {
@@ -55,6 +56,7 @@ export function createServeDefendantConfig(state?: string): GuidedStepConfig {
           : isNY
           ? "In New York Small Claims Court, the clerk handles service — no process server needed. After you file and pay the fee, the clerk mails the notice to the defendant by certified mail at the address you provide. Service must be completed at least 5 days before your hearing. If certified mail is returned undelivered, the court will advise on next steps."
           : 'Certified mail is cheapest but can be refused. A constable or process server is more reliable.',
+        acknowledgeLabel: "I'll choose the most reliable service method for my state →",
         showIf: (answers) => answers.service_method === 'not_sure',
       },
       {
@@ -76,6 +78,7 @@ export function createServeDefendantConfig(state?: string): GuidedStepConfig {
           : isNY
           ? "If certified mail is returned undelivered, ask the court clerk about re-service at a new address or alternative service options."
           : "If the defendant can't be found after diligent effort, ask the court about alternative service (posting on the courthouse door or publication).",
+        acknowledgeLabel: "I know my options if the defendant cannot be found →",
       },
     ],
 

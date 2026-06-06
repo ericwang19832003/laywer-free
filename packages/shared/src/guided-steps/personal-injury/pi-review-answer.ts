@@ -23,6 +23,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'Save the answer before continuing. The strongest next steps come from the actual document: what they admitted, what they denied, and whether they sued you back.',
+        acknowledgeLabel: "I'll save it first →",
         showIf: (answers) => answers.answer_uploaded === 'no',
       },
       {
@@ -41,6 +42,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'A general denial means the defendant denies everything in your petition. This is common and means you\'ll need to prove each element of your claim at trial.',
+        acknowledgeLabel: 'Got it — I\'ll prove each element →',
         showIf: (answers) => answers.denial_type === 'general',
       },
       {
@@ -48,6 +50,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'Specific denials mean the defendant only disputes certain facts. Look carefully at what they admit vs. deny — admissions can simplify your case.',
+        acknowledgeLabel: 'I\'ll note the admissions →',
         showIf: (answers) => answers.denial_type === 'specific',
       },
       {
@@ -55,6 +58,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'Look at the first page of the answer document. If it says "Defendant generally denies each and every allegation," that\'s a general denial. If it addresses specific paragraphs of your petition, those are specific denials.',
+        acknowledgeLabel: 'I\'ll check the first page →',
         showIf: (answers) => answers.denial_type === 'not_sure',
       },
       {
@@ -86,6 +90,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'Contributory negligence means they claim you were partly at fault. In Texas, you can still recover damages as long as you\'re less than 51% at fault, but your award is reduced by your percentage of fault.',
+        acknowledgeLabel: 'I understand comparative fault →',
         showIf: (answers) => answers.which_defenses === 'contributory_negligence',
       },
       {
@@ -99,6 +104,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'A counterclaim means the defendant is suing you back. You generally have 30 days to respond to the counterclaim. Consider consulting an attorney if the counterclaim involves significant damages.',
+        acknowledgeLabel: 'I\'ll respond within 30 days →',
         showIf: (answers) => answers.counterclaim === 'yes',
       },
       {
@@ -117,6 +123,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         type: 'info',
         prompt:
           'Special exceptions challenge the form of your petition — they\'re saying your petition isn\'t specific enough. You may need to amend your petition to address these. The court will typically give you a chance to fix any issues.',
+        acknowledgeLabel: 'I\'ll amend the petition →',
         showIf: (answers) => answers.special_exceptions === 'yes',
       },
       {
@@ -131,6 +138,7 @@ export function createPiReviewAnswerConfig(piSubType?: string | null): GuidedSte
         prompt: isPropertyDamage
           ? 'Make this a discovery focus. Ask for every estimate, appraisal, photo, inspection, repair invoice, insurer note, and factual basis they rely on to dispute your property damage amount.'
           : 'Make this a discovery focus. Ask for the records, experts, photos, witness statements, and factual basis they rely on to dispute causation or damages.',
+        acknowledgeLabel: 'I\'ll target this in discovery →',
         showIf: (answers) => answers.damages_disputed === 'yes',
       },
     ],

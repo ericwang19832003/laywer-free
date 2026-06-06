@@ -29,6 +29,7 @@ export const otherPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Always get settlement agreements in writing. A verbal agreement is hard to enforce. The agreement should spell out exactly what each side will do and by when.',
+      acknowledgeLabel: "I'll get the settlement agreement in writing and signed before proceeding",
       showIf: (answers) =>
         answers.resolution_type === 'settlement' && answers.settlement_written === 'no',
     },
@@ -44,6 +45,7 @@ export const otherPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other side is not complying, you may need to file a motion to enforce the judgment or settlement. For money judgments, options include wage garnishment, bank levies, or property liens. Contact the court clerk about enforcement procedures.',
+      acknowledgeLabel: "I'll pursue enforcement through garnishment, levy, or lien as appropriate",
       showIf: (answers) => answers.enforcement_needed === 'no',
     },
     {
@@ -57,6 +59,7 @@ export const otherPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Appeals must be filed within a strict deadline (often 30 days from the judgment). An appeal is not a new trial — it argues that the court made a legal error. Consider consulting an attorney for appeals as they have complex procedural rules.',
+      acknowledgeLabel: "I understand the appeal deadline and will act within 30 days of judgment",
       showIf: (answers) =>
         answers.resolution_type === 'judgment_lost' && answers.appeal_considered === 'yes',
     },
@@ -70,6 +73,7 @@ export const otherPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Common post-resolution deadlines include: payment deadlines in settlements, appeal deadlines, lien recording deadlines, and compliance reporting dates. Calendar all remaining deadlines immediately.',
+      acknowledgeLabel: "I'll calendar all post-resolution deadlines immediately",
       showIf: (answers) => answers.know_deadlines === 'no',
     },
   ],

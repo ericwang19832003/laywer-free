@@ -60,6 +60,7 @@ export const trialPrepChecklistConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Address the judge as 'Your Honor.' Stand when speaking. Don't interrupt. Dress professionally.",
+      acknowledgeLabel: "I'll follow courtroom etiquette",
     },
   ],
 

@@ -21,6 +21,7 @@ export const finalOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A proposed final order should include: property division, custody schedule, child support amounts, and any other terms. Bring it to the hearing for the judge to review.',
+      acknowledgeLabel: "I'll draft a proposed final order covering all required terms",
       showIf: (answers) => answers.proposed_order_prepared === 'no',
     },
     {
@@ -33,6 +34,7 @@ export const finalOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Bring: tax returns, pay stubs, bank statements, property valuations, and debt statements.',
+      acknowledgeLabel: "I'll gather all required financial documents before the hearing",
       showIf: (answers) => answers.financial_docs_ready === 'no',
     },
     {
@@ -40,12 +42,14 @@ export const finalOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'At the final hearing, both parties present their case. The judge reviews evidence and issues final orders. These orders are legally binding.',
+      acknowledgeLabel: "I understand what happens at the final hearing",
     },
     {
       id: 'after_order_info',
       type: 'info',
       prompt:
         'After the order: follow it exactly. If circumstances change, you can file a modification \u2014 but only for child-related matters, not property division.',
+      acknowledgeLabel: "I'll comply with the final order and know I can only modify child-related terms",
     },
   ],
 

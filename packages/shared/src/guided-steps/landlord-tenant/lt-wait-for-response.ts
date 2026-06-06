@@ -18,6 +18,7 @@ export const ltWaitForResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Make sure service is complete before counting the response deadline. Without proper service, the court cannot proceed.',
+      acknowledgeLabel: "I understand — I'll complete service before counting the response deadline",
       showIf: (answers) => answers.service_confirmed === 'no',
     },
     {
@@ -32,6 +33,7 @@ export const ltWaitForResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Eviction cases in JP court: the hearing is typically set 10-21 days after the citation is issued. Other LT cases: the answer deadline is the first Monday after 20 days from service. Mark this date on your calendar.',
+      acknowledgeLabel: "I understand the deadline rules — I'll calculate and calendar the response deadline now",
       showIf: (answers) => answers.answer_deadline_known === 'no',
     },
     {
@@ -46,6 +48,7 @@ export const ltWaitForResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check the court docket regularly using your cause number. Look for an answer, motions, or counterclaims. You can also call the clerk\'s office to ask about filings.',
+      acknowledgeLabel: "I understand — I'll monitor the court docket using my cause number for any new filings",
       showIf: (answers) => answers.checked_docket === 'no',
     },
     {
@@ -63,6 +66,7 @@ export const ltWaitForResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party did not respond by the deadline, you may be able to request a default judgment. For evictions in JP court, the judge may proceed on the scheduled hearing date even without a formal answer.',
+      acknowledgeLabel: "I understand — I'll request a default judgment or appear at the hearing to proceed without their answer",
       showIf: (answers) => answers.response_status === 'deadline_passed',
     },
   ],

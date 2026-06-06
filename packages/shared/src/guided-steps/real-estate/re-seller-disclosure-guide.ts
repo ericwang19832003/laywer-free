@@ -24,6 +24,7 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FAILURE TO PROVIDE DISCLOSURE (Section 5.008):\nTexas law requires sellers to deliver a written disclosure notice to the buyer BEFORE an executed contract becomes binding. If the seller never provided one:\n\n- You may have grounds to rescind (cancel) the sale\n- The seller is liable for any defects they knew about\n- This strengthens a DTPA claim because the seller actively concealed information\n\nExceptions: The disclosure requirement does NOT apply to foreclosure sales, court-ordered sales, sales by fiduciaries (executors, trustees), or new construction from a builder.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.received_disclosure === 'no_disclosure',
     },
 
@@ -49,6 +50,7 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHAT SELLERS MUST DISCLOSE (Section 5.008):\n\nThe Texas Seller\'s Disclosure Notice covers:\n- Known defects in walls, foundation, roof, fences, driveways\n- Flooding, drainage, or water penetration problems\n- Previous structural repairs or modifications\n- Conditions in the plumbing, electrical, and HVAC systems\n- Termite damage or treatment history\n- Environmental hazards (asbestos, lead paint, underground storage tanks)\n- Whether the property is in a flood zone or has flooded before\n- HOA membership and fees\n- Lawsuits or code violations affecting the property\n\nKey: The seller must disclose what they KNOW. They are not required to inspect or discover unknown defects. But if evidence shows they knew and lied, that is fraud.',
+      acknowledgeLabel: 'Got it →',
     },
 
     // Evidence of seller knowledge
@@ -64,6 +66,7 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'EVIDENCE OF SELLER KNOWLEDGE IS CRITICAL:\nThis is the strongest element of your case. Gather:\n- Prior repair invoices or estimates the seller obtained\n- Insurance claims the seller filed for the same issue\n- Building permits for repairs (check with the city)\n- Testimony from neighbors, contractors, or prior inspectors\n- The seller\'s own statements in emails, texts, or conversations\n- Prior listing photos that show the defect was concealed (fresh paint over water stains, etc.)\n- MLS listing history showing the property was previously listed with different disclosures',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.seller_knew === 'yes',
     },
 
@@ -80,6 +83,7 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'YOUR INSPECTION REPORT:\n- If the inspector found the defect: The seller may argue you knew about it and accepted the risk. However, if the seller actively concealed the defect (e.g., covered it up before inspection), this argument fails.\n- If the inspector missed it: This does not excuse the seller from disclosing what they knew. You may also have a negligence claim against the inspector.\n\nThe 7-day option period is your right to inspect — it does NOT eliminate the seller\'s duty to disclose. A seller cannot hide behind "you should have caught it."',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.had_inspection === 'yes',
     },
     {
@@ -87,6 +91,7 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'NOT HAVING AN INSPECTION:\nThe seller may argue you failed to inspect. However:\n- Texas law places the disclosure obligation on the SELLER, not the buyer\n- A buyer\'s failure to inspect does not excuse the seller\'s duty to disclose known defects\n- If the defect was hidden or not discoverable by a reasonable inspection, the seller is still liable\n\nFor your current case, focus on proving what the seller knew and failed to disclose.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.had_inspection === 'no',
     },
 
@@ -109,6 +114,7 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CALCULATING NON-DISCLOSURE DAMAGES:\n\n1. Cost to cure: Get 2-3 repair estimates from licensed contractors. This is the most straightforward measure.\n2. Diminished value: The difference between what you paid and what the property is actually worth with the defect. You may need an appraisal.\n3. Both: In some cases, even after repair, the property value is still reduced (e.g., foundation repair history reduces resale value).\n4. Rescission: Canceling the sale entirely — the seller takes back the property and refunds your purchase price. Courts rarely grant this unless the defect is severe and repair is impractical.',
+      acknowledgeLabel: 'Got it →',
     },
 
     // DTPA claim
@@ -117,14 +123,27 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DTPA CLAIM FOR TREBLE DAMAGES (Section 17.50):\n\nIf the seller\'s non-disclosure was knowing or intentional, you may have a claim under the Texas Deceptive Trade Practices Act (DTPA). The DTPA allows:\n\n- Actual damages (cost to cure + diminished value)\n- Up to THREE TIMES actual damages if the seller acted knowingly\n- Attorney\'s fees\n\nTo qualify for treble damages, you must prove:\n1. The seller made a false representation or failed to disclose a known defect\n2. The seller acted "knowingly" — meaning they were aware the information was false or misleading\n3. You relied on the false representation or non-disclosure\n4. You suffered damages as a result\n\nIMPORTANT: You must send a DTPA demand letter at least 60 days before filing suit (Section 17.505). The letter must describe your complaint and the amount of damages.',
+      acknowledgeLabel: 'Got it →',
     },
 
     // Evidence checklist
     {
       id: 'evidence_checklist',
-      type: 'info',
-      prompt:
-        'EVIDENCE YOU NEED:\n\n- The Seller\'s Disclosure Notice (or proof it was never provided)\n- Your inspection report (if you had one)\n- Repair estimates from 2-3 licensed contractors\n- Photos and videos of the defect\n- Evidence the seller knew (prior repair invoices, insurance claims, permits, neighbor statements)\n- Your purchase agreement showing the price you paid\n- An appraisal showing current value with the defect (if claiming diminished value)\n- Communications with the seller about the property condition\n- The listing description and photos (if they misrepresented the condition)',
+      type: 'multi_select',
+      prompt: 'Which of these evidence items do you already have?',
+      helpText: 'Check everything you currently have. This tells you what still needs to be gathered before you can make a demand.',
+      noneLabel: "I don't have any of these yet — I need to gather everything",
+      options: [
+        { value: 'disclosure_notice', label: "Seller's Disclosure Notice (or written proof none was provided)" },
+        { value: 'inspection_report', label: 'Inspection report from before closing' },
+        { value: 'repair_estimates', label: 'Repair estimates from 2–3 licensed contractors' },
+        { value: 'photos_video', label: 'Photos and videos of the defect' },
+        { value: 'seller_knowledge_docs', label: 'Evidence seller knew (repair invoices, insurance claims, building permits, neighbor statements)' },
+        { value: 'purchase_agreement', label: 'Purchase agreement showing the price you paid' },
+        { value: 'appraisal', label: 'Appraisal showing current value with the defect (for diminished value claims)' },
+        { value: 'seller_communications', label: 'Communications with the seller about property condition' },
+        { value: 'listing_materials', label: 'Listing description and photos (if condition was misrepresented)' },
+      ],
     },
   ],
 
@@ -221,10 +240,43 @@ export const reSellerDisclosureGuideConfig: GuidedStepConfig = {
       })
     }
 
-    items.push({
-      status: 'needed',
-      text: 'Get 2-3 repair estimates from licensed contractors to document your damages.',
-    })
+    // Evidence checklist
+    if (answers.evidence_checklist) {
+      const have = new Set(answers.evidence_checklist === 'none' ? [] : answers.evidence_checklist.split(','))
+      const allItems = [
+        'disclosure_notice',
+        'inspection_report',
+        'repair_estimates',
+        'photos_video',
+        'seller_knowledge_docs',
+        'purchase_agreement',
+        'appraisal',
+        'seller_communications',
+        'listing_materials',
+      ]
+      const missing = allItems.filter((v) => !have.has(v))
+      if (have.has('repair_estimates')) {
+        items.push({ status: 'done', text: 'Repair estimates obtained — use these to document cost-to-cure damages.' })
+      } else {
+        items.push({ status: 'needed', text: 'Get 2–3 repair estimates from licensed contractors to document your damages.' })
+      }
+      if (have.has('seller_knowledge_docs')) {
+        items.push({ status: 'done', text: 'Evidence of seller knowledge gathered — strongest element for a DTPA treble damages claim.' })
+      } else {
+        items.push({ status: 'needed', text: 'Gather evidence the seller knew: check for prior repair invoices, insurance claims, building permits, and neighbor statements.' })
+      }
+      if (missing.length > 0 && answers.evidence_checklist !== 'none') {
+        items.push({ status: 'needed', text: `Still needed: ${missing.length} evidence item${missing.length !== 1 ? 's' : ''} not yet gathered.` })
+      }
+      if (answers.evidence_checklist === 'none') {
+        items.push({ status: 'needed', text: 'No evidence gathered yet. Start with contractor estimates and any prior repair records from the seller.' })
+      }
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Get 2-3 repair estimates from licensed contractors to document your damages.',
+      })
+    }
 
     items.push({
       status: 'info',

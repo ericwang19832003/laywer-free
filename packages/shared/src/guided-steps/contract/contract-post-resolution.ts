@@ -29,6 +29,7 @@ export const contractPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Always put settlement agreements in writing. Include: the amount, payment schedule, deadlines, what happens if the other party defaults, and whether either side releases future claims. Both parties must sign.',
+      acknowledgeLabel: "I'll get the settlement agreement in writing with both signatures →",
       showIf: (answers) => answers.settlement_in_writing === 'no',
     },
     {
@@ -47,6 +48,7 @@ export const contractPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party has not paid, you can enforce the judgment through: wage garnishment, bank account levy, property lien, or a writ of execution. Start by sending a post-judgment demand letter with a final deadline.',
+      acknowledgeLabel: "I'll send a post-judgment demand letter and pursue enforcement tools →",
       showIf: (answers) => answers.payment_received === 'none' || answers.payment_received === 'partial',
     },
     {
@@ -60,6 +62,7 @@ export const contractPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Appeals must typically be filed within 30 days of the judgment. You must show the court made a legal error. Simply disagreeing with the outcome is not enough for a successful appeal.',
+      acknowledgeLabel: "I understand appeals require a legal error, not just disagreement with the outcome →",
       showIf: (answers) => answers.considering_appeal === 'yes',
     },
     {
@@ -67,6 +70,7 @@ export const contractPostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Settlement and judgment proceeds from contract disputes may have tax implications. Amounts that compensate you for lost income are generally taxable. Consult a tax professional if you received a significant recovery.',
+      acknowledgeLabel: "I'll consult a tax professional about the tax treatment of my recovery →",
     },
   ],
 

@@ -16,6 +16,7 @@ export const contractDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party is a business, check the Secretary of State website for their registered agent address. For individuals, you can try public records, social media, or their last known address from the contract.',
+      acknowledgeLabel: 'Got it — I\'ll look up their address →',
       showIf: (answers) => answers.know_recipient_address === 'no',
     },
     {
@@ -28,6 +29,7 @@ export const contractDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Review your contract and list each obligation the other party failed to perform. Reference specific sections, dates, and deliverables. The more specific you are, the stronger your demand.',
+      acknowledgeLabel: 'Got it — I\'ll review the contract →',
       showIf: (answers) => answers.breach_identified === 'no',
     },
     {
@@ -40,6 +42,7 @@ export const contractDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Include all damages: the amount paid under the contract, the cost to hire someone else to finish the work, lost profits, and any other out-of-pocket expenses caused by the breach.',
+      acknowledgeLabel: 'Got it — I\'ll calculate my total damages →',
       showIf: (answers) => answers.damages_calculated === 'no',
     },
     {
@@ -58,6 +61,7 @@ export const contractDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         '10-14 days is typical for demand letters. 30 days is more generous and may be appropriate if the other party is a large company. The deadline should be reasonable but firm.',
+      acknowledgeLabel: 'Got it — I\'ll set a firm deadline →',
       showIf: (answers) => answers.deadline_set === 'not_sure',
     },
     {
@@ -76,6 +80,7 @@ export const contractDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Certified mail with return receipt is the gold standard because it creates proof the other party received your letter. Sending by both email and certified mail is even better.',
+      acknowledgeLabel: 'Got it — I\'ll use certified mail →',
       showIf: (answers) => answers.sending_method === 'not_sure' || answers.sending_method === 'email_only',
     },
   ],

@@ -36,6 +36,7 @@ export const piInsuranceCommunicationPropertyConfig: GuidedStepConfig = {
         'You are NOT required to give a recorded statement to the other party\'s insurance company. You can decline and say "I prefer to communicate in writing." Stick to basic facts about the property damage only.',
       helpText:
         'Your own insurance policy may require cooperation, but be cautious about what you say.',
+      acknowledgeLabel: 'I understand the risks',
       showIf: (answers) => answers.recorded_statement_requested === 'yes',
     },
     {
@@ -52,6 +53,7 @@ export const piInsuranceCommunicationPropertyConfig: GuidedStepConfig = {
         'Early settlement offers are almost always too low. Do not accept any settlement before getting complete repair estimates and understanding the full scope of damage (including diminished value and loss of use). Once you accept, you cannot go back and ask for more.',
       helpText:
         'Get multiple repair estimates and document all costs before agreeing to any amount.',
+      acknowledgeLabel: 'I will not accept early offers',
       showIf: (answers) => answers.offered_quick_settlement === 'yes',
     },
     {
@@ -82,6 +84,7 @@ export const piInsuranceCommunicationPropertyConfig: GuidedStepConfig = {
         'Watch out for common adjuster tactics: offering a lowball settlement before you have full repair estimates, pressuring you to use their preferred repair shop, disputing the scope of damage, and delaying responses. Get your own independent estimates, document everything, and never rush to accept.',
       helpText:
         'You can always say "I need time to think about it" before agreeing to anything.',
+      acknowledgeLabel: 'I understand these tactics',
     },
   ],
 

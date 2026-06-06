@@ -9,6 +9,7 @@ export const debtExemptionClaimConfig: GuidedStepConfig = {
     {
       id: 'protections_intro',
       type: 'info',
+      acknowledgeLabel: 'Got it — let\'s protect my property →',
       prompt:
         'Texas has some of the STRONGEST debtor protections in the country. Even if you lost your case, most of your property is protected by law. You must act within 14 days of receiving notice of collection.',
     },
@@ -33,15 +34,24 @@ export const debtExemptionClaimConfig: GuidedStepConfig = {
     {
       id: 'wage_garnishment_info',
       type: 'info',
+      acknowledgeLabel: 'Great — I\'ll report this →',
       prompt:
         'GOOD NEWS \u2014 Texas PROHIBITS wage garnishment for consumer debt. Your employer cannot legally garnish your wages for this type of debt. If they try, this is illegal and you should inform the court immediately.',
       showIf: (answers) => answers.collection_type === 'wage_garnishment',
     },
     {
-      id: 'exemptions_overview',
-      type: 'info',
-      prompt:
-        'TEXAS PROPERTY EXEMPTIONS:\n\n\u2022 Homestead: Unlimited value (urban up to 10 acres, rural up to 200 acres). Cannot be forced to sell your home.\n\n\u2022 Personal property: $50,000 individual / $100,000 family \u2014 includes clothing, furniture, food, tools of trade, vehicles, animals, athletic equipment, and more under \u00a7 42.001\u201342.002.\n\n\u2022 Wages: Current wages are 100% exempt. Once deposited in your bank account, they remain protected for 2 months.\n\n\u2022 Retirement: All qualified retirement accounts are fully exempt (IRA, 401k, pension, etc.).\n\n\u2022 Government benefits: Social Security, VA benefits, and disability payments are fully exempt and protected for 2 months in your bank account.\n\n\u2022 Life insurance and annuities are also exempt.',
+      id: 'applicable_exemptions',
+      type: 'multi_select',
+      prompt: 'Which Texas exemptions apply to your situation? (Check all that apply)',
+      options: [
+        { value: 'homestead', label: 'Homestead (your home — unlimited value up to 10 acres urban / 200 acres rural)' },
+        { value: 'personal_property', label: 'Personal property — furniture, tools of trade, vehicles ($50K individual / $100K family)' },
+        { value: 'wages', label: 'Current wages (100% exempt; deposits protected for 2 months in bank)' },
+        { value: 'retirement', label: 'Retirement accounts — IRA, 401k, pension (fully exempt)' },
+        { value: 'government_benefits', label: 'Government benefits — Social Security, VA, disability (fully exempt)' },
+        { value: 'life_insurance', label: 'Life insurance and annuities (fully exempt)' },
+      ],
+      noneLabel: 'Not sure which apply',
     },
     {
       id: 'exemption_form_filed',
@@ -51,6 +61,7 @@ export const debtExemptionClaimConfig: GuidedStepConfig = {
     {
       id: 'file_within_14_days',
       type: 'info',
+      acknowledgeLabel: 'Filing within 14 days →',
       prompt:
         'FILE WITHIN 14 DAYS \u2014 After receiving notice that your property will be seized, you must file a claim of exemption with the court within 14 days. The court will schedule a hearing where you can prove your property is exempt. Bring documentation: pay stubs for wages, bank statements showing the source of deposits, and retirement account statements.',
       showIf: (answers) => answers.exemption_form_filed === 'no',
@@ -58,6 +69,7 @@ export const debtExemptionClaimConfig: GuidedStepConfig = {
     {
       id: 'how_to_file',
       type: 'info',
+      acknowledgeLabel: 'Got the filing steps →',
       prompt:
         'HOW TO FILE \u2014 Get the Protected Property Claim Form from the court clerk or TexasLawHelp.org. List each item of property you claim is exempt and the legal basis for the exemption. File the completed form with the court and serve a copy on the creditor\u2019s attorney.',
     },
@@ -118,10 +130,27 @@ export const debtExemptionClaimConfig: GuidedStepConfig = {
       })
     }
 
-    items.push({
-      status: 'info',
-      text: 'Texas protects your homestead, personal property (up to $50K/$100K), wages, retirement accounts, and government benefits from most creditor collection.',
-    })
+    if (answers.applicable_exemptions && answers.applicable_exemptions !== 'none') {
+      const exemptionLabels: Record<string, string> = {
+        homestead: 'Homestead',
+        personal_property: 'Personal property',
+        wages: 'Wages',
+        retirement: 'Retirement accounts',
+        government_benefits: 'Government benefits',
+        life_insurance: 'Life insurance and annuities',
+      }
+      const selected = answers.applicable_exemptions.split(',')
+      const labels = selected.map((v) => exemptionLabels[v] ?? v).join(', ')
+      items.push({
+        status: 'info',
+        text: `Applicable exemptions identified: ${labels}.`,
+      })
+    } else {
+      items.push({
+        status: 'info',
+        text: 'Texas protects your homestead, personal property (up to $50K/$100K), wages, retirement accounts, and government benefits from most creditor collection.',
+      })
+    }
 
     return items
   },

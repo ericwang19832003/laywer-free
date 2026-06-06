@@ -11,6 +11,7 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TEXAS SECURITY DEPOSIT LAW (\u00a792.103-109):\n- Landlord has 30 days after move-out to return deposit OR send itemized list of deductions\n- If they don\'t: you can recover 3x the wrongfully withheld amount + $100 + attorney fees\n- Deductions must be for ACTUAL damage beyond \'normal wear and tear\'\n- Landlord CANNOT deduct for: paint touch-ups, carpet cleaning (unless lease requires), nail holes, minor scuffs',
+      acknowledgeLabel: 'I understand Texas security deposit law',
     },
     {
       id: 'moved_out',
@@ -28,6 +29,7 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "CRITICAL: You MUST provide a written forwarding address. The 30-day clock does NOT start from your move-out date — it starts from the date you provide BOTH: (1) vacated the property AND (2) delivered a written forwarding address to the landlord.\n\nSend it now via certified mail with return receipt requested. Keep the receipt as proof of the date. Until you provide the forwarding address, the landlord's obligation to return the deposit is delayed.\n\nNote: Even without a forwarding address, you do NOT forfeit the deposit (\u00a792.107). You can still sue to recover it.",
+      acknowledgeLabel: "I'll send my forwarding address via certified mail",
       showIf: (answers) =>
         answers.moved_out === 'yes' && answers.forwarding_address === 'no',
     },
@@ -51,6 +53,7 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your landlord has violated \u00a792.109. You are entitled to: the full deposit, plus up to 3x the amount wrongfully withheld, plus $100, plus reasonable attorney fees. Send a demand letter immediately.',
+      acknowledgeLabel: "I'll send a demand letter immediately",
       showIf: (answers) =>
         answers.over_30_days === 'yes' &&
         answers.forwarding_address === 'yes',
@@ -62,10 +65,16 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
       showIf: (answers) => answers.moved_out === 'yes',
     },
     {
-      id: 'deduction_review',
-      type: 'info',
-      prompt:
-        "Review each deduction carefully. Challenge anything that is:\n- Normal wear and tear (faded paint, worn carpet)\n- Pre-existing damage (was there when you moved in)\n- Cleaning you already did\n- Repairs that were the landlord's responsibility",
+      id: 'improper_deduction_types',
+      type: 'multi_select',
+      prompt: 'Which types of improper deductions did the landlord make?',
+      options: [
+        { value: 'normal_wear', label: 'Normal wear and tear (faded paint, worn carpet)' },
+        { value: 'pre_existing', label: 'Pre-existing damage that was there when I moved in' },
+        { value: 'my_cleaning', label: 'Cleaning I already did before moving out' },
+        { value: 'landlord_repairs', label: "Repairs that were the landlord's responsibility" },
+      ],
+      noneLabel: "None of these — the deductions may be legitimate",
       showIf: (answers) => answers.itemized_deductions === 'yes',
     },
     {
@@ -73,6 +82,7 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DEMAND LETTER TEMPLATE:\n\n[Date]\n[Landlord Name]\n[Address]\n\nRe: Security Deposit Return \u2014 [Property Address]\n\nI vacated the property on [date] and provided my forwarding address on [date]. More than 30 days have passed and I have not received my security deposit of $[amount].\n\nUnder Texas Property Code \u00a792.109, I am entitled to the return of my deposit plus up to three times the amount wrongfully withheld, $100, and reasonable attorney fees.\n\nI demand return of $[amount] within 14 days. If I do not receive payment, I will file suit in Justice of the Peace Court.\n\n[Your Name]',
+      acknowledgeLabel: "I've copied this template for my demand letter",
     },
   ],
 
@@ -108,10 +118,20 @@ export const ltSecurityDepositDemandConfig: GuidedStepConfig = {
     }
 
     if (answers.itemized_deductions === 'yes') {
-      items.push({
-        status: 'needed',
-        text: 'Review each deduction and challenge anything that is normal wear and tear or pre-existing damage.',
-      })
+      const improper = answers.improper_deduction_types
+        ? answers.improper_deduction_types.split(',').filter((v: string) => v && v !== 'none')
+        : []
+      if (improper.length > 0) {
+        items.push({
+          status: 'needed',
+          text: `Challenge ${improper.length} type(s) of improper deductions in your written response to the landlord.`,
+        })
+      } else {
+        items.push({
+          status: 'needed',
+          text: 'Review each deduction and challenge anything that is normal wear and tear or pre-existing damage.',
+        })
+      }
     } else if (answers.itemized_deductions === 'no' && answers.over_30_days === 'yes') {
       items.push({
         status: 'info',

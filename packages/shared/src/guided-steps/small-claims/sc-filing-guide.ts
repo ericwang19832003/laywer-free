@@ -18,6 +18,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         id: 'filing_fee_info',
         type: 'info',
         prompt: `Filing fees vary by county. Call the clerk's office or check your county's ${sc.courtAbbrev} website for the exact amount.`,
+        acknowledgeLabel: "I'll confirm the filing fee",
         showIf: (answers) => answers.know_filing_fee === 'no',
       },
       {
@@ -29,6 +30,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         id: 'fee_waiver_info',
         type: 'info',
         prompt: `If you can't afford the filing fee, you can file a "${sc.feeWaiverForm}." The clerk can provide this form. If approved, your filing fee and service fees are waived.`,
+        acknowledgeLabel: "I'll request a fee waiver from the clerk",
         showIf: (answers) => answers.can_afford_fee === 'no',
       },
       {
@@ -39,6 +41,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'venue_info',
         type: 'info',
+        acknowledgeLabel: "I understand where to file",
         prompt: state === 'CA'
           ? `File in the ${sc.courtAbbrev} in the county where: (1) the defendant lives or regularly works, (2) where the transaction or event occurred, or (3) for consumer purchases, where you signed the contract or made the purchase (CCP § 116.370). If multiple counties qualify, you can choose.`
           : state === 'NY'
@@ -59,6 +62,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         id: 'petition_info',
         type: 'info',
         prompt: `Many ${sc.courtAbbrev}s have simplified fill-in-the-blank forms available at the clerk's office or on the court's website. You can also find forms at ${sc.helpSiteUrl} (${sc.helpSiteName}). You'll need: your name and address, the defendant's full name and address, the amount you're claiming, and a brief description of your dispute.`,
+        acknowledgeLabel: "I'll get the claim form",
         showIf: (answers) => answers.have_petition === 'no',
       },
       {
@@ -75,18 +79,21 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         id: 'efiling_info',
         type: 'info',
         prompt: `You can e-file at ${sc.eFilingUrl} (${sc.eFilingName}). Create an account, select your court, and upload your claim form. There may be a small e-filing service fee on top of the court filing fee.`,
+        acknowledgeLabel: "I'll file online",
         showIf: (answers) => answers.filing_method === 'efiling',
       },
       {
         id: 'in_person_info',
         type: 'info',
         prompt: "Bring your completed claim form, the filing fee (check if they accept cash, check, or card), and the defendant's address. The clerk can help you with questions about the form.",
+        acknowledgeLabel: "I'll bring my form and fee to the clerk's office",
         showIf: (answers) => answers.filing_method === 'in_person',
       },
       {
         id: 'not_sure_info',
         type: 'info',
         prompt: `If you're not sure how to file, going in person is the easiest option. The clerk's office can provide forms and answer procedural questions. You can also e-file at ${sc.eFilingUrl} if you prefer to do it from home.`,
+        acknowledgeLabel: "I'll go in person to file",
         showIf: (answers) => answers.filing_method === 'not_sure',
       },
       {
@@ -98,6 +105,7 @@ export function createScFilingGuideConfig(state?: string): GuidedStepConfig {
         id: 'defendant_address_info',
         type: 'info',
         prompt: `You'll need the defendant's physical address for both the claim form and for service of process. If you don't have it, try checking the original contract, business registration records (${sc.sosName} website: ${sc.sosUrl}), or property records.`,
+        acknowledgeLabel: "I'll locate the defendant's address",
         showIf: (answers) => answers.have_defendant_address === 'no',
       },
     ],

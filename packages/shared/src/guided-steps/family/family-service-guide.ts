@@ -11,6 +11,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IMPORTANT: You CANNOT serve the papers yourself. Texas law requires a third party to deliver the citation and petition to the other party.',
+      acknowledgeLabel: 'Understood — I need a third party →',
     },
     {
       id: 'service_method',
@@ -29,6 +30,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'PRIVATE PROCESS SERVER:\n\u2022 Cost: $50\u2013$100 typically\n\u2022 A licensed process server delivers the citation and petition directly to your spouse\n\u2022 They file a Return of Service (proof of delivery) with the court\n\u2022 Faster and more flexible than the sheriff \u2014 they can attempt service at different times and locations\n\u2022 Find one through the Texas Process Server Association or ask the court clerk for referrals',
+      acknowledgeLabel: 'Got it \u2014 I\'ll hire a process server \u2192',
       showIf: (answers) => answers.service_method === 'process_server',
     },
     {
@@ -36,6 +38,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SHERIFF SERVICE:\n\u2022 Cost: $75\u2013$100 depending on the county\n\u2022 File a request for service with the District Clerk\n\u2022 The county sheriff\u2019s office will attempt to deliver the papers\n\u2022 A deputy will file a Return of Service with the court\n\u2022 May take longer than a private process server, especially in busy counties\n\u2022 If the sheriff cannot locate the respondent after multiple attempts, you\u2019ll need to try another method',
+      acknowledgeLabel: 'Got it \u2014 I\'ll use the sheriff \u2192',
       showIf: (answers) => answers.service_method === 'sheriff',
     },
     {
@@ -43,6 +46,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CERTIFIED MAIL:\n\u2022 Some Texas courts allow service by certified mail with return receipt requested\n\u2022 The respondent must sign for the delivery \u2014 if they refuse or aren\u2019t home, service fails\n\u2022 Check with your court clerk whether this method is permitted in your county for your case type\n\u2022 Keep the signed return receipt (green card) as proof of service',
+      acknowledgeLabel: 'Got it \u2014 I\'ll confirm with the clerk \u2192',
       showIf: (answers) => answers.service_method === 'certified_mail',
     },
     {
@@ -50,6 +54,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WAIVER OF SERVICE:\n\u2022 If your spouse agrees, they can sign a "Waiver of Service" form\n\u2022 No delivery needed \u2014 this saves time and money\n\u2022 This is common in uncontested divorces where both parties cooperate\n\u2022 The waiver must be signed, notarized, and filed with the court\n\u2022 The respondent must wait at least the day AFTER receiving the petition before signing\n\u2022 Once filed, the case can proceed without waiting for formal service',
+      acknowledgeLabel: 'Got it \u2014 I\'ll get the waiver signed \u2192',
       showIf: (answers) => answers.service_method === 'waiver',
     },
     {
@@ -57,6 +62,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'OPTIONS SUMMARY:\n\u2022 Process server ($50\u2013$100): fastest, most flexible\n\u2022 Sheriff ($75\u2013$100): reliable but slower\n\u2022 Certified mail: cheapest but respondent must sign\n\u2022 Waiver of service: free if the other party cooperates\n\nRecommendation: If your spouse is cooperative, use a Waiver of Service. If not, a private process server is usually the fastest option.',
+      acknowledgeLabel: 'Thanks \u2014 I\'ll choose a method \u2192',
       showIf: (answers) => answers.service_method === 'not_sure',
     },
     {
@@ -64,6 +70,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CITATION REQUIREMENTS:\n\u2022 The citation is issued by the District Clerk after you file your petition\n\u2022 It tells the respondent they have been sued and must file an answer by a certain date\n\u2022 The citation MUST be served with a copy of your Original Petition\n\u2022 The respondent generally has until 10:00 AM on the first Monday after 20 days from service to file an answer',
+      acknowledgeLabel: 'Understood the citation rules \u2192',
     },
     {
       id: 'cant_find_them',
@@ -75,6 +82,7 @@ export const familyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVICE BY PUBLICATION (when you can\u2019t find them):\n\u2022 Governed by Texas Rules of Civil Procedure 109\u2013117\n\u2022 You must file a sworn statement (affidavit) explaining what efforts you\u2019ve made to find the respondent\n\u2022 The court may order publication in a local newspaper for a set period\n\u2022 This is a last resort \u2014 it\u2019s slow and the court may limit what relief it can grant\n\u2022 You may need to hire a skip-tracing service first to show the court you made diligent efforts\n\u2022 Cost: newspaper publication fees vary ($100\u2013$300+)',
+      acknowledgeLabel: 'Understood — I\'ll file the affidavit →',
       showIf: (answers) => answers.cant_find_them === 'yes',
     },
   ],

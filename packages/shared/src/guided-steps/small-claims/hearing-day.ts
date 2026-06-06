@@ -16,6 +16,7 @@ export const hearingDayConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Arrive 30 minutes early to find parking, go through security, and locate your courtroom.',
+      acknowledgeLabel: "I'll arrive 30 minutes early on hearing day →",
     },
     {
       id: 'have_all_documents',
@@ -27,6 +28,7 @@ export const hearingDayConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "The judge will call your case. You'll be sworn in. Present your side first (if plaintiff). Show evidence when relevant. The defendant gets their turn. The judge may ask questions.",
+      acknowledgeLabel: "I understand the hearing procedure →",
     },
     {
       id: 'know_after_hearing',
@@ -38,6 +40,7 @@ export const hearingDayConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "The judge may rule immediately or mail the decision. If you win, the defendant has 21 days to pay. If they don't, you can pursue collection. If you lose, you have 21 days to file an appeal.",
+      acknowledgeLabel: "I understand the post-hearing timeline and my options →",
       showIf: (answers) => answers.know_after_hearing === 'no',
     },
   ],

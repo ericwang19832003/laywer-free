@@ -28,6 +28,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING AN INDIVIDUAL:\n- Personal service by a process server or constable at their home or workplace\n- If you cannot locate them, you can use substituted service (leave with someone over 16 at their usual residence) or service by posting (ask the court for permission)\n- Cost: $75-150 for a private process server, $75-100 for a constable',
+      acknowledgeLabel: 'I understand individual service →',
       showIf: (answers) =>
         answers.defendant_type === 'individual_seller' || answers.defendant_type === 'individual_buyer',
     },
@@ -38,6 +39,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING A REAL ESTATE AGENT OR BROKER:\n- Serve the individual agent personally at their home or office\n- If you are also suing their brokerage firm (LLC or corporation), serve the firm\'s registered agent through the Texas Secretary of State\n- Look up the brokerage\'s registered agent at sos.state.tx.us\n- You may also need to serve the Texas Real Estate Commission (TREC) if your claim involves a license violation',
+      acknowledgeLabel: 'I understand agent/broker service →',
       showIf: (answers) => answers.defendant_type === 'real_estate_agent',
     },
 
@@ -47,6 +49,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING A TITLE COMPANY:\n- Title companies are typically LLCs or corporations\n- Serve their registered agent listed with the Texas Secretary of State (sos.state.tx.us)\n- If the registered agent cannot be found, you can serve the Texas Secretary of State as an agent for service under the Business Organizations Code\n- The citation must name the entity exactly as registered',
+      acknowledgeLabel: 'I understand title company service →',
       showIf: (answers) => answers.defendant_type === 'title_company',
     },
 
@@ -56,6 +59,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING A BUILDER OR DEVELOPER:\n- Builders are usually LLCs or corporations — serve their registered agent at sos.state.tx.us\n- IMPORTANT: Under the Residential Construction Liability Act (RCLA, Chapter 27 of the Texas Property Code), you must give the builder 60 days written notice BEFORE filing suit\n- The RCLA notice must describe the defect and allow the builder to inspect and offer to repair\n- Failure to send the RCLA notice can result in your lawsuit being abated (paused)',
+      acknowledgeLabel: 'I understand builder service and RCLA notice →',
       showIf: (answers) => answers.defendant_type === 'builder',
     },
 
@@ -65,6 +69,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING AN HOA:\n- Most HOAs are nonprofit corporations — serve their registered agent at sos.state.tx.us\n- If the HOA has no registered agent or it is outdated, serve:\n  1. The president of the HOA board\n  2. Any officer or director of the HOA\n  3. The HOA management company (if applicable)\n- Check the HOA\'s governing documents (CC&Rs) for any dispute resolution requirements — many require mediation or arbitration before filing suit',
+      acknowledgeLabel: 'I understand HOA service →',
       showIf: (answers) => answers.defendant_type === 'hoa',
     },
 
@@ -74,6 +79,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING MULTIPLE PARTIES:\nEach defendant must be served separately. Common multi-party scenarios in real estate:\n\n- Seller + listing agent + seller\'s brokerage\n- Builder + subcontractors\n- Seller + title company (for title defects)\n- HOA + management company\n\nYou need a separate citation for each defendant. Each must be served within 90 days of filing or you risk dismissal for want of prosecution.',
+      acknowledgeLabel: 'I understand multiple-party service →',
       showIf: (answers) => answers.defendant_type === 'multiple',
     },
 
@@ -94,6 +100,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO FIND A REGISTERED AGENT:\n1. Go to sos.state.tx.us (Texas Secretary of State)\n2. Click "SOSDirect" or search for the business by name\n3. The filing will show the registered agent\'s name and address\n4. If the registered agent has resigned or cannot be located, you may serve the Texas Secretary of State directly (they will forward service to the entity\'s last known address)',
+      acknowledgeLabel: 'I know how to look up registered agents →',
       showIf: (answers) => answers.know_registered_agent === 'no',
     },
 
@@ -108,6 +115,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SERVING OUT-OF-STATE PARTIES:\n- Texas long-arm statute (CPRC Section 17.042) allows you to serve out-of-state defendants who have ties to Texas (e.g., owned property here, transacted business here)\n- Service methods for out-of-state parties:\n  1. Personal service in the other state by a process server authorized there\n  2. Service by the Texas Secretary of State (file with the court clerk, who forwards to SOS, who sends by certified mail)\n  3. Service by certified mail with return receipt requested (if the court authorizes it)\n- Out-of-state service costs more and takes longer — budget 2-4 extra weeks',
+      acknowledgeLabel: 'I understand out-of-state service →',
       showIf: (answers) => answers.out_of_state === 'yes',
     },
 
@@ -128,6 +136,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CONSTABLE SERVICE:\n- Cost: $75-100\n- Give the citation and petition to the constable\'s office in the county where the defendant will be served\n- The constable will attempt service and file a return of service with the court\n- Usually takes 1-3 weeks\n- Reliable and affordable',
+      acknowledgeLabel: 'I will use the constable →',
       showIf: (answers) => answers.service_method === 'constable',
     },
     {
@@ -135,6 +144,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'PRIVATE PROCESS SERVER:\n- Cost: $75-150 (more for rush or difficult-to-serve defendants)\n- Must be certified by the Texas Supreme Court\n- Often faster than constables, especially for multiple defendants\n- Can serve across county lines without needing a different constable for each county',
+      acknowledgeLabel: 'I will use a private process server →',
       showIf: (answers) => answers.service_method === 'private_server',
     },
     {
@@ -142,6 +152,7 @@ export const reServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SECRETARY OF STATE SERVICE:\n- Used for out-of-state defendants or businesses with resigned registered agents\n- Cost: $40 (state fee) plus process server costs\n- Give the citation and petition to the court clerk, who forwards them to the Secretary of State\n- SOS sends the documents by certified mail to the defendant\n- Takes 3-6 weeks — the slowest option but sometimes the only one',
+      acknowledgeLabel: 'I will use Secretary of State service →',
       showIf: (answers) => answers.service_method === 'sos',
     },
   ],

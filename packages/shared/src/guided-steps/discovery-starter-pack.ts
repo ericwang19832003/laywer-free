@@ -16,6 +16,7 @@ export const discoveryStarterPackConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Discovery is the formal process where both sides exchange information. You can request documents, ask written questions (interrogatories), and take depositions.',
+      acknowledgeLabel: 'I understand discovery',
       showIf: (answers) => answers.first_time_discovery === 'yes',
     },
     {
@@ -33,6 +34,7 @@ export const discoveryStarterPackConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Key tools: Requests for Production (documents), Interrogatories (written questions), Requests for Admission (facts to confirm), and Depositions (sworn testimony).',
+      acknowledgeLabel: 'I understand the discovery tools',
       showIf: (answers) => answers.know_discovery_tools !== 'all_familiar',
     },
     {
@@ -51,6 +53,7 @@ export const discoveryStarterPackConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Discovery deadlines are set by the court's scheduling order. Missing them can mean losing the right to present evidence.",
+      acknowledgeLabel: "I'll check my discovery deadlines",
       showIf: (answers) => answers.know_deadlines === 'no',
     },
   ],

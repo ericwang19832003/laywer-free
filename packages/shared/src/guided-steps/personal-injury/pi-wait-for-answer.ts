@@ -16,6 +16,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The litigation file should not start until the court has accepted the petition. Look for the court stamp, filing date, and case or cause number on the first page.',
+      acknowledgeLabel: 'I\'ll get the file-stamped copy →',
       showIf: (answers) => answers.file_stamp_confirmed === 'no',
     },
     {
@@ -47,6 +48,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The defendant must be served before the answer deadline starts. Go back to the "Serve the Defendant" step and record the service completion date, service method, and who was served.',
+      acknowledgeLabel: 'I\'ll complete service first →',
       showIf: (answers) => answers.defendant_served === 'no',
     },
     {
@@ -72,6 +74,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas state court, the defendant generally has until 10:00 a.m. on the first Monday after 20 days from service to file an answer. Federal court is different: Rule 12(a) is usually 21 days after service. Use the court type before relying on a deadline.',
+      acknowledgeLabel: 'I\'ve noted the answer deadline →',
       showIf: (answers) => answers.defendant_served === 'yes',
     },
     {
@@ -90,6 +93,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can check if an answer has been filed by looking up your case on the county court\'s online docket, or by calling the clerk\'s office. You may also receive a copy by mail from the defendant\'s attorney.',
+      acknowledgeLabel: 'I\'ll check the docket →',
       showIf: (answers) => answers.answer_received === 'not_sure',
     },
     {
@@ -97,6 +101,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the defendant does not file an answer by the deadline, you may be eligible to request a default judgment. This means the court could rule in your favor without a trial.',
+      acknowledgeLabel: 'I\'ll consider requesting default →',
       showIf: (answers) => answers.answer_received === 'no' && answers.service_date === 'over_three_weeks',
     },
     {
@@ -115,6 +120,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check your court docket or look for a "Notice of Removal" from the defendant\'s attorney. If the case was removed, it will be transferred to the federal district court. You can also call the county clerk\'s office to confirm.',
+      acknowledgeLabel: 'I\'ll check for a removal notice →',
       showIf: (answers) => answers.case_removed === 'not_sure',
     },
     {
@@ -122,6 +128,7 @@ export const piWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'When a case is removed to federal court, you have 30 days from the date of removal to file a motion to remand (send it back to state court). After completing this step, we\'ll guide you through your options: filing a motion to remand, preparing an amended complaint for federal court, or both.',
+      acknowledgeLabel: 'I understand my 30-day remand window →',
       showIf: (answers) => answers.case_removed === 'yes',
     },
   ],

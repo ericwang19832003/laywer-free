@@ -129,17 +129,29 @@ export default async function CasesPage() {
     }
   })
 
+  const activeCaseCount = totalCaseCount ?? cases.length
+  const greeting = (() => {
+    const hour = new Date().getHours()
+    const salutation = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+    return userDisplayName ? `${salutation}, ${userDisplayName.split(' ')[0]}` : salutation
+  })()
+  const subheading = activeCaseCount === 0
+    ? 'No active matters yet. Start one to get organized.'
+    : activeCaseCount === 1
+    ? 'One active matter. Here\'s the one thing that needs you today.'
+    : `${activeCaseCount} active matters. Here's the one thing that needs you today.`
+
   return (
     <div className="min-h-screen bg-warm-bg">
       <main className="py-6">
-        {/* Page header — compact, professional */}
+        {/* Page header */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-warm-text">Cases</h1>
-            <p className="mt-0.5 text-sm text-warm-muted">
-              Organize your matters, track deadlines, and keep evidence in one place.
-            </p>
+            <p className="text-xs font-medium text-warm-muted uppercase tracking-wider mb-1">Your workspace</p>
+            <h1 className="text-2xl font-semibold text-warm-text">{greeting}</h1>
+            <p className="mt-0.5 text-sm text-warm-muted">{subheading}</p>
           </div>
+          {hasCases && <NewCaseDialog />}
         </div>
 
         {hasCases ? (

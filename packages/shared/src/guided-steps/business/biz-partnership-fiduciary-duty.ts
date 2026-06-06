@@ -87,6 +87,7 @@ export const bizPartnershipFiduciaryDutyConfig: GuidedStepConfig = {
     {
       id: 'damages_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — understood my remedies →',
       prompt:
         'Available damages for fiduciary duty breach:\n\n• Lost profits — what the partnership lost due to the breach\n• Disgorgement — the breaching partner must surrender all secret profits and benefits received\n• Punitive damages — available if the breach involved fraud, malice, or gross negligence\n• Constructive trust — court can impose a trust over assets obtained through breach\n• Accounting — court-ordered full accounting of all partnership finances\n• Attorney fees — recoverable under TBOC or if fraud is proven',
     },
@@ -98,6 +99,7 @@ export const bizPartnershipFiduciaryDutyConfig: GuidedStepConfig = {
     {
       id: 'injunction_note',
       type: 'info',
+      acknowledgeLabel: 'I\'ll file for a TRO immediately →',
       prompt:
         'You should seek emergency injunctive relief. File a petition for a Temporary Restraining Order (TRO) to freeze partnership accounts and prevent further dissipation of assets. Include a request for a temporary injunction hearing within 14 days.',
       showIf: (answers) => answers.seek_injunction === 'yes',

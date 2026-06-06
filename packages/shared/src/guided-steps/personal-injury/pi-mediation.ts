@@ -21,6 +21,7 @@ export const piMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Even without formal mediation, you can still negotiate a settlement directly with the defendant\'s attorney or insurance company at any time. Many cases settle through informal negotiations.',
+      acknowledgeLabel: 'I\'ll negotiate directly →',
       showIf: (answers) => answers.mediation_status === 'no_mediation',
     },
     {
@@ -39,6 +40,7 @@ export const piMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your settlement demand should include: total medical expenses (past and future), lost wages and earning capacity, pain and suffering, property damage, and any other damages. Organize these into a clear demand package with supporting documentation.',
+      acknowledgeLabel: 'I\'ll prepare my demand package →',
       showIf: (answers) => answers.settlement_demand_prepared === 'no' || answers.settlement_demand_prepared === 'working_on_it',
     },
     {
@@ -56,6 +58,7 @@ export const piMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before mediation, know your bottom line. Consider: your total out-of-pocket expenses, future medical costs, the strength of your evidence, the risk of losing at trial, and how long trial would take. The mediator is neutral and will try to find middle ground.',
+      acknowledgeLabel: 'I\'ll determine my bottom line →',
       showIf: (answers) => answers.minimum_settlement === 'no',
     },
     {
@@ -63,6 +66,7 @@ export const piMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Mediation tips: Be prepared to compromise — your first offer won\'t be accepted. The mediator will go back and forth between rooms. Stay patient, stay calm, and don\'t take it personally. Most mediations last a full day. Bring all relevant documents.',
+      acknowledgeLabel: 'I\'m ready for mediation →',
       showIf: (answers) => answers.mediation_status !== 'no_mediation',
     },
   ],

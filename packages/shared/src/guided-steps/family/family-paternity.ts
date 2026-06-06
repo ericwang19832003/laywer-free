@@ -23,6 +23,7 @@ export const paternityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Because of the marriage, paternity is legally presumed. No additional steps are needed to establish paternity. You can proceed directly to custody or support actions.',
+      acknowledgeLabel: 'Great — I\'m ready to proceed →',
       showIf: (a) =>
         a.parents_married === 'married_at_birth' ||
         a.parents_married === 'married_within_300' ||
@@ -41,6 +42,7 @@ export const paternityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A signed Acknowledgment of Paternity has the same legal effect as a court order establishing paternity. It can be rescinded within 60 days of signing. After 60 days, it can only be challenged on the basis of fraud, duress, or material mistake of fact.',
+      acknowledgeLabel: 'Understood — paternity is established →',
       showIf: (a) => a.parents_married === 'never_married' && a.aop_signed === 'yes',
     },
     {
@@ -61,6 +63,7 @@ export const paternityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Both parents sign the AOP under penalty of perjury. The form is free and can be obtained by calling 866-255-2006. If there is a presumed father (e.g., from a previous marriage), a Denial of Paternity must also be signed by that person.',
+      acknowledgeLabel: 'Got it \u2014 I\'ll get the AOP form \u2192',
       showIf: (a) =>
         a.parents_married === 'never_married' &&
         a.aop_signed === 'no' &&
@@ -71,6 +74,7 @@ export const paternityConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can file a paternity suit and the court will order DNA testing. The Office of the Attorney General can arrange testing at no cost \u2014 call 1-800-255-8014. If the alleged father refuses to submit to testing, the court may presume paternity.',
+      acknowledgeLabel: 'Understood \u2014 I\'ll file the paternity suit \u2192',
       showIf: (a) =>
         a.parents_married === 'never_married' &&
         a.aop_signed === 'no' &&

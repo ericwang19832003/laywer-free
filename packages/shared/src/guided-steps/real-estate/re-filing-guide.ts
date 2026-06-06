@@ -20,6 +20,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'MANDATORY VENUE (Section 15.011): Your real estate lawsuit must be filed in the county where the property is located. Unlike other lawsuits, you cannot file where the defendant lives or where the contract was signed. The court will dismiss or transfer your case if you file in the wrong county.',
+      acknowledgeLabel: 'Got it →',
     },
 
     // Property identification
@@ -35,6 +36,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your petition MUST identify the property by its full legal description — a street address alone is not sufficient. You can find the legal description on:\n\n1. Your deed (recorded at the county clerk\'s office)\n2. Your title commitment or title policy\n3. The county appraisal district website (search by address)\n4. A survey of the property\n\nThe description will be either:\n- Metes and bounds (bearings and distances describing the boundary)\n- Lot/block/subdivision (e.g., "Lot 5, Block 3, Oak Hills Subdivision")',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_legal_description === 'no',
     },
 
@@ -56,6 +58,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in Justice of the Peace (JP) Court. Filing fee: $35-75. Simpler process with relaxed evidence rules. Faster resolution, but limited to monetary damages under $20,000.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.total_damages === 'under_20k',
     },
     {
@@ -63,6 +66,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in County Court at Law. Filing fee: $250-350. More formal than JP Court. Can handle declaratory judgments and injunctive relief related to the property.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.total_damages === '20k_to_250k',
     },
     {
@@ -70,6 +74,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File in District Court. Filing fee: $300-400. Most formal. Required for claims over $250,000 and cases seeking specific performance (forcing a sale or transfer). District Court has full equitable powers.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) =>
         answers.total_damages === 'over_250k',
     },
@@ -91,6 +96,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'To file online:\n1. Go to eFileTexas.gov and create a free account\n2. Select your court and case type (real property dispute)\n3. Upload your Petition as a PDF — make sure it includes the full legal description of the property\n4. Pay the filing fee online (or submit fee waiver)\n5. You will receive a confirmation email when accepted\n\nTip: Most courts accept e-filed documents within 24 hours.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.filing_method === 'efile',
     },
     {
@@ -98,6 +104,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "To file in person:\n1. Print 3 copies of your Petition (one for the court, one for you, one to serve)\n2. Go to the court clerk's office during business hours (usually 8am-5pm)\n3. Tell the clerk: \"I need to file a real estate lawsuit\"\n4. Pay the filing fee (or bring a completed fee waiver form)\n5. The clerk will stamp all copies — keep your stamped copy as proof\n6. Ask the clerk about service options for the defendant",
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.filing_method === 'in_person',
     },
 
@@ -112,6 +119,7 @@ export const reFilingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You can file a "Statement of Inability to Afford Payment of Court Costs." This is an official Texas form.\n\n1. Download the form from texaslawhelp.org or ask the court clerk\n2. Fill it out honestly — include your income, expenses, and why you cannot pay\n3. File it WITH your Petition (same time)\n4. The court will review it — most are approved within a few days\n5. If approved, you pay $0. If denied, you can appeal the denial.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.can_afford_fee === 'no',
     },
 
@@ -124,19 +132,35 @@ export const reFilingGuideConfig: GuidedStepConfig = {
         'A lis pendens (notice of pending litigation) is recorded in the county property records and warns anyone searching the title that a lawsuit is pending. This prevents the other party from selling or refinancing without the buyer knowing about your claim.',
     },
     {
-      id: 'lis_pendens_info',
+      id: 'lis_pendens_what',
       type: 'info',
       prompt:
-        'LIS PENDENS (Texas Property Code Section 12.007):\n\nA lis pendens puts the world on notice that the property is subject to a pending lawsuit. To file one:\n\n1. Prepare a notice that identifies the property (full legal description), the court, the case number, and the parties\n2. File the notice with the County Clerk where the property is located (recording fee: $16-26)\n3. File it AFTER your lawsuit is filed — you need a cause number\n\nEffect: Any buyer or lender takes the property subject to the outcome of your lawsuit. This is powerful leverage to force settlement.\n\nWarning: Filing a frivolous lis pendens can result in sanctions and damages. Only file if your claim genuinely involves title or an interest in the property.',
+        'WHAT IS A LIS PENDENS (Texas Property Code Section 12.007):\n\nA lis pendens ("notice of pending suit") is a document recorded in the county property records that warns the world your lawsuit is pending. Any buyer or lender who searches the title after it is recorded takes the property subject to the outcome of your case. This is powerful leverage to force settlement and prevents the other party from selling or refinancing behind your back.',
+      acknowledgeLabel: 'I understand what a lis pendens does →',
+      showIf: (answers) => answers.want_lis_pendens === 'yes',
+    },
+    {
+      id: 'lis_pendens_how',
+      type: 'info',
+      prompt:
+        'HOW TO FILE A LIS PENDENS:\n\n1. File your lawsuit FIRST — you need a cause number before you can record the lis pendens\n2. Prepare a notice that identifies: the full legal description of the property, the court, the cause number, and the names of all parties\n3. File the notice with the County Clerk where the property is located (recording fee: $16-26)\n4. Keep a file-stamped copy for your records\n\nWarning: Filing a frivolous lis pendens can result in sanctions and damages. Only file if your claim genuinely involves title or an interest in the property.',
+      acknowledgeLabel: 'I know how to file the lis pendens →',
       showIf: (answers) => answers.want_lis_pendens === 'yes',
     },
 
     // Checklist
     {
       id: 'what_to_bring',
-      type: 'info',
-      prompt:
-        'CHECKLIST — what you need to file:\n\n- Your Petition (3 copies, signed) with the full legal description of the property\n- A copy of the purchase agreement or deed\n- Filing fee payment or fee waiver form\n- Government-issued ID\n- If filing lis pendens: a separate notice document with the cause number',
+      type: 'multi_select',
+      prompt: 'Which items have you prepared for filing?',
+      options: [
+        { value: 'signed_petition', label: 'Signed Petition (3 copies) with full legal description' },
+        { value: 'purchase_agreement_deed', label: 'Copy of the purchase agreement or deed' },
+        { value: 'filing_fee', label: 'Filing fee payment or fee waiver form' },
+        { value: 'photo_id', label: 'Government-issued ID' },
+        { value: 'lis_pendens_notice', label: 'Lis pendens notice document with cause number (if filing lis pendens)' },
+      ],
+      noneLabel: "Haven't gathered these yet",
     },
   ],
 
@@ -228,6 +252,19 @@ export const reFilingGuideConfig: GuidedStepConfig = {
         status: 'needed',
         text: 'Prepare lis pendens notice with legal description and cause number. File with the County Clerk after your lawsuit is filed (Section 12.007).',
       })
+    }
+
+    // Filing checklist
+    const bringAnswer = answers.what_to_bring
+    if (bringAnswer && bringAnswer !== 'none') {
+      const brought = new Set(bringAnswer.split(','))
+      if (brought.size >= 4) {
+        items.push({ status: 'done', text: 'Filing materials fully prepared.' })
+      } else {
+        items.push({ status: 'needed', text: `Gather remaining filing materials — ${5 - brought.size} item${5 - brought.size !== 1 ? 's' : ''} not yet checked off.` })
+      }
+    } else {
+      items.push({ status: 'needed', text: 'Prepare filing materials: signed Petition (3 copies with legal description), purchase agreement or deed, filing fee or waiver, and government ID.' })
     }
 
     items.push({

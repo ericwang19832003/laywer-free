@@ -19,6 +19,7 @@ export const debtAppealProcessConfig: GuidedStepConfig = {
     {
       id: 'jp_appeal_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll file the appeal →',
       prompt:
         'JP COURT APPEAL — DE NOVO TRIAL:\n\n• Deadline: 21 days from judgment to file appeal bond\n• Cost: Appeal bond typically equals judgment amount (or file Statement of Inability to Pay)\n• Effect: You get a COMPLETELY NEW TRIAL in County Court at Law — not a review, a fresh start\n• The county court hears everything again as if the JP trial never happened\n• You can present new evidence, new witnesses, new arguments\n• File at the JP court that issued the judgment\n\nThis is often worth pursuing — you get a second chance with a more formal process.',
       showIf: (answers) => answers.court_type === 'justice_court',
@@ -26,6 +27,7 @@ export const debtAppealProcessConfig: GuidedStepConfig = {
     {
       id: 'appellate_review_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — understood the process →',
       prompt:
         'COUNTY/DISTRICT COURT APPEAL — APPELLATE REVIEW:\n\n• Deadline: 30 days from judgment to file Notice of Appeal\n• Cost: Filing fee + possible supersedeas bond to stay collection during appeal\n• Effect: Court of Appeals reviews the RECORD — no new evidence, no new witnesses\n• Standard: Was the trial court\'s decision legally wrong? (abuse of discretion / legal error)\n• This is a harder path — the appeals court defers to the trial judge on factual findings\n\nConsider carefully — appeals are expensive and slow (6–18 months).',
       showIf: (answers) =>
@@ -40,6 +42,7 @@ export const debtAppealProcessConfig: GuidedStepConfig = {
     {
       id: 'missed_deadline_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — exploring my options →',
       prompt:
         'If the appeal deadline has passed, you may still be able to file a Motion for New Trial (14 days in JP court, 30 days in county/district). Grounds include: new evidence discovered, fraud/misconduct by the other party, the judgment is clearly wrong. After that window closes, a Bill of Review is possible but very difficult (requires showing fraud, accident, or wrongful act).',
       showIf: (answers) => answers.missed_deadline === 'yes',
@@ -53,6 +56,7 @@ export const debtAppealProcessConfig: GuidedStepConfig = {
     {
       id: 'cant_afford_bond_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll file the indigence statement →',
       prompt:
         'If you cannot afford the bond, file a "Statement of Inability to Afford Payment of Court Costs" (formerly affidavit of indigence). The court must allow your appeal without bond if you qualify. Keep in mind that during the appeal, the judgment may still be enforceable unless you obtain a stay.',
       showIf: (answers) =>
@@ -62,6 +66,7 @@ export const debtAppealProcessConfig: GuidedStepConfig = {
     {
       id: 'while_appealing_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll claim my exemptions →',
       prompt:
         'WHILE APPEALING — The judgment remains enforceable unless you post a supersedeas bond or obtain a stay. Claim your property exemptions immediately if collection is attempted.',
     },

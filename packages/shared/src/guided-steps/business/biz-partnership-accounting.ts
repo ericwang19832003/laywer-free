@@ -28,6 +28,7 @@ export const bizPartnershipAccountingConfig: GuidedStepConfig = {
     {
       id: 'default_rule_note',
       type: 'info',
+      acknowledgeLabel: 'Understood the default rule →',
       prompt:
         'Under TBOC §152.202, if there is no partnership agreement or the agreement is silent on profit sharing, profits and losses are shared equally among all partners — regardless of how much each partner invested. This is the Texas default rule.',
       showIf: (answers) => answers.profit_allocation === 'no_agreement',
@@ -61,6 +62,7 @@ export const bizPartnershipAccountingConfig: GuidedStepConfig = {
     {
       id: 'court_accounting_note',
       type: 'info',
+      acknowledgeLabel: 'I\'ll petition the court →',
       prompt:
         'Since the demand was refused, you can petition the court for a court-ordered accounting under TBOC §152.211. The court will appoint a master or require the partner to produce all financial records. Refusal to comply can result in contempt sanctions.',
       showIf: (answers) => answers.demand_refused === 'yes',
@@ -68,6 +70,7 @@ export const bizPartnershipAccountingConfig: GuidedStepConfig = {
     {
       id: 'demand_needed_note',
       type: 'info',
+      acknowledgeLabel: 'I\'ll send the demand →',
       prompt:
         'Send a formal written demand for an accounting via certified mail. Cite TBOC §152.211 and specify the time period and records you need. Give 30 days to respond. If refused, you can petition the court.',
       showIf: (answers) => answers.demanded_accounting === 'no',
@@ -101,6 +104,7 @@ export const bizPartnershipAccountingConfig: GuidedStepConfig = {
     {
       id: 'forensic_note',
       type: 'info',
+      acknowledgeLabel: 'I\'ll hire a forensic accountant →',
       prompt:
         'A forensic accountant is strongly recommended. They can:\n\n• Trace funds through multiple accounts\n• Identify unreported income using bank deposit analysis\n• Detect personal expenses disguised as business expenses\n• Locate undisclosed accounts through subpoenaed bank records\n• Reconstruct destroyed or missing records\n• Serve as an expert witness at trial\n\nCost typically ranges from $5,000–$25,000+ depending on complexity.',
       showIf: (answers) => answers.forensic_accounting === 'yes',
@@ -113,6 +117,7 @@ export const bizPartnershipAccountingConfig: GuidedStepConfig = {
     {
       id: 'tax_tip',
       type: 'info',
+      acknowledgeLabel: 'I\'ll request from IRS →',
       prompt:
         'If you cannot obtain tax returns from your partner, you can request copies from the IRS using Form 4506-T. As a partner, you are entitled to the partnership\u2019s Form 1065 and your own Schedule K-1. These documents are critical for verifying reported income and distributions.',
       showIf: (answers) => answers.tax_returns_access === 'no',

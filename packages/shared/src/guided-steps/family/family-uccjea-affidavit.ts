@@ -11,6 +11,7 @@ export const uccjeaAffidavitConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The UCCJEA (Uniform Child Custody Jurisdiction and Enforcement Act) affidavit is required in every initial custody case in Texas (Tex. Fam. Code § 152.209). It tells the court where your child has lived, whether any other custody cases exist, and whether anyone else claims rights to your child. Every parent filing a SAPCR must complete one — this is not optional, but it is straightforward. Let\u2019s go through the information you\u2019ll need.',
+      acknowledgeLabel: "I understand the UCCJEA affidavit is required and I'm ready to complete it",
     },
     {
       id: 'child_current_state',
@@ -30,6 +31,7 @@ export const uccjeaAffidavitConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Because your child has not lived in Texas for at least 6 months, Texas may not have jurisdiction over your custody case. This does not mean you are out of options, but it is important to understand before you file. Filing in the wrong state can cause delays or dismissal. We strongly recommend consulting with a family law attorney or your local legal aid office to confirm which state has jurisdiction before proceeding.',
+      acknowledgeLabel: "Understood — I'll consult an attorney before filing →",
       showIf: (a) => a.child_current_state === 'recently_moved' || a.child_current_state === 'no',
     },
     {
@@ -44,6 +46,7 @@ export const uccjeaAffidavitConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'That\u2019s okay — many parents need a little time to gather this information. Before you can complete the affidavit, you\u2019ll need to put together:\n\n\u2022 The full street address of every place your child has lived in the past 5 years\n\u2022 The approximate dates your child lived at each address (month and year is fine)\n\u2022 The names of every adult and child who lived in the home during that time\n\nTip: Check old lease agreements, utility bills, school enrollment records, or your own address book to help jog your memory. Take your time — accuracy matters more than speed.',
+      acknowledgeLabel: "Got it — I'll gather my address history →",
       showIf: (a) => a.addresses_prepared === 'no',
     },
     {
@@ -58,6 +61,7 @@ export const uccjeaAffidavitConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You are required to disclose every custody-related proceeding you know about. This includes:\n\n\u2022 Any pending custody, visitation, or conservatorship case in any state\n\n\u2022 Any prior court orders about custody or visitation (even if they\u2019re old)\n\n\u2022 Any CPS or DFPS investigation, past or present\n\nBe thorough — failing to disclose a proceeding can seriously hurt your credibility with the judge. If you\u2019re unsure whether something counts, include it. It is always better to over-disclose than to leave something out.',
+      acknowledgeLabel: "Understood — I'll disclose everything →",
       showIf: (a) => a.other_proceedings === 'yes',
     },
     {
@@ -72,6 +76,7 @@ export const uccjeaAffidavitConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You must disclose every person who claims a right to custody or visitation. This includes:\n\n\u2022 Grandparents who have been providing regular care\n\n\u2022 Other relatives who have had the child living with them\n\n\u2022 Non-parent caregivers (stepparents, family friends, foster parents)\n\nFor each person, you\u2019ll need their name, their relationship to your child, and the basis of their claim. The court needs this information to make sure all interested parties are properly notified.',
+      acknowledgeLabel: "Got it — I'll list all claimants →",
       showIf: (a) => a.other_claims === 'yes',
     },
     {
@@ -79,6 +84,7 @@ export const uccjeaAffidavitConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'One last important thing: your duty to update this affidavit does not end when you file it. Under § 152.209, you have a continuing obligation to inform the court if any of the information in your affidavit changes — for example, if you move, if a new custody case is filed in another state, or if someone new claims rights to your child. Keep the court informed, and you\u2019ll stay in good standing.',
+      acknowledgeLabel: 'I understand my continuing duty →',
     },
   ],
 

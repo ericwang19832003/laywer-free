@@ -21,6 +21,7 @@ export const mediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "You and the other party usually agree on a mediator. If you can't agree, the court will appoint one. Many counties have low-cost mediation programs.",
+      acknowledgeLabel: "I'll research mediators and check my county's low-cost programs",
       showIf: (answers) => answers.mediator_chosen === 'no',
     },
     {
@@ -34,6 +35,7 @@ export const mediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Make a prioritized list: custody arrangements, property division, child support, spousal support. Know which items are most important to you and where you can compromise.',
+      acknowledgeLabel: "I'll prepare a prioritized list of issues before mediation",
       showIf: (answers) => answers.issues_listed === 'no',
     },
     {
@@ -41,12 +43,14 @@ export const mediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "How mediation works: A neutral mediator helps both parties negotiate. It's confidential \u2014 nothing said can be used in court. If you reach agreement, it becomes a binding court order.",
+      acknowledgeLabel: "I understand how the mediation process works",
     },
     {
       id: 'fail_info',
       type: 'info',
       prompt:
         'If mediation fails, your case proceeds to trial. The judge will make the decisions instead.',
+      acknowledgeLabel: "I understand that failed mediation means the judge decides",
     },
   ],
 

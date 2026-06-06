@@ -19,6 +19,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Arrive 15-30 minutes early. Check in with the clerk when you arrive — they\'ll tell you where to sit and when your case will be called. Bring all your evidence and any witnesses.',
+        acknowledgeLabel: 'Got it — I will arrive early →',
         showIf: (answers) => answers.know_arrival === 'no',
       },
       {
@@ -31,6 +32,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'When your case is called, the plaintiff presents first. Tell your story simply and clearly — explain what happened, what you\'re owed, and show your evidence. Then the defendant responds. The judge may ask questions to both sides. The judge usually decides right there — the whole hearing takes 15-30 minutes.',
+        acknowledgeLabel: 'I understand the hearing flow →',
         showIf: (answers) => answers.know_hearing_flow === 'no',
       },
       {
@@ -49,6 +51,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'security_deposit_script',
         type: 'info',
+        acknowledgeLabel: 'I have my testimony ready →',
         prompt: state === 'NY'
           ? 'Sample testimony: "Your Honor, I rented from the defendant at [address]. I moved out on [date] and provided my forwarding address in writing. My deposit was $[amount]. It has been over 14 days and I have not received my deposit or an itemized statement of deductions, as required by New York General Obligations Law § 7-108(1-a). Here is my lease, move-out photos, and the forwarding address letter."'
           : state === 'CA'
@@ -65,6 +68,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Sample testimony: "Your Honor, I paid $[amount] to the defendant for [service/goods]. The defendant didn\'t deliver what was promised. Here is the contract showing what was agreed, my proof of payment, and communications showing I tried to resolve this."',
+        acknowledgeLabel: 'I have my testimony ready →',
         showIf: (answers) => answers.claim_type === 'breach_of_contract',
       },
       {
@@ -72,6 +76,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Sample testimony: "Your Honor, on [date], the defendant hit my car at [location]. Here is the police report showing the defendant was at fault, photos of the damage, and my repair estimate for $[amount]."',
+        acknowledgeLabel: 'I have my testimony ready →',
         showIf: (answers) => answers.claim_type === 'car_accident',
       },
       {
@@ -79,6 +84,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Sample testimony: "Your Honor, I loaned $[amount] to the defendant on [date]. Here is the promissory note [or text messages/emails] showing the agreement to repay. The defendant has not repaid despite my requests. Here are my records showing the outstanding balance."',
+        acknowledgeLabel: 'I have my testimony ready →',
         showIf: (answers) => answers.claim_type === 'unpaid_debt',
       },
       {
@@ -86,6 +92,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Sample testimony: "Your Honor, I purchased [product/service] from the defendant for $[amount] on [date]. The product was defective [or the service was not provided as described]. I requested a refund and was refused. Here is my receipt, the product listing, and our communications."',
+        acknowledgeLabel: 'I have my testimony ready →',
         showIf: (answers) => answers.claim_type === 'consumer',
       },
       {
@@ -98,6 +105,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'What NOT to say: Don\'t argue with the judge or the other side. Don\'t interrupt — wait your turn. Don\'t exaggerate your damages. Don\'t bring up irrelevant personal grievances. Don\'t say "I feel like" — state facts. Don\'t reference legal cases or statutes unless you truly understand them. Stick to: what happened, what you\'re owed, and your evidence.',
+        acknowledgeLabel: 'I know what to avoid →',
         showIf: (answers) => answers.know_what_not_to_say === 'no',
       },
       {
@@ -110,6 +118,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Dress respectfully — business casual is fine. No suit required, but avoid shorts, flip-flops, or clothing with offensive language. Address the judge as "Judge [Last Name]" or "Your Honor."',
+        acknowledgeLabel: 'I will dress appropriately →',
         showIf: (answers) => answers.know_dress_code === 'no',
       },
       {
@@ -122,6 +131,7 @@ export function createScCourtroomGuideConfig(state?: string): GuidedStepConfig {
         type: 'info',
         prompt:
           'Organize your evidence in the order you\'ll present it. Have 3 copies of everything: one for you, one for the judge, and one for the other side. When it\'s your turn, hand the judge the document and explain what it shows.',
+        acknowledgeLabel: 'I will prepare 3 copies of my evidence →',
         showIf: (answers) => answers.evidence_ready === 'no',
       },
     ],

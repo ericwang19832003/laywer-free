@@ -23,6 +23,7 @@ export const ltMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the court ordered mediation, you must attend in good faith. Check your court order for the deadline to complete mediation and any approved mediator requirements.',
+      acknowledgeLabel: "I understand — I'll check my court order for the deadline and attend in good faith",
       showIf: (answers) => answers.mediation_type === 'court_ordered',
     },
     {
@@ -37,6 +38,7 @@ export const ltMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check with the court clerk for a list of approved mediators or free mediation programs. Many Texas counties offer dispute resolution centers that handle landlord-tenant cases at low or no cost.',
+      acknowledgeLabel: "I understand — I'll contact the court clerk to find an approved low-cost mediator",
       showIf: (answers) => answers.mediator_selected === 'no',
     },
     {
@@ -51,6 +53,7 @@ export const ltMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before mediation, decide: What is your ideal outcome? What is your bottom line? What terms would you accept? Having clear boundaries makes mediation more productive.',
+      acknowledgeLabel: "I understand — I'll define my ideal outcome and bottom line before the session",
       showIf: (answers) => answers.settlement_authority === 'no',
     },
     {
@@ -68,6 +71,7 @@ export const ltMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Make sure your mediation agreement is signed by both parties and filed with the court. A mediated settlement agreement is binding and enforceable.',
+      acknowledgeLabel: "I understand — I'll get both signatures and file the agreement with the court",
       showIf: (answers) => answers.mediation_result === 'settled',
     },
     {
@@ -75,6 +79,7 @@ export const ltMediationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Since mediation did not resolve the dispute, your case will proceed to a hearing. Your mediation discussions are confidential and cannot be used against you in court.',
+      acknowledgeLabel: "I understand — my mediation discussions are confidential as I prepare for the hearing",
       showIf: (answers) => answers.mediation_result === 'no_agreement',
     },
   ],

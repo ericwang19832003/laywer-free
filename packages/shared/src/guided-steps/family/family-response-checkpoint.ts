@@ -28,6 +28,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'Great news — when both parties agree, your case can move much faster. This is sometimes called an "uncontested" or "agreed" case. You can skip mediation and go straight to drafting a final order for the judge to sign.',
+        acknowledgeLabel: 'Understood →',
         showIf: (a) => a.response_status === 'agreed',
       },
       {
@@ -35,6 +36,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'Important timing rule: if the other party signed a Waiver of Service, that waiver must be signed at least one day AFTER the petition was filed with the court. A waiver signed on the same day as filing is not valid. If yours was signed the same day, you will need to have it re-signed.',
+        acknowledgeLabel: 'Noted the timing rule →',
         showIf: (a) => a.response_status === 'agreed',
       },
       {
@@ -42,6 +44,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'Remember: Texas has a mandatory 60-day waiting period for divorce, and it runs from the date you FILED — not the date of service. If 60 days have passed since filing, you may be able to finalize soon.',
+        acknowledgeLabel: 'Got it — I know my filing date →',
         showIf: (a) => a.response_status === 'agreed' && subType === 'divorce',
       },
 
@@ -51,6 +54,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'When the other party files an answer, your case becomes "contested." This does not mean things are hostile — it just means there are issues you have not agreed on yet. Most contested cases still settle before trial, often through mediation.',
+        acknowledgeLabel: 'I understand →',
         showIf: (a) => a.response_status === 'answer_filed',
       },
       {
@@ -58,6 +62,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'Your next steps in a contested case:\n1. Read their answer carefully — note what they agree and disagree with.\n2. The court will likely set a scheduling order with deadlines.\n3. You may exchange information through "discovery" (requests for documents, questions, etc.).\n4. Most courts require mediation before a trial date is set.\n\nTake it one step at a time — you do not need to figure it all out today.',
+        acknowledgeLabel: 'Got my next steps →',
         showIf: (a) => a.response_status === 'answer_filed',
       },
       {
@@ -65,6 +70,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'Even in a contested divorce, the 60-day waiting period runs from the date you filed — not from service or from the answer. Keep that date in mind as you plan next steps.',
+        acknowledgeLabel: 'Noted the 60-day rule →',
         showIf: (a) => a.response_status === 'answer_filed' && subType === 'divorce',
       },
 
@@ -74,6 +80,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'If the other party was properly served and did not file an answer within the deadline, you may be able to get a "default judgment." This means the judge can grant your requests without the other party participating. It is one of the most straightforward paths to finishing your case.',
+        acknowledgeLabel: 'Understood — default path →',
         showIf: (a) => a.response_status === 'no_response',
       },
       {
@@ -81,6 +88,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'To proceed with a default, you will typically need:\n1. Military Status Declaration — a sworn statement about whether the other party is on active military duty (required by federal law).\n2. Certificate of Last Known Mailing Address — confirms the address where you sent the papers.\n\nWe will help you prepare both of these.',
+        acknowledgeLabel: 'I know what to prepare →',
         showIf: (a) => a.response_status === 'no_response',
       },
       {
@@ -88,6 +96,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'For divorce cases, remember that the 60-day waiting period runs from the filing date, not the service date. You cannot finalize — even by default — until that period has passed.',
+        acknowledgeLabel: 'Noted the 60-day rule →',
         showIf: (a) => a.response_status === 'no_response' && subType === 'divorce',
       },
 
@@ -97,6 +106,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'After being served, the other party generally has until 10:00 AM on the first Monday after 20 days have passed to file an answer. Mark that date on your calendar. Until then, there is nothing you need to do — the ball is in their court.',
+        acknowledgeLabel: 'Got it — I\'ll mark my calendar →',
         showIf: (a) => a.response_status === 'waiting',
       },
       {
@@ -104,6 +114,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'If the deadline passes with no response, you can move forward with a default judgment. We will guide you through that process when the time comes. For now, just keep an eye on the calendar.',
+        acknowledgeLabel: 'Understood →',
         showIf: (a) => a.response_status === 'waiting',
       },
       {
@@ -111,6 +122,7 @@ export function createResponseCheckpointConfig(subType: ResponseSubType): Guided
         type: 'info',
         prompt:
           'While you wait for a response, keep in mind that the 60-day divorce waiting period is already running — it started the day you filed, not the day of service.',
+        acknowledgeLabel: 'Noted — 60 days from filing →',
         showIf: (a) => a.response_status === 'waiting' && subType === 'divorce',
       },
     ],

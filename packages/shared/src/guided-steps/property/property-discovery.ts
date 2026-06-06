@@ -11,6 +11,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In a property dispute, discovery helps you gather critical evidence: property surveys, appraisals, title searches, deeds, and communications. Texas allows interrogatories, requests for production, requests for admission, and depositions.',
+      acknowledgeLabel: 'I understand my discovery options →',
     },
     {
       id: 'has_survey',
@@ -27,6 +28,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A current survey is critical in boundary and encroachment disputes. If your survey is old, consider getting a new one — conditions may have changed. You can also request the other party\'s survey through discovery.',
+      acknowledgeLabel: 'Got it — I\'ll get a current survey →',
       showIf: (answers) => answers.has_survey !== 'yes_recent',
     },
     {
@@ -44,6 +46,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'An appraisal establishes the property\'s value and any diminished value caused by the dispute. This is important for calculating damages. Request the other party\'s appraisal through discovery as well.',
+      acknowledgeLabel: 'Got it — I\'ll get an appraisal →',
       showIf: (answers) => answers.has_appraisal === 'no',
     },
     {
@@ -61,6 +64,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A full title search reveals ownership history, liens, easements, and restrictions on the property. This is essential for title disputes and helpful in boundary cases. Your title company or a title abstractor can perform the search.',
+      acknowledgeLabel: 'Got it — I\'ll run a full title search →',
       showIf: (answers) => answers.title_search !== 'yes',
     },
     {
@@ -78,6 +82,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Requests for production ask the other side to provide documents. In a property dispute, you should request: their deed, any surveys, correspondence about the property, contracts, HOA records, insurance policies, repair invoices, and photos of the disputed area.',
+      acknowledgeLabel: 'Got it — I\'ll send document requests →',
       showIf: (answers) => answers.sent_document_requests !== 'yes',
     },
     {
@@ -95,6 +100,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Interrogatories are written questions the other party must answer under oath. In a property dispute, ask about: their claimed boundaries, when they first noticed the issue, any prior disputes about the property, and the basis for their property claims. Texas limits you to 25 interrogatories including subparts.',
+      acknowledgeLabel: 'Got it — I\'ll send interrogatories →',
       showIf: (answers) => answers.sent_interrogatories !== 'yes',
     },
     {
@@ -112,6 +118,7 @@ export const propertyDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Depositions let you question the other party or witnesses under oath. In property disputes, consider deposing: the other party, their surveyor, previous owners, or any HOA board members involved. Depositions can be expensive due to court reporter fees.',
+      acknowledgeLabel: 'Got it — I\'ll consider depositions →',
       showIf: (answers) => answers.planning_depositions !== 'yes',
     },
   ],

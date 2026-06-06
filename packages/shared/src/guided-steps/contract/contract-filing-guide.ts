@@ -25,18 +25,21 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'court_jp',
         type: 'info',
         prompt: `File in ${ct.jpCourtName}. Simpler process, no jury unless requested. Faster resolution.`,
+        acknowledgeLabel: "I'll file in Justice of the Peace Court →",
         showIf: (answers) => answers.total_damages === 'under_jp',
       },
       {
         id: 'court_mid',
         type: 'info',
         prompt: `File in ${ct.midCourtName}. More formal, but still manageable for pro se litigants.`,
+        acknowledgeLabel: "I'll file in County Court →",
         showIf: (answers) => answers.total_damages === 'mid_range',
       },
       {
         id: 'court_high',
         type: 'info',
         prompt: `File in ${ct.highCourtName}. Most formal. Consider consulting an attorney for complex cases.`,
+        acknowledgeLabel: "I'll file in District Court →",
         showIf: (answers) => answers.total_damages === 'over_mid',
       },
 
@@ -50,6 +53,7 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'forum_selection_yes_info',
         type: 'info',
         prompt: "Your contract's forum selection clause usually controls where you must file. File in the court and location specified in the contract. If the clause names a different state, you may need to file there instead. Consult an attorney if the clause seems unfair or was buried in fine print.",
+        acknowledgeLabel: "I'll file in the court specified by the forum selection clause →",
         showIf: (answers) => answers.forum_selection === 'yes',
       },
 
@@ -69,6 +73,7 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'efile_instructions',
         type: 'info',
         prompt: `To file online:\n1. Go to ${ct.eFilingUrl} (${ct.eFilingName}) and create a free account\n2. Select your court and case type (breach of contract)\n3. Upload your Petition or Complaint as a PDF\n4. Pay the filing fee online (or submit fee waiver)\n5. You'll receive a confirmation email when accepted\n\nTip: Most courts accept e-filed documents within 24 hours.`,
+        acknowledgeLabel: "I'll create an account and e-file my petition →",
         showIf: (answers) => answers.filing_method === 'efile',
       },
 
@@ -76,6 +81,7 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'in_person_instructions',
         type: 'info',
         prompt: "To file in person:\n1. Print 3 copies of your Petition or Complaint (one for the court, one for you, one to serve)\n2. Go to the court clerk's office during business hours (usually 8am–5pm)\n3. Tell the clerk: \"I need to file a Petition for breach of contract\"\n4. Pay the filing fee (or bring a completed fee waiver form)\n5. The clerk will stamp all copies — keep your stamped copy as proof\n6. Ask the clerk about service options for the defendant",
+        acknowledgeLabel: "I'll bring 3 printed copies and payment to the clerk's office →",
         showIf: (answers) => answers.filing_method === 'in_person',
       },
 
@@ -83,6 +89,7 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'mail_instructions',
         type: 'info',
         prompt: "To file by mail:\n1. Print 3 copies of your Petition or Complaint\n2. Include a self-addressed stamped envelope for the clerk to return your stamped copy\n3. Mail to the court clerk's office via certified mail with return receipt\n4. Include a check or money order for the filing fee (or fee waiver form)\n\nWarning: Mail takes time. Allow at least 7–10 business days for processing.",
+        acknowledgeLabel: "I'll mail 3 copies via certified mail with a self-addressed return envelope →",
         showIf: (answers) => answers.filing_method === 'mail',
       },
 
@@ -96,6 +103,7 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'fee_waiver_info',
         type: 'info',
         prompt: `You can file a "${ct.feeWaiverForm}" to request a fee waiver.\n\n1. Download the form from ${ct.helpSiteUrl} (${ct.helpSiteName}) or ask the court clerk\n2. Fill it out honestly — include your income, expenses, and why you can't pay\n3. File it WITH your Petition (same time)\n4. The court will review it — most are approved within a few days\n5. If approved, you pay $0. If denied, you can appeal the denial.`,
+        acknowledgeLabel: "I'll download and file the fee waiver form alongside my petition →",
         showIf: (answers) => answers.can_afford_fee === 'no',
       },
 
@@ -103,12 +111,21 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         id: 'venue_info',
         type: 'info',
         prompt: 'VENUE: File in the county where: (a) the contract was performed, (b) the contract was made, or (c) the defendant lives. If your contract specifies a venue, that usually controls.',
+        acknowledgeLabel: "I'll file in the correct county based on contract performance or defendant location →",
       },
 
       {
         id: 'what_to_bring',
-        type: 'info',
-        prompt: 'Checklist — what to bring when filing:\n\n• Your Petition or Complaint (3 copies, signed)\n• A copy of the contract (or written summary if oral contract)\n• Filing fee payment or fee waiver form\n• Government-issued ID',
+        type: 'multi_select',
+        prompt: 'Check off the items you have ready to bring when filing:',
+        options: [
+          { value: 'petition_copies', label: 'Petition or Complaint (3 signed copies)' },
+          { value: 'contract_copy', label: 'Copy of the contract (or written summary if oral)' },
+          { value: 'filing_fee', label: 'Filing fee payment or fee waiver form' },
+          { value: 'government_id', label: 'Government-issued ID' },
+          { value: 'defendant_address', label: 'Defendant\'s current address (for service)' },
+        ],
+        noneLabel: 'Nothing ready yet',
       },
     ],
 
@@ -194,6 +211,15 @@ export function createContractFilingGuideConfig(state?: string): GuidedStepConfi
         status: 'info',
         text: "File in the county where the contract was performed, was made, or where the defendant lives. If your contract specifies a venue, that usually controls.",
       })
+
+      const allItems = ['petition_copies', 'contract_copy', 'filing_fee', 'government_id', 'defendant_address']
+      const selectedItems: string[] = answers.what_to_bring ? answers.what_to_bring.split(',').filter(Boolean) : []
+      const missingItems = allItems.filter((v) => !selectedItems.includes(v))
+      if (selectedItems.length > 0 && missingItems.length === 0) {
+        items.push({ status: 'done', text: 'All filing items are ready to bring.' })
+      } else if (missingItems.length > 0) {
+        items.push({ status: 'needed', text: 'Items still needed for filing: Petition copies, contract copy, filing fee, government ID, defendant address.' })
+      }
 
       return items
     },

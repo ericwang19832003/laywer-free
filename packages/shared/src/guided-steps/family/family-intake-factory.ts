@@ -116,7 +116,7 @@ const SUB_TYPE_QUESTIONS: Record<FamilySubType, QuestionDef[]> = {
       { value: 'multiple', label: 'Multiple types' },
     ]},
     { id: 'immediate_danger', type: 'yes_no', prompt: 'Are you in immediate danger right now?' },
-    { id: 'immediate_danger_info', type: 'info', prompt: 'If you are in immediate danger, call 911 now. You can also contact the National Domestic Violence Hotline at 1-800-799-7233.', showIf: (a) => a.immediate_danger === 'yes' },
+    { id: 'immediate_danger_info', type: 'info', prompt: 'If you are in immediate danger, call 911 now. You can also contact the National Domestic Violence Hotline at 1-800-799-7233.', acknowledgeLabel: "I'll call 911 or the DV Hotline immediately", showIf: (a) => a.immediate_danger === 'yes' },
   ],
   modification: [
     { id: 'existing_court', type: 'text', prompt: 'Which court issued the existing order?', placeholder: 'e.g., 256th District Court, Dallas County' },

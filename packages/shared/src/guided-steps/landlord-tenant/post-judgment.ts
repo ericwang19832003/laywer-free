@@ -33,6 +33,7 @@ export const postJudgmentConfig: GuidedStepConfig = {
         "If they haven't complied, you can pursue enforcement: writ of possession (eviction), wage garnishment, bank levy, or property lien.",
       helpText:
         'A judgment is only as good as your ability to collect. The court can help you enforce it.',
+      acknowledgeLabel: "I understand my enforcement options — I'll pursue a writ of possession, garnishment, or lien to collect",
       showIf: (answers) =>
         answers.case_outcome === 'won' &&
         answers.other_party_complied === 'no',
@@ -52,6 +53,7 @@ export const postJudgmentConfig: GuidedStepConfig = {
         'Appeals must be filed within 21 days in JP court. You\'ll need to post an appeal bond. The case starts fresh in county court.',
       helpText:
         'For eviction cases, the appeal deadline is only 5 days (TRCP 510.9). Don\'t miss this window.',
+      acknowledgeLabel: "I understand the appeal deadline — I'll file immediately given the 5-day window for eviction cases",
       showIf: (answers) =>
         answers.case_outcome === 'lost' &&
         answers.considering_appeal === 'yes',
@@ -63,6 +65,7 @@ export const postJudgmentConfig: GuidedStepConfig = {
         'Keep copies of all court documents. If money is owed, keep records of any payments received.',
       helpText:
         'You may need these documents for enforcement, appeals, or tax purposes.',
+      acknowledgeLabel: "I understand — I'll keep copies of all court documents and track any payments received",
     },
   ],
 

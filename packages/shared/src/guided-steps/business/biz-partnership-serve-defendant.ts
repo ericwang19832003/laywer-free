@@ -17,6 +17,7 @@ export const bizPartnershipServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Look up the registered agent on the Texas Secretary of State website (sos.state.tx.us).',
+      acknowledgeLabel: "I'll look up the registered agent on the Texas Secretary of State website",
       showIf: (answers) => answers.know_registered_agent === 'no',
     },
     {

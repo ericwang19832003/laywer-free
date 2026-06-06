@@ -7,10 +7,11 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
 
   questions: [
     {
-      id: 'damages_overview',
+      id: 'damages_overview_repair',
       type: 'info',
       prompt:
-        'TYPES OF PROPERTY DAMAGES IN TEXAS:\n\n1. REPAIR OR REPLACEMENT COST (pick one — these are mutually exclusive):\n   • Repairable: cost to restore property to pre-damage condition (use a reasonable estimate from 2–3 licensed contractors)\n   • Totaled/destroyed: fair market value immediately before the damage (not the cost to rebuild)\n\n2. DIMINISHED VALUE (repaired property only):\n   Property may still be worth less after full repair (e.g., flood-damaged home, car with accident history on title). Does not apply if you claimed replacement value.\n\n3. LOSS OF USE:\n   Costs incurred while the property was unusable — temporary housing, lost rental income, or lost business income during the repair period.\n\n4. CONSEQUENTIAL DAMAGES:\n   Other costs directly caused by the damage — hotel stays, storage fees, moving, emergency repairs to prevent further damage, HOA fines, permit and inspection fees.',
+        'REPAIR OR REPLACEMENT COST (pick one — these are mutually exclusive):\n\n• Repairable: cost to restore property to pre-damage condition (use a reasonable estimate from 2–3 licensed contractors)\n• Totaled/destroyed: fair market value immediately before the damage (not the cost to rebuild)\n\nYou cannot claim both. Choose the one that fits your situation.',
+      acknowledgeLabel: 'Got it →',
     },
     {
       id: 'repair_cost',
@@ -34,6 +35,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DIMINISHED VALUE:\nGet a before-and-after appraisal to establish diminished value. The difference between your property\'s value before the damage and its value after repair (accounting for the damage history) is your diminished value claim. A licensed appraiser can provide this.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_diminished_value === 'yes',
     },
     {
@@ -49,6 +51,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'LOSS OF USE DAMAGES:\nKeep receipts for all temporary housing, storage, and relocation costs. If you own rental property, calculate lost rental income for the repair period. If the property is used for business, document lost business income. The key is documenting the period you could not use the property and the costs incurred.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_loss_of_use === 'yes',
     },
     {
@@ -64,6 +67,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CONSEQUENTIAL DAMAGES:\nKeep every receipt. These "extra" costs add up quickly and are recoverable:\n• Hotel/temporary housing\n• Storage unit fees\n• Moving and relocation costs\n• Emergency repair costs (to prevent further damage)\n• Increased insurance premiums\n• HOA fines triggered by the damage\n• Permit and inspection fees\n• Lost wages (time off work to deal with damage)',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_consequential_costs === 'yes',
     },
     {
@@ -71,6 +75,7 @@ export const propertyDamagesGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'YOUR TOTAL CLAIM = Repair OR Replacement Cost (one, not both) + Diminished Value + Loss of Use + Consequential Damages\n\nRepair cost and replacement cost are mutually exclusive — pick whichever applies. Diminished value only applies if you chose repair cost, not replacement.\n\nDocument each category separately with receipts, estimates, or appraisals. Present them as line items to the court — judges appreciate organized, itemized damage calculations. Do not round up or guess — use actual numbers backed by evidence.',
+      acknowledgeLabel: 'Got it →',
     },
   ],
 

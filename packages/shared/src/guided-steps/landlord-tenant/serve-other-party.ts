@@ -27,6 +27,7 @@ export const serveOtherPartyConfig: GuidedStepConfig = {
         'Eviction cases have special service rules. In Texas, you can post the citation on the door if personal service fails.',
       helpText:
         'Under TRCP 510.4, door posting plus certified mail is allowed for eviction cases when other methods fail.',
+      acknowledgeLabel: "I understand — I can use door posting plus certified mail if personal service fails in this eviction case",
       showIf: (answers) => answers.is_eviction === 'yes',
     },
     {

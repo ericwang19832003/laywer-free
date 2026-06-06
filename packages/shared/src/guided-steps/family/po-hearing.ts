@@ -13,6 +13,7 @@ export const poHearingConfig: GuidedStepConfig = {
       id: 'hearing_info',
       type: 'info',
       prompt: 'The hearing must be set within 14 days of your application. Check with the court clerk for your hearing date.',
+      acknowledgeLabel: "I'll check with the clerk for my hearing date",
       showIf: (a) => a.hearing_date_known === 'no',
     },
     {
@@ -25,6 +26,7 @@ export const poHearingConfig: GuidedStepConfig = {
       id: 'evidence_info',
       type: 'info',
       prompt: 'Gather: photos of injuries, screenshots of threatening messages, medical records, police reports, and names of witnesses.',
+      acknowledgeLabel: "I'll gather photos, messages, medical records, and police reports",
       showIf: (a) => a.evidence_prepared === 'no',
     },
     {
@@ -42,12 +44,14 @@ export const poHearingConfig: GuidedStepConfig = {
       id: 'safety_plan_info',
       type: 'info',
       prompt: 'Create a safety plan: identify a safe place, save emergency contacts, keep copies of IDs and documents. DV Hotline: 1-800-799-7233.',
+      acknowledgeLabel: "I'll create my safety plan",
       showIf: (a) => a.safety_plan === 'no',
     },
     {
       id: 'hearing_procedure',
       type: 'info',
       prompt: 'At the hearing: both parties can present evidence and testimony. The respondent has a right to be present. Focus on specific incidents with dates and details.',
+      acknowledgeLabel: "I understand the hearing procedure",
     },
   ],
   generateSummary(answers) {

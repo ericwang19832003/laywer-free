@@ -11,12 +11,14 @@ export const ltWritOfPossessionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IF YOU LOSE THE EVICTION CASE:\n\nDay 1-5: Appeal window — you can file an appeal (see Appeal Guide)\nDay 6+: If no appeal filed, landlord can request a \'Writ of Possession\'\nWrit issued: Constable posts notice on your door giving you 24 hours\nAfter 24 hours: Constable can physically remove you and change locks',
+      acknowledgeLabel: 'I understand the post-judgment eviction timeline and my 5-day appeal window',
     },
     {
       id: 'rights_during_process',
       type: 'info',
       prompt:
         'YOUR RIGHTS DURING THIS PROCESS:\n- You MUST be given written notice before physical removal\n- The constable must be present (landlord cannot self-help)\n- You can take your personal belongings\n- Landlord must store your property for a reasonable time if you can\'t take it all\n- You are NOT responsible for the landlord\'s eviction costs unless the judge ordered it',
+      acknowledgeLabel: 'I understand my rights — the landlord cannot remove me without a constable and proper written notice',
     },
     {
       id: 'facing_removal',
@@ -27,11 +29,19 @@ export const ltWritOfPossessionConfig: GuidedStepConfig = {
     },
     {
       id: 'emergency_steps',
-      type: 'info',
+      type: 'multi_select',
       prompt:
-        'EMERGENCY STEPS:\n1. File an appeal NOW if within 5 days (this STOPS the eviction)\n2. If past 5 days: Contact legal aid immediately\n   - Lone Star Legal Aid: 1-800-733-8394\n   - Texas RioGrande Legal Aid: 1-888-988-9996\n3. Begin moving your most important belongings\n4. Secure important documents (ID, lease, financial records)\n5. Contact 211 (United Way) for emergency housing assistance',
+        'EMERGENCY STEPS — Check off each action you have taken or will take immediately:',
       helpText:
         'Time is critical. If you are within the 5-day appeal window, filing an appeal will immediately stop the eviction process.',
+      options: [
+        { value: 'file_appeal', label: 'File an appeal NOW if within 5 days of judgment (this STOPS the eviction)' },
+        { value: 'contact_lone_star', label: 'Contact Lone Star Legal Aid: 1-800-733-8394' },
+        { value: 'contact_trla', label: 'Contact Texas RioGrande Legal Aid: 1-888-988-9996' },
+        { value: 'move_belongings', label: 'Begin moving most important belongings' },
+        { value: 'secure_documents', label: 'Secure important documents (ID, lease, financial records)' },
+        { value: 'contact_211', label: 'Contact 211 (United Way) for emergency housing assistance' },
+      ],
       showIf: (answers) => answers.facing_removal === 'yes',
     },
     {
@@ -39,6 +49,7 @@ export const ltWritOfPossessionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RESOURCES FOR DISPLACED TENANTS:\n- 211 Texas: emergency housing, food, utilities assistance\n- texaslawhelp.org: free legal information\n- Salvation Army & local churches: temporary shelter\n- Local housing authority: Section 8 vouchers and public housing',
+      acknowledgeLabel: "I've noted these resources and will contact them if I need housing assistance",
     },
   ],
 
@@ -46,20 +57,24 @@ export const ltWritOfPossessionConfig: GuidedStepConfig = {
     const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 
     if (answers.facing_removal === 'yes') {
+      const completedSteps = answers.emergency_steps
+        ? new Set(answers.emergency_steps.split(','))
+        : new Set<string>()
+
       items.push({
-        status: 'needed',
+        status: completedSteps.has('file_appeal') ? 'done' : 'needed',
         text: 'URGENT: If within 5 days of judgment, file an appeal NOW to stop the eviction.',
       })
       items.push({
-        status: 'needed',
+        status: completedSteps.has('contact_lone_star') || completedSteps.has('contact_trla') ? 'done' : 'needed',
         text: 'Contact legal aid: Lone Star Legal Aid 1-800-733-8394 or Texas RioGrande Legal Aid 1-888-988-9996.',
       })
       items.push({
-        status: 'needed',
+        status: completedSteps.has('secure_documents') && completedSteps.has('move_belongings') ? 'done' : 'needed',
         text: 'Secure important documents and begin moving essential belongings.',
       })
       items.push({
-        status: 'needed',
+        status: completedSteps.has('contact_211') ? 'done' : 'needed',
         text: 'Call 211 for emergency housing assistance.',
       })
     } else {

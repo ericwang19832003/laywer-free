@@ -11,24 +11,28 @@ export const ltSb38AwarenessConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IMPORTANT LAW CHANGE — Texas Senate Bill 38 took effect January 1, 2026, making significant changes to eviction procedures. Key changes:',
+      acknowledgeLabel: 'I understand SB 38 changed Texas eviction procedures',
     },
     {
       id: 'possession_only',
       type: 'info',
       prompt:
         'POSSESSION-ONLY HEARINGS — Eviction suits are now limited to the issue of possession (who gets to stay in the property). Landlords CANNOT pursue unpaid rent in the same eviction suit. If your landlord wants rent money, they must file a separate lawsuit. This protects tenants from owing a judgment AND losing their home in one proceeding.',
+      acknowledgeLabel: "I understand rent claims must be filed separately — they can't be combined with eviction",
     },
     {
       id: 'no_counterclaims',
       type: 'info',
       prompt:
         'NO COUNTERCLAIMS IN EVICTION — Tenants can no longer file counterclaims (like habitability or security deposit claims) within an eviction suit. You must file those as separate lawsuits. This means: if you have repair/habitability claims, file them as a SEPARATE case in JP court.',
+      acknowledgeLabel: "I understand I must file habitability or deposit claims as a separate lawsuit",
     },
     {
       id: 'summary_disposition',
       type: 'info',
       prompt:
         'SUMMARY DISPOSITION FOR SQUATTERS — New Rule 510.4(d) allows landlords to get expedited eviction of someone who was never a tenant (squatter/unauthorized occupant). The occupant must respond within 4 DAYS or face eviction without a full hearing.',
+      acknowledgeLabel: 'I understand the 4-day response deadline for summary disposition claims',
     },
     {
       id: 'is_squatter_claim',
@@ -41,6 +45,7 @@ export const ltSb38AwarenessConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'URGENT — 4 DAY DEADLINE: You must respond to the Motion for Summary Disposition within 4 days. File a response explaining why you have a right to be in the property (lease, permission, prior tenancy). If you miss this deadline, the court can order eviction without a hearing.',
+      acknowledgeLabel: "I understand — I'll file my response to the Motion for Summary Disposition within 4 days",
       showIf: (answers) => answers.is_squatter_claim === 'yes',
     },
     {
@@ -48,12 +53,14 @@ export const ltSb38AwarenessConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ELECTRONIC NOTICE — Landlords can now serve notice to vacate by email IF the lease expressly permits electronic notice. Check your lease for an electronic notice clause.',
+      acknowledgeLabel: "I understand — I'll check my lease for an electronic notice clause",
     },
     {
       id: 'good_faith_oath',
       type: 'info',
       prompt:
         'STRENGTHENED GOOD FAITH OATH — Landlords must now sign a more detailed good faith affidavit when filing. If you believe the landlord filed in bad faith (retaliation, discrimination), this may be grounds for dismissal.',
+      acknowledgeLabel: "I understand — I'll note bad-faith filing as a potential dismissal ground if applicable",
     },
   ],
 

@@ -26,12 +26,14 @@ export function createFileWithCourtConfig(subType: FilingSubType): GuidedStepCon
         id: 'efiling_info',
         type: 'info',
         prompt: 'Texas requires e-filing in most counties. Check eFileTexas.gov for your county\'s requirements.',
+        acknowledgeLabel: "I'll check eFileTexas.gov for my county's e-filing requirements",
         showIf: (a) => a.filing_method === 'not_sure',
       },
       ...(isPO ? [{
         id: 'po_fee_info',
         type: 'info' as const,
         prompt: 'There is no filing fee for protective orders in Texas (TX Family Code §81.002). The court will handle service to the respondent.',
+        acknowledgeLabel: "I understand there is no filing fee for my protective order",
       }] : [{
         id: 'filing_fee_ready',
         type: 'yes_no' as const,
@@ -42,6 +44,7 @@ export function createFileWithCourtConfig(subType: FilingSubType): GuidedStepCon
         id: 'original_court_info',
         type: 'info' as const,
         prompt: 'Modifications should be filed in the court that issued the original order, unless the case has been transferred.',
+        acknowledgeLabel: "I'll file my modification in the court that issued the original order",
       }] : []),
       {
         id: 'documents_ready',

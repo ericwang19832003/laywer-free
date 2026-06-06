@@ -24,6 +24,7 @@ export function createContractWaitForAnswerConfig(state?: string): GuidedStepCon
         id: 'deadline_info',
         type: 'info',
         prompt: `The defendant generally has until ${ct.answerDeadline} to file an answer.`,
+        acknowledgeLabel: "I've noted the defendant's answer deadline →",
       },
       {
         id: 'monitoring_docket',
@@ -34,6 +35,7 @@ export function createContractWaitForAnswerConfig(state?: string): GuidedStepCon
         id: 'docket_info',
         type: 'info',
         prompt: "You can check for filings on your county court's online docket system, or by calling the clerk's office. Look for an \"Answer,\" \"General Denial,\" or any motions filed by the defendant.",
+        acknowledgeLabel: "I'll monitor the court docket regularly for the defendant's answer →",
         showIf: (answers) => answers.monitoring_docket === 'no',
       },
       {
@@ -50,12 +52,14 @@ export function createContractWaitForAnswerConfig(state?: string): GuidedStepCon
         id: 'check_answer_info',
         type: 'info',
         prompt: "Look up your case on the county court's online docket, or call the clerk's office. You may also receive a copy by mail from the defendant's attorney.",
+        acknowledgeLabel: "I'll check the court docket or call the clerk to find out →",
         showIf: (answers) => answers.answer_received === 'not_sure',
       },
       {
         id: 'default_judgment_info',
         type: 'info',
         prompt: 'If the defendant does not file an answer by the deadline, you may request a default judgment. This means the court could rule in your favor on the contract claim without a trial. You will still need to prove your damages.',
+        acknowledgeLabel: "I'll request a default judgment if the deadline has passed with no answer →",
         showIf: (answers) => answers.answer_received === 'no' && answers.service_date === 'over_three_weeks',
       },
     ],

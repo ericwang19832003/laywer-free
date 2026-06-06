@@ -9,6 +9,7 @@ export const debtDiscoveryResponseConfig: GuidedStepConfig = {
     {
       id: 'rfa_critical_warning',
       type: 'info',
+      acknowledgeLabel: 'Understood — responding to RFAs is my top priority →',
       prompt:
         'CRITICAL WARNING — REQUESTS FOR ADMISSION\n\nThis is the #1 mistake pro se defendants make. If you received Requests for Admission (RFAs) and do NOT respond within 30 days, every single request is automatically DEEMED ADMITTED — meaning the court treats them as true, even if they are not.\n\nThis can lose your entire case instantly. The plaintiff can then file a motion for summary judgment based on your "admissions" and win without a trial.\n\nIf you have received RFAs, responding to them is your most urgent priority. Do not wait. Count 30 days from the date you received them and work backward to give yourself time to prepare and file your responses.',
     },
@@ -46,6 +47,7 @@ export const debtDiscoveryResponseConfig: GuidedStepConfig = {
     {
       id: 'rfa_response_guide',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know how to respond →',
       prompt:
         'HOW TO RESPOND TO REQUESTS FOR ADMISSION (RFAs)\n\nYou must respond to each individual RFA with one of three answers:\n\n1. "ADMITTED" — You agree the statement is true. Only admit facts you are 100% certain about.\n\n2. "DENIED" — You disagree with the statement. Be specific in your denial. Example: "Denied. Defendant did not sign any agreement with Plaintiff."\n\n3. "OBJECTION" — The request is improper. State the specific legal grounds (vague, overly broad, compound, assumes facts not in evidence, etc.).\n\nCommon RFAs in debt collection cases:\n- "Admit that you owe $X to Plaintiff." — Deny if the amount is wrong or you dispute the debt.\n- "Admit that you signed the credit agreement." — Deny if you did not sign it or have no memory of signing it.\n- "Admit that you received the goods/services." — Deny if you are unsure or did not receive them.\n\nIMPORTANT: If you are not sure whether something is true, DENY IT. The plaintiff must then prove it. An admission cannot be taken back without a court order.',
       showIf: (answers) =>
@@ -56,6 +58,7 @@ export const debtDiscoveryResponseConfig: GuidedStepConfig = {
     {
       id: 'interrogatories_guide',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know how to respond →',
       prompt:
         'HOW TO RESPOND TO INTERROGATORIES\n\nInterrogatories are written questions you must answer under oath. Key rules:\n\n- Answer each question directly and truthfully, but do NOT volunteer extra information. Answer only what is asked.\n- If a question is overly broad, vague, or seeks privileged information, you may object. State the specific grounds: "Objection. This interrogatory is overly broad and unduly burdensome."\n- If you do not know the answer, say so: "Defendant does not have sufficient information to answer this interrogatory."\n- Keep your answers short and factual. Do not speculate or guess.\n- Your answers are under oath — they can be used against you at trial. Be careful and precise.',
       showIf: (answers) =>
@@ -66,6 +69,7 @@ export const debtDiscoveryResponseConfig: GuidedStepConfig = {
     {
       id: 'rfp_guide',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know how to respond →',
       prompt:
         'HOW TO RESPOND TO REQUESTS FOR PRODUCTION\n\nRequests for Production ask you to provide copies of documents. Key rules:\n\n- Produce documents you actually have. You are not required to create documents that do not exist.\n- If you do not have a requested document, say so: "Defendant does not possess, and after reasonable inquiry cannot locate, the requested document."\n- If a request is overly broad or seeks privileged information, object with specific grounds: "Objection. This request is overly broad and not reasonably calculated to lead to the discovery of admissible evidence."\n- Assert privilege where applicable — communications with your attorney (if any) are protected by attorney-client privilege.\n- Organize your responses by matching each numbered request with your response.',
       showIf: (answers) =>
@@ -83,17 +87,24 @@ export const debtDiscoveryResponseConfig: GuidedStepConfig = {
       showIf: (answers) => answers.received_discovery === 'yes',
     },
     {
-      id: 'your_discovery_guide',
-      type: 'info',
-      prompt:
-        'KEY DISCOVERY TO SEND TO THE PLAINTIFF\n\nYou have the right to send your own discovery requests. This is one of the most powerful tools available to you. Request the following — debt collectors often cannot produce these documents, which can win your case:\n\n1. ORIGINAL SIGNED AGREEMENT — Request the original credit agreement bearing your actual signature (not a generic cardholder agreement). If they cannot produce it, they may not be able to prove the debt exists.\n\n2. COMPLETE CHAIN OF ASSIGNMENT — Request every document showing how the debt was transferred from the original creditor to the current plaintiff. Each link in the chain must be documented. A broken chain means they lack standing to sue you.\n\n3. COMPLETE ACCOUNT STATEMENTS — Request statements showing every charge, payment, fee, and interest calculation from account opening to the amount claimed. This often reveals errors or inflated balances.\n\n4. PAYMENT RECORDS — Request records of every payment you made and how it was applied. Compare these against your own bank records.\n\n5. BUSINESS RECORDS AFFIDAVIT — Request that any documents produced be accompanied by a business records affidavit qualifying them for admission as evidence under the hearsay exception. Without this, their documents may be inadmissible at trial.\n\nThese requests frequently expose weak cases. Many debt buyers purchased debts in bulk with minimal documentation and simply cannot provide what you are asking for.',
+      id: 'sent_discovery_items',
+      type: 'multi_select',
+      prompt: 'Which of these discovery items have you sent (or plan to send) to the plaintiff?',
+      options: [
+        { value: 'original_agreement', label: 'Original signed credit agreement' },
+        { value: 'chain_of_assignment', label: 'Complete chain of debt assignment documents' },
+        { value: 'account_statements', label: 'Complete account statements (all charges, fees, interest)' },
+        { value: 'payment_records', label: 'Payment records showing how each payment was applied' },
+        { value: 'business_records_affidavit', label: 'Business records affidavit (to qualify documents as evidence)' },
+      ],
+      noneLabel: "Haven't sent any yet",
     },
     {
-      id: 'sent_own_discovery',
-      type: 'yes_no',
-      prompt: 'Have you sent your own discovery requests to the plaintiff?',
-      helpText:
-        'Sending your own discovery is strongly recommended. It forces the plaintiff to prove they have the documentation to support their case. Many debt cases are won because the plaintiff could not produce basic records.',
+      id: 'discovery_power_info',
+      type: 'info',
+      prompt:
+        'These requests frequently expose weak cases. Many debt buyers purchased debts in bulk with minimal documentation and simply cannot produce what you are asking for. If they fail to respond within 30 days, you can file a motion to compel.',
+      acknowledgeLabel: 'Got it — sending my requests →',
     },
   ],
 
@@ -143,12 +154,13 @@ export const debtDiscoveryResponseConfig: GuidedStepConfig = {
     }
 
     // Own discovery
-    if (answers.sent_own_discovery === 'yes') {
+    if (answers.sent_discovery_items && answers.sent_discovery_items !== 'none') {
+      const sentItems = answers.sent_discovery_items.split(',')
       items.push({
-        status: 'done',
-        text: 'You have sent your own discovery requests to the plaintiff. Follow up if they do not respond within 30 days — you can file a motion to compel.',
+        status: sentItems.length === 5 ? 'done' : 'needed',
+        text: `You have sent ${sentItems.length} of 5 discovery item${sentItems.length !== 1 ? 's' : ''} to the plaintiff. Follow up if they do not respond within 30 days — you can file a motion to compel.`,
       })
-    } else if (answers.sent_own_discovery === 'no') {
+    } else {
       items.push({
         status: 'needed',
         text: 'Send your own discovery requests to the plaintiff. Request the original signed agreement, chain of assignment, complete account statements, payment records, and business records affidavit. This often exposes weak cases.',

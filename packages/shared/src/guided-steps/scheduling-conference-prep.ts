@@ -25,6 +25,7 @@ export const schedulingConferencePrepConfig: GuidedStepConfig = {
       id: 'discovery_info',
       type: 'info',
       prompt: 'Consider: document requests, interrogatories, depositions, expert witnesses, and any ESI (electronic data) needs.',
+      acknowledgeLabel: 'Got it — I\'ll plan my discovery →',
       showIf: (answers) => answers.discovery_scope === 'no',
     },
     {
@@ -36,6 +37,7 @@ export const schedulingConferencePrepConfig: GuidedStepConfig = {
       id: 'expert_info',
       type: 'info',
       prompt: 'Expert disclosures typically require: expert name, qualifications, opinions, and summary of bases. Plan extra time for expert-related discovery.',
+      acknowledgeLabel: 'Got it — I\'ll plan for expert discovery →',
       showIf: (answers) => answers.expert_witnesses === 'yes',
     },
     {
@@ -47,6 +49,7 @@ export const schedulingConferencePrepConfig: GuidedStepConfig = {
       id: 'trial_info',
       type: 'info',
       prompt: 'Consider your evidence gathering timeline, expert schedules, and any conflicts when proposing a trial date.',
+      acknowledgeLabel: 'Got it — I\'ll work out a realistic trial date →',
       showIf: (answers) => answers.trial_ready === 'no',
     },
     {
@@ -58,6 +61,7 @@ export const schedulingConferencePrepConfig: GuidedStepConfig = {
       id: 'mediation_info',
       type: 'info',
       prompt: 'You may propose mediation or early settlement conference as part of the scheduling order.',
+      acknowledgeLabel: 'Got it — I\'ll propose mediation →',
       showIf: (answers) => answers.settlement_interest === 'yes',
     },
   ],

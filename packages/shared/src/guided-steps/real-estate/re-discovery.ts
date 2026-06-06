@@ -16,6 +16,7 @@ export const reDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Common document requests in real estate cases include: the purchase agreement, closing documents, inspection reports, disclosure notices, communications with agents or brokers, repair estimates, appraisals, title documents, HOA records, and any amendments or addenda to the contract.',
+      acknowledgeLabel: 'I know what documents to request →',
       showIf: (answers) => answers.documents_needed === 'no',
     },
     {
@@ -33,6 +34,7 @@ export const reDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You typically have 30 days to respond to discovery requests. Respond honestly and completely — failure to respond can result in court sanctions or the court assuming the facts are true. Gather the requested documents and answer any interrogatories under oath.',
+      acknowledgeLabel: 'I will respond within 30 days →',
       showIf: (answers) => answers.received_discovery === 'yes',
     },
     {

@@ -59,7 +59,8 @@ export async function FocusTab({
         | undefined) ?? null
 
     const tasksSummary = dashboard.tasks_summary ?? {}
-    const totalTasks = Object.values(tasksSummary).reduce((s: number, v) => s + (v as number), 0)
+    const lockedTasks = (tasksSummary.locked as number ?? 0)
+    const totalTasks = Object.values(tasksSummary).reduce((s: number, v) => s + (v as number), 0) - lockedTasks
     const completedTasks =
       (tasksSummary.completed as number ?? 0) + (tasksSummary.skipped as number ?? 0)
 

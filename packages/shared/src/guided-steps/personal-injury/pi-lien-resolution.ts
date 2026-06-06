@@ -10,7 +10,22 @@ export const piLienResolutionConfig: GuidedStepConfig = {
       id: 'what_are_liens',
       type: 'info',
       prompt:
-        "WHAT ARE MEDICAL LIENS?\nWhen you receive medical treatment after an injury, your medical providers, health insurer, or government programs may place a \"lien\" on your settlement or judgment. This means they have a legal right to be repaid from your recovery BEFORE you receive your share.\n\nCommon lien holders:\n\u2022 Hospitals and doctors who treated you\n\u2022 Health insurance companies (they paid your bills and want reimbursement)\n\u2022 Medicare or Medicaid (federal law requires repayment)\n\u2022 Workers' compensation carriers\n\u2022 ERISA health plans (employer-sponsored insurance)",
+        "WHAT ARE MEDICAL LIENS?\nWhen you receive medical treatment after an injury, lien holders can place a legal claim on your settlement. They must be repaid from your recovery BEFORE you receive your share.\n\nThere are two categories of lien holders \u2014 private and government. Each has different rules.",
+      acknowledgeLabel: 'Got it \u2014 tell me about each type \u2192',
+    },
+    {
+      id: 'what_are_private_liens',
+      type: 'info',
+      prompt:
+        "PRIVATE / MEDICAL LIENS:\n\u2022 Hospitals and doctors who treated you\n\u2022 Health insurance companies (they paid your bills and want reimbursement \u2014 called \"subrogation\")\n\u2022 Workers' compensation carriers (if your employer's insurer paid wage or medical benefits)\n\u2022 ERISA health plans (employer-sponsored insurance \u2014 federal law governs these)\n\nGood news: private lien holders typically negotiate. Medical providers often accept 30\u201350% reductions.",
+      acknowledgeLabel: 'Got it \u2014 now tell me about government liens \u2192',
+    },
+    {
+      id: 'what_are_government_liens',
+      type: 'info',
+      prompt:
+        "GOVERNMENT LIENS (Medicare / Medicaid):\nIf Medicare or Medicaid paid any of your accident-related medical bills, federal law REQUIRES you to repay them from your settlement. This is not optional.\n\u2022 Medicare: Contact the BCRC (1-855-798-2627) to get a conditional payment letter before settling.\n\u2022 Medicaid: Contact your state Medicaid office for the lien amount.\n\u2022 You must notify Medicare of any settlement within 60 days.\n\u2022 Failure to resolve government liens can result in penalties, loss of benefits, or personal liability.\n\nMedicare liens CAN be negotiated \u2014 they will often reduce the amount proportionally to cover attorney fees and costs.",
+      acknowledgeLabel: 'I understand the government lien rules \u2192',
     },
     {
       id: 'has_liens',
@@ -27,6 +42,7 @@ export const piLienResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "HOW TO IDENTIFY ALL LIENS:\n1. Request lien letters from every medical provider who treated you \u2014 ask their billing department if they have filed or intend to file a lien\n2. Contact your health insurance company \u2014 ask if they have a subrogation or reimbursement claim\n3. If you have Medicare: call the Medicare Benefits Coordination & Recovery Center (BCRC) at 1-855-798-2627 to get a conditional payment letter\n4. If you have Medicaid: contact your state Medicaid office for their lien amount\n5. Check court records \u2014 some providers file liens with the county clerk\n6. Review your medical bills file \u2014 any provider who treated you on a \"letter of protection\" will expect payment from your settlement\n\nDo this BEFORE settling your case. You need to know the total lien amount to calculate your actual net recovery.",
+      acknowledgeLabel: "I'll identify all my liens",
       showIf: (answers) => answers.has_liens !== 'no',
     },
     {
@@ -34,6 +50,7 @@ export const piLienResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "NEGOTIATING LIEN REDUCTIONS:\nLien holders will often accept less than the full amount. Here is how:\n\n\u2022 Medical providers typically reduce liens by 30\u201350% \u2014 they would rather get something quickly than pursue collection\n\u2022 Start by sending a letter explaining: the total settlement, attorney fees and costs deducted, other lien amounts, and what remains for you\n\u2022 Argue the \"common fund\" doctrine \u2014 the lien holder benefited from your effort to recover, so they should share the cost\n\u2022 Private health insurers: check your policy language. Texas law may limit their recovery to the \"made whole\" doctrine (they cannot take from you until you are fully compensated)\n\u2022 ERISA plans: more difficult to negotiate \u2014 federal law often preempts state protections. Review the plan language carefully.\n\nAlways get lien reductions IN WRITING before disbursing settlement funds.",
+      acknowledgeLabel: "I'll negotiate lien reductions",
     },
     {
       id: 'has_medicare_medicaid',
@@ -41,23 +58,18 @@ export const piLienResolutionConfig: GuidedStepConfig = {
       prompt: 'Did Medicare or Medicaid pay for any of your accident-related medical treatment?',
     },
     {
-      id: 'medicare_medicaid_info',
-      type: 'info',
-      prompt:
-        "MEDICARE/MEDICAID LIENS \u2014 CRITICAL:\n\u2022 Federal law REQUIRES you to repay Medicare and Medicaid from your settlement. This is not optional.\n\u2022 Medicare: Contact the BCRC (1-855-798-2627) to get a conditional payment letter BEFORE settling. You must notify Medicare of any settlement within 60 days.\n\u2022 Medicaid: Contact the Texas Health and Human Services Commission for your Medicaid lien amount.\n\u2022 Failing to resolve government liens can result in penalties, loss of benefits, or personal liability.\n\u2022 Medicare liens CAN be negotiated \u2014 they will often reduce the amount to account for attorney fees and costs (typically a proportional reduction).\n\u2022 You CANNOT distribute settlement funds until government liens are resolved or a plan is in place.\n\nThis is the one area where mistakes can have serious legal consequences. Take it seriously.",
-      showIf: (answers) => answers.has_medicare_medicaid === 'yes',
-    },
-    {
       id: 'net_recovery_calculation',
       type: 'info',
       prompt:
         "CALCULATING YOUR NET RECOVERY:\nHere is how to figure out what you actually take home:\n\nSettlement Amount:           $__________\nMinus Attorney Fees (33%):   - $__________\nMinus Case Costs:            - $__________\nMinus Medical Liens:         - $__________\nMinus Health Insurance Lien: - $__________\nMinus Medicare/Medicaid Lien:- $__________\n= YOUR NET RECOVERY:         $__________\n\nExample: $100,000 settlement\n- Attorney fees (33%): -$33,000\n- Case costs: -$2,000\n- Medical liens (negotiated): -$15,000\n- Health insurance subrogation: -$8,000\n= Net recovery: $42,000\n\nIf you are representing yourself (no attorney fees), your net will be higher, but you still must resolve all liens.",
+      acknowledgeLabel: "I'll calculate my net recovery",
     },
     {
       id: 'lien_resolution_letter',
       type: 'info',
       prompt:
         "LIEN RESOLUTION LETTER TEMPLATE:\n\n[Your Name]\n[Your Address]\n[Date]\n\n[Lien Holder Name]\n[Lien Holder Address]\n\nRe: Lien Resolution \u2014 [Your Name], Date of Injury: [Date]\n\nDear [Lien Holder]:\n\nI am writing to negotiate a resolution of your lien in the above-referenced matter.\n\nTotal settlement amount: $[amount]\nTotal medical expenses incurred: $[amount]\nYour lien amount: $[amount]\n\nAfter deducting litigation costs and other liens, the net recovery available is $[amount]. I respectfully request that you reduce your lien to $[proposed reduced amount], which represents [X]% of the original lien.\n\nThis reduction is justified because:\n1. The settlement does not fully compensate me for my injuries and damages\n2. You have benefited from the common fund created by this litigation\n3. [Additional reasons specific to your situation]\n\nPlease confirm your acceptance of this reduced amount in writing. I will hold settlement funds pending resolution of all liens.\n\nSincerely,\n[Your Name]",
+      acknowledgeLabel: "I'll use this letter template",
     },
   ],
 

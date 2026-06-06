@@ -15,6 +15,7 @@ const personalInjuryDiscoveryPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Discovery is the formal process for gathering evidence. In Texas, you can use: interrogatories (written questions), requests for production (documents), requests for admission (confirm/deny facts), and depositions (sworn testimony).',
+      acknowledgeLabel: 'I understand the discovery tools',
     },
     {
       id: 'sent_interrogatories',
@@ -31,6 +32,7 @@ const personalInjuryDiscoveryPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Interrogatories are written questions the defendant must answer under oath. In a PI case, you\'d typically ask about: the defendant\'s version of events, their insurance coverage, witnesses they know of, and any prior incidents. Texas limits you to 25 interrogatories (including subparts).',
+      acknowledgeLabel: 'I understand interrogatories',
       showIf: (answers) => answers.sent_interrogatories === 'not_familiar',
     },
     {
@@ -48,6 +50,7 @@ const personalInjuryDiscoveryPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Requests for production ask the other side to provide documents. In a PI case, you\'d request: the defendant\'s insurance policy, incident reports, photos, surveillance footage, maintenance records, cell phone records from the time of the incident, and any internal communications about the incident.',
+      acknowledgeLabel: 'I understand requests for production',
       showIf: (answers) => answers.sent_rfps === 'not_familiar',
     },
     {
@@ -65,6 +68,7 @@ const personalInjuryDiscoveryPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Depositions are live, sworn testimony recorded by a court reporter. In PI cases, you might depose: the defendant, the defendant\'s insurance adjuster, eyewitnesses, and the defendant\'s medical expert (if they have one). Depositions can be expensive due to court reporter fees.',
+      acknowledgeLabel: 'I understand depositions',
       showIf: (answers) => answers.planning_depositions !== 'yes',
     },
     {
@@ -133,6 +137,7 @@ export function createPiDiscoveryPrepConfig(piSubType?: string | null): GuidedSt
         type: 'info',
         prompt:
           'Review the answer first. Discovery requests should be aimed at the exact disputes: fault, repair amount, replacement value, diminished value, loss of use, or mitigation.',
+        acknowledgeLabel: "I'll review the answer first",
         showIf: (answers) => answers.answer_reviewed === 'no',
       },
       {
@@ -152,6 +157,7 @@ export function createPiDiscoveryPrepConfig(piSubType?: string | null): GuidedSt
         id: 'draft_pack_info',
         type: 'info',
         prompt: `Suggested first discovery set:\n${propertyDamageDiscoveryQuestions.map((request) => `• ${request}`).join('\n')}`,
+        acknowledgeLabel: "I'll send these discovery requests",
         showIf: (answers) => answers.answer_reviewed === 'yes',
       },
       {
@@ -182,6 +188,7 @@ export function createPiDiscoveryPrepConfig(piSubType?: string | null): GuidedSt
         type: 'info',
         prompt:
           'After discovery is served, track the response deadline. Many courts use a 30-day response period, but the exact rule depends on the court and request type.',
+        acknowledgeLabel: "I'll track the response deadline",
         showIf: (answers) => answers.answer_reviewed === 'yes',
       },
     ],

@@ -16,6 +16,7 @@ export const reWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the defendant has until the Monday after 20 days from service to file an answer. If the 20th day falls on a weekend or holiday, the deadline extends to the following Monday.',
+      acknowledgeLabel: "I understand the Texas answer deadline — I'll calculate it from the service date",
     },
     {
       id: 'monitoring_docket',
@@ -27,6 +28,7 @@ export const reWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check the court\'s online docket regularly. You can also call the clerk\'s office with your cause number to ask if any filings have been made by the defendant.',
+      acknowledgeLabel: "I'll check the online docket regularly and call the clerk if needed",
       showIf: (answers) => answers.monitoring_docket === 'no',
     },
     {
@@ -39,6 +41,7 @@ export const reWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the defendant misses the deadline, you may request a default judgment. This means the court could rule in your favor on the real estate claim without a trial. You will still need to prove your damages.',
+      acknowledgeLabel: "I'll request a default judgment and prepare my damages evidence",
       showIf: (answers) => answers.answer_received === 'no',
     },
   ],

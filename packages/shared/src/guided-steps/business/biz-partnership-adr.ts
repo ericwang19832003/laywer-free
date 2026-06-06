@@ -15,6 +15,7 @@ export const bizPartnershipAdrConfig: GuidedStepConfig = {
     {
       id: 'no_agreement_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll consider voluntary mediation →',
       prompt:
         'If there\u2019s no mandatory ADR clause, you can still choose mediation voluntarily. It\u2019s often faster and cheaper.',
       showIf: (answers) => answers.has_adr_clause === 'no',
@@ -46,6 +47,7 @@ export const bizPartnershipAdrConfig: GuidedStepConfig = {
     {
       id: 'adr_complete_info',
       type: 'info',
+      acknowledgeLabel: 'Good — ready to file →',
       prompt:
         'If ADR didn\u2019t resolve the dispute, you\u2019ve satisfied the requirement and can proceed to filing.',
       showIf: (answers) => answers.attempted_adr === 'yes',

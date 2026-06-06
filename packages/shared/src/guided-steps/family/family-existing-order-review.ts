@@ -13,6 +13,7 @@ export const existingOrderReviewConfig: GuidedStepConfig = {
       id: 'upload_info',
       type: 'info',
       prompt: 'Upload your existing order to the Evidence Vault. If you don\'t have a copy, request one from the court clerk.',
+      acknowledgeLabel: 'I\'ll upload my order →',
       showIf: (a) => a.order_uploaded === 'no',
     },
     {
@@ -24,6 +25,7 @@ export const existingOrderReviewConfig: GuidedStepConfig = {
       id: 'provisions_info',
       type: 'info',
       prompt: 'Review each section: custody/conservatorship, possession schedule, child support, and any other provisions. List exactly what you want changed.',
+      acknowledgeLabel: 'I\'ll review each section now →',
       showIf: (a) => a.provisions_identified === 'no',
     },
     {
@@ -37,6 +39,7 @@ export const existingOrderReviewConfig: GuidedStepConfig = {
       id: 'one_year_rule',
       type: 'info',
       prompt: 'ONE-YEAR RULE: Texas law generally prohibits modifying custody or conservatorship within 1 year of the last order.\n\nExceptions (you CAN file within 1 year if):\n1. The person with primary custody agrees to the change\n2. The child\'s current environment endangers their physical health or significantly harms their emotional development\n3. The person with primary custody has allowed someone else to have primary care for 6+ months (military deployment excluded)\n\nIf you are only modifying child support or visitation (not custody), the 1-year rule does not apply.',
+      acknowledgeLabel: 'I understand the 1-year rule →',
     },
     {
       id: 'one_year_status',
@@ -54,6 +57,7 @@ export const existingOrderReviewConfig: GuidedStepConfig = {
       id: 'endangerment_info',
       type: 'info',
       prompt: 'ENDANGERMENT EXCEPTION: You must file a "Declaration in Support of Changing Primary Custody within One Year" with specific facts under penalty of perjury. The judge reviews this declaration to decide whether to schedule a hearing. Be specific and factual — vague allegations will not be sufficient.',
+      acknowledgeLabel: 'Understood — I\'ll prepare the declaration →',
       showIf: (a) => a.one_year_status === 'endangerment',
     },
     {
@@ -66,6 +70,7 @@ export const existingOrderReviewConfig: GuidedStepConfig = {
       id: 'change_info',
       type: 'info',
       prompt: 'Document what changed: job loss/new job, relocation, children\'s needs changed, safety concerns, or significant time passage.\n\nFor child support: if 3+ years have passed and the guideline amount differs by 20% or $100/month from the current order, modification is presumptively appropriate.',
+      acknowledgeLabel: 'Got it — I\'ll document the changes →',
       showIf: (a) => a.change_documented === 'no',
     },
   ],

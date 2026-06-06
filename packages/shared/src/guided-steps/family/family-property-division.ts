@@ -14,6 +14,7 @@ export const propertyDivisionConfig: GuidedStepConfig = {
       id: 'inventory_info',
       type: 'info',
       prompt: 'Create a detailed inventory: real estate, vehicles, bank accounts, retirement/investment accounts, household items of value, and any business interests.',
+      acknowledgeLabel: 'Got it — I\'ll create the inventory →',
       showIf: (a) => a.inventory_complete === 'no',
     },
     {
@@ -26,6 +27,7 @@ export const propertyDivisionConfig: GuidedStepConfig = {
       id: 'separate_property_info',
       type: 'info',
       prompt: 'Gather documentation proving separate property: pre-marriage bank statements, inheritance documents, gift records.',
+      acknowledgeLabel: 'Got it — I\'ll gather the documentation →',
       showIf: (a) => a.separate_property === 'yes',
     },
     {
@@ -46,15 +48,24 @@ export const propertyDivisionConfig: GuidedStepConfig = {
       prompt: 'Does either spouse have retirement accounts (401(k), pension, IRA)?',
     },
     {
-      id: 'qdro_warning',
+      id: 'qdro_what',
       type: 'info',
-      prompt: 'IMPORTANT — QDRO REQUIRED FOR RETIREMENT ACCOUNTS:\n\nDividing 401(k)s and pensions requires a Qualified Domestic Relations Order (QDRO) — a separate legal document the plan administrator must approve.\n\n\u2022 TexasLawHelp does NOT provide QDRO forms\n\u2022 A missing or defective QDRO can permanently lose your community interest in the retirement plan\n\u2022 QDRO specialists typically charge $500\u2013$1,500 — far less than the benefits at stake\n\u2022 The QDRO must be included with or shortly after the final decree\n\u2022 IRAs can be divided by transfer incident to divorce without a QDRO, but must follow IRS rules\n\nSTRONG RECOMMENDATION: Hire a QDRO specialist or family law attorney for this part, even if you handle the rest yourself.',
+      prompt: 'WHAT IS A QDRO?\n\nA Qualified Domestic Relations Order (QDRO) is a separate court order required to divide a 401(k) or pension between spouses. It is not included in the divorce decree — it is a distinct legal document that must be approved by the retirement plan administrator.\n\n• Without a QDRO, the plan administrator will NOT split the account, even if your decree says to\n• A missing or defective QDRO can permanently lose your community interest in the retirement plan\n• IRAs are different — they can be divided by a transfer incident to divorce without a QDRO, but must follow IRS rules',
+      acknowledgeLabel: 'I understand what a QDRO is →',
+      showIf: (a) => a.retirement_accounts === 'yes',
+    },
+    {
+      id: 'qdro_how',
+      type: 'info',
+      prompt: 'HOW TO GET A QDRO ORDERED:\n\n1. Hire a QDRO specialist or family law attorney — this document requires specialized drafting\n2. Contact the retirement plan administrator to request their QDRO requirements (each plan has different rules)\n3. Have the QDRO drafted to match the decree language and the plan\'s requirements\n4. Submit the QDRO to the court for signature with or shortly after your final decree\n5. Send the court-signed QDRO to the plan administrator for approval\n\nCost: QDRO specialists typically charge $500–$1,500 — far less than the retirement benefits at stake.\n\nSTRONG RECOMMENDATION: Hire a QDRO specialist even if you handle the rest of your divorce yourself.',
+      acknowledgeLabel: 'I understand how to get the QDRO ordered →',
       showIf: (a) => a.retirement_accounts === 'yes',
     },
     {
       id: 'debt_creditor_warning',
       type: 'info',
       prompt: 'DEBT REMINDER: Creditors are NOT bound by the divorce decree. If your name is on a joint debt (mortgage, credit card, car loan), the creditor can still pursue you even if the decree assigns that debt to your spouse. Consider requiring refinancing as part of the settlement — especially for mortgages.',
+      acknowledgeLabel: 'Understood — I\'ll protect myself on joint debts →',
     },
   ],
   generateSummary(answers) {

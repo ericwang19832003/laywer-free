@@ -16,6 +16,7 @@ export const bizPartnershipEvidenceConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Great \u2014 your agreement likely contains provisions about dispute resolution, profit sharing, and dissolution procedures. Keep it handy.',
+      acknowledgeLabel: "I'll keep my agreement handy throughout the case",
       showIf: (answers) => answers.has_agreement === 'yes',
     },
     {

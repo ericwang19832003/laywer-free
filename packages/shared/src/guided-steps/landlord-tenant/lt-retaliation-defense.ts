@@ -11,6 +11,7 @@ export const ltRetaliationDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Under Texas Property Code \u00A7 92.331, a landlord CANNOT retaliate against you for exercising your legal rights. If they take adverse action within 6 months of your protected activity, the law PRESUMES it\u2019s retaliation \u2014 the burden shifts to the landlord to prove otherwise.',
+      acknowledgeLabel: 'I understand the 6-month retaliation presumption under \u00A7 92.331',
     },
     {
       id: 'protected_activity',
@@ -30,6 +31,7 @@ export const ltRetaliationDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The retaliation defense requires a "protected activity" that triggered the landlord\u2019s action. If none of these apply, consider other defenses instead.',
+      acknowledgeLabel: "I understand retaliation defense doesn't apply \u2014 I'll explore other defenses",
       showIf: (answers) => answers.protected_activity === 'none',
     },
     {
@@ -67,6 +69,7 @@ export const ltRetaliationDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'THE 6-MONTH RULE \u2014 If the landlord\u2019s action occurred within 6 months of your protected activity, Texas law PRESUMES retaliation (\u00A7 92.331(b)). The landlord must prove a legitimate, non-retaliatory reason.',
+      acknowledgeLabel: "I understand the 6-month presumption window \u2014 I'll record exact dates to establish the timeline",
       showIf: (answers) =>
         !!answers.protected_activity && answers.protected_activity !== 'none',
     },
@@ -83,6 +86,7 @@ export const ltRetaliationDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DOCUMENTATION IS CRITICAL. Gather: dated copies of repair requests (texts, emails, letters), government complaint filing receipts, photos/videos of conditions, landlord\u2019s responses (or lack thereof), timeline showing the sequence of events. The stronger your paper trail, the stronger your defense.',
+      acknowledgeLabel: "I understand \u2014 I'll gather dated records, receipts, photos, and a written timeline",
       showIf: (answers) => answers.have_documentation === 'no',
     },
     {
@@ -90,6 +94,7 @@ export const ltRetaliationDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DAMAGES FOR RETALIATION (\u00A7 92.333): If you prove retaliation, you can recover: one month\u2019s rent + $500, actual damages, court costs, and reasonable attorney fees. This can be raised as a SEPARATE lawsuit (under SB 38, counterclaims are no longer allowed in eviction suits).',
+      acknowledgeLabel: "I understand I can file a separate retaliation lawsuit to recover damages under \u00A7 92.333",
       showIf: (answers) =>
         !!answers.protected_activity && answers.protected_activity !== 'none',
     },
@@ -98,6 +103,7 @@ export const ltRetaliationDefenseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'EXCEPTION: Retaliation is NOT a defense if the eviction is for genuine nonpayment of rent AND the tenant is actually behind on rent (\u00A7 92.332(b)). However, if the "nonpayment" is pretextual (landlord manufactured a reason after you complained), document that.',
+      acknowledgeLabel: "I understand this exception \u2014 I'll document if nonpayment is being used as a pretext",
       showIf: (answers) =>
         !!answers.protected_activity && answers.protected_activity !== 'none',
     },

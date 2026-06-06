@@ -9,7 +9,8 @@ interface ProgressCardProps {
 
 export function ProgressCard({ tasksSummary }: ProgressCardProps) {
   const completed = (tasksSummary['completed'] ?? 0) + (tasksSummary['skipped'] ?? 0)
-  const total = Object.values(tasksSummary).reduce((sum, count) => sum + count, 0)
+  const locked = tasksSummary['locked'] ?? 0
+  const total = Object.values(tasksSummary).reduce((sum, count) => sum + count, 0) - locked
   const remaining = total - completed
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
   const allDone = total > 0 && completed === total

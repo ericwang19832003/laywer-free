@@ -112,6 +112,7 @@ export const piMedicalRecordsConfig: GuidedStepConfig = {
         'Do NOT send your demand letter until you reach Maximum Medical Improvement (MMI) or complete treatment. Sending too early means you may undervalue your claim because future medical costs won\'t be included.',
       helpText:
         'Ask your doctor when they expect you to reach MMI. This is the point where your condition has stabilized.',
+      acknowledgeLabel: "I understand — I'll wait until MMI before sending a demand",
     },
   ],
 

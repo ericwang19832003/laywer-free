@@ -16,6 +16,7 @@ export const debtHearingPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Gather: the original contract (if you have it), all payment records, the debt validation response, and any FDCPA violation evidence.',
+      acknowledgeLabel: "I'll gather my evidence →",
       showIf: (answers) => answers.evidence_organized === 'no',
     },
     {
@@ -35,6 +36,7 @@ export const debtHearingPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the debt is past the statute of limitations (4 years in Texas for written contracts), the collector cannot legally collect through the courts.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.defense_strategy === 'statute_of_limitations',
     },
     {
@@ -42,6 +44,7 @@ export const debtHearingPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Debt buyers must prove they own the debt through a complete chain of assignment. Many can't. Challenge them to prove standing.",
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.defense_strategy === 'lack_of_standing',
     },
     {
@@ -65,6 +68,7 @@ export const debtHearingPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If settling, negotiate for: reduced amount, payment plan, deletion from credit reports, and a written agreement before paying.',
+      acknowledgeLabel: "I'll keep these terms in mind →",
       showIf: (answers) =>
         answers.open_to_settlement === 'yes' ||
         answers.open_to_settlement === 'depends',

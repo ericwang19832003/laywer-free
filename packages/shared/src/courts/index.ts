@@ -3,3 +3,4 @@
 export * from './court-types'
 export * from './court-database'
 export * from './texas-court-directory'
+export * from './texas-filing-requirements'

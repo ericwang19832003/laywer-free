@@ -12,6 +12,7 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "WHAT IS A DEFAULT JUDGMENT?\nThe court rules in your favor because the defendant failed to respond to the lawsuit or failed to appear at the hearing. It's an automatic win — but you still need to prove your damages.",
+      acknowledgeLabel: 'I understand default judgments →',
     },
 
     // Which side are you
@@ -31,6 +32,7 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "WHEN DEFAULT JUDGMENT HAPPENS:\n- The defendant doesn't file an answer within the deadline (usually 14 days after being served)\n- The defendant doesn't show up at the hearing\n- Either situation can result in a default judgment in your favor",
+      acknowledgeLabel: 'I understand when default applies →',
       showIf: (answers) => answers.your_role === 'plaintiff',
     },
 
@@ -48,25 +50,24 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO REQUEST DEFAULT JUDGMENT:\nWhen your case is called and the defendant is not present, tell the judge:\n\n"Your Honor, the defendant is not present. I request a default judgment."\n\nThe judge will verify that the defendant was properly served, then ask you to present your evidence.',
+      acknowledgeLabel: 'I know what to say to the judge →',
       showIf: (answers) =>
         answers.your_role === 'plaintiff' &&
         answers.defendant_responded === 'no',
     },
 
-    // What you still need to prove
+    // What you still need to prove — checklist of items to bring
     {
-      id: 'prove_damages',
-      type: 'info',
-      prompt:
-        'WHAT YOU STILL NEED TO PROVE:\nEven with a default judgment, you must show the judge your damages. Bring:\n- Contracts, invoices, or receipts showing what you are owed\n- Photos or documentation of damage\n- Records of communication with the defendant\n- A clear explanation of how you calculated your damages\n\nThe judge can award up to what you asked for — but only if you prove it.',
-      showIf: (answers) => answers.your_role === 'plaintiff',
-    },
-
-    // Have evidence ready
-    {
-      id: 'have_evidence',
-      type: 'yes_no',
-      prompt: 'Do you have your evidence organized and ready to present?',
+      id: 'damages_evidence_gathered',
+      type: 'multi_select',
+      prompt: 'Which of these have you gathered to prove your damages?',
+      options: [
+        { value: 'contracts_invoices', label: 'Contracts, invoices, or receipts showing what you are owed' },
+        { value: 'damage_photos', label: 'Photos or documentation of damage' },
+        { value: 'communications', label: 'Records of communication with the defendant' },
+        { value: 'damages_calculation', label: 'Written calculation showing how you arrived at your damages amount' },
+      ],
+      noneLabel: "Haven't gathered any yet",
       showIf: (answers) => answers.your_role === 'plaintiff',
     },
 
@@ -76,6 +77,7 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "IF YOU RECEIVED A DEFAULT JUDGMENT AGAINST YOU:\nYou can file a Motion to Set Aside Default Judgment within 30 days if you have a valid reason. Valid reasons include:\n- You didn't receive proper notice of the lawsuit\n- You had a medical or family emergency\n- Military deployment or service\n- You filed an answer but it wasn't recorded\n\nAct quickly — after 30 days, your options become much more limited.",
+      acknowledgeLabel: 'I understand my options to set aside the judgment →',
       showIf: (answers) => answers.your_role === 'defendant',
     },
 
@@ -93,6 +95,7 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO FILE A MOTION TO SET ASIDE:\n1. Go to the JP court clerk where the judgment was entered\n2. File a "Motion to Set Aside Default Judgment"\n3. Explain your reason for not appearing (attach proof if you have it)\n4. Ask for a new hearing date\n5. You may need to pay a filing fee\n6. The judge will decide whether to grant your motion\n\nIf granted, you get a new hearing where you can present your defense.',
+      acknowledgeLabel: 'I will file the motion to set aside →',
       showIf: (answers) =>
         answers.your_role === 'defendant' &&
         answers.have_valid_reason === 'yes',
@@ -104,6 +107,7 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Without a valid reason, setting aside a default judgment is difficult. You may still want to:\n- Consult with an attorney about your options\n- Consider negotiating a payment plan with the plaintiff\n- Check if the judgment amount is correct',
+      acknowledgeLabel: 'I understand my limited options →',
       showIf: (answers) =>
         answers.your_role === 'defendant' &&
         answers.have_valid_reason === 'no',
@@ -127,6 +131,7 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TIME IS CRITICAL. You must file your Motion to Set Aside within 30 days of the judgment. If you are close to or past the deadline, go to the courthouse immediately or contact an attorney.',
+      acknowledgeLabel: 'I am going to the courthouse now →',
       showIf: (answers) =>
         answers.your_role === 'defendant' &&
         (answers.days_since_judgment === 'over_30' ||
@@ -154,11 +159,21 @@ export const scDefaultJudgmentConfig: GuidedStepConfig = {
         })
       }
 
-      if (answers.have_evidence === 'yes') {
-        items.push({
-          status: 'done',
-          text: 'Evidence is organized and ready to present.',
-        })
+      if (answers.damages_evidence_gathered && answers.damages_evidence_gathered !== 'none') {
+        const gathered = answers.damages_evidence_gathered.split(',').filter(Boolean)
+        const allItems = ['contracts_invoices', 'damage_photos', 'communications', 'damages_calculation']
+        const missing = allItems.filter((item) => !gathered.includes(item))
+        if (missing.length === 0) {
+          items.push({
+            status: 'done',
+            text: 'All damage evidence gathered and ready to present.',
+          })
+        } else {
+          items.push({
+            status: 'needed',
+            text: 'Organize your evidence — you must still prove your damages even for a default judgment.',
+          })
+        }
       } else {
         items.push({
           status: 'needed',

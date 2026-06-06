@@ -43,6 +43,7 @@ export const bizB2bTradeSecretsConfig: GuidedStepConfig = {
     {
       id: 'no_measures_warning',
       type: 'info',
+      acknowledgeLabel: 'I\'ll implement protections now →',
       prompt:
         'This is a serious problem. Under TUTSA, you must prove you took "reasonable measures" to keep the information secret. Without protective measures, a court may find the information does not qualify as a trade secret. Start implementing protections immediately and document what measures existed before the misappropriation.',
       showIf: (answers) => answers.reasonable_measures === 'no',
@@ -63,6 +64,7 @@ export const bizB2bTradeSecretsConfig: GuidedStepConfig = {
     {
       id: 'reverse_engineering_note',
       type: 'info',
+      acknowledgeLabel: 'Understood →',
       prompt:
         'Important: Under TUTSA, reverse engineering of a lawfully acquired product is generally NOT misappropriation. If the information was obtained through reverse engineering of a publicly available product, your claim may be weak. However, if the person had a contractual obligation not to reverse engineer (e.g., in a license agreement), that changes the analysis.',
       showIf: (answers) => answers.misappropriation_method === 'reverse_engineer',
@@ -75,6 +77,7 @@ export const bizB2bTradeSecretsConfig: GuidedStepConfig = {
     {
       id: 'tro_note',
       type: 'info',
+      acknowledgeLabel: 'I\'ll seek a TRO immediately →',
       prompt:
         'You should seek a Temporary Restraining Order (TRO) immediately. Texas courts can issue a TRO within 24 hours to stop ongoing use or disclosure. You will need to show: (1) a trade secret exists, (2) it was misappropriated, (3) you are suffering irreparable harm, and (4) no adequate remedy at law. File in district court with a verified petition and supporting affidavits.',
       showIf: (answers) => answers.ongoing_harm === 'yes',
@@ -102,12 +105,14 @@ export const bizB2bTradeSecretsConfig: GuidedStepConfig = {
     {
       id: 'remedies_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — understood my remedies →',
       prompt:
         'Under TUTSA, you can recover:\n\n• Injunction — court order to stop use/disclosure\n• Actual damages — your provable losses from the misappropriation\n• Unjust enrichment — profits the misappropriator gained (if not duplicating actual damages)\n• Reasonable royalty — if actual damages and unjust enrichment are not provable\n• Exemplary damages — up to 2x actual damages if misappropriation was willful and malicious\n• Attorney fees — if the claim or defense was made in bad faith, or misappropriation was willful and malicious',
     },
     {
       id: 'statute_of_limitations',
       type: 'info',
+      acknowledgeLabel: 'Understood — won\'t delay →',
       prompt:
         'The statute of limitations under TUTSA is 3 years from the date the misappropriation is discovered or should have been discovered. Continuing misappropriation is treated as a single claim — the clock starts when you knew or should have known. Do not delay filing.',
     },

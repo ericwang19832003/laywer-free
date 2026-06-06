@@ -21,6 +21,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ADVERSE POSSESSION IN TEXAS:\nTexas recognizes several adverse possession statutes. The two most common are:\n\n1. THREE-YEAR STATUTE (Tex. Civ. Prac. & Rem. Code §16.024): You must have "color of title" — a recorded deed or other document that purports to give you title — AND continuous, open possession for 3 years.\n\n2. TEN-YEAR STATUTE (Tex. Civ. Prac. & Rem. Code §16.026): No deed required, but you must prove open, notorious, hostile, exclusive, and continuous possession for 10 years. This is the most commonly used statute.',
+      acknowledgeLabel: 'I understand the adverse possession statutes →',
       showIf: (answers) => answers.claim_posture === 'claiming',
     },
     {
@@ -28,6 +29,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DEFENDING AGAINST AN ADVERSE POSSESSION CLAIM:\n• Act quickly — the longer you wait, the stronger their claim becomes.\n• Post "No Trespassing" signs and send a written demand to vacate.\n• If they refuse to leave, file a trespass-to-try-title action (Tex. Prop. Code Ch. 22).\n• Document that you have NOT abandoned the property: pay taxes, maintain the land, inspect it regularly.\n• A survey showing the true boundary can defeat many adverse possession claims.',
+      acknowledgeLabel: 'I understand how to defend my property →',
       showIf: (answers) => answers.claim_posture === 'defending',
     },
     {
@@ -46,6 +48,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'THREE-YEAR STATUTE (§16.024) — REQUIREMENTS:\n1. COLOR OF TITLE: You must have a recorded deed or other instrument that purports to convey title to you (even if the deed turns out to be defective).\n2. OPEN AND NOTORIOUS POSSESSION: Your use of the land must be visible — not hidden or secretive.\n3. CONTINUOUS POSSESSION: You must have possessed the land for a full 3 years without interruption.\n4. HOSTILE: Your possession must be without the true owner\'s permission.\n\nEVIDENCE NEEDED:\n• The recorded deed or title document\n• Proof of continuous use (photos over time, utility bills, improvements made)\n• Witness testimony from neighbors about your use\n• Tax payment records (helpful but not required for the 3-year statute)',
+      acknowledgeLabel: 'I understand the 3-year statute requirements →',
       showIf: (answers) => answers.ap_type === 'three_year',
     },
     {
@@ -53,6 +56,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TEN-YEAR STATUTE (§16.026) — REQUIREMENTS:\nYou must prove ALL of the following for a continuous 10-year period:\n\n1. OPEN AND NOTORIOUS: Your use is visible to anyone, including the true owner.\n2. HOSTILE: You occupy without the owner\'s permission. (If the owner gave you permission, the clock resets.)\n3. EXCLUSIVE: You treat the land as your own — not shared with the public or the true owner.\n4. CONTINUOUS: 10 uninterrupted years. Seasonal use (e.g., farming) can count if consistent.\n\nEVIDENCE NEEDED:\n• Survey showing the area you have possessed\n• Photographs over the years showing your use (fencing, farming, structures, landscaping)\n• Witness testimony (neighbors, friends, family) about the duration and nature of your use\n• Tax payment records (paying taxes on the property is strong evidence)\n• Receipts for improvements, maintenance, or utilities',
+      acknowledgeLabel: 'I understand the 10-year statute requirements →',
       showIf: (answers) => answers.ap_type === 'ten_year' || answers.ap_type === 'unsure',
     },
     {
@@ -60,6 +64,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'BOUNDARY LINE DISPUTES:\n\n1. GET A SURVEY: Hire a licensed Texas surveyor to establish the true boundary. This is almost always the first step.\n2. COMPARE SURVEYS: If the neighbor also has a survey, compare them. Discrepancies often arise from different reference points or old, inaccurate surveys.\n3. BOUNDARY LINE AGREEMENT: Texas allows neighbors to enter into a written agreement establishing the boundary. This is often faster and cheaper than litigation. Record it with the county clerk.\n4. TRESPASS-TO-TRY-TITLE: If you cannot agree, file suit to establish the boundary. The court will rely on surveys, deeds, and historical evidence.\n5. FENCES: A fence does not establish a legal boundary. However, a long-standing fence may support an adverse possession argument if the elements are met.',
+      acknowledgeLabel: 'I understand boundary dispute options →',
       showIf: (answers) => answers.claim_posture === 'boundary_dispute',
     },
     {
@@ -72,6 +77,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'GET A SURVEY:\n• A licensed Texas surveyor can establish the legal boundary based on the deed descriptions.\n• Cost typically ranges from $300 to $800 for a residential property.\n• The survey will be critical evidence in court if litigation becomes necessary.\n• Ask the surveyor to mark the corners with stakes or pins.\n• Keep the original survey document — you may need to file it with the court.',
+      acknowledgeLabel: 'I will get a survey →',
       showIf: (answers) => answers.has_survey === 'no',
     },
     {
@@ -97,6 +103,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'BOUNDARY LINE AGREEMENT:\n• This is a written agreement between neighbors that establishes the boundary.\n• Both parties sign it and record it with the county clerk, making it binding on future owners.\n• This is often the fastest and cheapest resolution.\n• Consider having each party pay for their own survey, then negotiate based on the results.\n• Put the agreement in writing — oral boundary agreements are difficult to enforce.',
+      acknowledgeLabel: 'I understand the boundary line agreement process →',
       showIf: (answers) => answers.resolution_preference === 'negotiation',
     },
     {
@@ -104,6 +111,7 @@ export const reAdversePossessionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'TRESPASS-TO-TRY-TITLE (Tex. Prop. Code Ch. 22):\n• This is the lawsuit you file to establish ownership or resolve a boundary dispute.\n• You must describe the property with legal descriptions.\n• File a lis pendens to put third parties on notice.\n• The court will examine deeds, surveys, historical use, and any adverse possession evidence.\n• If you prevail, the court issues a judgment establishing the boundary or awarding title, which you record with the county clerk.',
+      acknowledgeLabel: 'I understand the trespass-to-try-title process →',
       showIf: (answers) => answers.resolution_preference === 'litigation',
     },
   ],

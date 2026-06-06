@@ -16,6 +16,7 @@ export const debtValidationLetterConfig: GuidedStepConfig = {
     {
       id: 'find_address_info',
       type: 'info',
+      acknowledgeLabel: 'I found the address →',
       prompt:
         "Check any collection letters you have received — the creditor's name and address are required to be on them. You can also look at the original account statements, check the court filing if you have been sued, or search the creditor's name online for their correspondence address.",
       showIf: (answers) => answers.have_creditor_address === 'no',
@@ -38,6 +39,7 @@ export const debtValidationLetterConfig: GuidedStepConfig = {
     {
       id: 'validation_deadline_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — sending by certified mail →',
       prompt:
         'You have 30 days from first contact to request validation. After you send this letter, the collector must stop all collection activity until they provide proof of: (1) the original debt agreement, (2) the amount owed including all fees and interest, (3) their authority to collect, and (4) proof they are licensed to collect in your state. Send the letter via certified mail with return receipt requested so you have proof it was delivered.',
       showIf: (answers) => !!answers.first_contact_date,

@@ -15,6 +15,7 @@ export const postJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you won: The losing party typically has 30 days to appeal. If they don\'t pay voluntarily, you may need to pursue collection through garnishment, liens, or asset discovery.',
+      acknowledgeLabel: "I understand the judgment collection process and appeal window",
       showIf: (answers) => answers.judgment_favorable === 'yes',
     },
     {
@@ -22,6 +23,7 @@ export const postJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you lost: You typically have 30 days to file an appeal. Consider consulting an attorney about your options. You may also be able to file a motion for new trial.',
+      acknowledgeLabel: "I'll consult an attorney about my appeal or motion for new trial options",
       showIf: (answers) => answers.judgment_favorable === 'no',
     },
     {
@@ -34,6 +36,7 @@ export const postJudgmentConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party is not paying, you can: (1) File an Abstract of Judgment to create a lien, (2) Request a Writ of Execution for wage garnishment, (3) File for a debtor\'s examination to discover assets.',
+      acknowledgeLabel: "I'll pursue a lien, garnishment, or debtor's exam to collect the judgment",
       showIf: (answers) => answers.has_payment_plan === 'no',
     },
     {

@@ -12,6 +12,7 @@ export const contractSettlementGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHY SETTLE?\n- Faster resolution (months vs years)\n- Guaranteed payment (judgments can be hard to collect)\n- You control the terms (judge might award less)\n- Confidentiality possible\n- Lower costs (no trial expenses)',
+      acknowledgeLabel: 'I understand the benefits of settling',
     },
 
     // Total damages
@@ -30,14 +31,25 @@ export const contractSettlementGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'NEGOTIATION STRATEGY:\n- Start at 75-100% of your documented damages\n- Be prepared to come down to 50-60% for a quick settlement\n- Demand CASH or CERTIFIED FUNDS (personal checks can bounce)\n- Require payment within 14-30 days\n- ALWAYS get the agreement in writing before accepting payment',
+      acknowledgeLabel: 'I understand these negotiation principles',
     },
 
     // Settlement agreement contents
     {
       id: 'settlement_agreement_contents',
-      type: 'info',
-      prompt:
-        'SETTLEMENT AGREEMENT MUST INCLUDE:\n1. Amount to be paid\n2. Payment schedule (lump sum or installments)\n3. Deadline for payment\n4. Consequence of non-payment (can enforce as judgment)\n5. Mutual release of all claims\n6. Dismissal of lawsuit with prejudice\n7. Confidentiality (optional but recommended)\n8. Both parties\' signatures',
+      type: 'multi_select',
+      prompt: 'Does your draft settlement agreement include these terms?',
+      options: [
+        { value: 'amount', label: 'Amount to be paid' },
+        { value: 'payment_schedule', label: 'Payment schedule (lump sum or installments)' },
+        { value: 'payment_deadline', label: 'Deadline for payment' },
+        { value: 'nonpayment_consequence', label: 'Consequence of non-payment (enforceable as judgment)' },
+        { value: 'mutual_release', label: 'Mutual release of all claims' },
+        { value: 'dismissal', label: 'Dismissal of lawsuit with prejudice' },
+        { value: 'confidentiality', label: 'Confidentiality clause (optional but recommended)' },
+        { value: 'both_signatures', label: "Both parties' signatures" },
+      ],
+      noneLabel: "Haven't drafted the agreement yet",
     },
   ],
 
@@ -62,10 +74,21 @@ export const contractSettlementGuideConfig: GuidedStepConfig = {
     }
 
     // Settlement checklist
-    items.push({
-      status: 'needed',
-      text: 'Draft a settlement agreement that includes: amount, payment schedule, deadline, consequence of non-payment, mutual release, and dismissal with prejudice.',
-    })
+    const agreedTerms = answers.settlement_agreement_contents
+      ? answers.settlement_agreement_contents.split(',').filter((v: string) => v && v !== 'none')
+      : []
+    const requiredTerms = ['amount', 'payment_schedule', 'payment_deadline', 'nonpayment_consequence', 'mutual_release', 'dismissal', 'both_signatures']
+    const missingTerms = requiredTerms.filter(t => !agreedTerms.includes(t))
+    if (agreedTerms.length > 0 && missingTerms.length === 0) {
+      items.push({ status: 'done', text: 'Settlement agreement includes all required terms.' })
+    } else if (agreedTerms.length > 0) {
+      items.push({ status: 'needed', text: `Settlement agreement is missing ${missingTerms.length} required term(s). Review and complete before signing.` })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Draft a settlement agreement that includes: amount, payment schedule, deadline, consequence of non-payment, mutual release, and dismissal with prejudice.',
+      })
+    }
 
     items.push({
       status: 'info',

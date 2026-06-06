@@ -16,6 +16,7 @@ export const otherDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Discovery lets you request documents, ask written questions (interrogatories), request admissions of fact, and take depositions. The other side can do the same to you. There are deadlines for each step.',
+      acknowledgeLabel: "I understand how discovery works — I'll meet all deadlines",
       showIf: (answers) => answers.first_time_discovery === 'yes',
     },
     {
@@ -28,6 +29,7 @@ export const otherDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Think about what documents would help prove your case: contracts, emails, text messages, financial records, photos, internal policies, or incident reports. Be specific in your requests.',
+      acknowledgeLabel: "I'll identify and specifically request the documents I need",
       showIf: (answers) => answers.documents_to_request === 'no',
     },
     {
@@ -40,6 +42,7 @@ export const otherDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Interrogatories are written questions the other side must answer under oath. Use them to establish basic facts, identify witnesses, and understand the other side\'s position. Most courts limit the number you can ask (often 25).',
+      acknowledgeLabel: "I'll draft interrogatories to establish key facts and identify witnesses",
       showIf: (answers) => answers.questions_to_ask === 'no',
     },
     {
@@ -52,6 +55,7 @@ export const otherDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Discovery deadlines are strict. Check the court\'s scheduling order for your discovery cutoff date. Missing it can mean losing the right to present evidence at trial.',
+      acknowledgeLabel: "I'll check the scheduling order and calendar my discovery cutoff date",
       showIf: (answers) => answers.know_discovery_deadlines === 'no',
     },
     {
@@ -64,6 +68,7 @@ export const otherDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You must respond to discovery requests within the deadline (usually 30 days). Gather the requested documents and answer truthfully. If a request is overly broad or irrelevant, you can object, but you should still provide what you can.',
+      acknowledgeLabel: "I'll respond within the 30-day deadline and gather the requested documents",
       showIf: (answers) => answers.received_requests === 'yes',
     },
   ],

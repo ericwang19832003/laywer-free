@@ -11,6 +11,7 @@ export const ltRepairAndDeductConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "REPAIR-AND-DEDUCT (\u00a792.0561):\nIf your landlord won't fix a condition that materially affects health/safety, you can:\n1. Give written notice describing the problem\n2. Wait a 'reasonable time' (7 days for most issues, longer for complex repairs)\n3. If landlord still hasn't fixed it: hire a contractor yourself\n4. Deduct the REASONABLE cost from your next rent payment\n5. Provide the landlord with receipts",
+      acknowledgeLabel: 'I understand the 5-step repair-and-deduct process under \u00a7 92.0561',
     },
     {
       id: 'written_notice',
@@ -22,6 +23,7 @@ export const ltRepairAndDeductConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You MUST give written notice first. Send via certified mail or hand-deliver with a witness. Keep a copy. Include: description of the problem, how long it\'s existed, and a request to repair within [7] days.',
+      acknowledgeLabel: "I understand — I'll send written notice via certified mail before proceeding",
       showIf: (answers) => answers.written_notice === 'no',
     },
     {
@@ -40,6 +42,7 @@ export const ltRepairAndDeductConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You need to wait a "reasonable time" before proceeding. For most repairs, 7 days is considered reasonable. Continue to document the issue with photos and keep a record of any communication.',
+      acknowledgeLabel: "I understand — I'll wait the full 7 days and continue documenting the issue",
       showIf: (answers) => answers.time_since_notice === 'less_than_7_days',
     },
     {
@@ -47,6 +50,7 @@ export const ltRepairAndDeductConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A reasonable time has likely passed for most standard repairs. You may now proceed with hiring a contractor. Make sure the repair addresses a condition that materially affects health or safety.',
+      acknowledgeLabel: "I understand — I'm ready to hire a licensed contractor and keep receipts",
       showIf: (answers) => answers.time_since_notice === '7_to_14_days',
     },
     {
@@ -54,6 +58,7 @@ export const ltRepairAndDeductConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'More than enough time has passed. You have a strong basis to proceed with repair-and-deduct. Document everything and get at least two repair estimates for reasonableness.',
+      acknowledgeLabel: "I understand — I'll get two estimates and document everything before deducting",
       showIf: (answers) => answers.time_since_notice === 'over_14_days',
     },
     {
@@ -61,12 +66,14 @@ export const ltRepairAndDeductConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "LIMITS ON REPAIR-AND-DEDUCT:\n- Cost cannot exceed one month's rent (unless you get court approval)\n- The repair must address a condition that materially affects health or safety\n- You cannot deduct for cosmetic issues\n- You must use a licensed contractor for plumbing, electrical, and HVAC\n- Keep ALL receipts \u2014 you'll need them if the landlord disputes",
+      acknowledgeLabel: "I understand the legal limits \u2014 I'll stay within one month's rent and use a licensed contractor",
     },
     {
       id: 'retaliation_warning',
       type: 'info',
       prompt:
         "RISK WARNING: Some landlords may try to evict you for 'nonpayment' after you deduct. This is RETALIATION under \u00a792.331 and is illegal. Keep all documentation to prove you followed the legal process.",
+      acknowledgeLabel: "I understand \u2014 I'll keep all documentation in case the landlord retaliates",
     },
   ],
 

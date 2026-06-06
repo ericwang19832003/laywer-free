@@ -68,11 +68,102 @@ function InfoText({ text }: { text: string }) {
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { SkipForward } from 'lucide-react'
+import { SkipForward, CheckSquare, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { GuidedStepConfig, SummaryItem } from '@lawyer-free/shared/guided-steps/types'
+import type { GuidedStepConfig, QuestionDef, SummaryItem } from '@lawyer-free/shared/guided-steps/types'
+
+function MultiSelectQuestion({
+  question,
+  existingAnswer,
+  onAnswer,
+}: {
+  question: QuestionDef
+  existingAnswer?: string
+  onAnswer: (value: string) => void
+}) {
+  const initial = existingAnswer && existingAnswer !== 'none'
+    ? new Set(existingAnswer.split(','))
+    : new Set<string>()
+  const [selected, setSelected] = useState<Set<string>>(initial)
+  const [noneSelected, setNoneSelected] = useState(existingAnswer === 'none')
+
+  function toggle(value: string) {
+    setNoneSelected(false)
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(value)) next.delete(value); else next.add(value)
+      return next
+    })
+  }
+
+  function handleNone() {
+    setSelected(new Set())
+    setNoneSelected(true)
+  }
+
+  function handleContinue() {
+    if (noneSelected) { onAnswer('none'); return }
+    if (selected.size > 0) { onAnswer(Array.from(selected).join(',')); return }
+  }
+
+  const canContinue = noneSelected || selected.size > 0
+
+  return (
+    <div>
+      <h2 className="text-lg font-medium text-warm-text mb-2">{question.prompt}</h2>
+      {question.helpText && (
+        <p className="text-sm text-warm-muted mb-4">{question.helpText}</p>
+      )}
+      <div className="flex flex-col gap-2 mt-4">
+        {question.options?.map((opt) => {
+          const checked = selected.has(opt.value)
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggle(opt.value)}
+              className={`flex items-center gap-3 rounded-md border p-3 text-left text-sm transition-colors ${
+                checked
+                  ? 'border-calm-indigo bg-calm-indigo/5 text-warm-text'
+                  : 'border-warm-border text-warm-text hover:border-calm-indigo/50'
+              }`}
+            >
+              {checked
+                ? <CheckSquare className="h-4 w-4 shrink-0 text-calm-indigo" />
+                : <Square className="h-4 w-4 shrink-0 text-warm-muted" />
+              }
+              <span className="font-medium">{opt.label}</span>
+            </button>
+          )
+        })}
+        <button
+          type="button"
+          onClick={handleNone}
+          className={`flex items-center gap-3 rounded-md border p-3 text-left text-sm transition-colors ${
+            noneSelected
+              ? 'border-calm-amber bg-calm-amber/5 text-warm-text'
+              : 'border-warm-border text-warm-muted hover:border-warm-text'
+          }`}
+        >
+          {noneSelected
+            ? <CheckSquare className="h-4 w-4 shrink-0 text-calm-amber" />
+            : <Square className="h-4 w-4 shrink-0 text-warm-muted" />
+          }
+          <span>{question.noneLabel ?? 'None of these yet'}</span>
+        </button>
+      </div>
+      <Button
+        onClick={handleContinue}
+        disabled={!canContinue}
+        className="w-full mt-4"
+      >
+        Continue →
+      </Button>
+    </div>
+  )
+}
 
 interface GuidedStepProps {
   caseId: string
@@ -292,6 +383,14 @@ export function GuidedStep({
                 style={{ width: `${progress}%` }}
               />
             </div>
+            {currentIndex > 0 && (
+              <button
+                onClick={() => setCurrentIndex(0)}
+                className="mt-2 text-xs text-warm-muted hover:text-warm-text underline underline-offset-2"
+              >
+                ↩ Review from step 1
+              </button>
+            )}
           </div>
 
           <Card>
@@ -300,7 +399,7 @@ export function GuidedStep({
                 /* Info type: styled info box */
                 <div>
                   <div className="rounded-md border border-warm-border bg-warm-border/30 p-4 mb-4">
-                    <InfoText text={currentQuestion.prompt} />
+                    <InfoText text={currentQuestion.promptFn ? currentQuestion.promptFn(answers) : currentQuestion.prompt} />
                     {currentQuestion.helpText && (
                       <p className="text-sm text-warm-muted mt-3">
                         {currentQuestion.helpText}
@@ -311,9 +410,17 @@ export function GuidedStep({
                     onClick={() => handleAnswer('acknowledged')}
                     className="w-full"
                   >
-                    Got it &rarr;
+                    {currentQuestion.acknowledgeLabel ?? 'Got it'} &rarr;
                   </Button>
                 </div>
+              ) : currentQuestion.type === 'multi_select' ? (
+                /* Multi-select checklist */
+                <MultiSelectQuestion
+                  key={currentQuestion.id}
+                  question={currentQuestion}
+                  existingAnswer={answers[currentQuestion.id]}
+                  onAnswer={handleAnswer}
+                />
               ) : currentQuestion.type === 'text' ? (
                 /* Text input */
                 <div>

@@ -48,6 +48,7 @@ export const ltHearingPrepConfig: GuidedStepConfig = {
         'Bring 3 copies of everything: one for you, one for the judge, one for the other party.',
       helpText:
         'This is standard court procedure and shows you are well-prepared.',
+      acknowledgeLabel: "I'll make 3 copies before my hearing",
       showIf: (answers) => answers.copies_made === 'no',
     },
     {

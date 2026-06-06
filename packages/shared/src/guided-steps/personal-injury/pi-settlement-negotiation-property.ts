@@ -28,6 +28,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'To write a counter-offer: state why their offer is low, itemize your damages (repair or replacement cost, diminished value, and loss of use), propose a specific amount, and set a response deadline.',
+      acknowledgeLabel: 'I\'ll write my counter-offer →',
       showIf: (answers) => answers.offer_evaluation === 'too_low',
     },
     {
@@ -40,6 +41,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Mediation uses a neutral third party to help reach agreement. It's faster and cheaper than going to court.",
+      acknowledgeLabel: "I'll request mediation if needed",
       showIf: (answers) => answers.open_to_mediation === 'yes',
     },
     {
@@ -53,6 +55,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Important: If negotiations fail, you must file suit before your statute of limitations expires. In Texas, this is generally 2 years for property damage claims.',
+      acknowledgeLabel: 'I\'ve noted the 2-year deadline →',
     },
     {
       id: 'settlement_reached',
@@ -75,6 +78,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'We will guide you through preparing and filing your petition. Make sure you file before your statute of limitations expires.',
+      acknowledgeLabel: 'Ready to file my petition →',
       showIf: (answers) =>
         answers.settlement_reached === 'no' && answers.want_to_file_suit === 'yes',
     },
@@ -115,6 +119,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Got it. Since you've already filed your petition, we'll skip the petition preparation and court filing steps and move straight to serving the defendant.",
+      acknowledgeLabel: 'Proceed to serving the defendant →',
       showIf: (answers) =>
         answers.settlement_reached === 'no' &&
         answers.want_to_file_suit === 'yes' &&
@@ -125,6 +130,7 @@ export const piSettlementNegotiationPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Great — we will skip the litigation steps and guide you through the post-resolution process, including reviewing your settlement agreement and understanding any tax implications.',
+      acknowledgeLabel: 'Let\'s review my settlement →',
       showIf: (answers) => answers.settlement_reached === 'yes',
     },
   ],

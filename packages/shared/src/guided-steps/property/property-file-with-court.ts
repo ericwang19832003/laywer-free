@@ -21,6 +21,7 @@ export const propertyFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas requires e-filing in most courts. Use eFileTexas.gov to submit your petition electronically. You will need to create an account and pay the filing fee online. E-filing provides instant confirmation.',
+      acknowledgeLabel: 'Got it — I\'ll e-file on eFileTexas.gov →',
       showIf: (answers) => answers.filing_method === 'efiling',
     },
     {
@@ -28,6 +29,7 @@ export const propertyFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Some courts (especially JP courts) still accept in-person filings. Bring your petition, any exhibits, and payment for the filing fee. Ask the clerk if they accept cash, check, or credit card.',
+      acknowledgeLabel: 'Got it — I\'ll go to the courthouse →',
       showIf: (answers) => answers.filing_method === 'in_person',
     },
     {
@@ -35,6 +37,7 @@ export const propertyFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most Texas courts require e-filing through eFileTexas.gov. Check your county court\'s website or call the clerk\'s office to confirm their filing requirements for property disputes.',
+      acknowledgeLabel: 'Got it — I\'ll check the court website →',
       showIf: (answers) => answers.filing_method === 'not_sure',
     },
     {
@@ -52,12 +55,14 @@ export const propertyFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Filing fees for property disputes vary by court. District court cases typically cost $250-$350. County court cases are usually $150-$250. JP court fees are lower. You will also need to pay for service of process.',
+      acknowledgeLabel: 'Got it — I know the fee range →',
     },
     {
       id: 'fee_waiver_info',
       type: 'info',
       prompt:
         'If you cannot afford the filing fee, you can request a fee waiver by filing a "Statement of Inability to Afford Payment of Court Costs." The court will review your financial situation and may waive the fees.',
+      acknowledgeLabel: 'Got it — I\'ll file the fee waiver form →',
       showIf: (answers) => answers.filing_fee_paid === 'fee_waiver',
     },
     {
@@ -75,6 +80,7 @@ export const propertyFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A lis pendens puts the public on notice that the property is subject to a lawsuit. This prevents the other party from selling or transferring the property to avoid the judgment. In Texas, file it with the county clerk where the property is located.',
+      acknowledgeLabel: 'Understood — I\'ll consider a lis pendens →',
       showIf: (answers) => answers.lis_pendens_filed !== 'yes',
     },
     {
@@ -96,6 +102,7 @@ export const propertyFileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you e-filed, check your eFileTexas account for the filing status. If you filed in person, the clerk should have given you a file-stamped copy with your cause number. Call the clerk\'s office if you have not received confirmation.',
+      acknowledgeLabel: 'Got it — I\'ll check my filing status →',
       showIf: (answers) => answers.filing_confirmed === 'no',
     },
   ],

@@ -9,6 +9,7 @@ export const debtBusinessRecordsChallengeConfig: GuidedStepConfig = {
     {
       id: 'business_records_intro',
       type: 'info',
+      acknowledgeLabel: 'Got it — let\'s check →',
       prompt:
         'Debt buyers usually don\'t have a witness who personally handled your account. Instead, they rely on a "Business Records Affidavit" (Texas Rule of Evidence 803(6) / Rule 902) to get their documents admitted without live testimony. You can challenge this.',
     },
@@ -22,6 +23,7 @@ export const debtBusinessRecordsChallengeConfig: GuidedStepConfig = {
     {
       id: 'affidavit_weaknesses',
       type: 'info',
+      acknowledgeLabel: 'Got the weaknesses to look for →',
       prompt:
         'COMMON WEAKNESSES TO CHALLENGE:\n\n- The affiant (person who signed) has no personal knowledge of YOUR account \u2014 they work for the debt buyer, not the original creditor\n- Records were not made "at or near the time" of the transactions \u2014 they were created after purchase\n- Records were not kept in the "regular course of business" of the ORIGINAL creditor\n- Chain of custody gaps \u2014 records passed through multiple companies\n- Lack of foundation \u2014 no testimony about how records were created or maintained',
       showIf: (answers) => answers.affidavit_received === 'yes',
@@ -29,6 +31,7 @@ export const debtBusinessRecordsChallengeConfig: GuidedStepConfig = {
     {
       id: 'how_to_object',
       type: 'info',
+      acknowledgeLabel: 'Got the objection language →',
       prompt:
         'HOW TO OBJECT \u2014 At trial, when they try to introduce documents through the affidavit, object: "Objection, Your Honor. Hearsay. The business records exception requires that records be made by someone with personal knowledge, at or near the time of the event, as part of regular business practice. The affiant works for [debt buyer], not [original creditor], and has no personal knowledge of the creation or maintenance of these records."',
     },
@@ -43,6 +46,7 @@ export const debtBusinessRecordsChallengeConfig: GuidedStepConfig = {
     {
       id: 'challenge_accuracy',
       type: 'info',
+      acknowledgeLabel: 'I\'ll challenge the accuracy →',
       prompt:
         'CHALLENGE THE ACCURACY \u2014 If statements have gaps, unexplained fees, or don\'t match what you remember, point this out. The plaintiff bears the burden of proving the exact amount owed. Discrepancies undermine their case.',
       showIf: (answers) => answers.records_look_incomplete === 'yes',
@@ -50,6 +54,7 @@ export const debtBusinessRecordsChallengeConfig: GuidedStepConfig = {
     {
       id: 'written_objection_deadline',
       type: 'info',
+      acknowledgeLabel: 'I\'ll file my objection within 14 days →',
       prompt:
         'FILE A WRITTEN OBJECTION \u2014 If you receive a business records affidavit before trial, you have 14 days (Justice Court Rule 503.3) to file a written objection. If you don\'t object in time, the affidavit may be admitted automatically. Mark this deadline!',
     },

@@ -16,6 +16,7 @@ export const fileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "You don't need a lawyer to file. The court clerk's office can help with procedural questions, though they can't give legal advice.",
+      acknowledgeLabel: 'Got it — I\'ll ask the clerk →',
       showIf: (answers) => answers.first_time_filing === 'yes',
     },
     {
@@ -28,6 +29,7 @@ export const fileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Fees vary by court type. You can apply for a fee waiver if you can't afford it.",
+      acknowledgeLabel: 'Got it — I\'ll look up the fee →',
       showIf: (answers) => answers.know_filing_fee === 'no',
     },
     {
@@ -45,6 +47,7 @@ export const fileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most Texas courts use eFileTexas.gov. Create an account, select your court, upload documents, and pay fees online.',
+      acknowledgeLabel: 'Got it — I\'ll set up eFileTexas →',
       showIf: (answers) => answers.understand_efile === 'no',
     },
     {
@@ -57,6 +60,7 @@ export const fileWithCourtConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "After filing, you'll receive a cause number. You must then serve the other party within the required timeframe.",
+      acknowledgeLabel: 'Got it — I\'ll serve the other party next →',
       showIf: (answers) => answers.know_what_happens_after === 'no',
     },
   ],

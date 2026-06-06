@@ -18,6 +18,7 @@ export const ltReviewResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Obtain a copy of the response before proceeding. Check the court\'s online docket using your cause number, or visit the clerk\'s office.',
+      acknowledgeLabel: "I understand — I'll retrieve the response from the court docket or clerk's office before continuing",
       showIf: (answers) => answers.response_received === 'no',
     },
     {
@@ -38,6 +39,7 @@ export const ltReviewResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A counterclaim means you will need to defend against their claims at the hearing in addition to presenting your own case. Gather evidence to respond to each of their specific allegations.',
+      acknowledgeLabel: "I understand — I'll gather evidence to address each of their counterclaim allegations at the hearing",
       showIf: (answers) => answers.counterclaim_filed === 'yes',
     },
     {
@@ -53,6 +55,7 @@ export const ltReviewResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Review each paragraph of their answer. Note which claims they admit, which they deny, and which defenses they raise. Prepare evidence to counter each defense at the hearing.',
+      acknowledgeLabel: "I understand — I'll go through each paragraph and prepare counter-evidence for every defense they raise",
       showIf: (answers) => answers.defenses_identified === 'no',
     },
     {
@@ -60,6 +63,7 @@ export const ltReviewResponseConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Based on their response, update your hearing preparation. Focus your evidence on countering their specific defenses and any counterclaims.',
+      acknowledgeLabel: "I understand — I'll update my hearing preparation to directly address their defenses and counterclaims",
       showIf: (answers) => answers.response_received === 'yes',
     },
   ],

@@ -11,6 +11,7 @@ export const familyPropertyDivisionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Texas is a COMMUNITY PROPERTY state. This means:\n- Property acquired DURING the marriage belongs to BOTH spouses equally\n- Property owned BEFORE marriage, inherited, or gifted is SEPARATE property\n- The court divides community property in a 'just and right' manner (not always 50/50)",
+      acknowledgeLabel: 'I understand community property →',
     },
     {
       id: 'own_home',
@@ -22,6 +23,7 @@ export const familyPropertyDivisionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOME OPTIONS:\n- One spouse buys out the other (requires refinancing the mortgage into one name)\n- Sell the home and split the proceeds\n- One spouse keeps the home and the other gets equivalent value in other assets\n\nGet a formal appraisal to establish fair market value. If the home was purchased before marriage, the equity gained during marriage may still be community property.',
+      acknowledgeLabel: 'Got it — I\'ll get an appraisal →',
       showIf: (a) => a.own_home === 'yes',
     },
     {
@@ -34,6 +36,7 @@ export const familyPropertyDivisionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "RETIREMENT ACCOUNTS:\nContributions made during the marriage are community property. To split a retirement account, you need a QDRO (Qualified Domestic Relations Order) — a court order that directs the plan administrator to divide the account.\n\nIMPORTANT: A QDRO must be drafted precisely. Many courts have sample QDRO forms. The plan administrator must approve it before the court signs it. Do NOT withdraw funds without a QDRO — you'll face taxes and penalties.",
+      acknowledgeLabel: 'Got it — I\'ll prepare a QDRO →',
       showIf: (a) => a.retirement_accounts === 'yes',
     },
     {
@@ -46,6 +49,7 @@ export const familyPropertyDivisionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "BUSINESS INTERESTS:\n- If the business was started during the marriage, it's likely community property\n- If started before marriage, the increase in value during marriage may be community property\n- A business valuation may be needed (can cost $2,000-$10,000+)\n- The court can award the business to one spouse and offset with other assets\n\nGather: tax returns, profit/loss statements, balance sheets, and business bank statements.",
+      acknowledgeLabel: 'Understood — I\'ll gather business records →',
       showIf: (a) => a.business_owned === 'yes',
     },
     {
@@ -53,12 +57,14 @@ export const familyPropertyDivisionGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "DEBTS ARE ALSO DIVIDED:\n- Credit card debt during marriage: community debt\n- Student loans: depends on when incurred and benefit to community\n- Mortgage: usually allocated with the house\n- Tax liability: divided equitably\n\nIMPORTANT: The court divides debts between you and your spouse, but creditors are NOT bound by the decree. If your name is on a joint debt, the creditor can still come after you even if the court assigned it to your spouse.",
+      acknowledgeLabel: 'Understood — I\'ll protect myself on joint debts →',
     },
     {
       id: 'worksheet_info',
       type: 'info',
       prompt:
         'PROPERTY WORKSHEET:\nList all assets and debts, mark each as Community (C) or Separate (S), and estimate value. Bring this to mediation and trial.',
+      acknowledgeLabel: 'Got it — I\'ll build my property worksheet →',
     },
   ],
 

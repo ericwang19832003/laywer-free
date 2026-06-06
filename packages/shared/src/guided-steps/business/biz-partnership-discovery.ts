@@ -35,6 +35,7 @@ export const bizPartnershipDiscoveryConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas discovery rules allow 25 interrogatories and requests for production. Plan your questions carefully.',
+      acknowledgeLabel: "I'll plan my questions carefully within the 25-item Texas discovery limit",
     },
   ],
 

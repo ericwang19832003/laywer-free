@@ -29,6 +29,7 @@ export const debtServiceGuideConfig: GuidedStepConfig = {
     {
       id: 'efile_service_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — service is handled →',
       showIf: (answers) => answers.service_method === 'efile',
       prompt:
         "Good news! If you filed through eFileTexas.gov and the plaintiff's attorney is registered, service happens automatically. You'll see a \"Service\" confirmation in your e-filing receipt. Keep this receipt — it's your proof of service.",
@@ -36,6 +37,7 @@ export const debtServiceGuideConfig: GuidedStepConfig = {
     {
       id: 'certified_mail_info',
       type: 'info',
+      acknowledgeLabel: 'Got the steps — heading to post office →',
       showIf: (answers) => answers.service_method === 'certified_mail',
       prompt:
         'To serve by certified mail:\n1. Go to your local post office\n2. Ask for "certified mail with return receipt requested" (green card)\n3. Address it to the PLAINTIFF\'S ATTORNEY (name and address from your court papers)\n4. Mail a copy of your Answer WITH the Certificate of Service attached\n5. Keep the certified mail receipt AND the green return receipt card when it comes back\n6. Cost: approximately $10-15\n\nImportant: Do this the SAME DAY you file your Answer with the court.',
@@ -43,6 +45,7 @@ export const debtServiceGuideConfig: GuidedStepConfig = {
     {
       id: 'hand_delivery_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — delivering in person →',
       showIf: (answers) => answers.service_method === 'hand_delivery',
       prompt:
         "To serve by hand delivery:\n1. Bring a copy of your Answer with Certificate of Service to the attorney's office\n2. Ask the receptionist to accept service\n3. Ask them to SIGN or STAMP your extra copy with the date received\n4. If no one is available, leave it with any person at the office and note who accepted it\n\nKeep your signed/stamped copy as proof of delivery.",
@@ -50,6 +53,7 @@ export const debtServiceGuideConfig: GuidedStepConfig = {
     {
       id: 'timing_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — filing and serving same day →',
       prompt:
         "CRITICAL TIMING: You must serve the plaintiff's attorney on the same day you file, or before. Courts require proof that you served the other side. If you file but don't serve, your Answer may be rejected.\n\nThe easiest approach: File and serve on the SAME DAY.",
     },
@@ -64,6 +68,7 @@ export const debtServiceGuideConfig: GuidedStepConfig = {
     {
       id: 'find_attorney_info',
       type: 'info',
+      acknowledgeLabel: 'I found the attorney\'s address →',
       showIf: (answers) => answers.have_attorney_address === 'no',
       prompt:
         "To find the attorney's address:\n1. Check the petition/complaint (first page, usually top or bottom)\n2. Check the citation (the document that was served on you)\n3. Call the court clerk and ask for the attorney of record\n4. Search the Texas State Bar website (texasbar.com/AM/Template.cfm?Section=Find_A_Lawyer) with the attorney's name\n\nIf no attorney is listed, the plaintiff may be pro se — serve them directly at the address on the petition.",

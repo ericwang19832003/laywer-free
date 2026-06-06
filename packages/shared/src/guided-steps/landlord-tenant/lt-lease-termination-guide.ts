@@ -26,6 +26,7 @@ export const ltLeaseTerminationGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'MILITARY PROTECTION:\nThe Servicemembers Civil Relief Act (SCRA) and Tex. Property Code §92.017 protect you. You can terminate your lease with 30 days\' written notice plus a copy of your deployment or PCS orders. The lease terminates 30 days after the NEXT rent payment is due. The landlord cannot charge an early termination fee. This applies to active duty, reserves called to active duty, and National Guard members.',
+      acknowledgeLabel: "I understand my SCRA rights — I'll send 30-day written notice with a copy of my orders",
       showIf: (answers) => answers.termination_reason === 'military_deployment',
     },
     {
@@ -33,6 +34,7 @@ export const ltLeaseTerminationGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DOMESTIC VIOLENCE PROTECTION:\nUnder Tex. Property Code §92.016, you can terminate your lease if you are a victim of domestic violence, sexual assault, or stalking. You need: (1) a protective order, (2) a police report, or (3) documentation from a licensed health care provider or advocate. Provide written notice to the landlord with a copy of the documentation. The landlord cannot charge an early termination penalty. Your security deposit rights still apply.',
+      acknowledgeLabel: "I understand my rights under § 92.016 — I'll provide written notice with the required documentation",
       showIf: (answers) => answers.termination_reason === 'domestic_violence',
     },
     {
@@ -40,6 +42,7 @@ export const ltLeaseTerminationGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CONSTRUCTIVE EVICTION:\nIf the landlord won\'t fix serious conditions that affect your health or safety (no heat, sewage backup, mold, structural damage), you may have grounds for "constructive eviction." Steps: (1) Give WRITTEN notice of the problem, (2) Allow reasonable time for repair, (3) If landlord fails to act, send a second written notice stating you will vacate if not repaired within a reasonable time, (4) Vacate the property. Document everything with photos, dates, and written correspondence.',
+      acknowledgeLabel: "I understand the 4-step constructive eviction process — I'll document everything in writing",
       showIf: (answers) => answers.termination_reason === 'uninhabitable',
     },
     {
@@ -47,6 +50,7 @@ export const ltLeaseTerminationGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'LANDLORD BREACH OF LEASE:\nIf the landlord has materially breached the lease, you may be able to terminate. Common breaches include: entering your unit without proper notice, failing to maintain common areas, shutting off utilities, changing locks without authorization, or harassment. Document the breach in writing, give the landlord notice and a reasonable opportunity to cure, and if they don\'t, you may have grounds to terminate without penalty.',
+      acknowledgeLabel: "I understand — I'll document the breach in writing and give the landlord a chance to cure",
       showIf: (answers) => answers.termination_reason === 'landlord_breach',
     },
     {
@@ -54,6 +58,7 @@ export const ltLeaseTerminationGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RELOCATING WITHOUT LEGAL PROTECTION:\nIf you don\'t qualify for a statutory exception, your options include:\n- Check your lease for an early termination clause (many leases allow termination with 1-2 months\' rent as a fee)\n- Negotiate with your landlord — many prefer a cooperative move-out over chasing rent\n- Subletting or assigning the lease (if allowed by your lease)\n- Finding a replacement tenant to take over the lease\n- The landlord has a duty to mitigate damages — they must make reasonable efforts to re-rent the unit',
+      acknowledgeLabel: "I understand my options — I'll review my lease for an early termination clause and negotiate if needed",
       showIf: (answers) =>
         answers.termination_reason === 'relocating' ||
         answers.termination_reason === 'other',
@@ -65,6 +70,7 @@ export const ltLeaseTerminationGuideConfig: GuidedStepConfig = {
         'ALWAYS GIVE WRITTEN NOTICE:\nRegardless of reason, notify your landlord IN WRITING. Send via certified mail. State: your name, the property address, your reason for terminating, the date you\'ll vacate, and your forwarding address for the security deposit.',
       helpText:
         'Certified mail creates proof that the landlord received your notice. Keep the receipt and a copy of the letter.',
+      acknowledgeLabel: "I understand — I'll send termination notice via certified mail with all required details",
     },
   ],
 

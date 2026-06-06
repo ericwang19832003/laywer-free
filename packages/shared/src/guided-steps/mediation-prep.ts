@@ -15,6 +15,7 @@ export const mediationPrepConfig: GuidedStepConfig = {
       id: 'mediator_info',
       type: 'info',
       prompt: 'You can use a court-appointed mediator, agreed-upon private mediator, or a mediation service. Consider cost, availability, and expertise.',
+      acknowledgeLabel: "I'll select a mediator",
       showIf: (answers) => answers.mediator_selected === 'no',
     },
     {
@@ -31,6 +32,7 @@ export const mediationPrepConfig: GuidedStepConfig = {
       id: 'authority_info',
       type: 'info',
       prompt: 'You may need someone with settlement authority to be available by phone during mediation. This could be you, an insurance representative, or someone with power of attorney.',
+      acknowledgeLabel: "I'll arrange settlement authority",
       showIf: (answers) => answers.settlement_authority === 'no',
     },
     {
@@ -57,6 +59,7 @@ export const mediationPrepConfig: GuidedStepConfig = {
       id: 'BATNA_info',
       type: 'info',
       prompt: 'Your BATNA is what happens if mediation fails. This might be going to trial, accepting a judgment, or walking away.',
+      acknowledgeLabel: "I'll consider my alternatives",
       showIf: (answers) => answers.BATNA_prepared === 'no',
     },
     {

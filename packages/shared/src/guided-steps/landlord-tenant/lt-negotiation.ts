@@ -18,6 +18,7 @@ export const ltNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Sending a demand letter first strengthens your position. If you skipped this step, you can still negotiate, but the other party may take you less seriously without a formal demand on record.',
+      acknowledgeLabel: "I understand — I'll consider sending a demand letter before continuing negotiations",
       showIf: (answers) => answers.demand_letter_sent === 'no',
     },
     {
@@ -35,6 +36,7 @@ export const ltNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party has not responded, you can try one more contact attempt or proceed to filing your case. Their silence can help demonstrate to the court that you made a good-faith effort to resolve the dispute.',
+      acknowledgeLabel: "I understand — I'll make one more contact attempt or proceed to filing",
       showIf: (answers) => answers.response_received === 'no_response',
     },
     {
@@ -50,6 +52,7 @@ export const ltNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Know your bottom line before you start. Consider: repair costs or unpaid rent, the cost and time of litigation, lease terms, and your strongest evidence. Most settlements involve some compromise from both sides.',
+      acknowledgeLabel: "I understand — I'll determine my minimum acceptable terms before entering negotiations",
       showIf: (answers) => answers.settlement_range_known === 'no',
     },
     {
@@ -67,6 +70,7 @@ export const ltNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Get your settlement in writing. Include: what each party will do, deadlines, and consequences for non-compliance. Both parties should sign. Consider having it notarized.',
+      acknowledgeLabel: "I understand — I'll get the settlement in writing with both signatures before relying on it",
       showIf: (answers) => answers.settlement_reached === 'yes',
     },
     {
@@ -74,6 +78,7 @@ export const ltNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Since negotiations did not resolve the dispute, your next step is to prepare and file your case with the court. Your demand letter and negotiation attempts strengthen your position.',
+      acknowledgeLabel: "I understand — I'll proceed to file my case with the court",
       showIf: (answers) => answers.settlement_reached === 'no',
     },
   ],

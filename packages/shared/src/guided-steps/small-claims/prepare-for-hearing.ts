@@ -22,6 +22,7 @@ export const prepareForHearingConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Bring 3 copies of everything: one for you, one for the judge, one for the defendant.',
+      acknowledgeLabel: "I'll make 3 copies of all my documents →",
       showIf: (answers) => answers.copies_made === 'no',
     },
     {
@@ -35,6 +36,7 @@ export const prepareForHearingConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The judge will give you limited time. Practice telling your story: what happened, what you lost, what you\'re asking for.',
+      acknowledgeLabel: "I'll practice my 5-minute explanation before the hearing →",
       showIf: (answers) => answers.practiced_explanation === 'no',
     },
     {
@@ -47,6 +49,7 @@ export const prepareForHearingConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Be concise, stick to facts, don't argue with the other side. Let the judge ask questions. Be respectful.",
+      acknowledgeLabel: "I'll stay concise, factual, and respectful in court →",
       showIf: (answers) => answers.know_what_judge_expects === 'no',
     },
   ],

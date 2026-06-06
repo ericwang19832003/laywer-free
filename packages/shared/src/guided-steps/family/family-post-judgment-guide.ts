@@ -22,6 +22,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FAVORABLE OUTCOME:\n\u2022 Get a certified copy of the final order from the court clerk\n\u2022 Review it carefully to make sure it matches what the judge said in court\n\u2022 If anything is incorrect, file a Motion to Correct Clerical Error promptly\n\u2022 Begin following the order immediately \u2014 custody exchanges, support payments, property transfers\n\u2022 Keep a record of your compliance in case the other party later claims you didn\u2019t follow the order',
+      acknowledgeLabel: 'Got it \u2014 I\'ll get my certified copy \u2192',
       showIf: (answers) => answers.case_outcome === 'favorable',
     },
     {
@@ -29,6 +30,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'UNFAVORABLE OUTCOME:\n\u2022 You MUST comply with the court order even if you disagree \u2014 violating it can result in contempt\n\u2022 You have the right to appeal (see below)\n\u2022 You may also be able to file for modification if circumstances change\n\u2022 Consult with an attorney about your options \u2014 many offer free consultations for family law\n\u2022 Do NOT withhold the children or stop paying support as a protest \u2014 this will hurt your position',
+      acknowledgeLabel: 'Understood \u2014 I\'ll comply while I consider my options \u2192',
       showIf: (answers) => answers.case_outcome === 'unfavorable',
     },
     {
@@ -36,6 +38,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'PARTIAL OUTCOME:\n\u2022 Review the order carefully \u2014 understand exactly what was granted and what was denied\n\u2022 Comply fully with all parts of the order\n\u2022 For the parts that went against you, consider whether to appeal or wait and file a modification later\n\u2022 Sometimes a partial result is the best foundation for a future modification once you can show changed circumstances',
+      acknowledgeLabel: 'Understood \u2014 I\'ll review the order carefully \u2192',
       showIf: (answers) => answers.case_outcome === 'partial',
     },
     {
@@ -43,6 +46,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'AGREED/SETTLEMENT OUTCOME:\n\u2022 Your Mediated Settlement Agreement (MSA) or agreed order will be incorporated into the final decree\n\u2022 It is now a court order and is enforceable just like a judge\u2019s ruling\n\u2022 Agreed orders are very difficult to modify or appeal \u2014 courts favor finality of settlements\n\u2022 Keep a copy in a safe place and follow it precisely\n\u2022 If the other party stops following the agreement, you can enforce it through the court',
+      acknowledgeLabel: 'Got it \u2014 I\'ll keep my copy safe \u2192',
       showIf: (answers) => answers.case_outcome === 'agreed',
     },
     {
@@ -50,6 +54,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ENFORCEMENT: If the other party doesn\u2019t comply with the court order:\n1. File a "Motion for Enforcement" or "Motion for Contempt"\n2. The court can hold them in contempt (jail up to 6 months for willful violations)\n3. For unpaid child support: file an income withholding order with their employer\n4. Texas Attorney General\u2019s office helps enforce support: 1-800-252-8014\n5. For custody violations: document every instance with dates, times, and any witnesses\n6. Keep all communication (texts, emails) as evidence',
+      acknowledgeLabel: 'Got it \u2014 I know my enforcement options \u2192',
     },
     {
       id: 'considering_appeal',
@@ -63,6 +68,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'APPEAL INFORMATION:\n\u2022 You have 30 days to file a Notice of Appeal from the date the final order is signed\n\u2022 Appeals in family cases are reviewed for "abuse of discretion" \u2014 meaning the trial judge made a clearly wrong decision\n\u2022 This is a high bar: the appeals court gives significant deference to the trial judge, especially on credibility calls\n\u2022 You must comply with the trial court\u2019s order during the appeal unless you get a stay\n\u2022 Appeals are expensive and slow (6\u201318 months) \u2014 consider whether modification might be a better path\n\u2022 You will likely need an attorney for an appeal',
+      acknowledgeLabel: 'I understand the appeal process \u2192',
       showIf: (answers) =>
         answers.considering_appeal === 'yes' &&
         (answers.case_outcome === 'unfavorable' || answers.case_outcome === 'partial'),
@@ -72,6 +78,7 @@ export const familyPostJudgmentGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'MODIFICATION:\nLife changes. If circumstances change materially (new job, relocation, child\u2019s needs), you can file to modify custody, support, or visitation.\n\n\u2022 Wait at least 1 year unless the child\u2019s safety is at risk\n\u2022 You must prove a "material and substantial change in circumstances"\n\u2022 Examples: significant income change, relocation, remarriage, child\u2019s changing needs, substance abuse issues\n\u2022 File in the court that issued the original order\n\u2022 The standard is always: best interest of the child',
+      acknowledgeLabel: 'Got it \u2014 I\'ll come back if things change \u2192',
     },
   ],
 

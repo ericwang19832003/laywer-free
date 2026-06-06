@@ -22,6 +22,7 @@ export const propertyWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In Texas, the other party generally has until the first Monday after 20 days from the date of service to file an answer. If the 20th day falls on a weekend or holiday, the deadline extends to the following Monday.',
+      acknowledgeLabel: "I understand the 20-day answer deadline",
     },
     {
       id: 'checked_docket',
@@ -33,6 +34,7 @@ export const propertyWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check the court\'s online docket regularly for filings by the other party. You can also call the clerk\'s office to ask if an answer has been filed. In property disputes, the other party may also file a counterclaim related to the same property.',
+      acknowledgeLabel: "I'll check the court docket and watch for counterclaims",
       showIf: (answers) => answers.checked_docket === 'no',
     },
     {
@@ -50,6 +52,7 @@ export const propertyWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party does not file an answer by the deadline, you may request a default judgment. In property disputes, a default judgment can grant you the specific relief you requested (removal of encroachment, quiet title, etc.) in addition to monetary damages.',
+      acknowledgeLabel: "I'll request a default judgment if the deadline passes without a response",
       showIf: (answers) => answers.time_elapsed === 'deadline_passed',
     },
     {
@@ -67,6 +70,7 @@ export const propertyWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Look up your case on the county court\'s online docket system, or call the clerk\'s office with your cause number. The clerk can tell you if any filings have been made.',
+      acknowledgeLabel: "I'll look up my case on the court's online docket",
       showIf: (answers) => answers.answer_filed === 'not_sure',
     },
   ],

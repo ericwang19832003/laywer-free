@@ -21,6 +21,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A general denial means the other party denies everything in your petition. You will need to prove each element of your property claim at trial, including your ownership or right to the property.',
+      acknowledgeLabel: 'Understood — I\'ll prepare to prove my claim →',
       showIf: (answers) => answers.denial_type === 'general',
     },
     {
@@ -28,6 +29,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Specific denials mean the other party only disputes certain facts. Pay close attention to what they admit vs. deny about property boundaries, ownership, or damage. Admissions can simplify your case.',
+      acknowledgeLabel: 'Got it — I\'ll focus on disputed facts →',
       showIf: (answers) => answers.denial_type === 'specific',
     },
     {
@@ -35,6 +37,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Look at the first page of the answer. If it says "Defendant generally denies each and every allegation," that\'s a general denial. If it addresses specific paragraphs about your property claims, those are specific denials.',
+      acknowledgeLabel: 'Got it — I\'ll look at the first page →',
       showIf: (answers) => answers.denial_type === 'not_sure',
     },
     {
@@ -66,6 +69,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Adverse possession in Texas requires the other party to prove open, notorious, continuous, and hostile possession for a statutory period (typically 10 years, but can be as short as 3 years with a deed). This is a serious defense — gather evidence of your ownership and use of the property.',
+      acknowledgeLabel: 'Understood — I\'ll gather my ownership evidence →',
       showIf: (answers) => answers.which_defenses === 'adverse_possession',
     },
     {
@@ -73,6 +77,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A prescriptive easement claim means the other party argues they have a right to use part of your property based on long, open, and continuous use without your permission. Evidence of your objections or permission can defeat this claim.',
+      acknowledgeLabel: 'Got it — I\'ll document my objections →',
       showIf: (answers) => answers.which_defenses === 'prescriptive_easement',
     },
     {
@@ -85,6 +90,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A counterclaim means the other party is making their own property claim against you. Common counterclaims in property disputes include: claiming you are the one encroaching, seeking their own quiet title, or claiming you damaged their property. You generally have 30 days to respond.',
+      acknowledgeLabel: 'Understood — I\'ll respond within 30 days →',
       showIf: (answers) => answers.counterclaim_property === 'yes',
     },
     {
@@ -97,6 +103,7 @@ export const propertyReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A lis pendens puts the public on notice that the property is subject to litigation. This can affect your ability to sell or refinance the property while the case is pending. If the lis pendens is improper, you may be able to have it removed.',
+      acknowledgeLabel: 'Got it — I\'ll address the lis pendens →',
       showIf: (answers) => answers.lis_pendens === 'yes',
     },
   ],

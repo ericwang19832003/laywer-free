@@ -16,6 +16,7 @@ export const bizEmploymentWaitForAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The employer has 20 days (state court) or 21 days (federal court) to file an answer after being served. If they don\'t respond, you may be able to request a default judgment.',
+      acknowledgeLabel: "I'll monitor the deadline and be prepared to request a default judgment if they don't respond",
       showIf: (answers) => answers.answer_received === 'no',
     },
     {

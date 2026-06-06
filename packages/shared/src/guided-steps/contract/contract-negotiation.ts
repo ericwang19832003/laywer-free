@@ -22,6 +22,7 @@ export const contractNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party did not respond to your demand letter, you can try one more contact attempt or proceed to filing your lawsuit. Their silence can actually help your case by showing the court you tried to resolve the matter.',
+      acknowledgeLabel: "I'll decide whether to follow up or file",
       showIf: (answers) => answers.response_received === 'no_response',
     },
     {
@@ -35,6 +36,7 @@ export const contractNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before negotiating, know your bottom line. Consider: the amount the contract is worth, your out-of-pocket costs, the cost and time of litigation, and the likelihood of winning at trial. Most settlements involve some compromise.',
+      acknowledgeLabel: "I'll determine my bottom line",
       showIf: (answers) => answers.settlement_range_known === 'no',
     },
     {
@@ -54,6 +56,7 @@ export const contractNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Consider what matters most to you: getting the full amount (which may take longer through litigation) or getting a partial amount quickly. A small discount for immediate payment can be worth it to avoid months of court proceedings.',
+      acknowledgeLabel: "I understand the trade-offs",
       showIf: (answers) => answers.counter_offer_strategy === 'not_sure',
     },
     {
@@ -71,6 +74,7 @@ export const contractNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Always get your settlement agreement in writing. Include: the amount, payment schedule, deadline, and what happens if the other party fails to pay. Both parties should sign.',
+      acknowledgeLabel: "I'll get the agreement in writing",
       showIf: (answers) => answers.settlement_reached === 'yes',
     },
     {
@@ -78,6 +82,7 @@ export const contractNegotiationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Since negotiations did not result in a settlement, your next step is to file your contract lawsuit with the court. Make sure you file before the statute of limitations expires (typically 4 years for written contracts in Texas).',
+      acknowledgeLabel: "I'll proceed to filing",
       showIf: (answers) => answers.settlement_reached === 'no',
     },
   ],

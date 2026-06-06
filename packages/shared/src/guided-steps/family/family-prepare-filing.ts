@@ -14,12 +14,14 @@ export function createPrepareFilingConfig(_subType: 'divorce' | 'custody' | 'chi
         id: 'review_info',
         type: 'info',
         prompt: 'Go back and review your intake answers and evidence vault before starting the filing preparation.',
+        acknowledgeLabel: 'I\'ll go review first →',
         showIf: (a) => a.documents_reviewed === 'no',
       },
       {
         id: 'ready_to_start',
         type: 'info',
         prompt: 'Click "Complete" to launch the filing wizard. It will guide you step by step through creating your court documents.',
+        acknowledgeLabel: 'I\'m ready — let\'s start →',
       },
     ],
     generateSummary(answers) {

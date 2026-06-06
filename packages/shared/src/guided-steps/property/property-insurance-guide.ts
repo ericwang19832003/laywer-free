@@ -26,6 +26,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Homeowners insurance typically covers property damage from storms, fire, vandalism, and sometimes water damage. Review your policy\'s declarations page to confirm coverage. Check your deductible \u2014 your claim must exceed it to be worthwhile. File the claim as soon as possible; most policies have reporting deadlines.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.insurance_type === 'homeowners',
     },
     {
@@ -33,6 +34,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Renters insurance covers your personal property (belongings), not the building itself. If the building is damaged, your landlord\'s insurance should cover structural repairs. File a claim for any damaged personal items \u2014 furniture, electronics, clothing, etc. Make a detailed inventory of everything damaged.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.insurance_type === 'renters',
     },
     {
@@ -40,6 +42,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If a vehicle caused the damage to your property, the driver\'s auto insurance (liability coverage) should pay for your property repairs. File a claim with the driver\'s insurance company. If the driver is uninsured or unknown, check whether your own homeowners policy covers it.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.insurance_type === 'auto',
     },
     {
@@ -47,6 +50,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Without insurance, you will need to pursue the responsible party directly for the cost of repairs. Your repair estimates and documentation become even more important. You can still file a lawsuit to recover damages. Consider whether the other party has insurance that might cover your loss.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.insurance_type === 'no_insurance',
     },
     {
@@ -54,6 +58,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check the following to determine your coverage:\n1. Review your homeowners or renters insurance policy declarations page.\n2. Call your insurance agent and describe the damage \u2014 they can tell you if it\'s covered.\n3. If a vehicle caused the damage, the driver\'s auto insurance may apply.\n4. If you\'re in a condo or townhome, check both your personal policy and the HOA\'s master policy.',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.insurance_type === 'unsure',
     },
 
@@ -63,6 +68,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO FILE:\n1. Call your insurance company\'s claims line (on your policy card)\n2. Report the damage \u2014 be factual, not emotional\n3. An adjuster will be assigned and will inspect the damage\n4. Get your OWN repair estimates (don\'t rely solely on the adjuster\'s)\n5. If the adjuster\'s estimate is low, send your contractor estimates and negotiate',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) =>
         answers.insurance_type !== 'no_insurance',
     },
@@ -81,6 +87,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If you\'re unhappy with the adjuster\'s assessment, you have options:\n\n1. SEND YOUR OWN ESTIMATES: Provide your contractor\'s written estimates showing a higher repair cost. The insurance company must consider them.\n2. REQUEST RE-INSPECTION: Ask for a different adjuster or a re-inspection if you believe they missed damage.\n3. APPRAISAL CLAUSE: Most Texas policies include an appraisal clause. Either party can invoke it \u2014 each side hires an appraiser, and a neutral umpire breaks any tie. This is often faster and cheaper than a lawsuit.\n4. FILE A COMPLAINT: If the insurer acts in bad faith, you can file a complaint with the Texas Department of Insurance (tdi.texas.gov).',
+      acknowledgeLabel: 'Got it \u2192',
       showIf: (answers) => answers.adjuster_assessed === 'yes',
     },
 
@@ -90,6 +97,7 @@ export const propertyInsuranceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'IMPORTANT: Filing an insurance claim does NOT prevent you from suing the person who caused the damage. Your insurance may pay first, then pursue the responsible party through "subrogation."',
+      acknowledgeLabel: 'Got it \u2192',
     },
   ],
 

@@ -17,6 +17,7 @@ export const temporaryOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "If there's danger, you can request an emergency protective order. Contact the court clerk immediately or call the National Domestic Violence Hotline: 1-800-799-7233.",
+      acknowledgeLabel: "I'll contact the court clerk or the DV Hotline to request an emergency order",
       showIf: (answers) => answers.safety_concerns === 'yes',
     },
     {
@@ -40,6 +41,7 @@ export const temporaryOrdersConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Temporary orders remain in effect until the court issues final orders. They can cover: custody, support, property use, bill payment, and behavior requirements.',
+      acknowledgeLabel: "I understand what temporary orders cover and that they stay in effect until final orders",
     },
   ],
 

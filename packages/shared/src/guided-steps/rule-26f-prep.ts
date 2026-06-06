@@ -26,6 +26,7 @@ export const rule26fPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Initial disclosures include: names of people with knowledge, copies of relevant documents, computation of damages, and insurance agreements.',
+      acknowledgeLabel: 'Got it — I\'ll gather my initial disclosures →',
       showIf: (answers) => answers.initial_disclosures_ready === 'no',
     },
     {
@@ -38,6 +39,7 @@ export const rule26fPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Key topics: discovery timeline, ESI protocols, privilege log procedures, deposition limits, and potential settlement discussions.',
+      acknowledgeLabel: 'Got it — I\'ll review the conference topics →',
       showIf: (answers) => answers.know_conference_topics === 'no',
     },
     {

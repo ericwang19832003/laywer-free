@@ -17,6 +17,7 @@ export const courtroomPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Arrive 30 minutes early. Bring a valid photo ID. Dress professionally — business casual or better.',
+      acknowledgeLabel: "I'll arrive 30 minutes early with my photo ID and dressed professionally",
     },
     {
       id: 'documents_organized',
@@ -37,6 +38,7 @@ export const courtroomPrepConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In court: Stand when the judge enters. Say "Your Honor" when addressing the judge. Wait your turn to speak. Stay calm and respectful, even if the other side is not.',
+      acknowledgeLabel: "I'll follow courtroom etiquette and address the judge as 'Your Honor'",
     },
     {
       id: 'witnesses_ready',

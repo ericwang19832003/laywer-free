@@ -21,6 +21,7 @@ export const piSchedulingConferenceConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A scheduling order sets deadlines for discovery, expert designations, and trial. Check with the court clerk or look at your court\'s online docket to see if one has been issued.',
+      acknowledgeLabel: 'Got it — I\'ll check the court docket',
       showIf: (answers) => answers.scheduling_order === 'not_sure',
     },
     {
@@ -50,6 +51,7 @@ export const piSchedulingConferenceConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A pretrial conference is a meeting with the judge to discuss the status of the case, resolve disputes, and prepare for trial. Be prepared to discuss: the status of discovery, any pending motions, settlement prospects, and estimated trial length.',
+      acknowledgeLabel: "I'll prepare for the pretrial conference",
       showIf: (answers) => answers.pretrial_conference === 'yes' || answers.pretrial_conference === 'not_sure',
     },
     {
@@ -67,6 +69,7 @@ export const piSchedulingConferenceConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'In a personal injury case, you\'ll typically need a medical expert to testify about your injuries, treatment, and prognosis. Expert designations must be served by the deadline in the scheduling order, or the expert may be excluded from trial.',
+      acknowledgeLabel: "I'll arrange a medical expert",
       showIf: (answers) => answers.expert_designations === 'no',
     },
   ],

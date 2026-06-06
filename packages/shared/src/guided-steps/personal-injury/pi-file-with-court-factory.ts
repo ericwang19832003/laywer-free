@@ -158,12 +158,14 @@ export function createPiFileWithCourtConfig(
         prompt:
           stateInfo?.courtSelectionGuide ??
           'File in the county where the incident occurred or where the defendant resides. Contact your local court clerk for specific jurisdiction rules.',
+        acknowledgeLabel: "I'll contact the court clerk to confirm the correct venue for my case",
         showIf: (a) => a.know_which_court === 'not_sure',
       },
       {
         id: 'efile_info',
         type: 'info',
         prompt: buildEFilingPrompt(stateInfo, courtInfo),
+        acknowledgeLabel: "I'll follow the e-filing steps and save my confirmation receipt",
       },
       {
         id: 'know_filing_fee',
@@ -174,6 +176,7 @@ export function createPiFileWithCourtConfig(
         id: 'fee_info',
         type: 'info',
         prompt: buildFeePrompt(stateInfo, courtInfo, courtType),
+        acknowledgeLabel: "I'll contact the court clerk to confirm the exact filing fee",
         showIf: (a) => a.know_filing_fee === 'no',
       },
       {
@@ -187,12 +190,14 @@ export function createPiFileWithCourtConfig(
         id: 'fee_waiver_info',
         type: 'info',
         prompt: buildFeeWaiverPrompt(stateInfo),
+        acknowledgeLabel: "I'll file the fee waiver form with the court before submitting my case",
         showIf: (a) => a.need_fee_waiver === 'yes',
       },
       {
         id: 'documents_checklist',
         type: 'info',
         prompt: buildDocumentsPrompt(stateInfo, courtType),
+        acknowledgeLabel: "I'll gather all required documents before going to file",
       },
       {
         id: 'know_sol_deadline',
@@ -203,6 +208,7 @@ export function createPiFileWithCourtConfig(
         id: 'sol_critical',
         type: 'info',
         prompt: buildSolPrompt(stateInfo, piSubType),
+        acknowledgeLabel: "I understand the statute of limitations — I'll file before the deadline",
       },
     ],
 

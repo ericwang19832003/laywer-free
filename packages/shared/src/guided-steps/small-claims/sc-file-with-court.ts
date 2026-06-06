@@ -18,6 +18,7 @@ export function createScFileWithCourtConfig(state?: string): GuidedStepConfig {
         id: 'court_info',
         type: 'info',
         prompt: `File in the ${sc.courtName} where the defendant lives or where the issue occurred. ${sc.courtAbbrev} covers disputes up to ${sc.limit}.`,
+        acknowledgeLabel: 'I know which court to file in →',
         showIf: (answers) => answers.know_court === 'no',
       },
       {
@@ -29,6 +30,7 @@ export function createScFileWithCourtConfig(state?: string): GuidedStepConfig {
         id: 'fee_waiver_info',
         type: 'info',
         prompt: `If you can't afford the fee, you can apply for a fee waiver ("${sc.feeWaiverForm}").`,
+        acknowledgeLabel: "I'll apply for a fee waiver →",
         showIf: (answers) => answers.have_filing_fee === 'no',
       },
       {
@@ -46,12 +48,14 @@ export function createScFileWithCourtConfig(state?: string): GuidedStepConfig {
         id: 'efiling_info',
         type: 'info',
         prompt: `Check if your court supports e-filing at ${sc.eFilingUrl} (${sc.eFilingName}). It's often the fastest way to file.`,
+        acknowledgeLabel: "I'll file online →",
         showIf: (answers) => answers.filing_method === 'online',
       },
       {
         id: 'in_person_info',
         type: 'info',
         prompt: 'Bring your completed claim form, copies, and payment to the court clerk. They can answer procedural questions.',
+        acknowledgeLabel: "I'll bring my form and payment to the clerk →",
         showIf: (answers) => answers.filing_method === 'in_person',
       },
       {
@@ -63,6 +67,7 @@ export function createScFileWithCourtConfig(state?: string): GuidedStepConfig {
         id: 'documents_info',
         type: 'info',
         prompt: "You need your completed small claims claim form with the defendant's full name, address, the amount claimed, and a brief description of your dispute.",
+        acknowledgeLabel: "I'll complete my claim form with all required details →",
         showIf: (answers) => answers.documents_ready === 'no',
       },
       {
@@ -74,6 +79,7 @@ export function createScFileWithCourtConfig(state?: string): GuidedStepConfig {
         id: 'after_filing_info',
         type: 'info',
         prompt: "After filing, you'll receive a case number and a hearing date. You must then serve the defendant before the hearing.",
+        acknowledgeLabel: "I'll file first, then serve the defendant →",
         showIf: (answers) => answers.filed_case === 'no',
       },
     ],

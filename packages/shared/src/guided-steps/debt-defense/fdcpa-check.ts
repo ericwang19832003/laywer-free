@@ -7,10 +7,18 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
 
   questions: [
     {
+      id: 'fdcpa_intro',
+      type: 'info',
+      acknowledgeLabel: 'Got it — federal rules →',
+      prompt:
+        'FEDERAL LAW (FDCPA) — The Fair Debt Collection Practices Act applies to third-party debt collectors (not original creditors). If the collector violates the FDCPA, you may be entitled to statutory damages up to $1,000 per lawsuit, plus actual damages and attorney fees.',
+    },
+    {
       id: 'tdcpa_intro',
       type: 'info',
+      acknowledgeLabel: 'Got it — check for violations →',
       prompt:
-        'This step checks for violations under TWO laws:\n\n1. FEDERAL (FDCPA) — Applies to third-party debt collectors. Statutory damages up to $1,000 per lawsuit.\n\n2. TEXAS (TDCPA / Texas Finance Code Ch. 392) — Applies to BOTH debt collectors AND original creditors (broader protection). TDCPA violations automatically become DTPA violations, which can mean TREBLE DAMAGES (3x your actual damages) for knowing or intentional conduct.\n\nIf the company suing you is the original creditor (not a debt buyer), the TDCPA still protects you even though the FDCPA may not.',
+        'TEXAS LAW (TDCPA) — Texas Finance Code Ch. 392 applies to BOTH debt collectors AND original creditors, giving you broader protection than federal law. TDCPA violations automatically become DTPA violations, which can mean TREBLE DAMAGES (3x your actual damages) for knowing or intentional conduct. If the company suing you is the original creditor, the TDCPA still protects you even though the FDCPA may not.',
     },
     {
       id: 'plaintiff_is_original',
@@ -21,6 +29,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'original_creditor_info',
       type: 'info',
+      acknowledgeLabel: 'Understood — TDCPA still applies →',
       prompt:
         'Since this is the original creditor, the federal FDCPA may not apply — but the Texas TDCPA still does. All the violations below are also prohibited under Texas law. If you find violations, you can pursue a counterclaim under the TDCPA/DTPA.',
       showIf: (answers) => answers.plaintiff_is_original === 'yes',
@@ -35,6 +44,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'called_odd_hours_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692c(a)(1). Collectors are prohibited from contacting you at any unusual time or place. Calls before 8am or after 9pm are presumed inconvenient.',
       showIf: (answers) => answers.called_odd_hours === 'yes',
@@ -50,6 +60,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'contacted_at_work_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692c(a)(3). Once a collector knows or has reason to know your employer prohibits such communication, they must stop contacting you at work.',
       showIf: (answers) => answers.contacted_at_work === 'yes',
@@ -64,6 +75,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'threatened_arrest_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692e(4) and § 1692e(5). Threatening arrest, imprisonment, or any action that cannot legally be taken is a false and deceptive practice.',
       showIf: (answers) => answers.threatened_arrest === 'yes',
@@ -78,6 +90,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'misrepresented_amount_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692e(2)(A). Falsely representing the character, amount, or legal status of a debt is prohibited.',
       showIf: (answers) => answers.misrepresented_amount === 'yes',
@@ -93,6 +106,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'failed_validation_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692g(a). The collector must provide written notice within 5 days of initial communication stating the amount of the debt, the name of the creditor, and your right to dispute within 30 days.',
       showIf: (answers) => answers.failed_validation === 'yes',
@@ -106,6 +120,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'used_profanity_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692d(2). The use of obscene, profane, or abusive language in connection with debt collection is expressly prohibited.',
       showIf: (answers) => answers.used_profanity === 'yes',
@@ -121,6 +136,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'contacted_third_parties_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692c(b). A collector may not communicate with any third party in connection with the collection of a debt, except to obtain your location information (and even then, cannot reveal the debt).',
       showIf: (answers) => answers.contacted_third_parties === 'yes',
@@ -136,6 +152,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'continued_after_cease_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692c(c). After receiving a written request to cease communication, the collector may only contact you to confirm they are stopping, or to notify you of a specific action (such as filing a lawsuit).',
       showIf: (answers) => answers.continued_after_cease === 'yes',
@@ -151,6 +168,7 @@ export const fdcpaCheckConfig: GuidedStepConfig = {
     {
       id: 'false_attorney_info',
       type: 'info',
+      acknowledgeLabel: 'This is a violation →',
       prompt:
         'This is a violation of FDCPA § 1692e(3). Falsely representing or implying that any individual is an attorney or that any communication is from an attorney is prohibited.',
       showIf: (answers) => answers.false_attorney === 'yes',

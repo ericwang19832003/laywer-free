@@ -16,6 +16,7 @@ export const propertyServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Check county property records (the appraisal district website), the deed, or the HOA directory to find the other party\'s address. If they are a neighbor, you may already know where they live.',
+      acknowledgeLabel: "I'll search county records and the appraisal district to find their address",
       showIf: (answers) => answers.know_address === 'no',
     },
     {
@@ -34,6 +35,7 @@ export const propertyServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For property disputes, a constable or process server is generally more reliable than certified mail, which can be refused. The constable is often the most cost-effective option in Texas.',
+      acknowledgeLabel: "I'll use a constable or process server for reliable service",
       showIf: (answers) => answers.service_method === 'not_sure',
     },
     {
@@ -52,6 +54,7 @@ export const propertyServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The return of service document proves the other party was properly notified. Without it, the court cannot proceed with your case. If you used a constable, they will file it automatically. For process servers, you may need to file the affidavit of service yourself.',
+      acknowledgeLabel: "I'll file the affidavit of service with the court",
       showIf: (answers) => answers.service_completed === 'yes' && answers.proof_filed === 'no',
     },
     {
@@ -59,6 +62,7 @@ export const propertyServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the other party cannot be found after diligent effort, you can ask the court for alternative service by posting or publication. This is common in property disputes where an owner is absent or unknown.',
+      acknowledgeLabel: "I understand I can request alternative service if the other party can't be located",
     },
   ],
 

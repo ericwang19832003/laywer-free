@@ -16,6 +16,7 @@ export const reServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Check property records, the purchase agreement, or the defendant's agent records for their address. If you cannot locate them, consider using a skip trace service or hiring a process server who offers locate services.",
+      acknowledgeLabel: "I'll check property records and use a skip trace service if needed to locate the defendant",
       showIf: (answers) => answers.know_address === 'no',
     },
     {
@@ -34,6 +35,7 @@ export const reServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A private process server is typically the fastest option. A constable or sheriff is the cheapest and most widely accepted. Certified mail with return receipt requested may be allowed in some courts but is less reliable. Whichever method you choose, the server must complete and file a return of service.',
+      acknowledgeLabel: "I'll choose my service method and ensure the return of service is filed with the court",
     },
     {
       id: 'served',
@@ -45,6 +47,7 @@ export const reServeDefendantConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'File the return of service with the court as soon as possible. The defendant has 20 days (plus the next Monday if the 20th day falls on a weekend) to file an answer. If they do not answer, you may be able to request a default judgment.',
+      acknowledgeLabel: "I'll file the return of service immediately and track the 20-day answer deadline",
       showIf: (answers) => answers.served === 'yes',
     },
   ],

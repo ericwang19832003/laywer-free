@@ -20,6 +20,7 @@ export function createServeRespondentConfig(subType: 'divorce' | 'custody' | 'ch
         id: 'waiver_info',
         type: 'info',
         prompt: 'A waiver of service is the fastest and cheapest option. The other party signs a document acknowledging they received the papers.',
+        acknowledgeLabel: "I'll ask the other party to sign a waiver of service",
         showIf: (a) => a.service_method === 'waiver',
       },
       {
@@ -31,6 +32,7 @@ export function createServeRespondentConfig(subType: 'divorce' | 'custody' | 'ch
         id: 'address_info',
         type: 'info',
         prompt: 'If you cannot locate the other party, you may be able to serve by publication. This requires court approval.',
+        acknowledgeLabel: "I'll seek court approval to serve by publication",
         showIf: (a) => a.address_known === 'no',
       },
       {
@@ -39,6 +41,7 @@ export function createServeRespondentConfig(subType: 'divorce' | 'custody' | 'ch
         prompt: subType === 'divorce'
           ? 'After service, the respondent has 20 days (plus Monday) to file an answer. The 60-day waiting period runs from the filing date, not the service date.'
           : 'After service, the respondent typically has 20 days (plus Monday) to file an answer.',
+        acknowledgeLabel: "I understand the respondent's answer deadline and the waiting period",
       },
     ],
     generateSummary(answers) {

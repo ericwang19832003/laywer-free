@@ -40,6 +40,7 @@ export const piPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Most courts require a meet-and-confer before a motion to compel. Save the letter, email, call notes, dates, and the defendant response. The motion should certify that you tried to resolve the dispute first.',
+      acknowledgeLabel: 'I\'ll complete the meet-and-confer →',
       showIf: (answers) => answers.meet_and_confer_done === 'no',
     },
     {
@@ -47,6 +48,7 @@ export const piPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A strong motion to compel should use one section per deficiency: what you asked, what they answered, why it is deficient, the governing rule, and the exact relief requested.',
+      acknowledgeLabel: 'I\'ll structure the motion this way →',
       showIf: (answers) => answers.discovery_deficiencies === 'yes',
     },
     {
@@ -65,6 +67,7 @@ export const piPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A motion for summary judgment is serious — the defendant is asking the court to rule in their favor without a trial. You must respond with evidence (affidavits, depositions, documents) showing there are genuine disputes about the facts. Missing the response deadline could mean losing your case.',
+      acknowledgeLabel: 'I understand — I must respond →',
       showIf: (answers) => answers.msj_filed === 'yes',
     },
     {
@@ -83,6 +86,7 @@ export const piPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your response must include evidence that contradicts the defendant\'s claims. Attach affidavits (sworn statements), relevant deposition excerpts, medical records, and other documents. You typically have 21 days to respond in Texas. Consider consulting an attorney for this critical motion.',
+      acknowledgeLabel: 'I\'ll prepare my MSJ response →',
       showIf: (answers) => answers.msj_response_status === 'need_help',
     },
     {
@@ -101,6 +105,7 @@ export const piPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Motions in limine ask the judge to exclude certain evidence before trial. In PI cases, you might request excluding: evidence of prior unrelated injuries, mention of insurance coverage (to prevent jury bias), speculative testimony, or evidence obtained improperly.',
+      acknowledgeLabel: 'I\'ll consider filing motions in limine →',
       showIf: (answers) => answers.motions_in_limine === 'not_familiar' || answers.motions_in_limine === 'yes',
     },
     {
@@ -119,6 +124,7 @@ export const piPretrialMotionsConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A Daubert challenge tries to exclude your expert\'s testimony by arguing it\'s not scientifically reliable. If your medical expert is challenged, you\'ll need to show their opinions are based on accepted medical methodology. This is a serious motion — consider consulting an attorney.',
+      acknowledgeLabel: 'I\'ll defend my expert\'s methodology →',
       showIf: (answers) => answers.daubert_challenge === 'yes',
     },
   ],

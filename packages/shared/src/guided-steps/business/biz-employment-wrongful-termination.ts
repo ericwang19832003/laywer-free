@@ -11,6 +11,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'AT-WILL EMPLOYMENT IN TEXAS: Your employer can fire you for any reason, or no reason — UNLESS the reason is illegal. These exceptions matter:\n\n1. DISCRIMINATION: Can\'t fire based on race, sex, age (40+), disability, religion, national origin, pregnancy (Title VII, ADA, ADEA, Texas Labor Code Ch. 21)\n2. RETALIATION: Can\'t fire for filing a workers\' comp claim, reporting safety violations (whistleblower), or opposing illegal practices\n3. CONTRACT: If you have a written employment contract with termination protections\n4. PUBLIC POLICY: Very limited in Texas — firing for refusing to commit a crime',
+      acknowledgeLabel: 'I understand my rights →',
     },
     {
       id: 'termination_reason',
@@ -30,6 +31,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DISCRIMINATION CLAIM:\n\nLegal framework: Title VII (federal, 15+ employees), Texas Labor Code Ch. 21 (state, 15+ employees), ADA (disability), ADEA (age 40+), Pregnancy Discrimination Act\n\nTo win, you generally need to show:\n1. You are in a protected class\n2. You were qualified for your position\n3. You suffered an adverse action (termination)\n4. Similarly situated employees outside your protected class were treated differently\n\nEvidence to build:\n- Comparators: coworkers in similar roles who weren\'t fired\n- Discriminatory comments or emails from supervisors\n- Timing: were you fired shortly after disclosing a protected characteristic?\n- Pattern: has the employer fired other employees in the same protected class?',
+      acknowledgeLabel: 'Understood my claim →',
       showIf: (answers) => answers.termination_reason === 'discrimination',
     },
     {
@@ -37,6 +39,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'RETALIATION CLAIM:\n\nLegal framework: Texas Labor Code \u00a7451.001 (workers\' comp retaliation), Title VII \u00a7704 (opposing discrimination), Sabine Pilot doctrine (refusing to commit a crime)\n\nTo win, you generally need to show:\n1. You engaged in a protected activity (filed a claim, reported a violation, opposed illegal conduct)\n2. Your employer knew about the protected activity\n3. You suffered an adverse action (termination)\n4. There is a causal connection (timing, comments, pattern)\n\nKey evidence:\n- Documentation of when you made your complaint/report\n- Proof employer was aware of your protected activity\n- Timeline showing proximity between complaint and termination\n- Evidence of pretext (employer\'s stated reason doesn\'t hold up)',
+      acknowledgeLabel: 'Understood my claim \u2192',
       showIf: (answers) => answers.termination_reason === 'retaliation',
     },
     {
@@ -44,6 +47,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CONTRACT VIOLATION CLAIM:\n\nLegal framework: Texas common law breach of contract\n\nEmployment contracts can override at-will status if they:\n- Specify a term of employment (e.g., 2-year contract)\n- List specific reasons for termination ("for cause" provisions)\n- Require progressive discipline before termination\n\nTo win, you need to show:\n1. A valid, enforceable employment contract exists\n2. The contract limits the employer\'s right to terminate\n3. The employer terminated you in violation of those limits\n4. You suffered damages (lost wages, benefits)\n\nNote: Employee handbooks generally do NOT create a contract in Texas unless they contain a specific, express agreement.',
+      acknowledgeLabel: 'Understood my claim →',
       showIf: (answers) => answers.termination_reason === 'contract_violation',
     },
     {
@@ -51,11 +55,13 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WHISTLEBLOWER CLAIM:\n\nLegal framework:\n- Texas Whistleblower Act (\u00a7554.002) — protects PUBLIC employees who report violations of law in good faith\n- Sabine Pilot v. Hauck — protects PRIVATE employees fired solely for refusing to commit a criminal act\n- Sarbanes-Oxley — protects employees of publicly traded companies who report securities fraud\n\nFor public employees:\n- Must have reported to an appropriate law enforcement authority\n- Must have acted in good faith\n- Can recover: lost wages, reinstatement, compensatory damages, attorney fees\n\nFor private employees:\n- Protection is narrow: only covers refusal to commit a criminal act\n- You bear the burden of proving the sole reason for termination was your refusal',
+      acknowledgeLabel: 'Understood my claim →',
       showIf: (answers) => answers.termination_reason === 'whistleblower',
     },
     {
       id: 'no_reason_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — what are my options? →',
       prompt:
         'NO REASON GIVEN:\n\nWhile Texas employers don\'t have to give a reason, a lack of explanation can actually help your case if:\n- The timing is suspicious (fired right after a complaint or protected activity)\n- You have a strong performance record (suggesting the real reason was illegal)\n- Similarly situated coworkers were treated differently\n\nNext steps:\n1. Request your personnel file — Texas employers aren\'t required to provide it, but many will\n2. Document everything you remember about the termination\n3. Identify potential witnesses\n4. Consider whether any of the protected categories (discrimination, retaliation, contract) apply',
       showIf: (answers) => answers.termination_reason === 'no_reason_given',
@@ -63,6 +69,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
     {
       id: 'other_reason_info',
       type: 'info',
+      acknowledgeLabel: 'Understood →',
       prompt:
         'OTHER TERMINATION REASONS:\n\nSome other potentially illegal terminations include:\n- Fired for taking FMLA leave (if employer has 50+ employees)\n- Fired for military service (USERRA)\n- Fired for jury duty (Texas Labor Code \u00a7122.001)\n- Fired for voting or running for office\n\nIf your situation doesn\'t fit these categories, Texas at-will employment may apply, and the termination may be legal even if unfair. Consider consulting an employment attorney for a case-specific analysis.',
       showIf: (answers) => answers.termination_reason === 'other',
@@ -77,6 +84,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
     {
       id: 'eeoc_required_info',
       type: 'info',
+      acknowledgeLabel: 'I need to file first →',
       prompt:
         'IMPORTANT — FILE BEFORE SUING:\n\nFor discrimination and most retaliation claims, you MUST file a complaint with the EEOC or TWC BEFORE you can file a lawsuit.\n\n- TWC deadline: 180 days from the discriminatory act\n- EEOC deadline: 300 days from the discriminatory act (if TWC also has jurisdiction)\n- After filing, you must wait for a "right-to-sue" letter (you can request one after 180 days)\n- Once you receive the right-to-sue letter, you have 90 days to file your lawsuit\n\nFile online: publicportal.eeoc.gov\nTWC: twc.texas.gov',
       showIf: (answers) =>
@@ -86,6 +94,7 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
     {
       id: 'eeoc_filed_info',
       type: 'info',
+      acknowledgeLabel: 'Good — what\'s next? →',
       prompt:
         'Good. If you have your right-to-sue letter, you have 90 days to file your lawsuit. If you don\'t have it yet, you can request one after 180 days from filing.',
       showIf: (answers) =>
@@ -93,10 +102,18 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
         (answers.termination_reason === 'discrimination' || answers.termination_reason === 'retaliation'),
     },
     {
-      id: 'evidence_checklist',
-      type: 'info',
-      prompt:
-        'EVIDENCE TO GATHER:\n- Termination letter or notice\n- Performance reviews (especially recent positive ones)\n- Emails/texts related to termination\n- Witness names (coworkers who saw discrimination)\n- Company handbook/policies\n- Pay stubs and benefits records',
+      id: 'evidence_gathered',
+      type: 'multi_select',
+      prompt: 'Which of these pieces of evidence have you gathered?',
+      options: [
+        { value: 'termination_letter', label: 'Termination letter or written notice' },
+        { value: 'performance_reviews', label: 'Recent performance reviews (especially positive ones)' },
+        { value: 'emails_texts', label: 'Emails or texts related to the termination' },
+        { value: 'witness_names', label: 'Names of coworkers who witnessed discrimination or retaliation' },
+        { value: 'company_handbook', label: 'Company handbook or written policies' },
+        { value: 'pay_records', label: 'Pay stubs and benefits records' },
+      ],
+      noneLabel: "Haven't gathered any yet",
     },
   ],
 
@@ -158,10 +175,24 @@ export const bizEmploymentWrongfulTerminationConfig: GuidedStepConfig = {
       })
     }
 
-    items.push({
-      status: 'needed',
-      text: 'Gather evidence: termination letter, performance reviews, emails, witness names, handbook, pay stubs.',
-    })
+    if (answers.evidence_gathered && answers.evidence_gathered !== 'none') {
+      const gathered = answers.evidence_gathered.split(',').filter(Boolean)
+      const allItems = ['termination_letter', 'performance_reviews', 'emails_texts', 'witness_names', 'company_handbook', 'pay_records']
+      const missing = allItems.filter((item) => !gathered.includes(item))
+      if (missing.length === 0) {
+        items.push({ status: 'done', text: 'All key evidence gathered.' })
+      } else {
+        items.push({
+          status: 'needed',
+          text: `Still need to gather: ${missing.join(', ').replace(/_/g, ' ')}.`,
+        })
+      }
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Gather evidence: termination letter, performance reviews, emails, witness names, handbook, pay stubs.',
+      })
+    }
 
     return items
   },

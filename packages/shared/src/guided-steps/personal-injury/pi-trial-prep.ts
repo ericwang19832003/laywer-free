@@ -92,6 +92,7 @@ export const piTrialPrepConfig: GuidedStepConfig = {
         'During cross-examination: stay calm, answer only the question asked, and never volunteer extra information. It is okay to say "I don\'t remember" if you genuinely don\'t. Do not argue with the other side\'s attorney.',
       helpText:
         'If you don\'t understand a question, ask for clarification before answering.',
+      acknowledgeLabel: 'I\'m ready for cross-examination →',
     },
     {
       id: 'three_copies',
@@ -100,6 +101,7 @@ export const piTrialPrepConfig: GuidedStepConfig = {
         'Bring 3 copies of ALL documents: one for you, one for the judge, and one for the defendant.',
       helpText:
         'This is standard court procedure and shows you are well-prepared.',
+      acknowledgeLabel: 'I\'ll bring 3 copies of everything →',
     },
   ],
 

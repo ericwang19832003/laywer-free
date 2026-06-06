@@ -9,6 +9,7 @@ export const debtPreAnswerSettlementConfig: GuidedStepConfig = {
     {
       id: 'pre_answer_leverage_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I have leverage →',
       prompt:
         'Before filing your answer, consider whether settlement makes sense. You often have the MOST leverage right now — the plaintiff hasn\'t invested in litigation yet, and many debt buyers will accept significantly less than the full amount.',
     },
@@ -25,6 +26,7 @@ export const debtPreAnswerSettlementConfig: GuidedStepConfig = {
     {
       id: 'leverage_points_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I understand my leverage →',
       prompt:
         'SETTLEMENT LEVERAGE POINTS:\n\n- Debt buyers typically purchased your debt for 4-10 cents on the dollar\n- They often accept 20-50% of the claimed amount\n- They want to avoid trial costs (attorney fees, court time)\n- Your strongest leverage: a valid defense (SOL expired, standing issues, FDCPA violations)\n- Settlement saves you court time and stress',
       showIf: (answers) =>
@@ -34,6 +36,7 @@ export const debtPreAnswerSettlementConfig: GuidedStepConfig = {
     {
       id: 'what_to_negotiate_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know what to ask for →',
       prompt:
         'WHAT TO NEGOTIATE:\n\n- Reduced lump sum (start at 25%, they may counter at 40-50%)\n- Payment plan (if you can\'t pay lump sum)\n- "Pay for delete" — they remove the account from your credit report\n- Dismissal with prejudice (they can never refile)\n- Written settlement agreement BEFORE you pay anything\n- NEVER give them direct access to your bank account',
       showIf: (answers) =>
@@ -52,6 +55,7 @@ export const debtPreAnswerSettlementConfig: GuidedStepConfig = {
     {
       id: 'evaluating_offer_info',
       type: 'info',
+      acknowledgeLabel: 'I\'ll evaluate carefully →',
       prompt:
         'EVALUATING THE OFFER:\n\nBefore accepting any offer:\n- Verify the total amount is correct\n- Ensure it includes dismissal with prejudice\n- Get the agreement in WRITING\n- Never pay until you have the signed agreement\n- Keep copies of everything\n\nDo NOT admit the debt is valid during negotiations.',
       showIf: (answers) =>
@@ -62,6 +66,7 @@ export const debtPreAnswerSettlementConfig: GuidedStepConfig = {
     {
       id: 'fight_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'m ready to fight →',
       prompt:
         'That\'s a valid choice. Continue preparing your answer and defense. You can always settle later — many cases settle at mediation or even on the day of trial.',
       showIf: (answers) => answers.want_to_settle === 'no_want_to_fight',
@@ -69,6 +74,7 @@ export const debtPreAnswerSettlementConfig: GuidedStepConfig = {
     {
       id: 'file_answer_warning_info',
       type: 'info',
+      acknowledgeLabel: 'I\'ll file my answer on time →',
       prompt:
         'IMPORTANT — Even if you want to settle, FILE YOUR ANSWER ON TIME. Settlement negotiations do not extend your answer deadline. If you miss the deadline while negotiating, the plaintiff can take a default judgment.',
     },

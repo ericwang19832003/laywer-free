@@ -29,6 +29,7 @@ export const piPostResolutionPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before spending settlement funds, check for any outstanding liens — your insurance company may have a subrogation claim to recover what they paid on your behalf.',
+      acknowledgeLabel: 'I\'ll check for subrogation claims →',
       showIf: (answers) => answers.case_outcome === 'settled',
     },
     {
@@ -42,6 +43,7 @@ export const piPostResolutionPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "If the defendant hasn't paid, you may need to pursue collection through wage garnishment, bank levy, or property lien.",
+      acknowledgeLabel: "I'll pursue collection →",
       showIf: (answers) => answers.defendant_paid === 'no',
     },
     {
@@ -55,6 +57,7 @@ export const piPostResolutionPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Appeals must typically be filed within 30 days. You'll need to show the court made a legal error — disagreeing with the outcome alone isn't enough.",
+      acknowledgeLabel: "I'll file my appeal within 30 days →",
       showIf: (answers) => answers.considering_appeal === 'yes',
     },
     {
@@ -62,6 +65,7 @@ export const piPostResolutionPropertyConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Property damage settlements are generally not taxable if they reimburse you for a loss (restoring you to your previous position). However, if you receive more than your actual loss, the excess may be taxable. Consult a tax professional if unsure.',
+      acknowledgeLabel: 'I\'ll consult a tax professional if needed →',
     },
   ],
 

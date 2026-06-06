@@ -19,6 +19,7 @@ export const debtPostJudgmentConfig: GuidedStepConfig = {
     {
       id: 'dismissed_info',
       type: 'info',
+      acknowledgeLabel: 'Great news →',
       prompt:
         "Congratulations! If dismissed with prejudice, they can't refile. If without prejudice, they could try again \u2014 but they often don't.",
       showIf: (answers) => answers.case_outcome === 'dismissed',
@@ -36,6 +37,7 @@ export const debtPostJudgmentConfig: GuidedStepConfig = {
     {
       id: 'texas_protections',
       type: 'info',
+      acknowledgeLabel: 'Got it — I know my protections →',
       prompt:
         'Texas protections: Your wages CANNOT be garnished for consumer debt. Your homestead is exempt. You can exempt personal property up to certain limits. Bank accounts may be partially protected.',
       showIf: (answers) => answers.case_outcome === 'judgment_for_plaintiff',
@@ -49,6 +51,7 @@ export const debtPostJudgmentConfig: GuidedStepConfig = {
     {
       id: 'appeal_info',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll file within the deadline →',
       prompt:
         'You have 21 days to appeal from JP court (bond required) or 30 days from county/district court. The case starts over in the higher court.',
       showIf: (answers) =>
@@ -58,6 +61,7 @@ export const debtPostJudgmentConfig: GuidedStepConfig = {
     {
       id: 'asset_protection',
       type: 'info',
+      acknowledgeLabel: 'Got it — I\'ll file exemptions promptly →',
       prompt:
         'File your exemption claims promptly if the creditor attempts collection. Consider consulting with a consumer rights attorney \u2014 many offer free consultations.',
       showIf: (answers) => answers.case_outcome === 'judgment_for_plaintiff',

@@ -32,6 +32,7 @@ export const reDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Texas sellers must provide a Seller\'s Disclosure Notice under Section 5.008 of the Texas Property Code. If the seller failed to disclose known defects, you may have a claim for deceptive trade practices as well.',
+      acknowledgeLabel: 'I understand disclosure law →',
       showIf: (answers) => answers.dispute_type === 'seller_disclosure',
     },
     {
@@ -39,6 +40,7 @@ export const reDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For title defects, reference your title policy and any title commitment documents. Your title insurance company may have an obligation to resolve the defect or compensate you.',
+      acknowledgeLabel: 'I will reference my title policy →',
       showIf: (answers) => answers.dispute_type === 'title_defect',
     },
     {
@@ -80,6 +82,7 @@ export const reDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Documenting prior attempts to resolve the dispute strengthens your demand letter and demonstrates good faith. Reference specific dates, conversations, and any promises made.',
+      acknowledgeLabel: 'I will document my prior communications →',
       showIf: (answers) => answers.prior_communication === 'yes',
     },
   ],

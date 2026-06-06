@@ -34,6 +34,7 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'BUYER-CAUSED FAILURE:\n• The seller is typically entitled to keep the earnest money as liquidated damages (per the TREC contract).\n• If the contract allows, the seller may also sue for additional damages: difference between contract price and eventual sale price, carrying costs (mortgage payments, taxes, insurance during the delay), and re-listing costs.\n• The seller may also pursue specific performance — a court order forcing the buyer to complete the purchase.\n• Statute of limitations: 4 years for breach of contract (Tex. Civ. Prac. & Rem. Code §16.004).',
+      acknowledgeLabel: 'I understand my rights as the seller →',
       showIf: (answers) => answers.failure_cause === 'buyer_breach',
     },
     {
@@ -41,6 +42,7 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SELLER-CAUSED FAILURE:\n• The buyer is entitled to a full return of earnest money.\n• The buyer may also recover additional damages: inspection costs, appraisal fees, rate lock fees, loan application fees, temporary housing costs, and the difference in price if forced to buy a comparable property at a higher price.\n• Specific performance is available — the buyer can ask the court to force the seller to complete the sale. This remedy is particularly strong for real estate because each property is considered "unique."\n• Statute of limitations: 4 years for breach of contract.',
+      acknowledgeLabel: 'I understand my rights as the buyer →',
       showIf: (answers) => answers.failure_cause === 'seller_breach',
     },
     {
@@ -48,6 +50,7 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'LENDER DENIED THE LOAN:\n• If the contract has a financing contingency (TREC Third Party Financing Addendum), the buyer can terminate and get earnest money back if the loan is denied.\n• The buyer must provide written notice of the denial within the timeframe specified in the addendum.\n• If there is NO financing contingency, the buyer is still obligated to close and may forfeit earnest money.\n• Check the exact language of your financing addendum — deadlines and notice requirements vary.',
+      acknowledgeLabel: 'I understand the financing contingency rules →',
       showIf: (answers) => answers.failure_cause === 'loan_denial',
     },
     {
@@ -55,6 +58,7 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'APPRAISAL SHORTFALL:\n• If the appraisal comes in below the purchase price, the lender will only loan based on the appraised value.\n• Options: (1) Buyer pays the difference in cash, (2) Seller reduces the price, (3) Both parties negotiate a compromise, (4) Buyer terminates under the financing contingency if the lender won\'t approve the loan at the higher amount.\n• The TREC financing addendum may allow the buyer to terminate if they cannot obtain financing at the contract price.\n• Consider ordering a second appraisal or filing a Reconsideration of Value (ROV) with the lender.',
+      acknowledgeLabel: 'I understand appraisal shortfall options →',
       showIf: (answers) => answers.failure_cause === 'appraisal_shortfall',
     },
     {
@@ -73,6 +77,7 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DISPUTED EARNEST MONEY:\n• The title company will typically hold the funds until both parties agree or a court orders release.\n• Under the TREC contract, the title company may require a release signed by both parties.\n• If neither party will agree, the title company may interplead the funds — deposit them with the court and let the judge decide.\n• To get the earnest money released, you may need to file suit or demand mediation (most TREC contracts require mediation before litigation).\n• Keep all documentation: the contract, amendments, closing timeline, communications, and the reason the closing failed.',
+      acknowledgeLabel: 'I understand the earnest money dispute process →',
       showIf: (answers) => answers.earnest_money_status === 'disputed',
     },
     {
@@ -87,13 +92,32 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'SPECIFIC PERFORMANCE:\n• Available because real property is considered "unique" under Texas law — monetary damages alone may not make you whole.\n• You must show: (1) a valid contract exists, (2) you were ready, willing, and able to perform, (3) the other party breached, and (4) you have no adequate remedy at law.\n• File a lis pendens (notice of pending litigation) with the county clerk to put third parties on notice that the property is subject to a lawsuit. This prevents the seller from selling to someone else during litigation.\n• Specific performance cases often settle because the lis pendens effectively freezes the property.',
+      acknowledgeLabel: 'I understand how to pursue specific performance →',
       showIf: (answers) => answers.seeking_specific_performance === 'yes',
     },
     {
-      id: 'damages_overview',
+      id: 'damages_incurred',
+      type: 'multi_select',
+      prompt: 'Which of these damages did you incur? (Keep receipts for each)',
+      options: [
+        { value: 'earnest_money', label: 'Earnest money deposited' },
+        { value: 'inspection_costs', label: 'Inspection costs (home, pest, survey)' },
+        { value: 'appraisal_fees', label: 'Appraisal fees' },
+        { value: 'loan_fees', label: 'Loan application and origination fees' },
+        { value: 'rate_lock_fees', label: 'Rate lock fees lost' },
+        { value: 'temp_housing', label: 'Temporary housing costs' },
+        { value: 'moving_costs', label: 'Moving costs already incurred' },
+        { value: 'price_difference', label: 'Higher price paid for a comparable replacement property' },
+        { value: 'attorney_fees', label: 'Attorney fees (if contract provides for them)' },
+      ],
+      noneLabel: "None of these apply to my situation",
+    },
+    {
+      id: 'damages_sol_info',
       type: 'info',
       prompt:
-        'DAMAGES CALCULATION:\nKeep receipts and documentation for all of these potential damages:\n• Earnest money deposited\n• Inspection costs (home inspection, pest inspection, survey)\n• Appraisal fees\n• Loan application and origination fees\n• Rate lock fees lost\n• Temporary housing costs (if you sold your previous home or ended a lease)\n• Moving costs already incurred\n• Difference in purchase/sale price if you must find another property\n• Attorney fees (if the contract provides for them)\n\nStatute of limitations: 4 years from the date of breach (Tex. Civ. Prac. & Rem. Code §16.004).',
+        'STATUTE OF LIMITATIONS:\n\n4 years from the date of breach (Tex. Civ. Prac. & Rem. Code §16.004).\n\nDocument every cost with receipts. The more receipts you have, the stronger your damages claim.',
+      acknowledgeLabel: "I'll save all receipts and document my damages →",
     },
   ],
 
@@ -152,10 +176,20 @@ export const reFailedClosingGuideConfig: GuidedStepConfig = {
       })
     }
 
-    items.push({
-      status: 'info',
-      text: 'Document all out-of-pocket costs (inspection, appraisal, rate lock, temporary housing). Statute of limitations: 4 years from breach.',
-    })
+    const incurredDamages = answers.damages_incurred
+      ? answers.damages_incurred.split(',').filter((v: string) => v && v !== 'none')
+      : []
+    if (incurredDamages.length > 0) {
+      items.push({
+        status: 'needed',
+        text: `Document ${incurredDamages.length} damage item(s) with receipts. Statute of limitations: 4 years from breach.`,
+      })
+    } else {
+      items.push({
+        status: 'info',
+        text: 'Document all out-of-pocket costs (inspection, appraisal, rate lock, temporary housing). Statute of limitations: 4 years from breach.',
+      })
+    }
 
     items.push({
       status: 'info',

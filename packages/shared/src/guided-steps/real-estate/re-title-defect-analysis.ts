@@ -30,6 +30,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'LIENS ON PROPERTY:\n- Tax liens: Filed by the government for unpaid property taxes. These survive a sale and must be paid off.\n- Mechanic\'s liens: Filed by contractors or suppliers for unpaid work. Must be filed within specific deadlines to be valid.\n- Judgment liens: Created when a court judgment is recorded against a property owner. Abstract of judgment filed in the county records.\n\nCure options: Pay the lien, negotiate a release, challenge the validity of the lien (e.g., expired mechanic\'s lien), or file a quiet title action.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.defect_type === 'lien',
     },
 
@@ -39,6 +40,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ENCUMBRANCES:\n- Easements: Someone else has the right to use part of your property (utility easement, access easement, drainage easement)\n- Restrictive covenants: Rules about what you can build or how you can use the property (often from the subdivision developer)\n- Deed restrictions: Specific limitations written into the deed\n\nEncumbrances are NOT always defects — many are normal. They become a problem when they were not disclosed before purchase or when they prevent your intended use of the property.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.defect_type === 'encumbrance',
     },
 
@@ -48,6 +50,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'CLOUD ON TITLE:\nA "cloud" is any unresolved claim, document error, or ambiguity that casts doubt on who owns the property. Common examples:\n- A prior owner\'s heir claims they never signed off\n- A deed was recorded with the wrong legal description\n- An old mortgage was paid off but never released of record\n- A prior divorce decree did not properly convey the property\n\nCure: File a quiet title action asking the court to declare you the rightful owner and remove the cloud.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.defect_type === 'cloud',
     },
 
@@ -57,6 +60,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'BREAK IN CHAIN OF TITLE:\nA "chain of title" is the sequence of deeds from the original land grant to you. A break means there is a gap — for example:\n- A deed was never recorded\n- A prior owner died without a will and the estate was never probated\n- A deed conveyed property from someone who was not the record owner\n\nCure: You may need a corrective deed, an affidavit of heirship, a probate proceeding, or a quiet title action to fill the gap.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.defect_type === 'chain_break',
     },
 
@@ -66,6 +70,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'FORGERY OR FRAUD IN A PRIOR DEED:\nThis is the most serious title defect. A forged deed is void — it transfers nothing, even to an innocent buyer. This means:\n- The true owner can reclaim the property\n- Your title insurance is your primary protection\n- File a title insurance claim immediately\n- You may also have a fraud claim against the forger and negligence claims against the title company or notary\n\nImportant: Do NOT wait — file your title insurance claim and consult an attorney. Time limits apply.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.defect_type === 'forgery',
     },
 
@@ -82,6 +87,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'REVIEWING YOUR TITLE INSURANCE POLICY:\nYour policy has critical sections to review:\n\n1. COVERED RISKS (Section 1): Lists what the insurer will defend and pay for\n2. EXCLUSIONS (Section 2): Lists what is NOT covered (usually: government regulations, eminent domain, defects you created or agreed to)\n3. SCHEDULE A: Shows the insured amount, effective date, and property description\n4. SCHEDULE B: Lists SPECIFIC EXCEPTIONS — these are known issues the insurer will NOT cover\n\nKey question: Is your title defect listed as a Schedule B exception? If yes, it is likely excluded from coverage. If no, the insurer should cover it.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_title_insurance === 'yes',
     },
     {
@@ -89,6 +95,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WITHOUT TITLE INSURANCE:\nYou have fewer options but are not without recourse:\n- You can still file a quiet title action to resolve the defect\n- If a seller conveyed property with a general warranty deed, the seller is personally liable for title defects (warranty of title)\n- If you purchased with a special warranty deed, the seller only warrants against defects that arose during their ownership\n- A quitclaim deed offers no title warranties at all\n\nFor future transactions, always purchase owner\'s title insurance.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_title_insurance === 'no',
     },
 
@@ -105,6 +112,7 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'ANALYZING YOUR TITLE COMMITMENT:\nThe title commitment has three schedules:\n\n- Schedule A: Property description, proposed insured, and policy amount\n- Schedule B-1: Requirements that must be met before the policy is issued (e.g., pay off existing liens, obtain releases)\n- Schedule B-2: Exceptions that will appear in the final policy (items the insurer will NOT cover)\n\nIf Schedule B-1 requirements were not met before closing but the title company issued the policy anyway, the title company may be liable for negligence.',
+      acknowledgeLabel: 'Got it →',
       showIf: (answers) => answers.has_title_commitment === 'yes',
     },
 
@@ -114,14 +122,24 @@ export const reTitleDefectAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COMMON CURE PROCEDURES:\n\n1. Corrective deed: Fixes errors in a prior deed (wrong name, wrong legal description). The grantor signs a new deed.\n2. Release of lien: The lienholder signs a document releasing the lien (after payment or negotiation).\n3. Affidavit of heirship: Establishes who inherited property when an owner died without probate.\n4. Quiet title action: A lawsuit asking the court to declare you the true owner and remove all adverse claims.\n5. Curative affidavit: A sworn statement from someone with knowledge that corrects a title issue.\n\nCost: Corrective deeds and releases are cheap ($50-200 for preparation and recording). Quiet title actions cost $2,000-5,000+ depending on complexity.',
+      acknowledgeLabel: 'Got it →',
     },
 
-    // File claim vs lawsuit
+    // File claim — how to do it
     {
-      id: 'title_insurance_claim_process',
+      id: 'title_insurance_claim_how',
       type: 'info',
       prompt:
-        'TITLE INSURANCE CLAIM PROCESS:\n\nUnder Texas Insurance Code Section 2702.103, your title insurer has a duty to defend you against covered title claims. Here is the process:\n\n1. NOTIFY YOUR INSURER: Send written notice of the defect to the title insurance company (not just the title agent). Include your policy number and a description of the defect.\n2. INSURER INVESTIGATES: The insurer will review your claim, examine the title, and determine coverage.\n3. INSURER MUST RESPOND: If covered, the insurer must either cure the defect, defend you in any lawsuit, or pay your claim up to the policy amount.\n4. IF DENIED: If the insurer denies your claim, you can file a complaint with the Texas Department of Insurance or sue the insurer for breach of contract and bad faith.\n\nWhen to file a claim first: Always file the title insurance claim before suing. The insurer may resolve the issue without litigation.\nWhen to file a lawsuit: If the insurer denies coverage, if the defect is not covered by your policy, or if you need to bring a quiet title action against a third party.',
+        'HOW TO FILE A TITLE INSURANCE CLAIM (Texas Insurance Code Section 2702.103):\n\n1. NOTIFY YOUR INSURER: Send written notice of the defect to the title insurance company (not just the title agent). Include your policy number and a clear description of the defect.\n2. INSURER INVESTIGATES: The insurer will review your claim, examine the title, and determine whether the defect is covered.\n3. INSURER MUST RESPOND: If covered, the insurer must either cure the defect, defend you in any related lawsuit, or pay your claim up to the policy amount.\n\nAlways file the title insurance claim before filing a lawsuit — the insurer may resolve the issue without any litigation.',
+      acknowledgeLabel: 'I know how to notify my insurer →',
+    },
+    // File claim — if denied
+    {
+      id: 'title_insurance_claim_denied',
+      type: 'info',
+      prompt:
+        'IF YOUR TITLE INSURANCE CLAIM IS DISPUTED OR DENIED:\n\n- You can file a complaint with the Texas Department of Insurance (TDI) at tdi.texas.gov\n- You can sue the insurer for breach of contract and, if the denial was in bad faith, for additional bad-faith damages\n- If the defect is not covered by your policy (e.g., it is a Schedule B exception), you will need to pursue a quiet title action or another remedy directly against the responsible party\n\nWhen to file a lawsuit instead: If the insurer denies coverage, if the defect is excluded from your policy, or if you need to bring a quiet title action against a third party.',
+      acknowledgeLabel: 'I understand my options if the claim is denied →',
     },
   ],
 

@@ -181,8 +181,10 @@ export function WorkflowSidebar({ caseId, tasks, phases }: WorkflowSidebarProps)
     phase.taskKeys.includes(currentTaskKey ?? '')
   )
 
-  const countable = tasks.filter((t) => t.status !== 'skipped')
-  const completedCount = countable.filter((t) => t.status === 'completed').length
+  const countable = tasks.filter((t) => t.status !== 'locked')
+  const completedCount = countable.filter(
+    (t) => t.status === 'completed' || t.status === 'skipped'
+  ).length
   const totalCount = countable.length
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 

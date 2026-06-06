@@ -21,6 +21,7 @@ export const reReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A counterclaim means the defendant is suing you back. You must respond within 20 days. Common real estate counterclaims include disputes over ownership, boundary lines, or claims that you breached the contract. Review the counterclaim carefully and gather evidence to refute their claims.',
+      acknowledgeLabel: "I'll respond to the counterclaim within 20 days and gather evidence to refute it",
       showIf: (answers) => answers.has_counterclaims === 'yes',
     },
     {
@@ -39,6 +40,7 @@ export const reReviewAnswerConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Each numbered paragraph in the answer corresponds to a paragraph in your petition. "Denied" means they dispute that fact. "Admitted" means they agree. A "general denial" means they deny everything. Look for these keywords to understand what is actually in dispute.',
+      acknowledgeLabel: "I'll map each paragraph of the answer to my petition to identify what is disputed",
       showIf: (answers) => answers.disputed_facts === 'not_sure',
     },
   ],

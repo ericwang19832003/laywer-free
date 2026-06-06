@@ -23,6 +23,7 @@ export const rePostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The defendant has 30 days to pay the judgment or file an appeal. If they do not pay, you can pursue collection through wage garnishment, bank account levy, or property lien. Keep a copy of the signed judgment for your records.',
+      acknowledgeLabel: "I'll keep a copy of the judgment and pursue collection if not paid within 30 days",
       showIf: (answers) => answers.resolution_type === 'judgment_for_you',
     },
     {
@@ -30,6 +31,7 @@ export const rePostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Your settlement agreement must be in writing and signed by both parties. If the settlement affects property title or ownership, record the agreement with the county clerk\'s office to provide public notice and bind future owners.',
+      acknowledgeLabel: "I'll get the agreement in writing and record it with the county clerk if it affects title",
       showIf: (answers) => answers.resolution_type === 'settlement',
     },
     {
@@ -42,6 +44,7 @@ export const rePostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Record the judgment or settlement with the county clerk\'s office. If boundaries changed or title was quieted, you may also need to file an amended deed or plat. This protects your rights if the property is sold or refinanced in the future.',
+      acknowledgeLabel: "I'll record the judgment with the county clerk and update the deed or plat if needed",
       showIf: (answers) => answers.title_update_needed === 'yes',
     },
     {
@@ -54,6 +57,7 @@ export const rePostResolutionConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'If the defendant has not paid, you can file an abstract of judgment with the county clerk to create a lien on their property. Other enforcement options include wage garnishment, bank account levy, or a writ of execution. Start by sending a post-judgment demand letter with a final deadline.',
+      acknowledgeLabel: "I'll send a post-judgment demand letter and file an abstract of judgment to create a lien",
       showIf: (answers) => answers.payment_received === 'no' && answers.resolution_type === 'judgment_for_you',
     },
   ],

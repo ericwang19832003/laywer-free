@@ -26,6 +26,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Process server or sheriff delivers to their home or workplace. You will need the individual\'s name and address. If they are your neighbor, you already know where they live.',
+      acknowledgeLabel: 'Got it — I have their address →',
       showIf: (answers) => answers.defendant_type === 'individual_neighbor',
     },
     {
@@ -33,6 +34,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Serve their registered agent. Find the agent at the TX Secretary of State website: sos.state.tx.us. Search by company name. The registered agent is the person or company legally designated to accept lawsuits on the business\'s behalf.',
+      acknowledgeLabel: 'Got it — I\'ll look up the registered agent →',
       showIf: (answers) => answers.defendant_type === 'business_company',
     },
     {
@@ -40,6 +42,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Serve the HOA's registered agent OR the property management company's registered agent. Search for the HOA by name at sos.state.tx.us. If the HOA is unincorporated, serve the president or another officer listed in your community's records.",
+      acknowledgeLabel: 'Got it — I\'ll locate the HOA agent →',
       showIf: (answers) => answers.defendant_type === 'hoa',
     },
     {
@@ -47,6 +50,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "Special rules apply. You must serve the governmental entity's designated agent AND may need to file a notice of claim first (Tex. Civ. Prac. & Rem. Code Chapter 101). For cities, serve the city secretary. For counties, serve the county judge. For state agencies, serve the Attorney General. Check the entity's website for their designated agent.",
+      acknowledgeLabel: 'Understood — I\'ll check the special rules →',
       showIf: (answers) => answers.defendant_type === 'government',
     },
     {
@@ -54,6 +58,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Serve the landlord at their registered address. If the property is managed by a management company, you can serve the management company\'s registered agent. Search for the registered agent at sos.state.tx.us. You can also check your lease for the landlord\'s legal name and address.',
+      acknowledgeLabel: 'Got it — I\'ll check my lease →',
       showIf: (answers) => answers.defendant_type === 'landlord',
     },
 
@@ -76,6 +81,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'A private process server will deliver the papers to the defendant. Cost: typically $50\u2013150. They are usually faster than the sheriff and offer flexible scheduling. After delivery, they will provide you with an affidavit of service to file with the court.',
+      acknowledgeLabel: 'Got it \u2014 I\'ll hire a process server \u2192',
       showIf: (answers) => answers.service_method === 'process_server',
     },
     {
@@ -83,6 +89,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'The sheriff or constable will deliver the papers. Cost: typically $75\u2013100. Request service through the court clerk when you file your petition \u2014 they will forward the citation to the sheriff\'s office. The sheriff files the return of service automatically.',
+      acknowledgeLabel: 'Got it \u2014 I\'ll request sheriff service \u2192',
       showIf: (answers) => answers.service_method === 'sheriff',
     },
     {
@@ -90,6 +97,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Certified mail with return receipt requested can be used in some courts (especially JP Court). Cost: under $10. The risk: if the defendant refuses to sign or the mail is unclaimed, service fails and you\'ll need to use another method.',
+      acknowledgeLabel: 'Got it — I\'ll use certified mail →',
       showIf: (answers) => answers.service_method === 'certified_mail',
     },
     {
@@ -97,6 +105,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For most property damage cases, a sheriff/constable or process server is the most reliable option. Certified mail is cheaper but can be refused. If you\'re unsure, ask the court clerk what works best for your court.',
+      acknowledgeLabel: 'Thanks \u2014 I\'ll pick the best method \u2192',
       showIf: (answers) => answers.service_method === 'not_sure',
     },
 
@@ -106,6 +115,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'After service is completed, a certificate (or return) of service must be filed with the court. This document proves the defendant was properly notified.\n\n\u2022 Sheriff/constable: They file it automatically.\n\u2022 Process server: They provide an affidavit of service \u2014 you may need to file it yourself.\n\u2022 Certified mail: The signed return receipt (green card) serves as proof.',
+      acknowledgeLabel: 'Understood \u2014 I\'ll file the return of service \u2192',
     },
 
     // Cannot serve yourself
@@ -114,6 +124,7 @@ export const propertyServiceGuideConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'You CANNOT serve the papers yourself. Texas requires a third party \u2014 the sheriff, a constable, a private process server, or any person authorized by court order who is not a party to the suit.',
+      acknowledgeLabel: 'Understood \u2014 I need a third party \u2192',
     },
   ],
 

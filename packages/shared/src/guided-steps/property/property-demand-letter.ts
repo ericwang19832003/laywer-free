@@ -34,6 +34,7 @@ export const propertyDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For boundary encroachments, your demand should reference your property survey and clearly describe what structure or use crosses your boundary line. Include the approximate date you discovered the encroachment.',
+      acknowledgeLabel: 'Got it — I\'ll reference my survey →',
       showIf: (answers) => answers.property_right_violated === 'boundary_encroachment',
     },
     {
@@ -41,6 +42,7 @@ export const propertyDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'For title defects, reference your deed, title policy, and any title search results. Describe the specific defect (lien, undisclosed encumbrance, forged signature, etc.).',
+      acknowledgeLabel: 'Got it — I\'ll reference my deed and title policy →',
       showIf: (answers) => answers.property_right_violated === 'title_defect',
     },
     {
@@ -71,6 +73,7 @@ export const propertyDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         '30 days is the most common deadline for property disputes. Shorter deadlines (14 days) may be appropriate if there is ongoing damage. Longer deadlines (60 days) give more time for complex issues like title corrections.',
+      acknowledgeLabel: 'Got it — I\'ll set my deadline →',
     },
     {
       id: 'prior_communication',
@@ -82,6 +85,7 @@ export const propertyDemandLetterConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Documenting prior attempts to resolve the issue strengthens your demand letter and shows the court you acted in good faith before filing suit.',
+      acknowledgeLabel: 'Got it — I\'ll document my prior attempts →',
       showIf: (answers) => answers.prior_communication === 'yes',
     },
   ],

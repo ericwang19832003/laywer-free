@@ -40,6 +40,7 @@ export const piDiscoveryResponsesConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Flag this for a motion to compel. A party that denies fault or damages usually must state the facts supporting that position, not just repeat the denial.',
+      acknowledgeLabel: 'I\'ll flag this for the motion →',
       showIf: (answers) => answers.bare_denials === 'yes',
     },
     {
@@ -58,6 +59,7 @@ export const piDiscoveryResponsesConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Boilerplate objections often are not enough. If they disputed repair costs or fault, they should usually explain the factual basis and produce responsive non-privileged documents.',
+      acknowledgeLabel: 'I\'ll demand a proper response →',
       showIf: (answers) => answers.boilerplate_objections === 'yes' || answers.boilerplate_objections === 'not_sure',
     },
     {
@@ -83,6 +85,7 @@ export const piDiscoveryResponsesConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Before filing a motion to compel, most courts require a good-faith meet-and-confer. Keep the letter, email, call notes, date, and what the defendant refused to fix.',
+      acknowledgeLabel: 'I\'ll document the meet-and-confer →',
       showIf: (answers) => answers.received_responses === 'yes' || answers.received_responses === 'overdue',
     },
   ],

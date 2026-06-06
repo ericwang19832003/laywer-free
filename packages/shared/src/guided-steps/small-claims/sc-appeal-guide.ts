@@ -25,12 +25,14 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
         id: 'eviction_timeline',
         type: 'info',
         prompt: `EVICTION APPEAL DEADLINE: ${sc.appealDeadlineEviction.toUpperCase()} from the judgment.\n\nThis is an extremely tight deadline. If you are close to the deadline, go to the court clerk immediately to file your Notice of Appeal.`,
+        acknowledgeLabel: 'I am filing my appeal immediately →',
         showIf: (answers) => answers.case_type === 'eviction',
       },
       {
         id: 'other_timeline',
         type: 'info',
         prompt: `APPEAL DEADLINE: ${sc.appealDeadlineOther.toUpperCase()} from the judgment.\n\nMark this date on your calendar. If you miss it, you lose your right to appeal.`,
+        acknowledgeLabel: 'I have noted the appeal deadline →',
         showIf: (answers) => answers.case_type === 'other',
       },
 
@@ -50,6 +52,7 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
         id: 'past_deadline_info',
         type: 'info',
         prompt: 'If you are past the appeal deadline, your options are very limited. Consult an attorney immediately to see if any exceptions apply to your situation.',
+        acknowledgeLabel: 'I will consult an attorney immediately →',
         showIf: (answers) => answers.days_since === 'past',
       },
 
@@ -57,6 +60,7 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
         id: 'filing_steps',
         type: 'info',
         prompt: `HOW TO FILE YOUR APPEAL:\n1. Go to the ${sc.courtAbbrev} clerk where your case was heard\n2. File a Notice of Appeal\n3. Pay the filing fee\n4. Post an appeal bond (or file an inability-to-pay affidavit)\n5. The clerk will transfer your case to ${sc.upperCourtName}\n6. You will receive a new hearing date from ${sc.upperCourtName}`,
+        acknowledgeLabel: 'I understand the filing steps →',
       },
 
       {
@@ -69,12 +73,14 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
         id: 'inability_to_pay',
         type: 'info',
         prompt: `FILE AN INABILITY-TO-PAY AFFIDAVIT:\nIf you cannot afford the filing fee or appeal bond, file a "${sc.feeWaiverForm}" at the court clerk. The court will review your finances. If approved, both the fee and bond are waived.`,
+        acknowledgeLabel: 'I will file for a fee waiver →',
         showIf: (answers) => answers.can_afford_costs === 'no',
       },
 
       {
         id: 'trial_de_novo',
         type: 'info',
+        acknowledgeLabel: 'I understand what the appeal means →',
         prompt: state === 'NY'
           ? `APPEAL — WHAT IT MEANS:\n\nOutside NYC: Your case starts completely fresh in County Court (trial de novo). The ${sc.courtAbbrev} decision is erased and you can present new evidence and witnesses.\n\nIn NYC (Appellate Term): The Appellate Term reviews the record from your small claims hearing — it is NOT a new trial. You argue that the judge made a legal error. New evidence is generally not considered.`
           : `TRIAL DE NOVO — WHAT IT MEANS:\nYour case starts completely fresh in ${sc.upperCourtName}. The ${sc.courtAbbrev} decision is erased. You can:\n- Present new evidence you didn't have before\n- Call new witnesses\n- Make different arguments\n- Get a completely different result\n\nIt's as if the ${sc.courtAbbrev} hearing never happened.`,
@@ -84,6 +90,7 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
         id: 'upper_court_changes',
         type: 'info',
         prompt: `WHAT CHANGES IN ${sc.upperCourtName.toUpperCase()}:\n- More formal procedures (rules of evidence are stricter)\n- You may be able to request a jury trial\n- The other side may hire an attorney\n- Discovery (exchanging evidence before trial) may be available\n- The process takes longer than ${sc.courtAbbrev}\n- You may want to consider hiring an attorney yourself`,
+        acknowledgeLabel: 'I understand what changes in the upper court →',
       },
 
       {
@@ -98,6 +105,7 @@ export function createScAppealGuideConfig(state?: string): GuidedStepConfig {
         id: 'cost_benefit',
         type: 'info',
         prompt: `COST-BENEFIT ANALYSIS:\nConsider before appealing:\n- Filing fee + possible attorney costs vs. the judgment amount\n- Your time for a second round of court\n- Strength of your evidence — do you have something new or stronger?\n- If the judgment was close, an appeal may be worth it\n- If the judgment was clearly supported by the evidence, a new trial may reach the same result`,
+        acknowledgeLabel: 'I have weighed the costs and benefits →',
       },
 
       {

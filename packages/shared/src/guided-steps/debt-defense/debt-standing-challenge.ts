@@ -24,6 +24,7 @@ export const debtStandingChallengeConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Original creditors generally have standing to sue because they are the party you originally contracted with. Focus your defense on other issues such as the statute of limitations, the amount owed, or FDCPA violations.',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) => answers.plaintiff_type === 'original_creditor',
     },
     {
@@ -31,6 +32,7 @@ export const debtStandingChallengeConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'DEBT BUYER STANDING — This is often the WEAKEST point in their case. To sue you, a debt buyer must prove an unbroken chain of ownership from the original creditor to them. Many cannot do this.\n\nKey things they must prove:\n• They actually purchased YOUR specific account (not just a portfolio)\n• A complete chain of assignment from the original creditor through every intermediate buyer\n• The original agreement between you and the creditor\n• Accurate accounting of what you owe',
+      acknowledgeLabel: 'Got it, continue →',
       showIf: (answers) =>
         answers.plaintiff_type === 'debt_buyer' || answers.plaintiff_type === 'not_sure',
     },
@@ -47,6 +49,7 @@ export const debtStandingChallengeConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'WITHOUT THE ORIGINAL AGREEMENT, the debt buyer\'s case is weak. In your discovery requests, demand:\n\n1. The original signed application or agreement\n2. Every assignment agreement in the chain of ownership\n3. The bill of sale showing your specific account was included\n4. Account-level transaction history from origination to charge-off\n\nMany debt buyers purchased accounts in bulk and have none of these documents.',
+      acknowledgeLabel: "I'll demand these documents in discovery →",
       showIf: (answers) =>
         answers.plaintiff_type === 'debt_buyer' && answers.has_original_agreement === 'no',
     },
@@ -66,6 +69,7 @@ export const debtStandingChallengeConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'REQUEST THE CHAIN — Send a Request for Production of Documents demanding every document showing the transfer of ownership of this account. A gap in the chain of assignment means the plaintiff has no standing to sue, and the case should be dismissed.',
+      acknowledgeLabel: "I'll request all assignment documents →",
       showIf: (answers) => answers.chain_of_assignment === 'no',
     },
     {
@@ -73,6 +77,7 @@ export const debtStandingChallengeConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'COLLECTION AGENCY — A collection agency suing on behalf of a creditor must prove they are authorized to file suit. Request the authorization agreement between the collection agency and the original creditor in discovery. Without proof of authorization, they lack standing.',
+      acknowledgeLabel: "I'll request the authorization agreement →",
       showIf: (answers) => answers.plaintiff_type === 'collection_agency',
     },
     {
@@ -80,6 +85,7 @@ export const debtStandingChallengeConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'HOW TO RAISE THIS DEFENSE — Include in your Answer: "Plaintiff lacks standing to bring this action. Plaintiff has failed to establish an unbroken chain of assignment from the original creditor to itself." Then use discovery to force them to prove it. If they cannot produce the documentation, file a Motion for Summary Judgment on standing grounds.',
+      acknowledgeLabel: "I'll add this language to my Answer →",
     },
   ],
 

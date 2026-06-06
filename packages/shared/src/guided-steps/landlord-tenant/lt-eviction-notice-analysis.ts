@@ -23,6 +23,7 @@ export const ltEvictionNoticeAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "ANALYSIS:\n- Was it delivered properly? (hand-delivery, posted on door, or certified mail)\n- Does it state the EXACT amount owed?\n- Does it give you 3 FULL days? (The day of delivery doesn't count)\n- Does it state the landlord's right to proceed if you don't pay?\n- If ANY of these are missing, the notice may be defective \u2014 a defense at hearing.",
+      acknowledgeLabel: "I've reviewed my 3-day notice for defects",
       showIf: (answers) => answers.notice_type === 'three_day_pay_or_quit',
     },
     {
@@ -30,6 +31,7 @@ export const ltEvictionNoticeAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'This is a lease termination notice. Verify:\n- Is your lease month-to-month? (30-day notice only applies to month-to-month)\n- Does it give a full 30 days from the NEXT rental period?\n- Is it in writing?',
+      acknowledgeLabel: "I've reviewed my 30-day notice",
       showIf: (answers) => answers.notice_type === 'thirty_day_notice',
     },
     {
@@ -37,6 +39,7 @@ export const ltEvictionNoticeAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "This is the required notice BEFORE the landlord can file for eviction.\n- Must give at least 3 days (unless lease says differently)\n- Must be in writing\n- Must be delivered to you (not just posted)\n- DEFECT: If notice says 'vacate immediately' with no time period, it's invalid",
+      acknowledgeLabel: "I've reviewed my notice to vacate",
       showIf: (answers) => answers.notice_type === 'notice_to_vacate',
     },
     {
@@ -44,6 +47,7 @@ export const ltEvictionNoticeAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'This means the landlord has already filed an eviction lawsuit. You have a court date.\n- Check the hearing date \u2014 you MUST appear or you lose by default\n- You have the right to file an answer\n- You have the right to request a jury trial (must request in writing before hearing)',
+      acknowledgeLabel: 'I understand I must appear at my court date',
       showIf: (answers) => answers.notice_type === 'court_citation',
     },
     {
@@ -51,6 +55,7 @@ export const ltEvictionNoticeAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Look at the document carefully. Key clues:\n- If it mentions a dollar amount and says "pay or quit" \u2192 3-Day Pay or Quit\n- If it says you have 30 days to leave \u2192 30-Day Notice\n- If it says "notice to vacate" and gives a deadline \u2192 Notice to Vacate\n- If it has a court name, case number, and hearing date \u2192 Court Citation',
+      acknowledgeLabel: "I've identified my notice type",
       showIf: (answers) => answers.notice_type === 'unsure',
     },
     {
@@ -58,6 +63,7 @@ export const ltEvictionNoticeAnalysisConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         "COMMON NOTICE DEFECTS THAT VOID THE EVICTION:\n1. Wrong address on notice\n2. No specific amount owed listed\n3. Delivered to wrong person\n4. Less than required days given\n5. Notice says 'vacate immediately' (must give time)\n6. Landlord filed in court before notice period expired\n7. Notice not in writing (verbal doesn't count)",
+      acknowledgeLabel: "I'll check my notice against these defects",
     },
   ],
 

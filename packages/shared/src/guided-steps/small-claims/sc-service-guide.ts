@@ -17,6 +17,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'service_basics_info',
         type: 'info',
+        acknowledgeLabel: 'I understand how service works →',
         prompt: state === 'CA'
           ? `Service means officially delivering the lawsuit papers to the defendant. In California Small Claims Court, the most common method is certified mail sent by the court clerk — you pay a small fee and provide the address. The clerk mails the papers; you don't have to do it yourself. Service must be completed at least 15 days before the hearing (25 days if the defendant is in a different county). (Cal. Code Civ. Proc. § 116.340)`
           : state === 'NY'
@@ -37,6 +38,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
         id: 'address_info',
         type: 'info',
         prompt: `You need the defendant's physical address for service. Check your original contract, business filings (${sc.sosName}: ${sc.sosUrl}), or property records if you need to find their address.`,
+        acknowledgeLabel: 'I will look up the defendant\'s address →',
         showIf: (answers) => answers.have_defendant_address === 'no',
       },
       {
@@ -76,6 +78,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'constable_info',
         type: 'info',
+        acknowledgeLabel: 'I understand constable/process server service →',
         prompt: state === 'CA'
           ? `A process server or sheriff can personally deliver the papers to the defendant. This is more expensive ($75–$150) but works when certified mail fails or the defendant must be found at home or work. The process server files a Proof of Service (form SC-104) with the court after serving.`
           : state === 'NY'
@@ -90,6 +93,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'certified_mail_info',
         type: 'info',
+        acknowledgeLabel: 'I understand certified mail service →',
         prompt: state === 'CA'
           ? "The court clerk mails the papers to the defendant by certified mail with return receipt. You pay a fee (usually $15–$25) and the clerk handles the mailing. This is the easiest and cheapest option. If the defendant refuses to sign or the mail is returned, you'll need to use a process server instead."
           : state === 'NY'
@@ -110,6 +114,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
         id: 'service_fee_info',
         type: 'info',
         prompt: `If you received a fee waiver, service fees are also waived. Otherwise, the service fee is typically $50–$100 and is paid when you file or separately to the constable's office.`,
+        acknowledgeLabel: 'I understand the fee waiver option →',
         showIf: (answers) => answers.know_service_fee === 'no',
       },
       {
@@ -120,6 +125,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'service_failure_info',
         type: 'info',
+        acknowledgeLabel: 'I know what to do if service fails →',
         prompt: state === 'CA'
           ? "If certified mail is returned undelivered, switch to personal service by a process server or sheriff. If the defendant is actively avoiding service, inform the court at or before your hearing — the judge can reschedule and order alternative service. You can also try substitute service by leaving papers with an adult at the defendant's home or workplace plus mailing a copy (CCP § 415.20)."
           : state === 'NY'
@@ -139,6 +145,7 @@ export function createScServiceGuideConfig(state?: string): GuidedStepConfig {
       {
         id: 'proof_of_service_info',
         type: 'info',
+        acknowledgeLabel: 'I understand how proof of service works →',
         prompt: state === 'CA'
           ? "Once service is complete, the server files a Proof of Service (SC-104) with the court. For certified mail, the clerk handles this. For personal service, the process server files it. Service must be done at least 15 days before your hearing (25 days for out-of-county defendants). Check with the clerk to confirm service was successful before your hearing date."
           : state === 'NY'

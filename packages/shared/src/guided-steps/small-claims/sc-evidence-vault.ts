@@ -37,6 +37,7 @@ export const scEvidenceVaultConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Write down each witness\'s name and phone number. Ask if they\'re willing to come to court or provide a written statement.',
+      acknowledgeLabel: "I'll write down each witness's contact info",
       showIf: (answers) => answers.has_witnesses === 'yes',
     },
     {
@@ -49,6 +50,7 @@ export const scEvidenceVaultConfig: GuidedStepConfig = {
       type: 'info',
       prompt:
         'Create folders for: Receipts/Invoices, Contracts, Photos/Videos, Communications, and Witness Statements. Label files clearly with dates.',
+      acknowledgeLabel: "I'll organize my evidence into folders",
       showIf: (answers) => answers.evidence_organized === 'no',
     },
   ],
