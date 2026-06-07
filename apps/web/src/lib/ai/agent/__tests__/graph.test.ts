@@ -1,21 +1,25 @@
-import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { describe, expect, it, vi } from 'vitest'
 import { buildAgentGraph } from '../graph'
 import { createInitialState } from '../state'
 
-vi.mock('@langchain/openai', () => ({
-  ChatOpenAI: class {
-    bindTools() {
-      return {
-        invoke: async () => new AIMessage('I can help organize your next steps.'),
-      }
+vi.mock('openai', () => ({
+  default: class {
+    chat = {
+      completions: {
+        create: vi.fn().mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield { choices: [{ delta: { content: 'I can help organize your next steps.' } }] }
+            yield { choices: [{ delta: {} }] }
+          },
+        }),
+      },
     }
+    embeddings = { create: vi.fn() }
   },
-  OpenAIEmbeddings: class {},
 }))
 
 describe('buildAgentGraph', () => {
-  it('compiles and routes a basic user message through the agent node', async () => {
+  it('streams token events from a basic user message', async () => {
     const graph = buildAgentGraph({
       supabaseClient: {} as never,
       saveDraft: async () => 'draft-id',
@@ -31,11 +35,15 @@ describe('buildAgentGraph', () => {
       deadlines: [],
       evidenceCount: 0,
     })
-    state.messages = [new HumanMessage('What should I organize first?')]
+    state.messages = [{ role: 'user', content: 'What should I organize first?' }]
 
-    const result = await graph.invoke(state)
+    const events = []
+    for await (const event of graph.stream(state)) {
+      events.push(event)
+    }
 
-    expect(result.messages.at(-1)?.content).toBe('I can help organize your next steps.')
-    expect(result.toolCallCount).toBe(0)
+    const tokens = events.filter((e) => e.type === 'token')
+    expect(tokens.length).toBeGreaterThan(0)
+    expect(events.at(-1)?.type).toBe('done')
   })
 })

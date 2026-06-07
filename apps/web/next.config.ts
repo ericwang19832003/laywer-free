@@ -24,7 +24,6 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@lawyer-free/shared'],
-  serverExternalPackages: ['tesseract.js', 'pdf-parse'],
   poweredByHeader: false,
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];

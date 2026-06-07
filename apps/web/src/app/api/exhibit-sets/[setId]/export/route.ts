@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { safeError } from '@/lib/security/safe-log'
 
-export const runtime = 'nodejs'
 
 // GET /api/exhibit-sets/:setId/export?format=csv|json
 export async function GET(

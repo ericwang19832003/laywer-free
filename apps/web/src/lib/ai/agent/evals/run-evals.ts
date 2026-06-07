@@ -3,15 +3,14 @@ import { createClient } from '@supabase/supabase-js'
 
 // Load .env.local when running via tsx (vitest handles this via vite; tsx does not)
 loadDotenv({ path: '.env.local', override: false })
-import { HumanMessage } from '@langchain/core/messages'
+
 import { buildAgentGraph } from '../graph'
 import { createInitialState } from '../state'
+import type { AgentEvent } from '../graph'
 import { EVAL_DATASET, type EvalCase } from './dataset'
 import { judgeResponse } from './judge'
 
 // ---- Validate env vars ----
-// Accepts test-specific vars (SUPABASE_TEST_URL / SUPABASE_TEST_SERVICE_KEY)
-// or the production vars in .env.local (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).
 if (!process.env.OPENAI_API_KEY) {
   console.error('Missing required env var: OPENAI_API_KEY')
   process.exit(1)
@@ -54,24 +53,15 @@ interface EvalResult extends EvalCase {
 
 async function runSingleEval(evalCase: EvalCase, graph: ReturnType<typeof buildAgentGraph>): Promise<EvalResult> {
   const state = createInitialState(EVAL_STATE_INPUT)
-  state.messages = [new HumanMessage(evalCase.question)]
+  state.messages = [{ role: 'user', content: evalCase.question }]
 
   let agentResponse = ''
 
   try {
-    const stream = await graph.stream(state, { streamMode: 'messages' })
-    for await (const chunk of stream) {
-      // streamMode: 'messages' yields [BaseMessage, metadata] tuples.
-      // Tokens arrive as deltas — accumulate from agent node only.
-      const [message, metadata] = chunk as [any, Record<string, unknown>]
-      const fromAgent = (metadata as any)?.langgraph_node === 'agent'
-      if (
-        message?.content &&
-        typeof message.content === 'string' &&
-        !message?.tool_calls?.length &&
-        fromAgent
-      ) {
-        agentResponse += message.content
+    for await (const event of graph.stream(state)) {
+      const e = event as AgentEvent
+      if (e.type === 'token') {
+        agentResponse += e.content
       }
     }
   } catch (err) {

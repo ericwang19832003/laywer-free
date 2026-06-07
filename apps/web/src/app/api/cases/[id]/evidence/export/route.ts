@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import archiver from 'archiver'
-import { PassThrough } from 'stream'
+import { zipSync } from 'fflate'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { safeError } from '@/lib/security/safe-log'
 
-export const runtime = 'nodejs'
 
 export async function GET(
   request: NextRequest,
@@ -91,25 +89,11 @@ export async function GET(
     }
 
     // Create ZIP archive
-    const passthrough = new PassThrough()
-    const archive = archiver('zip', { zlib: { level: 5 } })
-
-    archive.pipe(passthrough)
-
+    const zipFiles: Record<string, Uint8Array> = {}
     for (const file of files) {
-      archive.append(file.buffer, { name: file.name })
+      zipFiles[file.name] = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength)
     }
-
-    const archiveFinalized = archive.finalize()
-
-    // Collect ZIP into buffer
-    const chunks: Buffer[] = []
-    for await (const chunk of passthrough) {
-      chunks.push(chunk as Buffer)
-    }
-    await archiveFinalized
-
-    const zipBuffer = Buffer.concat(chunks)
+    const zipBuffer = Buffer.from(zipSync(zipFiles, { level: 5 }))
 
     // Generate ZIP file name
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')

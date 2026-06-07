@@ -3,7 +3,6 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { confirmDiscoveryDeadlineSchema } from '@lawyer-free/shared/schemas/discovery'
 import { calculateReminderDates } from '@lawyer-free/shared/rules/reminders'
 
-export const runtime = 'nodejs'
 
 // POST /api/discovery/packs/:packId/deadline — set response due date
 export async function POST(

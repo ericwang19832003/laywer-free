@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { BaseMessage } from '@langchain/core/messages'
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 
 export interface CheckpointData {
-  messages: BaseMessage[]
+  messages: ChatCompletionMessageParam[]
   toolCallCount: number
 }
 

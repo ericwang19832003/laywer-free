@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { servePackSchema } from '@lawyer-free/shared/schemas/discovery'
 
-export const runtime = 'nodejs'
 
 // POST /api/discovery/packs/:packId/serve — record service of discovery
 export async function POST(

@@ -3,7 +3,6 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateCourtFormPdf, type CourtFormData } from '@/lib/pdf/court-form-pdf'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-export const runtime = 'nodejs'
 export const maxDuration = 30
 
 export async function POST(

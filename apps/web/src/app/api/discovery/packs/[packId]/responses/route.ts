@@ -3,7 +3,6 @@ import { createHash } from 'crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { uploadResponseSchema } from '@lawyer-free/shared/schemas/discovery'
 
-export const runtime = 'nodejs'
 
 // POST /api/discovery/packs/:packId/responses — upload a discovery response file
 export async function POST(

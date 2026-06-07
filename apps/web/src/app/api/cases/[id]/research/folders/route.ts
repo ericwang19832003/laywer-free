@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { isUuid } from '@/lib/security/uuid'
 
-export const runtime = 'nodejs'
 
 export async function GET(
   _request: NextRequest,

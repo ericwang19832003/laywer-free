@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
-export const runtime = 'nodejs'
 
 // GET /api/discovery/examples?dispute_type=...&item_type=...
 export async function GET(request: NextRequest) {

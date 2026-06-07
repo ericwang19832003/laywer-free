@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { updateExhibitSchema } from '@lawyer-free/shared/schemas/exhibits'
 
-export const runtime = 'nodejs'
 
 // PATCH /api/exhibits/:exhibitId — update exhibit title/description
 export async function PATCH(

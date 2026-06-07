@@ -10,7 +10,6 @@ import {
 import { safeError } from '@/lib/security/safe-log'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const CACHE_KEY = 'strategy'

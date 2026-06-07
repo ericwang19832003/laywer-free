@@ -4,7 +4,6 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateMeetAndConferNote } from '@/lib/templates/meet-and-confer-note'
 import type { MeetAndConferItem } from '@/lib/templates/meet-and-confer-note'
 
-export const runtime = 'nodejs'
 
 // POST /api/objections/reviews/:reviewId/meet-and-confer/generate
 export async function POST(

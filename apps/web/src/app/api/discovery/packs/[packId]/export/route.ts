@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import archiver from 'archiver'
-import { PassThrough } from 'stream'
+import { zipSync } from 'fflate'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { safeError } from '@/lib/security/safe-log'
 
-export const runtime = 'nodejs'
 
 export async function GET(
   _request: NextRequest,
@@ -187,31 +185,19 @@ export async function GET(
     }
 
     // --- Build ZIP ---
-    const passthrough = new PassThrough()
-    const archive = archiver('zip', { zlib: { level: 5 } })
-    archive.pipe(passthrough)
-
-    archive.append(requestsTxt, { name: 'requests.txt' })
-    archive.append(serviceTxt, { name: 'service_log.txt' })
-    archive.append(timelineTxt, { name: 'timeline.txt' })
-
+    const enc = new TextEncoder()
+    const zipFiles: Record<string, Uint8Array> = {
+      'requests.txt': enc.encode(requestsTxt),
+      'service_log.txt': enc.encode(serviceTxt),
+      'timeline.txt': enc.encode(timelineTxt),
+    }
     for (const file of responseFiles) {
-      archive.append(file.buffer, { name: `responses/${file.name}` })
+      zipFiles[`responses/${file.name}`] = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength)
     }
     for (const file of evidenceFiles) {
-      archive.append(file.buffer, { name: `evidence/${file.name}` })
+      zipFiles[`evidence/${file.name}`] = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength)
     }
-
-    const archiveFinalized = archive.finalize()
-
-    // Collect ZIP into buffer
-    const chunks: Buffer[] = []
-    for await (const chunk of passthrough) {
-      chunks.push(chunk as Buffer)
-    }
-    await archiveFinalized
-
-    const zipBuffer = Buffer.concat(chunks)
+    const zipBuffer = Buffer.from(zipSync(zipFiles, { level: 5 }))
 
     // Generate ZIP file name
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')

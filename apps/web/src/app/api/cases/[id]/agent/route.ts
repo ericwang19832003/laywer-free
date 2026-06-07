@@ -3,8 +3,6 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { buildAgentGraph } from '@/lib/ai/agent/graph'
 import { createInitialState } from '@/lib/ai/agent/state'
 import { loadCheckpoint, saveCheckpoint } from '@/lib/ai/agent/checkpointer'
-import { HumanMessage } from '@langchain/core/messages'
-import type { BaseMessage } from '@langchain/core/messages'
 
 const TIMEOUT_MS = 60_000
 
@@ -33,7 +31,6 @@ export async function POST(
   ])
 
   if (caseResult.error) {
-    // PGRST116 = "not found" (0 rows for .single()); anything else is a DB error
     const isNotFound = caseResult.error.code === 'PGRST116'
     return new Response(JSON.stringify({ error: isNotFound ? 'Case not found' : 'Failed to load case' }), {
       status: isNotFound ? 404 : 500,
@@ -52,9 +49,7 @@ export async function POST(
   let existingCheckpoint = null
   try {
     existingCheckpoint = await loadCheckpoint(supabase, caseId, user.id)
-  } catch {
-    // Start fresh if checkpoint load fails — don't block the user
-  }
+  } catch { /* start fresh if load fails */ }
 
   const saveDraft = async (p: { caseId: string; documentType: string; content: string }) => {
     const { data } = await supabase
@@ -79,57 +74,42 @@ export async function POST(
   })
 
   if (existingCheckpoint?.messages) {
-    state.messages = existingCheckpoint.messages as typeof state.messages
+    state.messages = existingCheckpoint.messages
   }
 
-  state.messages = [...state.messages, new HumanMessage(body.message)]
+  state.messages = [...state.messages, { role: 'user', content: body.message }]
 
   const encoder = new TextEncoder()
-  // Track messages accumulated during the stream for checkpoint persistence
-  const accumulatedMessages: BaseMessage[] = [...state.messages]
 
   const stream = new ReadableStream({
     async start(controller) {
       const abortController = new AbortController()
-      const timeout = setTimeout(() => {
-        abortController.abort()
-      }, TIMEOUT_MS)
+      const timeout = setTimeout(() => abortController.abort(), TIMEOUT_MS)
 
       try {
-        const msgStream = await graph.stream(state, {
-          streamMode: 'messages',
-          signal: abortController.signal,
-        })
+        const agentStream = graph.stream(state)
 
-        for await (const [message, _metadata] of msgStream) {
-          const msg = message as any
-          // Streaming text token (AIMessageChunk with text content, no tool calls)
-          if (msg?.content && typeof msg.content === 'string' && msg.content.length > 0 && !msg.tool_calls?.length) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', content: msg.content })}\n\n`))
-            accumulatedMessages.push(msg)
-          }
-          // Tool call starting
-          if (msg?.tool_calls?.length) {
-            for (const call of msg.tool_calls) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_start', tool: call.name })}\n\n`))
-            }
-          }
-          // Tool result (ToolMessage)
-          if (msg?.type === 'tool' || msg?.constructor?.name === 'ToolMessage') {
+        for await (const event of agentStream) {
+          if (abortController.signal.aborted) break
+
+          if (event.type === 'token') {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', content: event.content })}\n\n`))
+          } else if (event.type === 'tool_start') {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_start', tool: event.tool })}\n\n`))
+          } else if (event.type === 'tool_end') {
             controller.enqueue(encoder.encode('data: {"type":"tool_end"}\n\n'))
-            accumulatedMessages.push(msg)
+          } else if (event.type === 'done') {
+            // Persist checkpoint — best-effort
+            try {
+              await saveCheckpoint(supabase, caseId, user.id, {
+                messages: state.messages,
+                toolCallCount: 0,
+              })
+            } catch { /* non-fatal */ }
+
+            controller.enqueue(encoder.encode('data: {"type":"done"}\n\n'))
           }
         }
-
-        // Persist thread — best-effort, don't fail the response if save fails
-        try {
-          await saveCheckpoint(supabase, caseId, user.id, {
-            messages: accumulatedMessages,
-            toolCallCount: 0,
-          })
-        } catch { /* non-fatal */ }
-
-        controller.enqueue(encoder.encode('data: {"type":"done"}\n\n'))
       } catch (err) {
         const isAbort = err instanceof Error && (err.name === 'AbortError' || err.message.includes('abort'))
         const msg = isAbort

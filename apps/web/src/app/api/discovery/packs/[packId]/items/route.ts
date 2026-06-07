@@ -3,7 +3,6 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { addItemSchema } from '@lawyer-free/shared/schemas/discovery'
 import { generateDiscoveryText, PromptLintError } from '@lawyer-free/shared/discovery/templates'
 
-export const runtime = 'nodejs'
 
 // POST /api/discovery/packs/:packId/items — add a discovery item
 export async function POST(

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
-export const runtime = 'nodejs'
 
 // GET /api/cases/:caseId/case-file — aggregated hub for all pipeline data
 export async function GET(

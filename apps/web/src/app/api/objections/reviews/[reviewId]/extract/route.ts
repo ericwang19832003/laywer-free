@@ -3,7 +3,6 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
 import { extractTextFromImage } from '@/lib/extraction/ocr'
 
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/tiff']
@@ -105,7 +104,7 @@ export async function POST(
         text = await extractTextFromPdf(buffer)
       }
 
-      // For images, use OCR directly (tesseract cannot process raw PDF buffers)
+      // For images, use Vision OCR directly
       if (IMAGE_MIMES.includes(response.mime_type)) {
         text = await extractTextFromImage(buffer, response.mime_type)
         extractor = 'ocr'

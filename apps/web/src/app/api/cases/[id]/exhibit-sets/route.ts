@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { createExhibitSetSchema } from '@lawyer-free/shared/schemas/exhibits'
 
-export const runtime = 'nodejs'
 
 // POST /api/cases/:caseId/exhibit-sets — create an exhibit set
 export async function POST(

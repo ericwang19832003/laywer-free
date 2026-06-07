@@ -6,10 +6,9 @@ function makeSupabase(returnData: any) {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue({ data: returnData, error: null }),
-    from: vi.fn().mockReturnThis(),
     upsert: vi.fn().mockResolvedValue({ error: null }),
   }
-  return { from: vi.fn(() => chain), ...chain } as any
+  return { from: vi.fn(() => chain) } as any
 }
 
 describe('loadCheckpoint', () => {

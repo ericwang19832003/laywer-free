@@ -4,7 +4,6 @@ import { sendEmail } from '@/lib/email/provider'
 import { buildReminderEmail } from '@/lib/email/reminder-templates'
 import { safeEquals } from '@/lib/security/timing-safe'
 
-export const runtime = 'nodejs'
 export const maxDuration = 30
 
 /**

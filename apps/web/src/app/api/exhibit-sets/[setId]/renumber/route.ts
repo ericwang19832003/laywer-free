@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
-export const runtime = 'nodejs'
 
 // POST /api/exhibit-sets/:setId/renumber — renumber exhibits in a set
 export async function POST(

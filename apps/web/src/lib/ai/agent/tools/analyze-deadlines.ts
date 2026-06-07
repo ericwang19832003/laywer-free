@@ -1,5 +1,4 @@
-import { tool } from '@langchain/core/tools'
-import { z } from 'zod'
+import type { AgentTool } from '../state'
 
 interface Deadline {
   key: string
@@ -7,9 +6,19 @@ interface Deadline {
   label: string
 }
 
-export function createAnalyzeDeadlinesTool({ deadlines }: { deadlines: Deadline[] }) {
-  return tool(
-    async (_input: Record<string, never>) => {
+export function createAnalyzeDeadlinesTool({ deadlines }: { deadlines: Deadline[] }): AgentTool {
+  return {
+    name: 'analyze_deadlines',
+    definition: {
+      type: 'function',
+      function: {
+        name: 'analyze_deadlines',
+        description:
+          'Analyze the case deadlines to identify what is overdue or urgent. Use when the user asks about timing, what to do next, or whether they are behind. Also call for any question naming a specific deadline (e.g., "serve the defendant", "file an answer", "how many days") — do not answer deadline questions from prior knowledge.',
+        parameters: { type: 'object', properties: {}, required: [] },
+      },
+    },
+    async invoke(_args) {
       if (deadlines.length === 0) return 'No deadlines found for this case.'
 
       const now = Date.now()
@@ -29,11 +38,5 @@ export function createAnalyzeDeadlinesTool({ deadlines }: { deadlines: Deadline[
 
       return lines.join('\n')
     },
-    {
-      name: 'analyze_deadlines',
-      description:
-        'Analyze the case deadlines to identify what is overdue or urgent. Use when the user asks about timing, what to do next, or whether they are behind. Also call for any question naming a specific deadline (e.g., "serve the defendant", "file an answer", "how many days") — do not answer deadline questions from prior knowledge.',
-      schema: z.object({}),
-    }
-  )
+  }
 }

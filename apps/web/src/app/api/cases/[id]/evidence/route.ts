@@ -3,7 +3,6 @@ import { createHash } from 'crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { evidenceUploadSchema } from '@lawyer-free/shared/schemas/evidence'
 
-export const runtime = 'nodejs'
 
 export async function GET(
   request: NextRequest,

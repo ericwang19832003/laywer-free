@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
-export const runtime = 'nodejs'
 
 // GET /api/discovery/packs/:packId — pack detail with items, service logs, responses
 export async function GET(

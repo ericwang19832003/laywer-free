@@ -1,5 +1,4 @@
-import { tool } from '@langchain/core/tools'
-import { z } from 'zod'
+import type { AgentTool } from '../state'
 
 interface ReviewEvidenceConfig {
   evidenceCount: number
@@ -12,9 +11,19 @@ const EVIDENCE_GUIDANCE: Record<string, string[]> = {
   personal_injury: ['Medical records', 'Photos of injuries/scene', 'Witness statements', 'Police report', 'Medical bills'],
 }
 
-export function createReviewEvidenceTool({ evidenceCount, disputeType }: ReviewEvidenceConfig) {
-  return tool(
-    async (_input: Record<string, never>) => {
+export function createReviewEvidenceTool({ evidenceCount, disputeType }: ReviewEvidenceConfig): AgentTool {
+  return {
+    name: 'review_evidence',
+    definition: {
+      type: 'function',
+      function: {
+        name: 'review_evidence',
+        description:
+          'Review the evidence file to identify organization gaps and suggested document categories. Use when the user asks what evidence they have organized or what evidence they should gather. Do not predict outcomes or assess whether the user will win.',
+        parameters: { type: 'object', properties: {}, required: [] },
+      },
+    },
+    async invoke(_args) {
       const completeness =
         evidenceCount >= 5 ? 'more complete' : evidenceCount >= 3 ? 'developing' : 'limited'
       const guidance = EVIDENCE_GUIDANCE[disputeType] ?? ['Document all relevant communications', 'Preserve all records']
@@ -32,11 +41,5 @@ export function createReviewEvidenceTool({ evidenceCount, disputeType }: ReviewE
 
       return lines.join('\n')
     },
-    {
-      name: 'review_evidence',
-      description:
-        'Review the evidence file to identify organization gaps and suggested document categories. Use when the user asks what evidence they have organized or what evidence they should gather. Do not predict outcomes or assess whether the user will win.',
-      schema: z.object({}),
-    }
-  )
+  }
 }

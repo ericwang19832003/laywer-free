@@ -6,7 +6,6 @@ import { extractTextFromImage } from '@/lib/extraction/ocr'
 import { extractRosFields } from '@/lib/extraction/ros-regex'
 import { computeConfidence, deriveStatus } from '@/lib/extraction/confidence'
 
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const IMAGE_MIMES = ['image/jpeg', 'image/png']

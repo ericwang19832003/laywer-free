@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { addExhibitSchema } from '@lawyer-free/shared/schemas/exhibits'
 
-export const runtime = 'nodejs'
 
 // POST /api/exhibit-sets/:setId/exhibits — add an exhibit via RPC
 export async function POST(

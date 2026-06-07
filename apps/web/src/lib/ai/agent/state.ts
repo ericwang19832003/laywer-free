@@ -1,4 +1,5 @@
-import type { BaseMessage } from '@langchain/core/messages'
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+import type OpenAI from 'openai'
 
 export interface CaseContext {
   disputeType: string
@@ -10,8 +11,14 @@ export interface CaseContext {
   evidenceCount: number
 }
 
+export interface AgentTool {
+  name: string
+  definition: OpenAI.ChatCompletionTool
+  invoke: (args: Record<string, unknown>) => Promise<string>
+}
+
 export interface AgentState {
-  messages: BaseMessage[]
+  messages: ChatCompletionMessageParam[]
   caseId: string
   caseContext: CaseContext
   toolCallCount: number

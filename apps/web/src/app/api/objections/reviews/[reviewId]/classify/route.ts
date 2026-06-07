@@ -11,7 +11,6 @@ import {
 import type { ClassificationItem } from '@lawyer-free/shared/schemas/objection-classification'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const PROMPT_VERSION = '1.0.0'

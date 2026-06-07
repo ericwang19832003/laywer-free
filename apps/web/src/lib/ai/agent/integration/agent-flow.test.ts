@@ -1,14 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { HumanMessage } from '@langchain/core/messages'
-import type { BaseMessage } from '@langchain/core/messages'
 import { buildAgentGraph } from '../graph'
 import { createInitialState } from '../state'
+import type { AgentEvent } from '../graph'
 import { seedTestCase, getTestSupabase } from './test-helpers'
 import type { SeededCase } from './test-helpers'
-
-// ---------------------------------------------------------------------------
-// Shared fixture
-// ---------------------------------------------------------------------------
 
 let seeded: SeededCase
 
@@ -20,10 +15,6 @@ afterEach(async () => {
   await seeded.cleanup()
 })
 
-// ---------------------------------------------------------------------------
-// saveDraft stub — records last draft, returns a stable doc ID
-// ---------------------------------------------------------------------------
-
 let lastDraft: { caseId: string; documentType: string; content: string } | null = null
 
 const saveDraft = async (params: {
@@ -34,10 +25,6 @@ const saveDraft = async (params: {
   lastDraft = params
   return 'draft-id-stub'
 }
-
-// ---------------------------------------------------------------------------
-// runAgent helper
-// ---------------------------------------------------------------------------
 
 async function runAgent(question: string): Promise<{
   toolsCalled: string[]
@@ -79,40 +66,22 @@ async function runAgent(question: string): Promise<{
     evidenceCount: 3,
   })
 
-  // Attach the user question
-  state.messages = [new HumanMessage(question)]
+  state.messages = [{ role: 'user', content: question }]
 
   const toolsCalled: string[] = []
   let finalContent = ''
 
-  // stream() returns a Promise — must be awaited.
-  // streamMode: 'messages' yields [BaseMessage, metadata] tuples.
-  // The LLM streams tokens as deltas — accumulate rather than replace.
-  const stream = await graph.stream(state, { streamMode: 'messages' })
-
-  for await (const chunk of stream) {
-    const [message, metadata] = chunk as [
-      BaseMessage & { tool_calls?: Array<{ name: string }> },
-      Record<string, unknown>
-    ]
-    const fromAgent = (metadata as any)?.langgraph_node === 'agent'
-
-    if (message.tool_calls && message.tool_calls.length > 0) {
-      for (const tc of message.tool_calls) {
-        toolsCalled.push(tc.name)
-      }
-    } else if (typeof message.content === 'string' && message.content.length > 0 && fromAgent) {
-      // Accumulate tokens from the agent node (deltas, not replacements)
-      finalContent += message.content
+  for await (const raw of graph.stream(state)) {
+    const event = raw as AgentEvent
+    if (event.type === 'token') {
+      finalContent += event.content
+    } else if (event.type === 'tool_start') {
+      toolsCalled.push(event.tool)
     }
   }
 
   return { toolsCalled, finalContent }
 }
-
-// ---------------------------------------------------------------------------
-// 5 golden scenarios
-// ---------------------------------------------------------------------------
 
 describe('agent integration — golden scenarios', () => {
   it('deadline-urgency: flags overdue and urgent deadlines', async () => {
@@ -120,8 +89,6 @@ describe('agent integration — golden scenarios', () => {
       'What deadlines am I at risk of missing?'
     )
 
-    // analyze_deadlines may be called explicitly OR pre-injected before the LLM call;
-    // either way the response must contain case-specific deadline information.
     const usedTool = toolsCalled.includes('analyze_deadlines')
     const hasDeadlineInfo = /overdue|urgent|deadline|behind/i.test(finalContent)
     expect(usedTool || hasDeadlineInfo).toBe(true)
@@ -131,8 +98,6 @@ describe('agent integration — golden scenarios', () => {
   it('evidence-gap: assesses case strength from evidence', async () => {
     const { toolsCalled, finalContent } = await runAgent('How strong is my case?')
 
-    // review_evidence may be called explicitly OR pre-injected before the LLM call;
-    // either way the response must contain a case-specific strength assessment.
     const usedTool = toolsCalled.includes('review_evidence')
     const hasStrengthInfo = /evidence|strong|moderate|thin/i.test(finalContent)
     expect(usedTool || hasStrengthInfo).toBe(true)

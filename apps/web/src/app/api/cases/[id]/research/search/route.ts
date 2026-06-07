@@ -6,7 +6,6 @@ import type { CLSearchFilters } from '@/lib/courtlistener/types'
 import { expandQueryWithContext } from '@/lib/courtlistener/search'
 import { safeError } from '@/lib/security/safe-log'
 
-export const runtime = 'nodejs'
 export const maxDuration = 30
 
 export async function POST(

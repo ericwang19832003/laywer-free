@@ -5,7 +5,6 @@ import { sendEmail } from '@/lib/email/provider'
 import { createHash } from 'crypto'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-export const runtime = 'nodejs'
 
 const sendSchema = z.object({
   draft_id: z.string().uuid(),

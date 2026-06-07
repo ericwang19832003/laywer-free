@@ -321,7 +321,6 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
   },
 }
 
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 function getGenerationProvider() {

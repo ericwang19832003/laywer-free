@@ -6,7 +6,6 @@ import {
   type DiscoveryPackStatus,
 } from '@lawyer-free/shared/schemas/discovery'
 
-export const runtime = 'nodejs'
 
 // PATCH /api/discovery/packs/:packId/status — update pack status
 export async function PATCH(

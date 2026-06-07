@@ -1,7 +1,6 @@
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
-import { ChatOpenAI } from '@langchain/openai'
-import { BaseMessage, SystemMessage } from '@langchain/core/messages'
-import type { CaseContext } from './state'
+import OpenAI from 'openai'
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+import type { AgentState, AgentTool, CaseContext } from './state'
 import { createSearchCaseLawTool } from './tools/search-case-law'
 import { createAnalyzeDeadlinesTool } from './tools/analyze-deadlines'
 import { createReviewEvidenceTool } from './tools/review-evidence'
@@ -27,183 +26,158 @@ Tool grounding rules — follow strictly:
 - For any question about evidence organization, evidence quality, or whether the user has documents for a court presentation: use the "Current case evidence review" section injected into this prompt. Do not predict outcomes, evaluate whether the user will win, or give a legal sufficiency opinion. If no evidence review is provided in context, call review_evidence.
 - For any document drafting request (letter, motion, notice, interrogatories): call draft_document immediately using reasonable assumptions. Do not ask for more context before drafting — draft first, offer to refine after. After draft_document returns, present the COMPLETE document text to the user — do not summarize or describe it.`
 
-type InvokableTool = {
-  invoke: (input: Record<string, unknown>) => Promise<unknown>
-}
-
-// ---- State annotation (LangGraph v1.x Annotation API) ---- //
-
-const AgentAnnotation = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (a: BaseMessage[], b: BaseMessage | BaseMessage[]) => {
-      if (Array.isArray(b)) return a.concat(b)
-      return a.concat([b])
-    },
-    default: () => [],
-  }),
-  caseId: Annotation<string>({
-    reducer: (_prev: string, next: string) => next,
-    default: () => '',
-  }),
-  caseContext: Annotation<CaseContext>({
-    reducer: (_prev: CaseContext, next: CaseContext) => next,
-    default: () => ({
-      disputeType: '',
-      role: 'plaintiff' as const,
-      county: '',
-      healthScore: 0,
-      tasks: [],
-      deadlines: [],
-      evidenceCount: 0,
-    }),
-  }),
-  toolCallCount: Annotation<number>({
-    reducer: (_prev: number, next: number) => next,
-    default: () => 0,
-  }),
-})
-
-type GraphState = typeof AgentAnnotation.State
-
-// ---- Config types ---- //
+export type AgentEvent =
+  | { type: 'token'; content: string }
+  | { type: 'tool_start'; tool: string }
+  | { type: 'tool_end' }
+  | { type: 'done' }
 
 export interface BuildGraphConfig {
   supabaseClient: SupabaseClient
   saveDraft: (params: { caseId: string; documentType: string; content: string }) => Promise<string>
 }
 
-// ---- Helper: build tool instances from current state ---- //
-
-function buildTools(state: GraphState, config: BuildGraphConfig) {
+function buildTools(caseContext: CaseContext, config: BuildGraphConfig): AgentTool[] {
   return [
     createSearchCaseLawTool({
-      disputeType: state.caseContext.disputeType,
+      disputeType: caseContext.disputeType,
       supabaseClient: config.supabaseClient,
     }),
-    createAnalyzeDeadlinesTool({ deadlines: state.caseContext.deadlines }),
+    createAnalyzeDeadlinesTool({ deadlines: caseContext.deadlines }),
     createReviewEvidenceTool({
-      evidenceCount: state.caseContext.evidenceCount,
-      disputeType: state.caseContext.disputeType,
+      evidenceCount: caseContext.evidenceCount,
+      disputeType: caseContext.disputeType,
     }),
     createDraftDocumentTool({
-      caseId: state.caseId,
-      disputeType: state.caseContext.disputeType,
-      role: state.caseContext.role,
+      caseId: '',
+      disputeType: caseContext.disputeType,
+      role: caseContext.role,
       saveDraft: config.saveDraft,
     }),
   ]
 }
 
-// ---- Graph factory ---- //
-
 export function buildAgentGraph(config: BuildGraphConfig) {
-  const graph = new StateGraph(AgentAnnotation)
+  return {
+    async *stream(state: AgentState): AsyncGenerator<AgentEvent> {
+      const client = new OpenAI({
+        apiKey: process.env.DEEPSEEK_API_KEY,
+        baseURL: 'https://api.deepseek.com',
+      })
 
-  // ---- agent node ---- //
-  const graphWithAgent = graph.addNode('agent', async (state: GraphState) => {
-    if (state.toolCallCount >= MAX_TOOL_CALLS) {
-      return {
-        messages: [
-          new SystemMessage('I have reached the maximum number of tool calls for this turn.'),
-        ],
-        toolCallCount: state.toolCallCount,
+      const tools = buildTools(state.caseContext, config)
+      // Patch caseId into draft tool (can't pass it at build time because state carries it)
+      const draftTool = tools.find((t) => t.name === 'draft_document')
+      if (draftTool) {
+        const originalInvoke = draftTool.invoke.bind(draftTool)
+        draftTool.invoke = (args) => {
+          ;(config as unknown as { _caseId: string })._caseId = state.caseId
+          return originalInvoke({ ...args, _caseId: state.caseId })
+        }
       }
-    }
 
-    const tools = buildTools(state, config)
-    const llm = new ChatOpenAI({ model: 'deepseek-chat', temperature: 0.5, openAIApiKey: process.env.DEEPSEEK_API_KEY, configuration: { baseURL: 'https://api.deepseek.com' } }).bindTools(tools)
+      const toolMap = Object.fromEntries(tools.map((t) => [t.name, t]))
+      const toolDefs = tools.map((t) => t.definition)
 
-    const contextSummary =
-      `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +
-      `Task completion score: ${state.caseContext.healthScore}/100 (task-completion only — NOT case strength). Evidence items uploaded: ${state.caseContext.evidenceCount} (raw upload count — DO NOT use this to assess sufficiency or strength; call review_evidence).\n` +
-      `Tasks: ${state.caseContext.tasks.map((t) => `${t.title} (${t.status})`).join(', ')}.`
+      const contextSummary =
+        `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +
+        `Task completion score: ${state.caseContext.healthScore}/100 (task-completion only — NOT case strength). Evidence items uploaded: ${state.caseContext.evidenceCount} (raw upload count — DO NOT use this to assess sufficiency or strength; call review_evidence).\n` +
+        `Tasks: ${state.caseContext.tasks.map((t) => `${t.title} (${t.status})`).join(', ')}.`
 
-    const lastMsg = state.messages[state.messages.length - 1]
-    const msgText = typeof lastMsg?.content === 'string' ? lastMsg.content : ''
-    const isDeadlineQuestion = DEADLINE_QUESTION_RE.test(msgText)
+      const lastUserMsg = [...state.messages].reverse().find((m) => m.role === 'user')
+      const msgText = typeof lastUserMsg?.content === 'string' ? lastUserMsg.content : ''
+      const isDeadlineQuestion = DEADLINE_QUESTION_RE.test(msgText)
+      const isEvidenceQuestion = EVIDENCE_QUESTION_RE.test(msgText)
 
-    const isEvidenceQuestion = EVIDENCE_QUESTION_RE.test(msgText)
-
-    let deadlineContext = ''
-    if (isDeadlineQuestion && state.caseContext.deadlines.length > 0) {
-      try {
-        const deadlineTool = tools.find((t) => t.name === 'analyze_deadlines')
-        if (!deadlineTool) throw new Error('analyze_deadlines tool not found in tools array')
-        deadlineContext = `\n\nCurrent case deadline status:\n${String(await deadlineTool.invoke({}))}`
-      } catch {
-        // silent fail — agent proceeds without pre-injection
+      let deadlineContext = ''
+      if (isDeadlineQuestion && state.caseContext.deadlines.length > 0) {
+        try {
+          deadlineContext = `\n\nCurrent case deadline status:\n${await toolMap['analyze_deadlines'].invoke({})}`
+        } catch { /* silent */ }
       }
-    }
 
-    let evidenceContext = ''
-    if (isEvidenceQuestion) {
-      try {
-        const evidenceTool = tools.find((t) => t.name === 'review_evidence')
-        if (!evidenceTool) throw new Error('review_evidence tool not found in tools array')
-        evidenceContext = `\n\nCurrent case evidence review:\n${String(await evidenceTool.invoke({}))}`
-      } catch {
-        // silent fail — agent proceeds without pre-injection
+      let evidenceContext = ''
+      if (isEvidenceQuestion) {
+        try {
+          evidenceContext = `\n\nCurrent case evidence review:\n${await toolMap['review_evidence'].invoke({})}`
+        } catch { /* silent */ }
       }
-    }
 
-    const response = await llm.invoke([
-      new SystemMessage(`${SYSTEM_PROMPT}\n\n${contextSummary}${deadlineContext}${evidenceContext}`),
-      ...state.messages,
-    ])
+      const systemContent = `${SYSTEM_PROMPT}\n\n${contextSummary}${deadlineContext}${evidenceContext}`
+      const msgs: ChatCompletionMessageParam[] = [
+        { role: 'system', content: systemContent },
+        ...state.messages,
+      ]
 
-    const hasCalls = (response as any)?.tool_calls?.length > 0
-    return {
-      messages: [response],
-      toolCallCount: hasCalls ? state.toolCallCount + 1 : state.toolCallCount,
-    }
-  })
+      let toolCallCount = 0
 
-  // ---- tools node ---- //
-  const graphWithTools = graphWithAgent.addNode('tools', async (state: GraphState) => {
-    const lastMessage = state.messages[state.messages.length - 1] as BaseMessage & {
-      tool_calls?: Array<{ id: string; name: string; args: Record<string, unknown> }>
-    }
-    const toolCalls = lastMessage?.tool_calls ?? []
-    const results: Array<{ role: 'tool'; tool_call_id: string; content: string }> = []
-
-    const tools = buildTools(state, config)
-    const toolMap = Object.fromEntries(tools.map((t) => [t.name, t]))
-
-    for (const call of toolCalls) {
-      const t = toolMap[call.name]
-      if (!t) {
-        results.push({
-          role: 'tool',
-          tool_call_id: call.id,
-          content: `Error: unknown tool "${call.name}"`,
+      while (toolCallCount < MAX_TOOL_CALLS) {
+        const stream = await client.chat.completions.create({
+          model: 'deepseek-chat',
+          temperature: 0.5,
+          messages: msgs,
+          tools: toolDefs,
+          stream: true,
         })
-        continue
+
+        let assistantContent = ''
+        const toolCalls: Array<{ id: string; name: string; arguments: string }> = []
+
+        for await (const chunk of stream) {
+          const delta = chunk.choices[0]?.delta
+          if (!delta) continue
+
+          if (delta.content) {
+            assistantContent += delta.content
+            yield { type: 'token', content: delta.content }
+          }
+
+          if (delta.tool_calls) {
+            for (const tc of delta.tool_calls) {
+              const idx = tc.index ?? 0
+              if (!toolCalls[idx]) {
+                toolCalls[idx] = { id: tc.id ?? '', name: tc.function?.name ?? '', arguments: '' }
+                if (tc.function?.name) yield { type: 'tool_start', tool: tc.function.name }
+              }
+              if (tc.id) toolCalls[idx].id = tc.id
+              if (tc.function?.name) toolCalls[idx].name = tc.function.name
+              if (tc.function?.arguments) toolCalls[idx].arguments += tc.function.arguments
+            }
+          }
+        }
+
+        const activeCalls = toolCalls.filter(Boolean)
+        if (activeCalls.length === 0) break
+
+        msgs.push({
+          role: 'assistant',
+          content: assistantContent || null,
+          tool_calls: activeCalls.map((tc) => ({
+            id: tc.id,
+            type: 'function' as const,
+            function: { name: tc.name, arguments: tc.arguments },
+          })),
+        })
+
+        for (const tc of activeCalls) {
+          const handler = toolMap[tc.name]
+          let result: string
+          try {
+            const args = JSON.parse(tc.arguments || '{}') as Record<string, unknown>
+            result = handler ? await handler.invoke(args) : `Unknown tool: ${tc.name}`
+          } catch (err) {
+            result = `Tool error: ${err instanceof Error ? err.message : String(err)}`
+          }
+          yield { type: 'tool_end' }
+          msgs.push({ role: 'tool', tool_call_id: tc.id, content: result })
+        }
+
+        toolCallCount++
       }
-      let content: string
-      try {
-        content = String(await (t as InvokableTool).invoke(call.args))
-      } catch (err) {
-        content = `Tool error: ${err instanceof Error ? err.message : String(err)}`
-      }
-      results.push({ role: 'tool', tool_call_id: call.id, content })
-    }
 
-    return { messages: results as unknown as BaseMessage[], toolCallCount: state.toolCallCount }
-  })
-
-  // ---- edges ---- //
-  graphWithTools.addEdge(START, 'agent')
-
-  graphWithTools.addConditionalEdges('agent', (state: GraphState) => {
-    const last = state.messages[state.messages.length - 1] as BaseMessage & {
-      tool_calls?: unknown[]
-    }
-    const hasCalls = (last?.tool_calls?.length ?? 0) > 0
-    if (hasCalls && state.toolCallCount < MAX_TOOL_CALLS) return 'tools'
-    return END
-  })
-
-  graphWithTools.addEdge('tools', 'agent')
-
-  return graphWithTools.compile()
+      // Expose accumulated messages for checkpoint saving (strip system message)
+      state.messages = msgs.slice(1) as ChatCompletionMessageParam[]
+      yield { type: 'done' }
+    },
+  }
 }

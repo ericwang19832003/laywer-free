@@ -13,7 +13,6 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 import { INPUT_LIMITS, validateTextLength } from '@/lib/validation/input-limits'
 import { validateAIInput } from '@/lib/ai/input-validation'
 
-export const runtime = 'nodejs'
 export const maxDuration = 30
 
 const AI_MODEL = 'deepseek-chat'

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { createObjectionReviewSchema } from '@lawyer-free/shared/schemas/objection-reviews'
 
-export const runtime = 'nodejs'
 
 // POST /api/discovery/responses/:responseId/objections/reviews — create an objection review
 export async function POST(

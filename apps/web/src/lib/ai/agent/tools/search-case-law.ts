@@ -1,49 +1,57 @@
-import { tool } from '@langchain/core/tools'
-import { z } from 'zod'
-import { SupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
-import { OpenAIEmbeddings } from '@langchain/openai'
+import OpenAI from 'openai'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { AgentTool } from '../state'
 
 interface SearchCaseLawConfig {
   disputeType: string
   supabaseClient: SupabaseClient
 }
 
-export function createSearchCaseLawTool({ disputeType, supabaseClient }: SearchCaseLawConfig) {
-  const embeddings = new OpenAIEmbeddings({ model: 'text-embedding-3-large', dimensions: 3072 })
-  const vectorStore = new SupabaseVectorStore(embeddings, {
-    client: supabaseClient,
-    tableName: 'case_law_embeddings',
-    queryName: 'match_case_law',
-  })
-  const retriever = vectorStore.asRetriever({
-    k: 3,
-    filter: { dispute_type: disputeType },
-  })
+export function createSearchCaseLawTool({ disputeType, supabaseClient }: SearchCaseLawConfig): AgentTool {
+  return {
+    name: 'search_case_law',
+    definition: {
+      type: 'function',
+      function: {
+        name: 'search_case_law',
+        description:
+          'Search relevant Texas case law and statutes. Use when the user asks about legal standards, what courts have ruled, or needs citations to support their position.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'The legal question or topic to search for' },
+          },
+          required: ['query'],
+        },
+      },
+    },
+    async invoke(args) {
+      const query = String(args.query ?? '')
 
-  return tool(
-    async (input: { query: string }) => {
-      const docs = await retriever.invoke(input.query)
+      const embClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+      const embResponse = await embClient.embeddings.create({
+        model: 'text-embedding-3-large',
+        dimensions: 3072,
+        input: query,
+      })
+      const embedding = embResponse.data[0].embedding
 
-      if (docs.length === 0) {
+      const { data: docs, error } = await supabaseClient.rpc('match_case_law', {
+        query_embedding: embedding,
+        match_count: 3,
+        filter: { dispute_type: disputeType },
+      })
+
+      if (error || !docs?.length) {
         return 'No relevant case law found for this query.'
       }
 
-      return docs
+      return (docs as Array<{ case_name?: string; citation?: string; year?: string; content: string }>)
         .map((doc, i) => {
-          const { case_name, citation, year } = doc.metadata ?? {}
-          const header = [case_name, citation, year].filter(Boolean).join(', ')
-          return `[${i + 1}] ${header || 'Unknown case'}\n${doc.pageContent}`
+          const header = [doc.case_name, doc.citation, doc.year].filter(Boolean).join(', ')
+          return `[${i + 1}] ${header || 'Unknown case'}\n${doc.content}`
         })
         .join('\n\n')
     },
-    {
-      name: 'search_case_law',
-      description:
-        'Search relevant Texas case law and statutes. Use when the user asks about legal standards, what courts have ruled, or needs citations to support their position.',
-      schema: z.object({
-        query: z.string().describe('The legal question or topic to search for'),
-      }),
-    }
-  )
+  }
 }

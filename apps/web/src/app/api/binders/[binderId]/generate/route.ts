@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
-import { PassThrough } from 'stream'
-import archiver from 'archiver'
+import { zipSync } from 'fflate'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSummaryPdf } from '@/lib/binder/generate-summary-pdf'
 import { exhibitFileName, safeFileName } from '@/lib/binder/safe-filename'
 import type { BinderOptions } from '@lawyer-free/shared/schemas/trial-binders'
 
-export const runtime = 'nodejs'
 
 // Maximum time for the build (5 minutes)
 export const maxDuration = 300
@@ -252,32 +250,19 @@ export async function POST(
     }
 
     // ⑦ Build ZIP
-    const passthrough = new PassThrough()
-    const archive = archiver('zip', { zlib: { level: 5 } })
-    archive.pipe(passthrough)
-
-    // Root-level generated files
-    archive.append(Buffer.from(summaryPdf), { name: '01_Binder_Summary.pdf' })
-    archive.append(exhibitCsv, { name: '02_Exhibit_List.csv' })
-
-    if (timelineJson) {
-      archive.append(timelineJson, { name: '03_Timeline.json' })
+    const enc = new TextEncoder()
+    const zipFiles: Record<string, Uint8Array> = {
+      '01_Binder_Summary.pdf': new Uint8Array(summaryPdf),
+      '02_Exhibit_List.csv': enc.encode(exhibitCsv),
     }
-    if (deadlinesCsv) {
-      archive.append(deadlinesCsv, { name: '04_Deadlines.csv' })
-    }
-
-    // Exhibits folder
+    if (timelineJson) zipFiles['03_Timeline.json'] = enc.encode(timelineJson)
+    if (deadlinesCsv) zipFiles['04_Deadlines.csv'] = enc.encode(deadlinesCsv)
     for (const file of exhibitFiles) {
-      archive.append(file.buffer, { name: `05_Exhibits/${file.name}` })
+      zipFiles[`05_Exhibits/${file.name}`] = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength)
     }
-
-    // All evidence folder (non-exhibited items)
     for (const file of allEvidenceFiles) {
-      archive.append(file.buffer, { name: `06_All_Evidence/${file.name}` })
+      zipFiles[`06_All_Evidence/${file.name}`] = new Uint8Array(file.buffer.buffer, file.buffer.byteOffset, file.buffer.byteLength)
     }
-
-    // Skipped files manifest (if any downloads failed)
     if (skippedFiles.length > 0) {
       const lines = [
         'SKIPPED FILES',
@@ -290,19 +275,9 @@ export async function POST(
         '',
         'These exhibits are listed in 02_Exhibit_List.csv but their files are missing from 05_Exhibits/.',
       ]
-      archive.append(lines.join('\n'), { name: 'Skipped_Files.txt' })
+      zipFiles['Skipped_Files.txt'] = enc.encode(lines.join('\n'))
     }
-
-    const archiveFinalized = archive.finalize()
-
-    // Collect ZIP into buffer
-    const chunks: Buffer[] = []
-    for await (const chunk of passthrough) {
-      chunks.push(chunk as Buffer)
-    }
-    await archiveFinalized
-
-    const zipBuffer = Buffer.concat(chunks)
+    const zipBuffer = Buffer.from(zipSync(zipFiles, { level: 5 }))
 
     // ⑧ Compute SHA256
     const sha256 = createHash('sha256').update(zipBuffer).digest('hex')

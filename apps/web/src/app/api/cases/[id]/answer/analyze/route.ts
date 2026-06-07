@@ -6,7 +6,6 @@ import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
 import { extractTextFromImage } from '@/lib/extraction/ocr'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const IMAGE_MIMES = ['image/jpeg', 'image/png']

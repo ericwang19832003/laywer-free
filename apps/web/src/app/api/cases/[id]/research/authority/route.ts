@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { safeError } from '@/lib/security/safe-log'
 
-export const runtime = 'nodejs'
 export const maxDuration = 60  // opinion processing can take time
 
 // GET: List saved authorities for this case
