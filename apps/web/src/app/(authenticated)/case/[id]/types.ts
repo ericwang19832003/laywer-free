@@ -31,4 +31,7 @@ export interface SharedCaseData {
   county: string | null
   outcome: string | null
   createdAt: string | null
+  preservationTaskId: string | null
+  preservationLetterSent: boolean
+  preservationTaskStatus: string | null
 }

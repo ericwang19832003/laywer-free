@@ -124,17 +124,22 @@ function MultiSelectQuestion({
               key={opt.value}
               type="button"
               onClick={() => toggle(opt.value)}
-              className={`flex items-center gap-3 rounded-md border p-3 text-left text-sm transition-colors ${
+              className={`flex items-start gap-3 rounded-md border p-3 text-left text-sm transition-colors ${
                 checked
                   ? 'border-calm-indigo bg-calm-indigo/5 text-warm-text'
                   : 'border-warm-border text-warm-text hover:border-calm-indigo/50'
               }`}
             >
               {checked
-                ? <CheckSquare className="h-4 w-4 shrink-0 text-calm-indigo" />
-                : <Square className="h-4 w-4 shrink-0 text-warm-muted" />
+                ? <CheckSquare className="h-4 w-4 shrink-0 text-calm-indigo mt-0.5" />
+                : <Square className="h-4 w-4 shrink-0 text-warm-muted mt-0.5" />
               }
-              <span className="font-medium">{opt.label}</span>
+              <div>
+                <span className="font-medium">{opt.label}</span>
+                {opt.description && (
+                  <p className="text-xs text-warm-muted mt-0.5 font-normal">{opt.description}</p>
+                )}
+              </div>
             </button>
           )
         })}
@@ -227,6 +232,7 @@ export function GuidedStep({
     }
   )
   const [loading, setLoading] = useState(false)
+  const [reviewMode, setReviewMode] = useState(false)
 
   // Compute visible questions based on current answers
   const visibleQuestions = useMemo(
@@ -304,10 +310,18 @@ export function GuidedStep({
         : !(q.id in pruned)
     })
 
-    if (nextUnanswered !== -1) {
+    if (reviewMode) {
+      const nextIndex = currentIndex + 1
+      if (nextIndex < nextVisible.length) {
+        setCurrentIndex(nextIndex)
+      } else {
+        setReviewMode(false)
+        setPhase('summary')
+      }
+    } else if (nextUnanswered !== -1) {
       setCurrentIndex(nextUnanswered)
     } else {
-      // All questions answered -- show summary
+      setReviewMode(false)
       setPhase('summary')
     }
   }
@@ -372,9 +386,7 @@ export function GuidedStep({
           {/* Progress bar */}
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm text-warm-muted mb-2">
-              <span>
-                {`Step ${currentIndex + 1}`}
-              </span>
+              <span>{`Question ${currentIndex + 1} of ${totalQuestions}`}</span>
               <span>{progress}%</span>
             </div>
             <div className="h-2 rounded-full bg-warm-border">
@@ -385,7 +397,11 @@ export function GuidedStep({
             </div>
             {currentIndex > 0 && (
               <button
-                onClick={() => setCurrentIndex(0)}
+                onClick={() => {
+                  setReviewMode(true)
+                  const firstInput = visibleQuestions.findIndex((q) => q.type !== 'info')
+                  setCurrentIndex(firstInput >= 0 ? firstInput : 0)
+                }}
                 className="mt-2 text-xs text-warm-muted hover:text-warm-text underline underline-offset-2"
               >
                 ↩ Review from step 1
@@ -571,7 +587,10 @@ export function GuidedStep({
               <button
                 onClick={() => {
                   setPhase('questions')
-                  setCurrentIndex(0)
+                  setReviewMode(true)
+                  // Skip leading info cards — go to the first actual input question
+                  const firstInput = visibleQuestions.findIndex((q) => q.type !== 'info')
+                  setCurrentIndex(firstInput >= 0 ? firstInput : 0)
                 }}
                 className="mt-4 block w-full text-center text-sm text-warm-muted hover:text-warm-text"
               >

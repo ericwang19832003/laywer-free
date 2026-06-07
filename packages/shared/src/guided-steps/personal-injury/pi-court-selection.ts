@@ -123,24 +123,13 @@ export function createPiCourtSelectionConfig(piSubType?: string, state?: string)
           { value: 'petition', label: 'Original Petition (3 copies)' },
           { value: 'photo_id', label: 'Photo ID (for in-person filing)' },
           { value: 'fee_payment', label: 'Filing fee payment or fee waiver' },
-          { value: 'case_info_sheet', label: 'Civil Case Information Sheet (Texas OCA form)' },
+          {
+            value: 'case_info_sheet',
+            label: 'Civil Case Information Sheet (Texas OCA form)',
+            description: 'A 1-page form every Texas civil court requires. Download free at texascourts.gov or pick up a blank copy at the clerk\'s office.',
+          },
         ],
         noneLabel: "Haven't prepared any yet",
-        showIf: (answers) =>
-          !!(answers.accident_county || answers.defendant_county) &&
-          !!answers.estimated_damages_range,
-      },
-      {
-        id: 'court_formatting',
-        type: 'multi_select',
-        prompt: 'Does your document meet these formatting requirements?',
-        options: [
-          { value: 'pdf', label: 'Text-searchable PDF (not a scanned image)' },
-          { value: 'redacted', label: 'SSN, DOB, and account numbers redacted' },
-          { value: 'font', label: 'Legible font, 12pt or larger' },
-          { value: 'margins', label: '1-inch margins on all sides' },
-        ],
-        noneLabel: "Haven't checked these yet",
         showIf: (answers) =>
           !!(answers.accident_county || answers.defendant_county) &&
           !!answers.estimated_damages_range,

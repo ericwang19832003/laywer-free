@@ -6,7 +6,6 @@ import { CaseStatusStrip } from '@/components/dashboard/case-status-strip'
 import { PriorityAlertsSection } from '@/components/dashboard/priority-alerts-section'
 import { PriorityBanners } from '@/components/dashboard/priority-banners'
 import { DashboardTabs } from '@/components/dashboard/dashboard-tabs'
-import { PreservationLetterReminder } from '@/components/dashboard/preservation-letter-reminder'
 import { FocusTab } from './focus-tab'
 import { OverviewTab } from './overview-tab'
 import { ToolsTab } from './tools-tab'
@@ -23,8 +22,8 @@ export default async function DashboardPage({
   const { id } = await params
   const { tab } = await searchParams
   const rawTab = Array.isArray(tab) ? tab[0] : tab
-  const activeTab: 'focus' | 'overview' | 'tools' =
-    rawTab === 'overview' || rawTab === 'tools' ? rawTab : 'focus'
+  const activeTab: 'focus' | 'analyze' | 'tools' =
+    rawTab === 'analyze' || rawTab === 'tools' ? rawTab : 'focus'
   const supabase = await createClient()
 
   const [
@@ -67,7 +66,7 @@ export default async function DashboardPage({
       .limit(3),
     supabase
       .from('tasks')
-      .select('id')
+      .select('id, status')
       .eq('case_id', id)
       .eq('task_key', 'preservation_letter')
       .neq('status', 'locked')
@@ -95,6 +94,10 @@ export default async function DashboardPage({
     )
   }
 
+  const preservationTaskId = preservationTaskResult.data?.id ?? null
+  const preservationTaskStatus = preservationTaskResult.data?.status ?? null
+  const preservationLetterSent = !!preservationSentResult.data
+
   const shared = {
     caseId: id,
     disputeType: caseRow.dispute_type ?? 'other',
@@ -103,6 +106,9 @@ export default async function DashboardPage({
     county: caseRow.county ?? null,
     outcome: caseRow.outcome ?? null,
     createdAt: caseRow.created_at ?? null,
+    preservationTaskId,
+    preservationLetterSent,
+    preservationTaskStatus,
   }
 
   const alerts: ReminderEscalation[] = (escalationResult.data ?? []).map(
@@ -134,10 +140,6 @@ export default async function DashboardPage({
     label: string | null
   }>
 
-  // Show reminder when the workflow includes a preservation letter task but none has been sent yet
-  const preservationTaskId = preservationTaskResult.data?.id ?? null
-  const preservationLetterSent = !!preservationSentResult.data
-
   return (
     <div className="bg-warm-bg min-h-full">
       <main className="mx-auto max-w-2xl px-4 py-10">
@@ -153,9 +155,6 @@ export default async function DashboardPage({
             riskLevel={riskScoreResult.data?.risk_level}
           />
           <PriorityAlertsSection caseId={id} alerts={alerts} />
-          {preservationTaskId && !preservationLetterSent && (
-            <PreservationLetterReminder caseId={id} taskId={preservationTaskId} />
-          )}
           <PriorityBanners
             caseId={id}
             disputeType={shared.disputeType}
@@ -173,7 +172,7 @@ export default async function DashboardPage({
               <FocusTab {...shared} />
             </Suspense>
           ) : null}
-          overview={activeTab === 'overview' ? (
+          overview={activeTab === 'analyze' ? (
             <Suspense fallback={<TabSkeleton />}>
               <OverviewTab caseId={id} disputeType={shared.disputeType} createdAt={shared.createdAt} />
             </Suspense>

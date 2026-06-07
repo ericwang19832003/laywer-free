@@ -15,12 +15,12 @@ describe('DashboardTabs', () => {
     mockPush.mockClear()
   })
 
-  function setup(activeTab: 'focus' | 'overview' | 'tools' = 'focus') {
+  function setup(activeTab: 'focus' | 'analyze' | 'tools' = 'focus') {
     return render(
       <DashboardTabs
         activeTab={activeTab}
         focus={activeTab === 'focus' ? <div>focus content</div> : null}
-        overview={activeTab === 'overview' ? <div>overview content</div> : null}
+        overview={activeTab === 'analyze' ? <div>analyze content</div> : null}
         tools={activeTab === 'tools' ? <div>tools content</div> : null}
       />
     )
@@ -29,13 +29,13 @@ describe('DashboardTabs', () => {
   it('shows Focus tab content when activeTab is focus', () => {
     setup('focus')
     expect(screen.getByText('focus content')).toBeInTheDocument()
-    expect(screen.queryByText('overview content')).not.toBeInTheDocument()
+    expect(screen.queryByText('analyze content')).not.toBeInTheDocument()
     expect(screen.queryByText('tools content')).not.toBeInTheDocument()
   })
 
-  it('shows Overview tab content when activeTab is overview', () => {
-    setup('overview')
-    expect(screen.getByText('overview content')).toBeInTheDocument()
+  it('shows Analyze tab content when activeTab is analyze', () => {
+    setup('analyze')
+    expect(screen.getByText('analyze content')).toBeInTheDocument()
     expect(screen.queryByText('focus content')).not.toBeInTheDocument()
   })
 
@@ -47,14 +47,14 @@ describe('DashboardTabs', () => {
   it('marks the active tab as selected', () => {
     setup('focus')
     expect(screen.getByRole('tab', { name: 'Focus' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getByRole('tab', { name: 'Analyze' })).toHaveAttribute('aria-selected', 'false')
     expect(screen.getByRole('tab', { name: 'Tools' })).toHaveAttribute('aria-selected', 'false')
   })
 
   it('calls router.push with correct tab param on click', () => {
     setup('focus')
-    fireEvent.click(screen.getByRole('tab', { name: 'Overview' }))
-    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=overview', { scroll: false })
+    fireEvent.click(screen.getByRole('tab', { name: 'Analyze' }))
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=analyze', { scroll: false })
   })
 
   it('calls router.push for Tools tab', () => {
@@ -66,7 +66,7 @@ describe('DashboardTabs', () => {
   it('navigates to next tab with ArrowRight', () => {
     setup('focus')
     fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' })
-    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=overview', { scroll: false })
+    expect(mockPush).toHaveBeenCalledWith('/case/test-id?tab=analyze', { scroll: false })
   })
 
   it('navigates to previous tab with ArrowLeft', () => {

@@ -6,6 +6,7 @@ import ProSeBanner from '@/components/dashboard/pro-se-banner'
 import { BackfillBanner } from '@/components/dashboard/backfill-banner'
 import { OutcomePrompt } from '@/components/dashboard/outcome-prompt'
 import { SavingsCard } from '@/components/dashboard/savings-card'
+import { PreservationLetterReminder } from '@/components/dashboard/preservation-letter-reminder'
 import { getSubscription } from '@/lib/subscription/check'
 import type { DashboardData, SharedCaseData } from './types'
 
@@ -17,6 +18,9 @@ export async function FocusTab({
   county,
   outcome,
   createdAt,
+  preservationTaskId,
+  preservationLetterSent,
+  preservationTaskStatus,
 }: SharedCaseData) {
   try {
     const supabase = await createClient()
@@ -72,6 +76,15 @@ export async function FocusTab({
           nextTask={dashboard.next_task}
           taskDescription={taskDescription}
         />
+
+        {/* Preservation letter nudge — only when task exists, genuinely pending (not skipped/completed), letter unsent, and it's not already the next step */}
+        {preservationTaskId &&
+          !preservationLetterSent &&
+          preservationTaskStatus !== 'skipped' &&
+          preservationTaskStatus !== 'completed' &&
+          dashboard.next_task?.task_key !== 'preservation_letter' && (
+          <PreservationLetterReminder caseId={caseId} taskId={preservationTaskId} />
+        )}
 
         {/* 2. Deadlines */}
         <DeadlinesCard caseId={caseId} deadlines={dashboard.upcoming_deadlines} />

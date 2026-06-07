@@ -3,11 +3,11 @@
 import { useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 
-const TABS = ['Focus', 'Overview', 'Tools'] as const
+const TABS = ['Focus', 'Analyze', 'Tools'] as const
 type Tab = (typeof TABS)[number]
 
 interface DashboardTabsProps {
-  activeTab: 'focus' | 'overview' | 'tools'
+  activeTab: 'focus' | 'analyze' | 'tools'
   focus: React.ReactNode
   overview: React.ReactNode
   tools: React.ReactNode
@@ -67,7 +67,7 @@ export function DashboardTabs({ activeTab, focus, overview, tools }: DashboardTa
         tabIndex={0}
         aria-labelledby={`tab-${activeTab}`}
       >
-        {active === 'Focus' ? focus : active === 'Overview' ? overview : tools}
+        {active === 'Focus' ? focus : active === 'Analyze' ? overview : tools}
       </div>
     </div>
   )

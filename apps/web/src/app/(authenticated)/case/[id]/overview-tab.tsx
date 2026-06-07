@@ -5,8 +5,12 @@ import { StrategyCard } from '@/components/dashboard/strategy-card'
 import { ConfidenceScoreCard } from '@/components/dashboard/confidence-score-card'
 import { TimelineCard } from '@/components/dashboard/timeline-card'
 import { CaseComparisonCard } from '@/components/dashboard/case-comparison-card'
+import { MeritAnalysisCard } from '@/components/dashboard/merit-analysis-card'
+import { OptionsAdvisorCard } from '@/components/dashboard/options-advisor-card'
 import type { ConfidenceBreakdown } from '@/lib/confidence/types'
 import type { TimelineEvent } from '@/components/dashboard/timeline-card'
+import type { MeritAnalysis } from '@/lib/ai/merit-analysis'
+import type { OptionsAdvisor } from '@/lib/ai/options-advisor'
 
 interface OverviewTabProps {
   caseId: string
@@ -30,6 +34,8 @@ export async function OverviewTab({ caseId, disputeType, createdAt }: OverviewTa
       eventsResult,
       tasksResult,
       evidenceResult,
+      meritCacheResult,
+      optionsCacheResult,
     ] = await Promise.all([
       supabase
         .from('case_risk_scores')
@@ -88,6 +94,18 @@ export async function OverviewTab({ caseId, disputeType, createdAt }: OverviewTa
         .from('evidence_items')
         .select('id', { count: 'exact', head: true })
         .eq('case_id', caseId),
+      supabase
+        .from('ai_cache')
+        .select('content, generated_at')
+        .eq('case_id', caseId)
+        .eq('cache_key', 'merit_analysis')
+        .single(),
+      supabase
+        .from('ai_cache')
+        .select('content, generated_at')
+        .eq('case_id', caseId)
+        .eq('cache_key', 'options_advisor')
+        .single(),
     ])
 
     const tasks = tasksResult.data ?? []
@@ -98,6 +116,11 @@ export async function OverviewTab({ caseId, disputeType, createdAt }: OverviewTa
     const daysSinceCreation = createdAt
       ? Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24)))
       : 0
+
+    const meritAnalysis = (meritCacheResult.data?.content as MeritAnalysis | null) ?? null
+    const meritGeneratedAt = meritCacheResult.data?.generated_at ?? null
+    const optionsAdvisor = (optionsCacheResult.data?.content as OptionsAdvisor | null) ?? null
+    const optionsGeneratedAt = optionsCacheResult.data?.generated_at ?? null
 
     const strategyRecs =
       (
@@ -116,6 +139,16 @@ export async function OverviewTab({ caseId, disputeType, createdAt }: OverviewTa
 
     return (
       <div className="space-y-6">
+        <OptionsAdvisorCard
+          caseId={caseId}
+          initial={optionsAdvisor}
+          generatedAt={optionsGeneratedAt}
+        />
+        <MeritAnalysisCard
+          caseId={caseId}
+          initial={meritAnalysis}
+          generatedAt={meritGeneratedAt}
+        />
         <CaseHealthCard
           caseId={caseId}
           riskScore={riskScoreResult.data}

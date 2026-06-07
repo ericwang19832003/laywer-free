@@ -24,8 +24,9 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon, Sparkles, SearchIcon, PencilIcon, CheckIcon, XIcon } from 'lucide-react'
+import { UploadIcon, FileIcon, TrashIcon, DownloadIcon, StampIcon, Loader2Icon, Sparkles, SearchIcon, PencilIcon, CheckIcon, XIcon, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
+import { DocumentExplainModal } from './document-explain-modal'
 
 // ── Types ──────────────────────────────────────────────
 
@@ -111,6 +112,9 @@ export function EvidenceVault({ caseId, initialEvidence, exhibitedIds = [] }: Ev
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<EvidenceItem | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Explain state
+  const [explainTarget, setExplainTarget] = useState<EvidenceItem | null>(null)
 
   // Exhibit state
   const [exhibitMap, setExhibitMap] = useState<Record<string, string>>({})
@@ -587,6 +591,14 @@ export function EvidenceVault({ caseId, initialEvidence, exhibitedIds = [] }: Ev
                       <Button
                         variant="ghost"
                         size="icon-xs"
+                        onClick={() => setExplainTarget(item)}
+                        title="Explain this document"
+                      >
+                        <MessageSquare className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
                         onClick={() => startEdit(item)}
                         title="Edit"
                         disabled={editingId === item.id}
@@ -679,6 +691,17 @@ export function EvidenceVault({ caseId, initialEvidence, exhibitedIds = [] }: Ev
           </div>
         )}
       </div>
+
+      {/* ── Document Explain Modal ─────────────────── */}
+      {explainTarget && (
+        <DocumentExplainModal
+          open={!!explainTarget}
+          onOpenChange={(open) => { if (!open) setExplainTarget(null) }}
+          caseId={caseId}
+          evidenceId={explainTarget.id}
+          fileName={explainTarget.file_name}
+        />
+      )}
 
       {/* ── Delete Confirmation Dialog ──────────────── */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

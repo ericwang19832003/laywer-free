@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertTriangle, Building2, CheckCircle2, ExternalLink, FileCheck2, Globe, Info, ListChecks, Mail } from 'lucide-react'
+import { useState } from 'react'
+import { AlertTriangle, Building2, CheckCircle2, ChevronDown, ChevronUp, ExternalLink, FileCheck2, Globe, Info, ListChecks, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -36,6 +37,7 @@ export function FilingMethodStep({
   const courtLabel = getCourtLabel(state, courtType)
   const hasEFiling = !!eFilingSystem
   const isTexas = state === 'TX'
+  const [expandedStep, setExpandedStep] = useState<number | null>(null)
   const recommendedProvider = isTexas ? 'State Provided EFSP / eFile.TXCourts.gov' : eFilingSystem?.name
   const providerComparisonUrl = isTexas ? 'https://www.efiletexas.gov/service-providers.htm' : eFileUrl
   const filingPortalLabel = isTexas ? 'eFileTexas' : eFilingSystem?.name
@@ -200,58 +202,138 @@ export function FilingMethodStep({
 
           <div className="rounded-lg border border-warm-border bg-white p-4">
             <h5 className="mb-4 text-sm font-semibold text-warm-text">Step-by-step e-filing guide</h5>
-            <ol className="space-y-4 text-sm text-warm-muted">
+            <p className="mb-4 text-xs text-warm-muted">Click any step for detailed instructions.</p>
+            <ol className="space-y-2 text-sm text-warm-muted">
               {[
                 {
-                  title: isTexas ? 'Choose your EFSP' : `Open ${eFilingSystem.name}`,
+                  title: isTexas ? 'Choose your EFSP' : `Open ${eFilingSystem?.name ?? 'the e-filing portal'}`,
                   detail: isTexas
                     ? `On eFileTexas, choose ${recommendedProvider} unless you already use another certified provider.`
-                    : `Go to ${eFilingSystem.name} and create or log into your account.`,
+                    : `Go to ${eFilingSystem?.name ?? 'the portal'} and create or log into your account.`,
                   caution: isTexas ? 'If you pick a third-party provider, check whether it charges convenience or filing-service fees.' : undefined,
+                  expanded: isTexas ? [
+                    `Go to eFileTexas.gov and click the option to start filing.`,
+                    `You'll see a list of certified EFSPs — these are third-party services that handle document transmission to the court.`,
+                    `Select "${recommendedProvider}" — this is the free, state-run option.`,
+                    `Avoid providers that show additional "service fees" or "convenience fees" unless you specifically want their extra features.`,
+                    `All certified providers submit to the same courts — the difference is price and interface, not who reviews your filing.`,
+                  ] : [
+                    `Navigate to the ${eFilingSystem?.name ?? 'state e-filing'} portal.`,
+                    `If this is your first visit, create an account using your full legal name and a personal email address.`,
+                    `Save your login credentials — you'll need them to check filing status and download accepted documents.`,
+                  ],
                 },
                 {
                   title: 'Create or log into your account',
                   detail: 'Use your own name and email. Save your username and password because filing notices usually go to this email address.',
+                  expanded: [
+                    `Click "Register" for a new account or "Sign In" if you have an existing one.`,
+                    `Use your legal name exactly as it appears on your government-issued ID.`,
+                    `Use a personal email you check regularly — all acceptance and rejection notices go here.`,
+                    `Write down your password; you'll need it every time you check filing status.`,
+                    `Verify your email address if prompted before attempting to file.`,
+                  ],
                 },
                 {
                   title: 'Start a new case filing',
                   detail: `Select your court: ${county || 'your county'} — ${courtLabel}. Choose case category "${config.caseCategory}".`,
                   caution: courtType === 'jp' ? 'For JP courts, confirm the precinct and whether that court accepts online filing.' : undefined,
+                  expanded: [
+                    `After signing in, look for "New Filing," "File & Serve," or "Start a New Case."`,
+                    `Under Location or Court, find "${county || 'your county'}" and select "${courtLabel}."`,
+                    `Under Case Category, choose "${config.caseCategory}."`,
+                    courtType === 'jp'
+                      ? `For JP courts, you may also need to select the precinct number — check your court selection from the prior step.`
+                      : `Under Case Type, pick the option that most closely matches your dispute.`,
+                    `If you see a "Civil Case Information Sheet" requirement, you'll need to attach that as a supporting document after uploading your petition.`,
+                  ],
                 },
                 {
                   title: `Upload your ${config.documentLabel}`,
                   detail: `Use the ${config.documentLabel} PDF you download from Lawyer Free after completing this wizard. It will usually be the lead document.`,
+                  expanded: [
+                    `Click "Add Document" or "Lead Document" inside the filing envelope.`,
+                    `Under Filing Code, look for "Petition," "Original Petition," or "Plaintiff's Original Petition."`,
+                    `Click Browse or Choose File and select your ${config.documentLabel} PDF downloaded from Lawyer Free.`,
+                    `The file must be a PDF, typically under 25 MB — the portal will warn you if it is too large.`,
+                    `If you have exhibits or attachments, add them separately under "Supporting Documents" — do not combine them with the main ${config.documentLabel}.`,
+                  ],
                 },
                 {
                   title: 'Review fees and service',
                   detail: `Expected filing fee: ${feeRange}. If you need citation/service, look for options to request issuance or clerk/constable service.`,
                   caution: 'Some courts calculate service or copy fees separately. If the fee looks wrong, call the clerk before submitting.',
+                  expanded: [
+                    `Filing fee: ${feeRange} — paid by credit card, debit card, or e-check directly in the portal.`,
+                    `If you need the defendant formally served, find the Service section inside the filing envelope.`,
+                    `"Issuance Only" means the clerk prints the citation; you arrange delivery through a constable or process server.`,
+                    `If "Constable Service" or "Process Server" options appear, those typically add $75–$150 to the total.`,
+                    `If you are requesting a fee waiver (inability to pay), look for an option to attach a Statement of Inability to Pay.`,
+                    `If the total looks higher than expected, stop and call the clerk before submitting.`,
+                  ],
                 },
                 {
                   title: 'Submit and save proof',
                   detail: 'Submit the envelope, save the envelope number, then watch your email for accepted or rejected status.',
+                  expanded: [
+                    `Review the full summary page before clicking Submit — verify the court name, case type, and document name.`,
+                    `After submitting, the portal assigns an Envelope Number (e.g., ENV-2026-12345) — screenshot or copy it immediately.`,
+                    `This envelope number proves you submitted even before the clerk reviews the filing.`,
+                    `The clerk typically reviews within 1–3 business days — watch the email address you used to register.`,
+                    `If you don't see a confirmation email within 24 hours, check your spam folder or log back in to view envelope status.`,
+                  ],
                 },
                 {
                   title: 'After acceptance',
                   detail: 'Download the file-stamped copy, note the cause number and filing date, then return to Lawyer Free to update your case.',
+                  expanded: [
+                    `The acceptance email or portal notification will include a file-stamped copy of your petition.`,
+                    `Download and save it — this is your official filed document with the court's stamp and cause number.`,
+                    `Note the cause number (e.g., 2026-CV-12345) and the official filing date — both appear on the stamped copy.`,
+                    `The date on the file stamp is what counts for legal deadlines, not the date you clicked Submit.`,
+                    `Return to Lawyer Free and mark this step complete so your workflow advances to serving the defendant.`,
+                  ],
                 },
-              ].map((item, index) => (
-                <li key={item.title} className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo">
-                    {index + 1}
-                  </span>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-warm-text">{item.title}</p>
-                    <p className="text-sm leading-relaxed text-warm-muted">{item.detail}</p>
-                    {item.caution && (
-                      <p className="flex gap-1.5 text-xs leading-relaxed text-amber-800">
-                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                        {item.caution}
-                      </p>
+              ].map((item, index) => {
+                const isOpen = expandedStep === index
+                return (
+                  <li key={item.title} className="rounded-lg border border-warm-border overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedStep(isOpen ? null : index)}
+                      className="flex w-full items-start gap-3 p-3 text-left hover:bg-warm-bg/60 transition-colors"
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-calm-indigo/10 text-xs font-semibold text-calm-indigo mt-0.5">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 space-y-1 min-w-0">
+                        <p className="font-semibold text-warm-text">{item.title}</p>
+                        <p className="text-xs leading-relaxed text-warm-muted">{item.detail}</p>
+                        {item.caution && (
+                          <p className="flex gap-1.5 text-xs leading-relaxed text-amber-800">
+                            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                            {item.caution}
+                          </p>
+                        )}
+                      </div>
+                      {isOpen
+                        ? <ChevronUp className="h-4 w-4 shrink-0 text-warm-muted mt-1" />
+                        : <ChevronDown className="h-4 w-4 shrink-0 text-warm-muted mt-1" />
+                      }
+                    </button>
+                    {isOpen && (
+                      <div className="border-t border-warm-border bg-warm-bg/40 px-4 py-3 space-y-2">
+                        {item.expanded.map((line, i) => (
+                          <p key={i} className="text-xs leading-relaxed text-warm-muted flex gap-2">
+                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-calm-indigo/40 shrink-0" />
+                            {line}
+                          </p>
+                        ))}
+                      </div>
                     )}
-                  </div>
-                </li>
-              ))}
+                  </li>
+                )
+              })}
             </ol>
           </div>
 

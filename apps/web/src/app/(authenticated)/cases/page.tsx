@@ -51,7 +51,7 @@ export default async function CasesPage() {
   // Fetch analytics data in parallel
   const [tasksResult, deadlinesResult, healthResult, activityResult] = await Promise.all([
     hasCases
-      ? supabase.from('tasks').select('case_id, status').in('case_id', caseIds)
+      ? supabase.from('tasks').select('case_id, status').in('case_id', caseIds).neq('status', 'locked')
       : Promise.resolve({ data: [] }),
     hasCases
       ? supabase.from('deadlines').select('case_id, due_at, key, label').in('case_id', caseIds)

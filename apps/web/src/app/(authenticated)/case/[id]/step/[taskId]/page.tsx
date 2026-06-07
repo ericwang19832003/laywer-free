@@ -233,10 +233,24 @@ export default async function StepPage({
 
   const { data: caseStateData } = await supabase
     .from('cases')
-    .select('state')
+    .select('state, county, court_type')
     .eq('id', id)
     .maybeSingle()
   const caseState = caseStateData?.state ?? undefined
+  const caseCounty = caseStateData?.county ?? undefined
+  const caseCourt = caseStateData?.court_type ?? undefined
+
+  // Pre-fill known case-level data into guided-step answers to avoid redundant questions
+  function prefillCaseAnswers(
+    saved: Record<string, string> | undefined,
+    fills: Partial<Record<string, string | undefined>>
+  ): Record<string, string> {
+    const result = { ...(saved ?? {}) }
+    for (const [k, v] of Object.entries(fills)) {
+      if (v && !result[k]) result[k] = v
+    }
+    return result
+  }
   const getFamilySubType = async () => {
     const { data: familyDetails } = await supabase
       .from('family_case_details')
@@ -899,7 +913,12 @@ export default async function StepPage({
     case 'sc_jp_court_guide':
       return <DynamicGuidedStep taskKey="sc_jp_court_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_filing_guide':
-      return <DynamicGuidedStep taskKey="sc_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+      return <DynamicGuidedStep taskKey="sc_filing_guide" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          know_filing_fee: caseCounty ? 'yes' : undefined,
+          know_venue: caseCounty ? 'yes' : undefined,
+        })}
+        state={caseState} />
     case 'sc_service_guide':
       return <DynamicGuidedStep taskKey="sc_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'sc_courtroom_guide':
@@ -920,8 +939,15 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="sc_counterclaim_defense" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
 
     // Real estate depth steps
-    case 're_filing_guide':
-      return <DynamicGuidedStep taskKey="re_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 're_filing_guide': {
+      const reDamage = caseCourt === 'jp' ? 'under_20k' : caseCourt === 'district' ? 'over_250k' : caseCourt ? '20k_to_250k' : undefined
+      return <DynamicGuidedStep taskKey="re_filing_guide" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          property_county: caseCounty,
+          total_damages: reDamage,
+        })}
+        state={caseState} />
+    }
     case 're_service_guide':
       return <DynamicGuidedStep taskKey="re_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 're_courtroom_guide':
@@ -976,8 +1002,14 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="contract_provisions_check" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_defenses_guide':
       return <DynamicGuidedStep taskKey="contract_defenses_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
-    case 'contract_filing_guide':
-      return <DynamicGuidedStep taskKey="contract_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'contract_filing_guide': {
+      const contractDamage = caseCourt === 'jp' ? 'under_jp' : caseCourt === 'district' ? 'over_mid' : caseCourt ? 'mid_range' : undefined
+      return <DynamicGuidedStep taskKey="contract_filing_guide" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          total_damages: contractDamage,
+        })}
+        state={caseState} />
+    }
     case 'contract_service_guide':
       return <DynamicGuidedStep taskKey="contract_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'contract_courtroom_guide':
@@ -992,8 +1024,14 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="property_damage_assessment" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_insurance_guide':
       return <DynamicGuidedStep taskKey="property_insurance_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
-    case 'property_filing_guide':
-      return <DynamicGuidedStep taskKey="property_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'property_filing_guide': {
+      const propDamage = caseCourt === 'jp' ? 'under_20k' : caseCourt === 'district' ? 'over_250k' : caseCourt ? '20k_to_250k' : undefined
+      return <DynamicGuidedStep taskKey="property_filing_guide" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          total_damages: propDamage,
+        })}
+        state={caseState} />
+    }
     case 'property_service_guide':
       return <DynamicGuidedStep taskKey="property_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_courtroom_guide':
@@ -1021,7 +1059,11 @@ export default async function StepPage({
       return <DynamicGuidedStep taskKey="pi_filing_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piSubType} />
     }
     case 'pi_service_guide':
-      return <DynamicGuidedStep taskKey="pi_service_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+      return <DynamicGuidedStep taskKey="pi_service_guide" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          filing_county: caseCounty,
+        })}
+        state={caseState} />
     case 'pi_courtroom_guide':
       return <DynamicGuidedStep taskKey="pi_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_comparative_fault':
@@ -1283,9 +1325,31 @@ export default async function StepPage({
     case 'pi_court_selection': {
       const [{ data: piDetails }, { data: caseRow }] = await Promise.all([
         supabase.from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle(),
-        supabase.from('cases').select('state').eq('id', id).single(),
+        supabase.from('cases').select('state, county, court_type').eq('id', id).single(),
       ])
-      return <PiCourtSelectionStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piDetails?.pi_sub_type ?? undefined} state={caseRow?.state ?? undefined} />
+      const savedAnswers = task.metadata?.guided_answers ?? {}
+      const prefilledAnswers = { ...savedAnswers }
+      if (caseRow?.county && !prefilledAnswers.accident_county) {
+        prefilledAnswers.accident_county = caseRow.county
+      }
+      if (caseRow?.court_type && !prefilledAnswers.estimated_damages_range) {
+        const ct = caseRow.court_type
+        const st = caseRow.state
+        let damageRange: string | undefined
+        if (st === 'CA') {
+          damageRange = ct === 'small_claims' ? 'under_12500' : ct === 'unlimited_civil' ? 'over_35000' : '12500_to_35000'
+        } else if (st === 'FL') {
+          damageRange = ct === 'fl_small_claims' ? 'under_8000' : ct === 'fl_circuit' ? 'over_50000' : ct === 'fl_county' ? '8000_to_50000' : undefined
+        } else if (st === 'NY') {
+          damageRange = ct === 'ny_small_claims' ? 'under_10000' : ct === 'ny_supreme' ? 'over_50000' : ct === 'ny_civil' ? '10000_to_50000' : undefined
+        } else if (st === 'PA') {
+          damageRange = ct === 'pa_magisterial' ? 'under_12000' : ct === 'pa_common_pleas' ? 'over_12000' : undefined
+        } else {
+          damageRange = ct === 'jp' ? 'under_20000' : ct === 'district' ? 'over_325000' : ct?.includes('county') ? '20000_to_325000' : undefined
+        }
+        if (damageRange) prefilledAnswers.estimated_damages_range = damageRange
+      }
+      return <PiCourtSelectionStep caseId={id} taskId={taskId} existingAnswers={prefilledAnswers} piSubType={piDetails?.pi_sub_type ?? undefined} state={caseRow?.state ?? undefined} />
     }
     case 'prepare_pi_petition': {
       const { data: caseRow } = await supabase
@@ -1403,16 +1467,29 @@ export default async function StepPage({
     case 'property_negotiation':
       return <DynamicGuidedStep taskKey="property_negotiation" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'property_prepare_filing': {
-      const { data: caseRow } = await supabase
-        .from('cases').select('county, court_type, state').eq('id', id).single()
-      const { data: propertyDetails } = await supabase
-        .from('property_dispute_details').select('*').eq('case_id', id).maybeSingle()
+      const [{ data: caseRow }, { data: propertyDetails }, { data: intakeTask }] = await Promise.all([
+        supabase.from('cases').select('county, court_type, state').eq('id', id).single(),
+        supabase.from('property_dispute_details').select('*').eq('case_id', id).maybeSingle(),
+        supabase.from('tasks').select('metadata').eq('case_id', id).eq('task_key', 'property_intake').maybeSingle(),
+      ])
+      const intakeMeta = (intakeTask?.metadata ?? {}) as Record<string, unknown>
+      const mergedDetails = {
+        property_address: (propertyDetails?.property_address ?? (intakeMeta.property_address as string | null)) ?? null,
+        property_type: (propertyDetails?.property_type ?? (intakeMeta.property_type as string | null)) ?? null,
+        property_value: propertyDetails?.property_value ?? null,
+        other_party_name: (propertyDetails?.other_party_name ?? (intakeMeta.other_party_name as string | null)) ?? null,
+        other_party_relationship: (propertyDetails?.other_party_relationship ?? (intakeMeta.other_party_relationship as string | null)) ?? null,
+        dispute_description: (propertyDetails?.dispute_description ?? (intakeMeta.dispute_description as string | null)) ?? null,
+        damages_sought: propertyDetails?.damages_sought ?? (intakeMeta.damages_sought ? Number(intakeMeta.damages_sought) : null),
+        has_survey: propertyDetails?.has_survey ?? false,
+        has_title_insurance: propertyDetails?.has_title_insurance ?? false,
+      }
       return (
         <PropertyWizard
           caseId={id}
           taskId={taskId}
           existingMetadata={task.metadata}
-          propertyDetails={propertyDetails}
+          propertyDetails={mergedDetails}
           caseData={{ county: caseRow?.county ?? null, court_type: caseRow?.court_type ?? 'county', state: caseRow?.state ?? undefined }}
         />
       )
@@ -1526,7 +1603,11 @@ export default async function StepPage({
       )
     }
     case 'biz_partnership_file_with_court':
-      return <DynamicGuidedStep taskKey="biz_partnership_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+      return <DynamicGuidedStep taskKey="biz_partnership_file_with_court" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          know_court: caseCounty ? 'yes' : undefined,
+        })}
+        state={caseState} />
     case 'biz_partnership_serve_defendant':
       return <DynamicGuidedStep taskKey="biz_partnership_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_partnership_wait_for_answer':
@@ -1579,7 +1660,11 @@ export default async function StepPage({
       )
     }
     case 'biz_employment_file_with_court':
-      return <DynamicGuidedStep taskKey="biz_employment_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+      return <DynamicGuidedStep taskKey="biz_employment_file_with_court" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          know_court: caseCounty ? 'yes' : undefined,
+        })}
+        state={caseState} />
     case 'biz_employment_serve_defendant':
       return <DynamicGuidedStep taskKey="biz_employment_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_employment_wait_for_answer':
@@ -1628,7 +1713,11 @@ export default async function StepPage({
       )
     }
     case 'biz_b2b_file_with_court':
-      return <DynamicGuidedStep taskKey="biz_b2b_file_with_court" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+      return <DynamicGuidedStep taskKey="biz_b2b_file_with_court" caseId={id} taskId={taskId}
+        existingAnswers={prefillCaseAnswers(task.metadata?.guided_answers, {
+          know_court: caseCounty ? 'yes' : undefined,
+        })}
+        state={caseState} />
     case 'biz_b2b_serve_defendant':
       return <DynamicGuidedStep taskKey="biz_b2b_serve_defendant" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'biz_b2b_wait_for_answer':

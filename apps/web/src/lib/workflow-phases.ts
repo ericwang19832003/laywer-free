@@ -7,11 +7,19 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
   personal_injury: [
     {
       label: 'Getting Started',
-      taskKeys: ['welcome', 'pi_intake'],
+      taskKeys: ['welcome', 'pi_intake', 'preservation_letter'],
     },
     {
       label: 'Building Your Case',
-      taskKeys: ['pi_medical_records', 'evidence_vault', 'preservation_letter', 'pi_insurance_communication'],
+      taskKeys: [
+        'pi_medical_records',
+        'pi_pip_claim',
+        'pi_medical_improvement',
+        'pi_comparative_fault',
+        'evidence_vault',
+        'pi_insurance_communication',
+        'pi_damages_calculation',
+      ],
     },
     {
       label: 'Pre-Litigation',
@@ -19,7 +27,14 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
     },
     {
       label: 'Filing & Service',
-      taskKeys: ['prepare_pi_petition', 'pi_file_with_court', 'pi_serve_defendant'],
+      taskKeys: [
+        'pi_court_selection',
+        'prepare_pi_petition',
+        'pi_filing_guide',
+        'pi_file_with_court',
+        'pi_service_guide',
+        'pi_serve_defendant',
+      ],
     },
     {
       label: 'Litigation',
@@ -31,12 +46,14 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
         'pi_scheduling_conference',
         'pi_pretrial_motions',
         'pi_mediation',
+        'pi_expert_witness_guide',
         'pi_trial_prep',
+        'pi_courtroom_guide',
       ],
     },
     {
       label: 'Resolution',
-      taskKeys: ['pi_post_resolution'],
+      taskKeys: ['pi_post_resolution', 'pi_lien_resolution'],
     },
   ],
 
@@ -336,11 +353,11 @@ export const WORKFLOW_PHASES: Record<string, WorkflowPhase[]> = {
   civil: [
     {
       label: 'Getting Started',
-      taskKeys: ['welcome', 'intake'],
+      taskKeys: ['welcome', 'intake', 'preservation_letter'],
     },
     {
       label: 'Building Your Case',
-      taskKeys: ['evidence_vault', 'preservation_letter'],
+      taskKeys: ['evidence_vault'],
     },
     {
       label: 'Filing & Service',
