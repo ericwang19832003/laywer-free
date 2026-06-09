@@ -164,6 +164,10 @@ export async function POST(
     })
 
     // 4. Call AI
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
+    }
+
     const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
     const { content: answerRaw } = await aiClient.complete({
       systemPrompt: prompt.system,

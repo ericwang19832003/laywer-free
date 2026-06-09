@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+import type Anthropic from '@anthropic-ai/sdk'
 
 export interface CheckpointData {
-  messages: ChatCompletionMessageParam[]
+  messages: Anthropic.MessageParam[]
   toolCallCount: number
 }
 

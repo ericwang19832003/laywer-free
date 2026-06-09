@@ -155,7 +155,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
           }
         }
 
-        const finalMessage = await stream.finalMessage()
+        await stream.finalMessage()
 
         if (pendingToolUses.length === 0) break
 
@@ -174,13 +174,15 @@ export function buildAgentGraph(config: BuildGraphConfig) {
         // Execute tools and collect results
         const toolResultBlocks: Anthropic.ToolResultBlockParam[] = []
         for (const tu of pendingToolUses) {
-          let parsedInput: Record<string, unknown> = {}
-          try { parsedInput = JSON.parse(tu.input || '{}') } catch { /* empty */ }
+          const parsedInput: Record<string, unknown> = {}
+          // Reuse parsed input from the block already in assistantBlocks
+          const block = assistantBlocks.find((b) => b.type === 'tool_use' && b.id === tu.id)
+          const inputToUse = (block && 'input' in block ? block.input : parsedInput) as Record<string, unknown>
 
           const handler = toolMap[tu.name]
           let result: string
           try {
-            result = handler ? await handler.invoke(parsedInput) : `Unknown tool: ${tu.name}`
+            result = handler ? await handler.invoke(inputToUse) : `Unknown tool: ${tu.name}`
           } catch (err) {
             result = `Tool error: ${err instanceof Error ? err.message : String(err)}`
           }
@@ -188,9 +190,6 @@ export function buildAgentGraph(config: BuildGraphConfig) {
           toolResultBlocks.push({ type: 'tool_result', tool_use_id: tu.id, content: result })
         }
         msgs.push({ role: 'user', content: toolResultBlocks })
-
-        // Suppress unused variable warning
-        void finalMessage
 
         toolCallCount++
       }

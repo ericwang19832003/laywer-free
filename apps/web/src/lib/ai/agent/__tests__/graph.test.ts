@@ -2,21 +2,43 @@ import { describe, expect, it, vi } from 'vitest'
 import { buildAgentGraph } from '../graph'
 import { createInitialState } from '../state'
 
-vi.mock('openai', () => ({
-  default: class {
-    chat = {
-      completions: {
-        create: vi.fn().mockReturnValue({
-          async *[Symbol.asyncIterator]() {
-            yield { choices: [{ delta: { content: 'I can help organize your next steps.' } }] }
-            yield { choices: [{ delta: {} }] }
-          },
-        }),
+// Mock the Anthropic SDK so tests don't require a real API key
+vi.mock('@anthropic-ai/sdk', () => {
+  const mockStream = {
+    async *[Symbol.asyncIterator]() {
+      yield {
+        type: 'content_block_start',
+        index: 0,
+        content_block: { type: 'text', text: '' },
+      }
+      yield {
+        type: 'content_block_delta',
+        index: 0,
+        delta: { type: 'text_delta', text: 'I can help organize your next steps.' },
+      }
+      yield { type: 'content_block_stop', index: 0 }
+      yield { type: 'message_stop' }
+    },
+    finalMessage: vi.fn().mockResolvedValue({
+      id: 'msg_test',
+      type: 'message',
+      role: 'assistant',
+      content: [{ type: 'text', text: 'I can help organize your next steps.' }],
+      model: 'claude-sonnet-4-6',
+      stop_reason: 'end_turn',
+      stop_sequence: null,
+      usage: { input_tokens: 10, output_tokens: 10 },
+    }),
+  }
+
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      messages: {
+        stream: vi.fn().mockResolvedValue(mockStream),
       },
-    }
-    embeddings = { create: vi.fn() }
-  },
-}))
+    })),
+  }
+})
 
 describe('buildAgentGraph', () => {
   it('streams token events from a basic user message', async () => {

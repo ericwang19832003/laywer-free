@@ -42,7 +42,7 @@ OUTPUT FORMAT — respond with valid JSON only:
   ]
 }`
 
-// POST /api/objections/reviews/:reviewId/classify — classify objections via OpenAI
+// POST /api/objections/reviews/:reviewId/classify — classify objections via AI (Claude)
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ reviewId: string }> }
