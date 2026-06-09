@@ -10,57 +10,38 @@ import {
 } from '@/lib/ai/client'
 
 // ---------------------------------------------------------------------------
-// Mock OpenAI
+// Mock Anthropic SDK
 // ---------------------------------------------------------------------------
 
 const mockCreate = vi.fn()
 
-vi.mock('openai', () => {
+vi.mock('@anthropic-ai/sdk', () => {
   class RateLimitError extends Error {
     status = 429
-    headers: Record<string, string> = {}
-    constructor(msg: string) {
-      super(msg)
-      this.name = 'RateLimitError'
-    }
+    headers: Map<string, string> = new Map()
+    constructor(msg: string) { super(msg); this.name = 'RateLimitError' }
   }
-
   class APIConnectionError extends Error {
-    constructor(msg: string) {
-      super(msg)
-      this.name = 'APIConnectionError'
-    }
+    constructor(msg: string) { super(msg); this.name = 'APIConnectionError' }
   }
-
   class APIConnectionTimeoutError extends Error {
-    constructor(msg: string) {
-      super(msg)
-      this.name = 'APIConnectionTimeoutError'
-    }
+    constructor(msg: string) { super(msg); this.name = 'APIConnectionTimeoutError' }
   }
-
   class InternalServerError extends Error {
     status = 500
-    constructor(msg: string) {
-      super(msg)
-      this.name = 'InternalServerError'
-    }
+    constructor(msg: string) { super(msg); this.name = 'InternalServerError' }
   }
-
-  class MockOpenAI {
-    chat = {
-      completions: {
-        create: mockCreate,
-      },
-    }
+  class AuthenticationError extends Error {
+    status = 401
+    constructor(msg: string) { super(msg); this.name = 'AuthenticationError' }
   }
-
+  class MockAnthropic {
+    messages = { create: mockCreate }
+  }
   return {
-    default: MockOpenAI,
-    RateLimitError,
-    APIConnectionError,
-    APIConnectionTimeoutError,
-    InternalServerError,
+    default: MockAnthropic,
+    RateLimitError, APIConnectionError, APIConnectionTimeoutError,
+    InternalServerError, AuthenticationError,
   }
 })
 
@@ -78,15 +59,11 @@ vi.mock('@/lib/observability/logger', () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeCompletion(content: string, model = 'gpt-4o-mini') {
+function makeCompletion(content: string, model = 'claude-sonnet-4-6') {
   return {
-    choices: [{ message: { content } }],
+    content: [{ type: 'text', text: content }],
     model,
-    usage: {
-      prompt_tokens: 10,
-      completion_tokens: 20,
-      total_tokens: 30,
-    },
+    usage: { input_tokens: 10, output_tokens: 20 },
   }
 }
 
@@ -101,8 +78,7 @@ const BASE_REQUEST = {
 
 describe('AIClient', () => {
   beforeEach(() => {
-    vi.stubEnv('OPENAI_API_KEY', 'test-key-123')
-    vi.stubEnv('DEEPSEEK_API_KEY', 'test-key-123')
+    vi.stubEnv('ANTHROPIC_API_KEY', 'test-key-123')
     vi.useFakeTimers({ shouldAdvanceTime: true })
     mockCreate.mockReset()
   })
@@ -123,7 +99,7 @@ describe('AIClient', () => {
 
       expect(res.content).toBe('Hello!')
       expect(res.raw).toBe('Hello!')
-      expect(res.model).toBe('gpt-4o-mini')
+      expect(res.model).toBe('claude-sonnet-4-6')
       expect(res.usage).toEqual({
         promptTokens: 10,
         completionTokens: 20,
@@ -132,7 +108,7 @@ describe('AIClient', () => {
       expect(res.durationMs).toBeGreaterThanOrEqual(0)
     })
 
-    it('passes temperature, maxTokens, and jsonMode to OpenAI', async () => {
+    it('passes temperature, maxTokens, and jsonMode to Anthropic', async () => {
       mockCreate.mockResolvedValueOnce(makeCompletion('{"ok":true}'))
 
       const client = new AIClient()
@@ -147,20 +123,20 @@ describe('AIClient', () => {
         expect.objectContaining({
           temperature: 0.2,
           max_tokens: 500,
-          response_format: { type: 'json_object' },
+          system: expect.stringContaining('JSON'),
         }),
         expect.anything()
       )
     })
 
     it('uses custom model from config', async () => {
-      mockCreate.mockResolvedValueOnce(makeCompletion('Hello!', 'gpt-4o'))
+      mockCreate.mockResolvedValueOnce(makeCompletion('Hello!', 'claude-opus-4-5'))
 
-      const client = new AIClient({ model: 'gpt-4o' })
+      const client = new AIClient({ model: 'claude-opus-4-5' })
       await client.complete(BASE_REQUEST)
 
       expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({ model: 'gpt-4o' }),
+        expect.objectContaining({ model: 'claude-opus-4-5' }),
         expect.anything()
       )
     })
@@ -191,7 +167,7 @@ describe('AIClient', () => {
     })
 
     it('does not retry rate-limit errors', async () => {
-      const { RateLimitError } = await import('openai')
+      const { RateLimitError } = await import('@anthropic-ai/sdk')
       mockCreate.mockRejectedValueOnce(new RateLimitError('429'))
 
       const client = new AIClient({ maxRetries: 2 })
@@ -263,9 +239,9 @@ describe('AIClient', () => {
   describe('error types', () => {
     it('wraps empty response as AIResponseError', async () => {
       mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: null } }],
-        model: 'gpt-4o-mini',
-        usage: null,
+        content: [],
+        model: 'claude-sonnet-4-6',
+        usage: { input_tokens: 0, output_tokens: 0 },
       })
 
       const client = new AIClient({ maxRetries: 0 })
@@ -274,8 +250,7 @@ describe('AIClient', () => {
     })
 
     it('throws AIConfigError when no generation provider key is configured', async () => {
-      vi.stubEnv('DEEPSEEK_API_KEY', '')
-      vi.stubEnv('OPENAI_API_KEY', '')
+      vi.stubEnv('ANTHROPIC_API_KEY', '')
       // AIConfigError is thrown before the mock is called
       const client = new AIClient({ maxRetries: 0 })
 
@@ -284,7 +259,7 @@ describe('AIClient', () => {
     })
 
     it('wraps connection errors as AIConnectionError', async () => {
-      const { APIConnectionError } = await import('openai')
+      const { APIConnectionError } = await import('@anthropic-ai/sdk')
       mockCreate.mockRejectedValueOnce(new APIConnectionError('ECONNREFUSED'))
 
       const client = new AIClient({ maxRetries: 0 })
@@ -313,8 +288,8 @@ describe('AIClient', () => {
       expect(logger.info).toHaveBeenCalledWith(
         'ai.completion',
         expect.objectContaining({
-          provider: 'openai',
-          model: 'gpt-4o-mini',
+          provider: 'anthropic',
+          model: 'claude-sonnet-4-6',
           status: 'success',
           caller: 'test-caller',
           promptTokens: 10,
