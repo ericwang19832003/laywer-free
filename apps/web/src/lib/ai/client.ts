@@ -87,12 +87,22 @@ export class AIClient {
   private readonly model: string
   private readonly maxRetries: number
   private readonly timeoutMs: number
+  private anthropicInstance: Anthropic | null = null
 
   constructor(config: AIClientConfig = {}) {
     this.provider = 'anthropic'
     this.model = config.model ?? 'claude-sonnet-4-6'
     this.maxRetries = config.maxRetries ?? 2
     this.timeoutMs = config.timeoutMs ?? 30_000
+  }
+
+  private getAnthropicClient(): Anthropic {
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    if (!apiKey) throw new AIConfigError('ANTHROPIC_API_KEY is not set')
+    if (!this.anthropicInstance) {
+      this.anthropicInstance = new Anthropic({ apiKey })
+    }
+    return this.anthropicInstance
   }
 
   async complete<T = string>(request: AICompletionRequest): Promise<AICompletionResponse<T>> {
@@ -148,10 +158,7 @@ export class AIClient {
     raw: string; model: string
     usage?: { promptTokens: number; completionTokens: number; totalTokens: number }
   }> {
-    const apiKey = process.env.ANTHROPIC_API_KEY
-    if (!apiKey) throw new AIConfigError('ANTHROPIC_API_KEY is not set')
-
-    const anthropic = new Anthropic({ apiKey })
+    const anthropic = this.getAnthropicClient()
 
     const systemPrompt = request.jsonMode
       ? `${request.systemPrompt}\n\nRespond with valid JSON only. Do not include any other text, explanation, or markdown.`
@@ -191,7 +198,10 @@ export class AIClient {
     if (error instanceof AIError) return error
 
     if (error instanceof AnthropicRateLimitError) {
-      const retryAfter = (error.headers as Record<string, string>)?.['retry-after']
+      const h = error.headers
+      const retryAfter = h instanceof Headers
+        ? h.get('retry-after')
+        : (h as Record<string, string> | null | undefined)?.['retry-after']
       return new AIRateLimitError(error.message, {
         retryAfterMs: retryAfter ? Number(retryAfter) * 1000 : undefined,
         cause: error,
