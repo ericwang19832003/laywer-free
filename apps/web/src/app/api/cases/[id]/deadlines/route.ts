@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { createDeadlineSchema } from '@lawyer-free/shared/schemas/deadline'
+import { calculateSol } from '@lawyer-free/shared/rules/statute-of-limitations'
+import { calculateAppealDeadline } from '@lawyer-free/shared/rules/appeal-deadline'
 
 export async function POST(
   request: NextRequest,
@@ -24,10 +26,10 @@ export async function POST(
 
     const { key, due_at, source, rationale } = parsed.data
 
-    // Verify case exists (RLS handles ownership)
+    // Verify case exists (RLS handles ownership); fetch state + dispute_type for auto-calculations
     const { data: caseData, error: caseError } = await supabase
       .from('cases')
-      .select('id')
+      .select('id, state, dispute_type')
       .eq('id', id)
       .single()
 
@@ -56,6 +58,43 @@ export async function POST(
         { error: 'Failed to create deadline', details: deadlineError.message },
         { status: 500 }
       )
+    }
+
+    // Special key: incident_date — store on case + auto-create SOL warning deadline
+    if (key === 'incident_date') {
+      const incidentDate = new Date(due_at).toISOString().slice(0, 10)
+      await supabase.from('cases').update({ incident_date: incidentDate }).eq('id', id)
+
+      if (caseData.dispute_type) {
+        const sol = calculateSol(caseData.state ?? 'TX', caseData.dispute_type, null, incidentDate)
+        if (sol.expiresAt && sol.years !== null) {
+          await supabase.from('deadlines').upsert({
+            case_id: id,
+            key: 'sol_warning',
+            label: `Statute of Limitations (${sol.years}-year)`,
+            due_at: sol.expiresAt.toISOString(),
+            source: 'system',
+            rationale: sol.notes ?? `${sol.years}-year statute of limitations based on ${caseData.dispute_type} in ${caseData.state ?? 'TX'}.`,
+            consequence: 'Filing after this date may permanently bar your claims.',
+            auto_generated: true,
+          }, { onConflict: 'case_id,key' })
+        }
+      }
+    }
+
+    // Special key: judgment_entered — auto-create appeal deadline
+    if (key === 'judgment_entered') {
+      const appealDate = calculateAppealDeadline(due_at, caseData.state ?? 'TX')
+      await supabase.from('deadlines').upsert({
+        case_id: id,
+        key: 'appeal_deadline',
+        label: 'Notice of Appeal Deadline',
+        due_at: appealDate.toISOString(),
+        source: 'system',
+        rationale: 'Appeal deadline calculated from judgment date.',
+        consequence: 'Missing this deadline forfeits your right to appeal. Courts rarely grant extensions.',
+        auto_generated: true,
+      }, { onConflict: 'case_id,key' })
     }
 
     // Auto-create reminders at -7d, -3d, -1d from due_at (skip if in the past)

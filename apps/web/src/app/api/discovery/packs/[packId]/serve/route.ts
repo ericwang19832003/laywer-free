@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { servePackSchema } from '@lawyer-free/shared/schemas/discovery'
+import { discoveryResponseDeadline } from '@lawyer-free/shared/rules/discovery-deadlines'
 
 
 // POST /api/discovery/packs/:packId/serve — record service of discovery
@@ -55,6 +56,19 @@ export async function POST(
         { status: 500 }
       )
     }
+
+    // Auto-create discovery response deadline (served_at + 30 days, TRCP 196.2(a))
+    const responseDeadline = discoveryResponseDeadline(parsed.data.served_at)
+    await supabase.from('deadlines').upsert({
+      case_id: pack.case_id,
+      key: `discovery_response_deadline_${packId}`,
+      label: 'Discovery Response Deadline',
+      due_at: responseDeadline.toISOString(),
+      source: 'system',
+      rationale: 'Opposing party has 30 days to respond to served discovery (TRCP 196.2(a)).',
+      consequence: 'Failure to timely object may waive objections. Unanswered requests may be deemed admitted.',
+      auto_generated: true,
+    }, { onConflict: 'case_id,key' })
 
     // Write timeline event
     await supabase.from('task_events').insert({

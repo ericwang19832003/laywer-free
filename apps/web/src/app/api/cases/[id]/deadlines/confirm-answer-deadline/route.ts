@@ -3,6 +3,7 @@ import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { confirmAnswerDeadlineSchema } from '@lawyer-free/shared/schemas/deadline'
 import { calculateReminderDates } from '@lawyer-free/shared/rules/reminders'
 import { runAndApplyGatekeeper } from '@/lib/rules/apply-gatekeeper'
+import { discoveryCutoffDate } from '@lawyer-free/shared/rules/discovery-deadlines'
 
 export async function POST(
   request: NextRequest,
@@ -103,6 +104,19 @@ export async function POST(
         reminders_created: reminders.length,
       },
     })
+
+    // Auto-create discovery cutoff (answer deadline + 180 days, TX Rule 190.3)
+    const cutoff = discoveryCutoffDate(confirmed_due_at)
+    await supabase.from('deadlines').upsert({
+      case_id: caseId,
+      key: 'discovery_cutoff',
+      label: 'Discovery Cutoff',
+      due_at: cutoff.toISOString(),
+      source: 'system',
+      rationale: 'Discovery closes 180 days after the answer deadline (TRCP 190.3).',
+      consequence: 'Evidence or information not disclosed before this date may be excluded at trial.',
+      auto_generated: true,
+    }, { onConflict: 'case_id,key' })
 
     // Run gatekeeper to unlock wait_for_answer immediately
     await runAndApplyGatekeeper(supabase, caseId)
