@@ -8,35 +8,71 @@ const COURTLISTENER_BASE = 'https://www.courtlistener.com/api/rest/v4'
 interface DocketEntry {
   id: number
   date_filed: string
-  description: string
+  description: string | null
   recap_documents: { id: number }[]
+}
+
+interface ClPage {
+  next: string | null
+  results: DocketEntry[]
 }
 
 async function classifyDocketEntry(
   entry: DocketEntry,
   anthropicKey: string
 ): Promise<{ summary: string; responseDeadline: string | null; type: string }> {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': anthropicKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
-      system: 'You classify court docket entries for self-represented litigants. Respond with JSON only: {"summary": "one sentence plain English", "type": "motion|order|notice|other", "responseDeadline": "YYYY-MM-DD or null"}. If no response deadline is implied, set responseDeadline to null. Be conservative — only set a deadline when clearly implied.',
-      messages: [{ role: 'user', content: `Classify this docket entry: ${entry.description} (filed: ${entry.date_filed})` }],
-    }),
-  })
-  const data = await res.json()
+  const description = entry.description ?? ''
+  const fallback = { summary: description.slice(0, 200) || '(no description)', responseDeadline: null, type: 'other' }
+
   try {
-    const text = data.content[0].text
-    return JSON.parse(text)
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        system: 'You classify court docket entries for self-represented litigants. Respond with JSON only: {"summary": "one sentence plain English", "type": "motion|order|notice|other", "responseDeadline": "YYYY-MM-DD or null"}. If no response deadline is implied, set responseDeadline to null. Be conservative — only set a deadline when clearly implied.',
+        messages: [{ role: 'user', content: `Classify this docket entry: ${description} (filed: ${entry.date_filed})` }],
+      }),
+    })
+    if (!res.ok) return fallback
+    const data = await res.json()
+    const text = data?.content?.[0]?.text
+    if (!text) return fallback
+    const parsed = JSON.parse(text)
+    return {
+      summary: typeof parsed.summary === 'string' ? parsed.summary : fallback.summary,
+      type: typeof parsed.type === 'string' ? parsed.type : 'other',
+      responseDeadline: typeof parsed.responseDeadline === 'string' ? parsed.responseDeadline : null,
+    }
   } catch {
-    return { summary: entry.description.slice(0, 200), responseDeadline: null, type: 'other' }
+    return fallback
   }
+}
+
+async function fetchAllDocketEntries(
+  docketId: number,
+  sinceDate: string,
+  clApiToken: string
+): Promise<DocketEntry[]> {
+  const entries: DocketEntry[] = []
+  let nextUrl: string | null =
+    `${COURTLISTENER_BASE}/docket-entries/?docket=${docketId}&date_filed__gte=${sinceDate}&format=json`
+
+  while (nextUrl) {
+    const res = await fetch(nextUrl, {
+      headers: clApiToken ? { Authorization: `Token ${clApiToken}` } : {},
+    })
+    if (!res.ok) break
+    const page = await res.json() as ClPage
+    entries.push(...(page.results ?? []))
+    nextUrl = page.next ?? null
+  }
+  return entries
 }
 
 Deno.serve(async () => {
@@ -56,17 +92,13 @@ Deno.serve(async () => {
 
   let processed = 0
   for (const c of cases) {
-    const since = c.docket_last_checked ?? new Date(Date.now() - 7 * 86400000).toISOString()
+    const since = new Date(
+      c.docket_last_checked ?? Date.now() - 7 * 86400000
+    ).toISOString().slice(0, 10)
 
-    const url = `${COURTLISTENER_BASE}/docket-entries/?docket=${c.courtlistener_docket_id}&date_filed__gte=${since.slice(0, 10)}&format=json`
-    const clRes = await fetch(url, {
-      headers: clApiToken ? { Authorization: `Token ${clApiToken}` } : {},
-    })
-    if (!clRes.ok) continue
+    const entries = await fetchAllDocketEntries(c.courtlistener_docket_id, since, clApiToken)
 
-    const { results: entries } = await clRes.json() as { results: DocketEntry[] }
-
-    for (const entry of (entries ?? [])) {
+    for (const entry of entries) {
       const classified = await classifyDocketEntry(entry, anthropicKey)
 
       await supabase.from('task_events').insert({
