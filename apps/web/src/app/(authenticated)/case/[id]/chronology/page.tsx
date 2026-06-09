@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChronologyTimeline } from '@/components/chronology/chronology-timeline'
@@ -12,10 +13,16 @@ export default async function ChronologyPage({
 
   const [{ data: caseRow }, { data: entries }] = await Promise.all([
     supabase.from('cases').select('name, role').eq('id', id).single(),
-    supabase.from('chronologies').select('*').eq('case_id', id).order('entry_date'),
+    supabase
+      .from('chronologies')
+      .select('id, entry_date, description, significance, source')
+      .eq('case_id', id)
+      .order('entry_date'),
   ])
 
-  const perspective = (caseRow?.role === 'defendant' ? 'defendant' : 'plaintiff') as 'plaintiff' | 'defendant'
+  if (!caseRow) notFound()
+
+  const perspective = (caseRow.role === 'defendant' ? 'defendant' : 'plaintiff') as 'plaintiff' | 'defendant'
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">

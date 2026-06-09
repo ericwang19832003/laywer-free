@@ -41,6 +41,7 @@ export function ChronologyTimeline({ caseId, initialEntries, perspective }: Chro
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to build chronology')
+      if (!Array.isArray(data.entries)) throw new Error('Unexpected response format')
       setEntries(data.entries)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'An error occurred')
@@ -80,7 +81,7 @@ export function ChronologyTimeline({ caseId, initialEntries, perspective }: Chro
 
       <div className="space-y-2">
         {sorted.map((entry) => {
-          const config = SIGNIFICANCE_CONFIG[entry.significance]
+          const config = SIGNIFICANCE_CONFIG[entry.significance] ?? SIGNIFICANCE_CONFIG.background
           return (
             <div key={entry.id} className={`p-4 rounded-lg ${config.className}`}>
               <div className="flex items-start justify-between gap-3">
