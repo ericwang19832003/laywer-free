@@ -35,7 +35,7 @@ Rules:
 
   const userPrompt = `${isDeposing
     ? `Prepare deposition questions to ask ${input.witnessName} (${WITNESS_ROLE_LABELS[input.witnessRole]}).`
-    : `Help me prepare for my own deposition. The opposing party may question me as a ${WITNESS_ROLE_LABELS[input.witnessRole]}.`
+    : `Help me prepare for my own deposition. ${input.witnessName} (${WITNESS_ROLE_LABELS[input.witnessRole]}) may question me.`
   }
 
 Key facts:
