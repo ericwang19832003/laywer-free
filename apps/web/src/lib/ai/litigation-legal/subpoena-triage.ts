@@ -12,7 +12,7 @@ const STATE_SUBPOENA_NOTES: Record<string, string> = {
 }
 
 export function buildSubpoenaTriagePrompt(input: SubpoenaTriageInput): { systemPrompt: string; userPrompt: string } {
-  const stateNote = STATE_SUBPOENA_NOTES[input.state] ?? "Check your state's rules of civil procedure for subpoena response requirements."
+  const stateNote = STATE_SUBPOENA_NOTES[input.state] ?? `${input.state}: Check your state's rules of civil procedure for subpoena response requirements.`
 
   const systemPrompt = `You are helping a self-represented litigant understand and respond to a subpoena they received.
 
