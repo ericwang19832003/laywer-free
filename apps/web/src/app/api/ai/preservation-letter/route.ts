@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ...validated.data,
       _meta: {
-        model: 'deepseek-chat',
+        model: 'claude-sonnet-4-6',
         prompt_version: PROMPT_VERSION,
       },
     })

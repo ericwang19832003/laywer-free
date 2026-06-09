@@ -13,8 +13,6 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 
 export const maxDuration = 30
 
-const AI_MODEL = 'deepseek-chat'
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -73,7 +71,7 @@ export async function GET(
       .eq('status', 'completed')
 
     // Try AI
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         const userPrompt = buildTaskDescriptionPrompt({
           task_key: taskKey,
@@ -119,7 +117,7 @@ export async function GET(
 
     return NextResponse.json({
       ...result,
-      _meta: { source, model: source === 'ai' ? AI_MODEL : null },
+      _meta: { source, model: source === 'ai' ? 'claude-sonnet-4-6' : null },
     })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -13,7 +13,6 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 
 export const maxDuration = 30
 
-const AI_MODEL = 'deepseek-chat'
 const CACHE_KEY = 'health_tips'
 const STALE_HOURS = 24
 
@@ -77,7 +76,7 @@ export async function GET(
     const completedCount = allTasks.filter((t) => t.status === 'completed').length
 
     // Try AI
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         const userPrompt = buildHealthTipsPrompt({
           overall_score: risk.overall_score,

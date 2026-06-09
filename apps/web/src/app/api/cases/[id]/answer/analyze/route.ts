@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
@@ -184,18 +184,14 @@ export async function POST(
       )
     }
 
-    // Analyze with DeepSeek
-    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
-    const message = await deepseek.chat.completions.create({
-      model: 'deepseek-chat',
-      max_tokens: 2048,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: `Analyze this court document for a ${caseData.role} in a ${caseData.dispute_type?.replace(/_/g, ' ')} case:\n\n${text.slice(0, 8000)}` },
-      ],
+    // Analyze with AI
+    const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
+    const { content: responseText } = await aiClient.complete({
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt: `Analyze this court document for a ${caseData.role} in a ${caseData.dispute_type?.replace(/_/g, ' ')} case:\n\n${text.slice(0, 8000)}`,
+      maxTokens: 2048,
+      caller: 'answer-analyze',
     })
-
-    const responseText = message.choices[0]?.message?.content ?? ''
 
     const analysis = parseAnalysis(responseText)
 
@@ -217,7 +213,7 @@ export async function POST(
       payload: { court_document_id, document_type: analysis.document_type ?? doc.doc_type },
     })
 
-    return NextResponse.json({ analysis, _meta: { source: 'ai', model: 'deepseek-chat' } }, { status: 201 })
+    return NextResponse.json({ analysis, _meta: { source: 'ai', model: 'claude-sonnet-4-6' } }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

@@ -1,5 +1,4 @@
-import OpenAI from 'openai'
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+import Anthropic from '@anthropic-ai/sdk'
 import type { AgentState, AgentTool, CaseContext } from './state'
 import { createSearchCaseLawTool } from './tools/search-case-law'
 import { createAnalyzeDeadlinesTool } from './tools/analyze-deadlines'
@@ -57,13 +56,22 @@ function buildTools(caseContext: CaseContext, config: BuildGraphConfig): AgentTo
   ]
 }
 
+function toAnthropicTool(tool: AgentTool): Anthropic.Tool {
+  const fn = tool.definition.function
+  return {
+    name: fn.name,
+    description: fn.description,
+    input_schema: fn.parameters as Anthropic.Tool['input_schema'],
+  }
+}
+
 export function buildAgentGraph(config: BuildGraphConfig) {
   return {
     async *stream(state: AgentState): AsyncGenerator<AgentEvent> {
-      const client = new OpenAI({
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseURL: 'https://api.deepseek.com',
-      })
+      const apiKey = process.env.ANTHROPIC_API_KEY
+      if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set')
+
+      const anthropic = new Anthropic({ apiKey })
 
       const tools = buildTools(state.caseContext, config)
       // Patch caseId into draft tool (can't pass it at build time because state carries it)
@@ -77,7 +85,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
       }
 
       const toolMap = Object.fromEntries(tools.map((t) => [t.name, t]))
-      const toolDefs = tools.map((t) => t.definition)
+      const anthropicTools = tools.map(toAnthropicTool)
 
       const contextSummary =
         `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +
@@ -104,79 +112,99 @@ export function buildAgentGraph(config: BuildGraphConfig) {
       }
 
       const systemContent = `${SYSTEM_PROMPT}\n\n${contextSummary}${deadlineContext}${evidenceContext}`
-      const msgs: ChatCompletionMessageParam[] = [
-        { role: 'system', content: systemContent },
-        ...state.messages,
-      ]
+
+      // Convert stored messages to Anthropic format
+      type AnthropicMessage = Anthropic.MessageParam
+      const msgs: AnthropicMessage[] = state.messages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: typeof m.content === 'string' ? m.content : String(m.content ?? ''),
+        }))
 
       let toolCallCount = 0
 
       while (toolCallCount < MAX_TOOL_CALLS) {
-        const stream = await client.chat.completions.create({
-          model: 'deepseek-chat',
+        // Use streaming for token-by-token output
+        const stream = await anthropic.messages.stream({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 4096,
           temperature: 0.5,
+          system: systemContent,
           messages: msgs,
-          tools: toolDefs,
-          stream: true,
+          tools: anthropicTools,
         })
 
         let assistantContent = ''
-        const toolCalls: Array<{ id: string; name: string; arguments: string }> = []
+        const pendingToolUses: Array<{ id: string; name: string; input: string }> = []
 
-        for await (const chunk of stream) {
-          const delta = chunk.choices[0]?.delta
-          if (!delta) continue
-
-          if (delta.content) {
-            assistantContent += delta.content
-            yield { type: 'token', content: delta.content }
-          }
-
-          if (delta.tool_calls) {
-            for (const tc of delta.tool_calls) {
-              const idx = tc.index ?? 0
-              if (!toolCalls[idx]) {
-                toolCalls[idx] = { id: tc.id ?? '', name: tc.function?.name ?? '', arguments: '' }
-                if (tc.function?.name) yield { type: 'tool_start', tool: tc.function.name }
-              }
-              if (tc.id) toolCalls[idx].id = tc.id
-              if (tc.function?.name) toolCalls[idx].name = tc.function.name
-              if (tc.function?.arguments) toolCalls[idx].arguments += tc.function.arguments
+        for await (const event of stream) {
+          if (event.type === 'content_block_start') {
+            if (event.content_block.type === 'tool_use') {
+              pendingToolUses.push({ id: event.content_block.id, name: event.content_block.name, input: '' })
+              yield { type: 'tool_start', tool: event.content_block.name }
+            }
+          } else if (event.type === 'content_block_delta') {
+            if (event.delta.type === 'text_delta') {
+              assistantContent += event.delta.text
+              yield { type: 'token', content: event.delta.text }
+            } else if (event.delta.type === 'input_json_delta') {
+              const last = pendingToolUses[pendingToolUses.length - 1]
+              if (last) last.input += event.delta.partial_json
             }
           }
         }
 
-        const activeCalls = toolCalls.filter(Boolean)
-        if (activeCalls.length === 0) break
+        const finalMessage = await stream.finalMessage()
 
-        msgs.push({
-          role: 'assistant',
-          content: assistantContent || null,
-          tool_calls: activeCalls.map((tc) => ({
-            id: tc.id,
-            type: 'function' as const,
-            function: { name: tc.name, arguments: tc.arguments },
-          })),
-        })
+        if (pendingToolUses.length === 0) break
 
-        for (const tc of activeCalls) {
-          const handler = toolMap[tc.name]
+        // Build assistant message with tool_use blocks
+        const assistantBlocks: Anthropic.ContentBlock[] = []
+        if (assistantContent) {
+          assistantBlocks.push({ type: 'text', text: assistantContent })
+        }
+        for (const tu of pendingToolUses) {
+          let parsedInput: Record<string, unknown> = {}
+          try { parsedInput = JSON.parse(tu.input || '{}') } catch { /* empty */ }
+          assistantBlocks.push({ type: 'tool_use', id: tu.id, name: tu.name, input: parsedInput })
+        }
+        msgs.push({ role: 'assistant', content: assistantBlocks })
+
+        // Execute tools and collect results
+        const toolResultBlocks: Anthropic.ToolResultBlockParam[] = []
+        for (const tu of pendingToolUses) {
+          let parsedInput: Record<string, unknown> = {}
+          try { parsedInput = JSON.parse(tu.input || '{}') } catch { /* empty */ }
+
+          const handler = toolMap[tu.name]
           let result: string
           try {
-            const args = JSON.parse(tc.arguments || '{}') as Record<string, unknown>
-            result = handler ? await handler.invoke(args) : `Unknown tool: ${tc.name}`
+            result = handler ? await handler.invoke(parsedInput) : `Unknown tool: ${tu.name}`
           } catch (err) {
             result = `Tool error: ${err instanceof Error ? err.message : String(err)}`
           }
           yield { type: 'tool_end' }
-          msgs.push({ role: 'tool', tool_call_id: tc.id, content: result })
+          toolResultBlocks.push({ type: 'tool_result', tool_use_id: tu.id, content: result })
         }
+        msgs.push({ role: 'user', content: toolResultBlocks })
+
+        // Suppress unused variable warning
+        void finalMessage
 
         toolCallCount++
       }
 
-      // Expose accumulated messages for checkpoint saving (strip system message)
-      state.messages = msgs.slice(1) as ChatCompletionMessageParam[]
+      // Expose accumulated messages for checkpoint saving (convert back to generic format)
+      state.messages = msgs.map((m) => ({
+        role: m.role,
+        content: typeof m.content === 'string'
+          ? m.content
+          : Array.isArray(m.content)
+            ? m.content.map((b) => ('text' in b ? b.text : '')).join('')
+            : '',
+      })) as typeof state.messages
+
       yield { type: 'done' }
     },
   }

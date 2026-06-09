@@ -114,7 +114,7 @@ export async function GET(
     let result = buildStaticMeritAnalysis(disputeType, evidenceCount)
     let source: 'ai' | 'static' = 'static'
 
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         const userPrompt = buildMeritAnalysisPrompt({
           disputeType,

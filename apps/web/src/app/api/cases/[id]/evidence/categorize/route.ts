@@ -15,8 +15,6 @@ import { validateAIInput } from '@/lib/ai/input-validation'
 
 export const maxDuration = 30
 
-const AI_MODEL = 'deepseek-chat'
-
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -64,7 +62,7 @@ export async function POST(
     let source: 'ai' | 'heuristic' | 'none' = result ? 'heuristic' : 'none'
 
     // Try AI if available
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         const userPrompt = buildCategorizationPrompt({ file_name, mime_type, text_snippet })
 
@@ -91,7 +89,7 @@ export async function POST(
 
     return NextResponse.json({
       suggestion: result,
-      _meta: { source, model: source === 'ai' ? AI_MODEL : null },
+      _meta: { source, model: source === 'ai' ? 'claude-sonnet-4-6' : null },
     })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

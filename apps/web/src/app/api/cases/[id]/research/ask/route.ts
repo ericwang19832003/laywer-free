@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
-import { createHash } from 'crypto'
+import { AIClient } from '@/lib/ai/client'
+import { sha256Hex } from '@/lib/edge-crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSingleEmbedding } from '@/lib/courtlistener/embeddings'
 import { buildRAGPrompt, isRAGAnswerSafe, ragQuestionSchema, type RAGChunkContext } from '@/lib/courtlistener/rag-prompts'
@@ -11,8 +11,6 @@ import { safeError } from '@/lib/security/safe-log'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 export const maxDuration = 60
-
-const AI_MODEL = 'deepseek-chat'
 
 export async function POST(
   request: NextRequest,
@@ -67,11 +65,9 @@ export async function POST(
       })
     }
 
-    const authoritiesHash = createHash('sha256')
-      .update(JSON.stringify(authorityIds))
-      .digest('hex')
+    const authoritiesHash = await sha256Hex(JSON.stringify(authorityIds))
 
-    const queryHash = buildQueryHash(question, caseId)
+    const queryHash = await buildQueryHash(question, caseId)
 
     const { data: cached } = await supabase
       .from('cl_query_cache')
@@ -167,18 +163,14 @@ export async function POST(
       county: caseData.county,
     })
 
-    // 4. Call DeepSeek
-    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
-    const response = await deepseek.chat.completions.create({
-      model: AI_MODEL,
-      max_tokens: 2048,
-      messages: [
-        { role: 'system', content: prompt.system },
-        { role: 'user', content: prompt.user },
-      ],
+    // 4. Call AI
+    const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
+    const { content: answerRaw } = await aiClient.complete({
+      systemPrompt: prompt.system,
+      userPrompt: prompt.user,
+      maxTokens: 2048,
+      caller: 'research-ask',
     })
-
-    const answerRaw = response.choices[0]?.message?.content ?? ''
 
     const answer = sanitizeDirectiveLanguage(answerRaw)
 
@@ -222,7 +214,7 @@ export async function POST(
     const responsePayload = {
       answer,
       citations: uniqueCitations,
-      _meta: { source: 'rag', model: AI_MODEL, chunks_used: chunks.length },
+      _meta: { source: 'rag', model: 'claude-sonnet-4-6', chunks_used: chunks.length },
     }
 
     const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString()

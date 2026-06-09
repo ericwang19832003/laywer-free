@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { isGmailMcpConfigured, getThreadTextForAI, readMessage } from '@/lib/mcp/gmail-client'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
-
-const AI_MODEL = 'deepseek-chat'
 
 export async function POST(
   _request: NextRequest,
@@ -61,17 +59,13 @@ Guidelines:
 
     const userPrompt = `Here is the email thread:\n\n${threadText}\n\nPlease draft a reply to the most recent message.`
 
-    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
-    const response = await deepseek.chat.completions.create({
-      model: AI_MODEL,
-      max_tokens: 1500,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
+    const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
+    const { content: draft } = await aiClient.complete({
+      systemPrompt,
+      userPrompt,
+      maxTokens: 1500,
+      caller: 'email-draft-reply',
     })
-
-    const draft = response.choices[0]?.message?.content ?? ''
 
     // Audit log (no email content stored)
     console.log(`[email-reply-audit] user=${user.id} case=${caseId} subject="${message.subject ?? 'unknown'}"`)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import {
   optionsAdvisorSchema,
@@ -116,12 +116,9 @@ export async function GET(
     let result = buildStaticOptionsAdvisor(disputeType, completedTasks, pendingTasks)
     let source: 'ai' | 'static' = 'static'
 
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
-        const deepseek = new OpenAI({
-          apiKey: process.env.DEEPSEEK_API_KEY,
-          baseURL: 'https://api.deepseek.com',
-        })
+        const client = new AIClient({ model: 'claude-sonnet-4-6' })
 
         const userPrompt = buildOptionsAdvisorPrompt({
           disputeType,
@@ -135,17 +132,14 @@ export async function GET(
           upcomingDeadlines: upcomingDeadlines as { key: string; due_at: string }[],
         })
 
-        const message = await deepseek.chat.completions.create({
-          model: 'deepseek-chat',
-          max_tokens: 2048,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: OPTIONS_ADVISOR_SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
+        const { raw } = await client.complete({
+          systemPrompt: OPTIONS_ADVISOR_SYSTEM_PROMPT,
+          userPrompt,
+          maxTokens: 2048,
+          jsonMode: true,
+          caller: 'options-advisor',
         })
 
-        const raw = message.choices[0]?.message?.content ?? ''
         if (raw) {
           const parsed = JSON.parse(raw)
           const validated = optionsAdvisorSchema.safeParse(parsed)

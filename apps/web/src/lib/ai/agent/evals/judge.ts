@@ -1,4 +1,4 @@
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 
 export interface JudgeResult {
   score: number  // 0, 1, or 2
@@ -15,25 +15,19 @@ export async function judgeResponse(
   agentResponse: string,
   rubric: string
 ): Promise<JudgeResult> {
-  const apiKey = process.env.DEEPSEEK_API_KEY
-  if (!apiKey) throw new Error('DEEPSEEK_API_KEY is required')
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY is required')
 
-  const openai = new OpenAI({ apiKey, baseURL: 'https://api.deepseek.com' })
+  const client = new AIClient({ model: 'claude-sonnet-4-6' })
 
-  const response = await openai.chat.completions.create({
-    model: 'deepseek-chat',
+  const { raw } = await client.complete({
+    systemPrompt: JUDGE_SYSTEM_PROMPT,
+    userPrompt: `Question asked: ${question}\n\nAgent response: ${agentResponse}\n\nRubric: ${rubric}`,
     temperature: 0,
-    response_format: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: JUDGE_SYSTEM_PROMPT },
-      {
-        role: 'user',
-        content: `Question asked: ${question}\n\nAgent response: ${agentResponse}\n\nRubric: ${rubric}`,
-      },
-    ],
+    jsonMode: true,
+    caller: 'judge',
   })
 
-  const raw = response.choices[0]?.message?.content ?? '{}'
   try {
     const parsed = JSON.parse(raw) as { score?: number; reason?: string }
     return {
