@@ -29,6 +29,8 @@ describe('appealDeadlineDays — case-insensitive + fallback', () => {
   it('mixed case Ca → 60', () => expect(appealDeadlineDays('Ca')).toBe(60))
   it('unknown state ZZ → 30', () => expect(appealDeadlineDays('ZZ')).toBe(30))
   it('empty string → 30', () => expect(appealDeadlineDays('')).toBe(30))
+  it('null → 30', () => expect(appealDeadlineDays(null)).toBe(30))
+  it('undefined → 30', () => expect(appealDeadlineDays(undefined)).toBe(30))
 })
 
 describe('calculateAppealDeadline — date arithmetic', () => {
@@ -61,5 +63,10 @@ describe('calculateAppealDeadline — date arithmetic', () => {
     const input = new Date('2026-01-01T00:00:00Z')
     calculateAppealDeadline(input, 'TX')
     expect(input.toISOString().slice(0, 10)).toBe('2026-01-01')
+  })
+
+  it('year boundary: 2026-12-15 + TX(30) → 2027-01-14', () => {
+    const result = calculateAppealDeadline(new Date('2026-12-15T00:00:00Z'), 'TX')
+    expect(result.toISOString().slice(0, 10)).toBe('2027-01-14')
   })
 })

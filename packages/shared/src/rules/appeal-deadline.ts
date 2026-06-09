@@ -12,12 +12,12 @@ const APPEAL_DAYS: Record<string, number> = {
   RI: 20, // R.I. Super. Ct. App. R. 4(a)
 }
 
-export function appealDeadlineDays(state: string): number {
-  return APPEAL_DAYS[state.toUpperCase()] ?? 30
+export function appealDeadlineDays(state: string | null | undefined): number {
+  return APPEAL_DAYS[(state ?? '').toUpperCase()] ?? 30
 }
 
 export function calculateAppealDeadline(judgmentDate: Date | string, state: string): Date {
-  const d = new Date(typeof judgmentDate === 'string' ? judgmentDate : judgmentDate.getTime())
+  const d = new Date(judgmentDate instanceof Date ? judgmentDate.getTime() : judgmentDate)
   d.setUTCDate(d.getUTCDate() + appealDeadlineDays(state))
   return d
 }
