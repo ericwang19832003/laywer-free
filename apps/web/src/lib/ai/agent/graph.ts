@@ -160,7 +160,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
         if (pendingToolUses.length === 0) break
 
         // Build assistant message with tool_use blocks
-        const assistantBlocks: Anthropic.ContentBlock[] = []
+        const assistantBlocks: (Anthropic.TextBlockParam | Anthropic.ToolUseBlockParam)[] = []
         if (assistantContent) {
           assistantBlocks.push({ type: 'text', text: assistantContent })
         }
