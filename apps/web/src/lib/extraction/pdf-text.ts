@@ -1,13 +1,24 @@
-import { PDFParse } from 'pdf-parse'
+import Anthropic from '@anthropic-ai/sdk'
 
-export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
-  const parser = new PDFParse({ data: new Uint8Array(buffer) })
+export async function extractTextFromPdf(buffer: Uint8Array | ArrayBuffer): Promise<string> {
+  const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
+  const base64 = btoa(String.fromCharCode(...bytes))
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   try {
-    const result = await parser.getText({ first: 5 })
-    return result.text ?? ''
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: 'Extract all text from this PDF document verbatim. Return only the extracted text, nothing else.' },
+        ],
+      }],
+    })
+    const block = response.content[0]
+    return block.type === 'text' ? block.text : ''
   } catch {
     return ''
-  } finally {
-    await parser.destroy().catch(() => {})
   }
 }

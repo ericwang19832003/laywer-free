@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server'
 // DEPRECATED: OAuth flow replaced by MCP integration.
-// This file can be safely deleted.
-export {}
+export function GET() { return NextResponse.json({ error: 'Deprecated' }, { status: 410 }) }
+export function POST() { return NextResponse.json({ error: 'Deprecated' }, { status: 410 }) }

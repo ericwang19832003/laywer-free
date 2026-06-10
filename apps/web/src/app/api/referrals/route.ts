@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { secureRandomBase64url } from '@/lib/edge-crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 
@@ -20,7 +20,7 @@ export async function GET() {
 
     // Generate one if none exists
     if (!referralCode) {
-      referralCode = randomBytes(6).toString('base64url')
+      referralCode = secureRandomBase64url(6)
       const { error } = await supabase
         .from('referrals')
         .insert({

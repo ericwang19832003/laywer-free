@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -10,7 +11,7 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://plausible.io",
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://plausible.io`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
@@ -25,6 +26,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   transpilePackages: ['@lawyer-free/shared'],
   poweredByHeader: false,
+  // Set Turbopack root to monorepo root so it can resolve hoisted packages (e.g. next)
+  // from the workspace root node_modules without hitting the cross-boundary security check.
+  turbopack: {
+    root: path.resolve(__dirname, '../..'),
+  },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
   },

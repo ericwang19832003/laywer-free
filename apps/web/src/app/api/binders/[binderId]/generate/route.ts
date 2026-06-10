@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash } from 'crypto'
+import { sha256Hex } from '@/lib/edge-crypto'
 import { zipSync } from 'fflate'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateSummaryPdf } from '@/lib/binder/generate-summary-pdf'
@@ -280,7 +280,7 @@ export async function POST(
     const zipBuffer = Buffer.from(zipSync(zipFiles, { level: 5 }))
 
     // ⑧ Compute SHA256
-    const sha256 = createHash('sha256').update(zipBuffer).digest('hex')
+    const sha256 = await sha256Hex(zipBuffer)
 
     // ⑨ Upload ZIP to Supabase Storage
     const storagePath = `cases/${caseId}/binders/${binderId}/trial_binder.zip`

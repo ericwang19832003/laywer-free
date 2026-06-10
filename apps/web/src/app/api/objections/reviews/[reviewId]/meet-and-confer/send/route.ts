@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { sendEmail } from '@/lib/email/provider'
-import { createHash } from 'crypto'
+import { sha256Hex } from '@/lib/edge-crypto'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
 
@@ -68,7 +68,7 @@ export async function POST(
 
     const subject = 'Meet and Confer — Discovery Objections'
     const bodyText = draft.content_text ?? ''
-    const bodySha = draft.sha256 ?? createHash('sha256').update(bodyText, 'utf8').digest('hex')
+    const bodySha = draft.sha256 ?? await sha256Hex(bodyText)
 
     // Insert communications record (queued)
     const { data: comm, error: commError } = await supabase

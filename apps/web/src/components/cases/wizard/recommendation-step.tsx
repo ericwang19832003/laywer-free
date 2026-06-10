@@ -51,11 +51,349 @@ const PA_COURT_LABELS: Record<string, string> = {
   federal: 'Federal Court',
 }
 
+const IL_COURT_LABELS: Record<string, string> = {
+  il_small_claims: 'Circuit Court — Small Claims',
+  il_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const OH_COURT_LABELS: Record<string, string> = {
+  oh_small_claims: 'Small Claims Court',
+  oh_municipal: 'Municipal Court',
+  oh_common_pleas: 'Court of Common Pleas',
+  federal: 'Federal Court',
+}
+
+const GA_COURT_LABELS: Record<string, string> = {
+  ga_magistrate: 'Magistrate Court',
+  ga_state_court: 'State Court',
+  ga_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const NC_COURT_LABELS: Record<string, string> = {
+  nc_small_claims: 'Small Claims (Magistrate)',
+  nc_district: 'District Court',
+  nc_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const MI_COURT_LABELS: Record<string, string> = {
+  mi_small_claims: 'Small Claims Court',
+  mi_district: 'District Court',
+  mi_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const NJ_COURT_LABELS: Record<string, string> = {
+  nj_small_claims: 'Small Claims Court',
+  nj_special_civil: 'Special Civil Part',
+  nj_civil: 'Superior Court — Civil Part',
+  nj_family: 'Superior Court — Family Part',
+  federal: 'Federal Court',
+}
+
+const VA_COURT_LABELS: Record<string, string> = {
+  va_small_claims: 'Small Claims Division',
+  va_general_district: 'General District Court',
+  va_circuit: 'Circuit Court',
+  va_jdr: 'J&DR District Court',
+  federal: 'Federal Court',
+}
+
+const WA_COURT_LABELS: Record<string, string> = {
+  wa_small_claims: 'Small Claims Court',
+  wa_district: 'District Court',
+  wa_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const AZ_COURT_LABELS: Record<string, string> = {
+  az_small_claims: 'Small Claims Court',
+  az_justice: 'Justice Court',
+  az_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const CO_COURT_LABELS: Record<string, string> = {
+  co_small_claims: 'Small Claims Court',
+  co_county: 'County Court',
+  co_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const TN_COURT_LABELS: Record<string, string> = {
+  tn_general_sessions: 'General Sessions Court',
+  tn_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const IN_COURT_LABELS: Record<string, string> = {
+  in_small_claims: 'Small Claims Court',
+  in_circuit: 'Circuit / Superior Court',
+  federal: 'Federal Court',
+}
+
+const MO_COURT_LABELS: Record<string, string> = {
+  mo_small_claims: 'Small Claims Court',
+  mo_associate_circuit: 'Associate Circuit Court',
+  mo_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const MD_COURT_LABELS: Record<string, string> = {
+  md_district: 'District Court',
+  md_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const WI_COURT_LABELS: Record<string, string> = {
+  wi_small_claims: 'Circuit Court — Small Claims',
+  wi_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const MN_COURT_LABELS: Record<string, string> = {
+  mn_conciliation: 'Conciliation Court (Small Claims)',
+  mn_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const SC_COURT_LABELS: Record<string, string> = {
+  sc_magistrate: 'Magistrate Court',
+  sc_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const AL_COURT_LABELS: Record<string, string> = {
+  al_small_claims: 'District Court — Small Claims',
+  al_district: 'District Court',
+  al_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const LA_COURT_LABELS: Record<string, string> = {
+  la_small_claims: 'City Court — Small Claims',
+  la_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const KY_COURT_LABELS: Record<string, string> = {
+  ky_small_claims: 'District Court — Small Claims',
+  ky_district: 'District Court',
+  ky_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const OR_COURT_LABELS: Record<string, string> = {
+  or_small_claims: 'Small Claims Dept, Circuit Court',
+  or_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const NV_COURT_LABELS: Record<string, string> = {
+  nv_small_claims: 'Small Claims Court (Justice Court)',
+  nv_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const CT_COURT_LABELS: Record<string, string> = {
+  ct_small_claims: 'Superior Court — Small Claims Session',
+  ct_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const MA_COURT_LABELS: Record<string, string> = {
+  ma_small_claims: 'Small Claims Session, District Court',
+  ma_district: 'District Court / Superior Court',
+  federal: 'Federal Court',
+}
+
+const OK_COURT_LABELS: Record<string, string> = {
+  ok_small_claims: 'Small Claims Docket, District Court',
+  ok_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const AR_COURT_LABELS: Record<string, string> = {
+  ar_small_claims: 'Small Claims Court (District Court)',
+  ar_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const MS_COURT_LABELS: Record<string, string> = {
+  ms_justice: 'Justice Court',
+  ms_county: 'County Court',
+  ms_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const UT_COURT_LABELS: Record<string, string> = {
+  ut_small_claims: 'Justice Court — Small Claims',
+  ut_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const NM_COURT_LABELS: Record<string, string> = {
+  nm_magistrate: 'Magistrate Court (or Metro Court in Bernalillo)',
+  nm_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const WV_COURT_LABELS: Record<string, string> = {
+  wv_magistrate: 'Magistrate Court',
+  wv_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const DE_COURT_LABELS: Record<string, string> = {
+  de_jp: 'Justice of the Peace Court',
+  de_common_pleas: 'Court of Common Pleas',
+  de_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const RI_COURT_LABELS: Record<string, string> = {
+  ri_small_claims: 'District Court Small Claims',
+  ri_district: 'District Court',
+  ri_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const NH_COURT_LABELS: Record<string, string> = {
+  nh_small_claims: 'Circuit Court Small Claims',
+  nh_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const VT_COURT_LABELS: Record<string, string> = {
+  vt_small_claims: 'Small Claims Court',
+  vt_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const ME_COURT_LABELS: Record<string, string> = {
+  me_small_claims: 'District Court Small Claims',
+  me_superior: 'Superior Court',
+  federal: 'Federal Court',
+}
+
+const IA_COURT_LABELS: Record<string, string> = {
+  ia_small_claims: 'Small Claims Court',
+  ia_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const KS_COURT_LABELS: Record<string, string> = {
+  ks_small_claims: 'Small Claims Court',
+  ks_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const NE_COURT_LABELS: Record<string, string> = {
+  ne_small_claims: 'County Court Small Claims',
+  ne_county: 'County Court',
+  ne_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const SD_COURT_LABELS: Record<string, string> = {
+  sd_small_claims: 'Small Claims Court',
+  sd_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const ND_COURT_LABELS: Record<string, string> = {
+  nd_small_claims: 'Small Claims Court',
+  nd_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const MT_COURT_LABELS: Record<string, string> = {
+  mt_justice: 'Justice Court Small Claims',
+  mt_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const WY_COURT_LABELS: Record<string, string> = {
+  wy_small_claims: 'Circuit Court Small Claims',
+  wy_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const ID_COURT_LABELS: Record<string, string> = {
+  id_small_claims: 'Small Claims Court',
+  id_magistrate: 'Magistrate Division',
+  id_district: 'District Court',
+  federal: 'Federal Court',
+}
+
+const HI_COURT_LABELS: Record<string, string> = {
+  hi_small_claims: 'Small Claims Court',
+  hi_district: 'District Court',
+  hi_circuit: 'Circuit Court',
+  federal: 'Federal Court',
+}
+
+const AK_COURT_LABELS: Record<string, string> = {
+  ak_small_claims: 'District Court Small Claims',
+  ak_district: 'District Court',
+  federal: 'Federal Court',
+}
+
 function getCourtLabels(selectedState: State): Record<string, string> {
-  if (selectedState === 'PA') return PA_COURT_LABELS
-  if (selectedState === 'FL') return FL_COURT_LABELS
-  if (selectedState === 'NY') return NY_COURT_LABELS
-  return selectedState === 'CA' ? CA_COURT_LABELS : TX_COURT_LABELS
+  switch (selectedState) {
+    case 'PA': return PA_COURT_LABELS
+    case 'FL': return FL_COURT_LABELS
+    case 'NY': return NY_COURT_LABELS
+    case 'CA': return CA_COURT_LABELS
+    case 'IL': return IL_COURT_LABELS
+    case 'OH': return OH_COURT_LABELS
+    case 'GA': return GA_COURT_LABELS
+    case 'NC': return NC_COURT_LABELS
+    case 'MI': return MI_COURT_LABELS
+    case 'NJ': return NJ_COURT_LABELS
+    case 'VA': return VA_COURT_LABELS
+    case 'WA': return WA_COURT_LABELS
+    case 'AZ': return AZ_COURT_LABELS
+    case 'CO': return CO_COURT_LABELS
+    case 'TN': return TN_COURT_LABELS
+    case 'IN': return IN_COURT_LABELS
+    case 'MO': return MO_COURT_LABELS
+    case 'MD': return MD_COURT_LABELS
+    case 'WI': return WI_COURT_LABELS
+    case 'MN': return MN_COURT_LABELS
+    case 'SC': return SC_COURT_LABELS
+    case 'AL': return AL_COURT_LABELS
+    case 'LA': return LA_COURT_LABELS
+    case 'KY': return KY_COURT_LABELS
+    case 'OR': return OR_COURT_LABELS
+    case 'NV': return NV_COURT_LABELS
+    case 'CT': return CT_COURT_LABELS
+    case 'MA': return MA_COURT_LABELS
+    case 'OK': return OK_COURT_LABELS
+    case 'AR': return AR_COURT_LABELS
+    case 'MS': return MS_COURT_LABELS
+    case 'UT': return UT_COURT_LABELS
+    case 'NM': return NM_COURT_LABELS
+    case 'WV': return WV_COURT_LABELS
+    case 'DE': return DE_COURT_LABELS
+    case 'RI': return RI_COURT_LABELS
+    case 'NH': return NH_COURT_LABELS
+    case 'VT': return VT_COURT_LABELS
+    case 'ME': return ME_COURT_LABELS
+    case 'IA': return IA_COURT_LABELS
+    case 'KS': return KS_COURT_LABELS
+    case 'NE': return NE_COURT_LABELS
+    case 'SD': return SD_COURT_LABELS
+    case 'ND': return ND_COURT_LABELS
+    case 'MT': return MT_COURT_LABELS
+    case 'WY': return WY_COURT_LABELS
+    case 'ID': return ID_COURT_LABELS
+    case 'HI': return HI_COURT_LABELS
+    case 'AK': return AK_COURT_LABELS
+    default: return TX_COURT_LABELS
+  }
 }
 
 interface RecommendationStepProps {
@@ -87,15 +425,58 @@ export function RecommendationStep({
 
   const courtLabels = getCourtLabels(selectedState)
   const config = getStateConfig(selectedState)
-  const countyPlaceholder = selectedState === 'PA'
-    ? 'e.g. Allegheny County'
-    : selectedState === 'FL'
-      ? 'e.g. Miami-Dade County'
-      : selectedState === 'NY'
-        ? 'e.g. Kings County'
-        : selectedState === 'CA'
-          ? 'e.g. Los Angeles County'
-          : 'e.g. Travis County'
+  const COUNTY_PLACEHOLDERS: Partial<Record<State, string>> = {
+    PA: 'e.g. Allegheny County',
+    FL: 'e.g. Miami-Dade County',
+    NY: 'e.g. Kings County',
+    CA: 'e.g. Los Angeles County',
+    IL: 'e.g. Cook County',
+    OH: 'e.g. Franklin County',
+    GA: 'e.g. Fulton County',
+    NC: 'e.g. Wake County',
+    MI: 'e.g. Wayne County',
+    NJ: 'e.g. Bergen County',
+    VA: 'e.g. Fairfax County',
+    WA: 'e.g. King County',
+    AZ: 'e.g. Maricopa County',
+    CO: 'e.g. Denver County',
+    TN: 'e.g. Shelby County',
+    IN: 'e.g. Marion County',
+    MO: 'e.g. St. Louis County',
+    MD: 'e.g. Montgomery County',
+    WI: 'e.g. Milwaukee County',
+    MN: 'e.g. Hennepin County',
+    SC: 'e.g. Richland County',
+    AL: 'e.g. Jefferson County',
+    LA: 'e.g. Orleans Parish',
+    KY: 'e.g. Jefferson County',
+    OR: 'e.g. Multnomah County',
+    NV: 'e.g. Clark County',
+    CT: 'e.g. Hartford County',
+    MA: 'e.g. Middlesex County',
+    OK: 'e.g. Oklahoma County',
+    AR: 'e.g. Pulaski County',
+    MS: 'e.g. Hinds County',
+    UT: 'e.g. Salt Lake County',
+    NM: 'e.g. Bernalillo County',
+    WV: 'e.g. Kanawha County',
+    DE: 'e.g. New Castle County',
+    RI: 'e.g. Providence County',
+    NH: 'e.g. Hillsborough County',
+    VT: 'e.g. Chittenden County',
+    ME: 'e.g. Cumberland County',
+    IA: 'e.g. Polk County',
+    KS: 'e.g. Johnson County',
+    NE: 'e.g. Douglas County',
+    SD: 'e.g. Minnehaha County',
+    ND: 'e.g. Cass County',
+    MT: 'e.g. Yellowstone County',
+    WY: 'e.g. Laramie County',
+    ID: 'e.g. Ada County',
+    HI: 'e.g. Honolulu County',
+    AK: 'e.g. Anchorage Borough',
+  }
+  const countyPlaceholder = COUNTY_PLACEHOLDERS[selectedState] ?? 'e.g. Travis County'
 
   const recommendedLabel = courtLabels[recommendation.recommended] ?? recommendation.recommended
 

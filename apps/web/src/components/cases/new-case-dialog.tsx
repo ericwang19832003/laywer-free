@@ -21,6 +21,7 @@ import {
   type DisputeType,
   type AmountRange,
   type CircumstanceFlags,
+  type CourtType,
 } from '@lawyer-free/shared/rules/court-recommendation'
 import type { State } from '@lawyer-free/shared/schemas/case'
 import { WizardProgress } from './wizard/wizard-progress'
@@ -360,28 +361,61 @@ export function NewCaseDialog() {
     setError(null)
 
     const stateCode = state.selectedState || 'TX'
-    const isCA = stateCode === 'CA'
-    const isNY = stateCode === 'NY'
-    const isFL = stateCode === 'FL'
-    const isPA = stateCode === 'PA'
+
+    const FAMILY_COURT: Record<string, string> = {
+      TX: 'district', CA: 'unlimited_civil', NY: 'ny_supreme', FL: 'fl_circuit', PA: 'pa_common_pleas',
+      IL: 'il_circuit', OH: 'oh_common_pleas', GA: 'ga_superior', NC: 'nc_district', MI: 'mi_circuit',
+      NJ: 'nj_family', VA: 'va_circuit', WA: 'wa_superior', AZ: 'az_superior', CO: 'co_district',
+      TN: 'tn_circuit', IN: 'in_circuit', MO: 'mo_circuit', MD: 'md_circuit', WI: 'wi_circuit',
+      MN: 'mn_district', SC: 'sc_circuit', AL: 'al_circuit', LA: 'la_district', KY: 'ky_circuit',
+      OR: 'or_circuit', NV: 'nv_district', CT: 'ct_superior', MA: 'ma_district', OK: 'ok_district',
+      AR: 'ar_circuit', MS: 'ms_circuit', UT: 'ut_district', NM: 'nm_district', WV: 'wv_circuit',
+      DE: 'de_superior', RI: 'ri_superior', NH: 'nh_superior', VT: 'vt_superior', ME: 'me_superior',
+      IA: 'ia_district', KS: 'ks_district', NE: 'ne_district', SD: 'sd_circuit', ND: 'nd_district',
+      MT: 'mt_district', WY: 'wy_district', ID: 'id_district', HI: 'hi_circuit', AK: 'ak_district',
+    }
+    const SMALL_CLAIMS_COURT: Record<string, string> = {
+      TX: 'jp', CA: 'small_claims', NY: 'ny_small_claims', FL: 'fl_small_claims', PA: 'pa_magisterial',
+      IL: 'il_small_claims', OH: 'oh_small_claims', GA: 'ga_magistrate', NC: 'nc_small_claims', MI: 'mi_small_claims',
+      NJ: 'nj_small_claims', VA: 'va_small_claims', WA: 'wa_small_claims', AZ: 'az_small_claims', CO: 'co_small_claims',
+      TN: 'tn_general_sessions', IN: 'in_small_claims', MO: 'mo_small_claims', MD: 'md_district', WI: 'wi_small_claims',
+      MN: 'mn_conciliation', SC: 'sc_magistrate', AL: 'al_small_claims', LA: 'la_small_claims', KY: 'ky_small_claims',
+      OR: 'or_small_claims', NV: 'nv_small_claims', CT: 'ct_small_claims', MA: 'ma_small_claims', OK: 'ok_small_claims',
+      AR: 'ar_small_claims', MS: 'ms_justice', UT: 'ut_small_claims', NM: 'nm_magistrate', WV: 'wv_magistrate',
+      DE: 'de_jp', RI: 'ri_small_claims', NH: 'nh_small_claims', VT: 'vt_small_claims', ME: 'me_small_claims',
+      IA: 'ia_small_claims', KS: 'ks_small_claims', NE: 'ne_small_claims', SD: 'sd_small_claims', ND: 'nd_small_claims',
+      MT: 'mt_justice', WY: 'wy_small_claims', ID: 'id_small_claims', HI: 'hi_small_claims', AK: 'ak_small_claims',
+    }
+    const EVICTION_COURT: Record<string, string> = {
+      TX: 'jp', CA: 'unlimited_civil', NY: 'ny_civil', FL: 'fl_county', PA: 'pa_magisterial',
+      IL: 'il_circuit', OH: 'oh_municipal', GA: 'ga_magistrate', NC: 'nc_small_claims', MI: 'mi_district',
+      NJ: 'nj_special_civil', VA: 'va_general_district', WA: 'wa_superior', AZ: 'az_justice', CO: 'co_county',
+      TN: 'tn_general_sessions', IN: 'in_circuit', MO: 'mo_associate_circuit', MD: 'md_district', WI: 'wi_small_claims',
+      MN: 'mn_district', SC: 'sc_magistrate', AL: 'al_district', LA: 'la_district', KY: 'ky_district',
+      OR: 'or_circuit', NV: 'nv_district', CT: 'ct_superior', MA: 'ma_district', OK: 'ok_district',
+      AR: 'ar_circuit', MS: 'ms_justice', UT: 'ut_district', NM: 'nm_magistrate', WV: 'wv_magistrate',
+      DE: 'de_jp', RI: 'ri_district', NH: 'nh_small_claims', VT: 'vt_superior', ME: 'me_small_claims',
+      IA: 'ia_small_claims', KS: 'ks_district', NE: 'ne_county', SD: 'sd_small_claims', ND: 'nd_district',
+      MT: 'mt_justice', WY: 'wy_small_claims', ID: 'id_magistrate', HI: 'hi_district', AK: 'ak_small_claims',
+    }
 
     const courtType =
       courtOverride ??
       (isFamily
-        ? (isPA ? 'pa_common_pleas' : isFL ? 'fl_circuit' : isNY ? 'ny_supreme' : isCA ? 'unlimited_civil' : 'district')
+        ? (FAMILY_COURT[stateCode] ?? 'district')
         : isBusiness
-          ? (isPA ? 'pa_common_pleas' : isFL ? 'fl_circuit' : isNY ? 'ny_supreme' : isCA ? 'unlimited_civil' : 'district')
+          ? (FAMILY_COURT[stateCode] ?? 'district')
           : isSmallClaims
-          ? (isPA ? 'pa_magisterial' : isFL ? 'fl_small_claims' : isNY ? 'ny_small_claims' : isCA ? 'small_claims' : 'jp')
+          ? (SMALL_CLAIMS_COURT[stateCode] ?? 'jp')
           : isEviction
-            ? (isPA ? 'pa_magisterial' : isFL ? 'fl_county' : isNY ? 'ny_civil' : isCA ? 'unlimited_civil' : 'jp')
+            ? (EVICTION_COURT[stateCode] ?? 'jp')
             : state.disputeType && state.amount
               ? recommendCourt({
                   disputeType: state.disputeType,
                   amount: state.amount,
                   circumstances: state.circumstances,
                   subType: isLandlordTenant ? state.landlordTenantSubType : undefined,
-                  state: stateCode,
+                  state: stateCode as Parameters<typeof recommendCourt>[0]['state'],
                 }).recommended
               : 'unknown')
 
@@ -483,10 +517,214 @@ export function NewCaseDialog() {
   }
 
   const selectedState = state.selectedState || 'TX'
-  const isCA = selectedState === 'CA'
-  const isNY = selectedState === 'NY'
-  const isFL = selectedState === 'FL'
-  const isPA = selectedState === 'PA'
+
+  const STATE_FAMILY_RECOMMENDATION: Record<string, { recommended: CourtType; reasoning: string; confidence: 'high' | 'moderate' }> = {
+    TX: { recommended: 'district', reasoning: 'Family law cases are filed in District Court.', confidence: 'high' },
+    CA: { recommended: 'unlimited_civil', reasoning: 'Family law matters are heard in California Superior Court (Unlimited Civil division).', confidence: 'high' },
+    FL: { recommended: 'fl_circuit', reasoning: 'Family law matters are heard in Florida Circuit Court.', confidence: 'high' },
+    PA: { recommended: 'pa_common_pleas', reasoning: 'Family law matters are heard in the Family Division of Pennsylvania Court of Common Pleas.', confidence: 'high' },
+    IL: { recommended: 'il_circuit', reasoning: 'Family law matters are heard in Illinois Circuit Court — Domestic Relations Division.', confidence: 'high' },
+    OH: { recommended: 'oh_common_pleas', reasoning: 'Family law matters are heard in the Domestic Relations Division of Ohio Court of Common Pleas.', confidence: 'high' },
+    GA: { recommended: 'ga_superior', reasoning: 'Family law matters (divorce, custody) have exclusive jurisdiction in Georgia Superior Court.', confidence: 'high' },
+    NC: { recommended: 'nc_district', reasoning: 'Family law matters have exclusive jurisdiction in North Carolina District Court.', confidence: 'high' },
+    MI: { recommended: 'mi_circuit', reasoning: 'Family law matters are heard in the Family Division of Michigan Circuit Court.', confidence: 'high' },
+    NJ: { recommended: 'nj_family', reasoning: 'Family law matters are heard in the Family Part of New Jersey Superior Court Chancery Division.', confidence: 'high' },
+    VA: { recommended: 'va_circuit', reasoning: 'Divorce cases are filed in Virginia Circuit Court. Custody/support matters may also be heard in J&DR District Court.', confidence: 'high' },
+    WA: { recommended: 'wa_superior', reasoning: 'Family law matters have exclusive jurisdiction in Washington Superior Court.', confidence: 'high' },
+    AZ: { recommended: 'az_superior', reasoning: 'Family law matters are heard in the Family Court Division of Arizona Superior Court.', confidence: 'high' },
+    CO: { recommended: 'co_district', reasoning: 'Family law matters have exclusive jurisdiction in Colorado District Court — Domestic Relations Division.', confidence: 'high' },
+    TN: { recommended: 'tn_circuit', reasoning: 'Family law matters (divorce, custody) are filed in Tennessee Circuit Court.', confidence: 'high' },
+    IN: { recommended: 'in_circuit', reasoning: 'Family law matters are heard in Indiana Circuit or Superior Court.', confidence: 'high' },
+    MO: { recommended: 'mo_circuit', reasoning: 'Family law matters have exclusive jurisdiction in Missouri Circuit Court.', confidence: 'high' },
+    MD: { recommended: 'md_circuit', reasoning: 'Family law matters have exclusive jurisdiction in Maryland Circuit Court.', confidence: 'high' },
+    WI: { recommended: 'wi_circuit', reasoning: 'Family law matters have exclusive jurisdiction in Wisconsin Circuit Court.', confidence: 'high' },
+    MN: { recommended: 'mn_district', reasoning: 'Family law matters have exclusive jurisdiction in Minnesota District Court.', confidence: 'high' },
+    SC: { recommended: 'sc_circuit', reasoning: 'Family law matters are heard in South Carolina Family Court (a division of Circuit Court).', confidence: 'high' },
+    AL: { recommended: 'al_circuit', reasoning: 'Family law matters have exclusive jurisdiction in Alabama Circuit Court.', confidence: 'high' },
+    LA: { recommended: 'la_district', reasoning: 'Family law matters have exclusive jurisdiction in Louisiana District Court.', confidence: 'high' },
+    KY: { recommended: 'ky_circuit', reasoning: 'Family law matters have exclusive jurisdiction in Kentucky Circuit Court — Family Court Division.', confidence: 'high' },
+    OR: { recommended: 'or_circuit', reasoning: 'Family law matters (dissolution, custody, support) have exclusive jurisdiction in Oregon Circuit Court.', confidence: 'high' },
+    NV: { recommended: 'nv_district', reasoning: 'Family law matters have exclusive jurisdiction in Nevada District Court — Family Division.', confidence: 'high' },
+    CT: { recommended: 'ct_superior', reasoning: 'Family law matters are heard in the Family Division of Connecticut Superior Court.', confidence: 'high' },
+    MA: { recommended: 'ma_district', reasoning: 'Family law matters are heard in Massachusetts Probate and Family Court.', confidence: 'high' },
+    OK: { recommended: 'ok_district', reasoning: 'Family law matters have exclusive jurisdiction in Oklahoma District Court — Family Division.', confidence: 'high' },
+    AR: { recommended: 'ar_circuit', reasoning: 'Family law matters have exclusive jurisdiction in Arkansas Circuit Court — Domestic Relations Division.', confidence: 'high' },
+    MS: { recommended: 'ms_circuit', reasoning: 'Family law matters (divorce, custody) have exclusive jurisdiction in Mississippi Chancery Court.', confidence: 'high' },
+    UT: { recommended: 'ut_district', reasoning: 'Family law matters have exclusive jurisdiction in Utah District Court.', confidence: 'high' },
+    NM: { recommended: 'nm_district', reasoning: 'Family law matters have exclusive jurisdiction in New Mexico District Court.', confidence: 'high' },
+    WV: { recommended: 'wv_circuit', reasoning: 'Family law matters have exclusive jurisdiction in West Virginia Circuit Court — Family Court Division.', confidence: 'high' },
+    DE: { recommended: 'de_superior', reasoning: 'Family Court in Delaware handles divorce, custody, and support matters (a division of Superior Court).', confidence: 'high' },
+    RI: { recommended: 'ri_superior', reasoning: 'Family Court in Rhode Island handles divorce, custody, and support matters.', confidence: 'high' },
+    NH: { recommended: 'nh_superior', reasoning: 'Family Division of the New Hampshire Circuit Court handles divorce, custody, and support matters.', confidence: 'high' },
+    VT: { recommended: 'vt_superior', reasoning: 'Family Division of Vermont Superior Court handles divorce, custody, and support matters.', confidence: 'high' },
+    ME: { recommended: 'me_superior', reasoning: 'Maine District Court and Superior Court handle family matters depending on the issue.', confidence: 'high' },
+    IA: { recommended: 'ia_district', reasoning: 'Family law matters in Iowa are handled exclusively by District Court.', confidence: 'high' },
+    KS: { recommended: 'ks_district', reasoning: 'Family law matters in Kansas are handled exclusively by District Court.', confidence: 'high' },
+    NE: { recommended: 'ne_district', reasoning: 'Family law matters in Nebraska are handled by District Court.', confidence: 'high' },
+    SD: { recommended: 'sd_circuit', reasoning: 'Family law matters in South Dakota are handled exclusively by Circuit Court.', confidence: 'high' },
+    ND: { recommended: 'nd_district', reasoning: 'Family law matters in North Dakota are handled exclusively by District Court.', confidence: 'high' },
+    MT: { recommended: 'mt_district', reasoning: 'Family law matters in Montana are handled exclusively by District Court.', confidence: 'high' },
+    WY: { recommended: 'wy_district', reasoning: 'Family law matters in Wyoming are handled exclusively by District Court.', confidence: 'high' },
+    ID: { recommended: 'id_magistrate', reasoning: 'Family law matters in Idaho are handled by the Magistrate Division of District Court.', confidence: 'high' },
+    HI: { recommended: 'hi_circuit', reasoning: 'Family Court in Hawaii is a division of Circuit Court.', confidence: 'high' },
+    AK: { recommended: 'ak_district', reasoning: 'Family law matters in Alaska are handled by Superior Court (larger matters) or District Court.', confidence: 'high' },
+  }
+  const STATE_SMALL_CLAIMS_RECOMMENDATION: Record<string, { recommended: CourtType; reasoning: string; confidence: 'high' | 'moderate' }> = {
+    TX: { recommended: 'jp', reasoning: 'Small claims cases are filed in Justice of the Peace (JP) Court.', confidence: 'high' },
+    CA: { recommended: 'small_claims', reasoning: 'Small claims cases are filed in California Small Claims Court.', confidence: 'high' },
+    NY: { recommended: 'ny_small_claims', reasoning: 'Small claims cases up to $10,000 are filed in New York Small Claims Court.', confidence: 'high' },
+    FL: { recommended: 'fl_small_claims', reasoning: 'Small claims cases up to $8,000 are filed in Florida Small Claims Court.', confidence: 'high' },
+    PA: { recommended: 'pa_magisterial', reasoning: 'Small claims cases up to $12,000 are filed in Pennsylvania Magisterial District Court.', confidence: 'high' },
+    IL: { recommended: 'il_small_claims', reasoning: 'Small claims cases up to $10,000 use the Small Claims track in Illinois Circuit Court.', confidence: 'high' },
+    OH: { recommended: 'oh_small_claims', reasoning: 'Small claims cases up to $6,000 are filed in Ohio Small Claims Court (Municipal/County Court).', confidence: 'high' },
+    GA: { recommended: 'ga_magistrate', reasoning: 'Small claims cases up to $15,000 are filed in Georgia Magistrate Court.', confidence: 'high' },
+    NC: { recommended: 'nc_small_claims', reasoning: 'Small claims cases up to $10,000 are heard before a Magistrate in North Carolina District Court.', confidence: 'high' },
+    MI: { recommended: 'mi_small_claims', reasoning: 'Small claims cases up to $7,000 are filed in Michigan Small Claims Court (District Court).', confidence: 'high' },
+    NJ: { recommended: 'nj_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in New Jersey Superior Court Small Claims Section.', confidence: 'high' },
+    VA: { recommended: 'va_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in the Small Claims Division of Virginia General District Court.', confidence: 'high' },
+    WA: { recommended: 'wa_small_claims', reasoning: 'Small claims cases up to $10,000 (individuals) are filed in Washington Small Claims Court (District Court).', confidence: 'high' },
+    AZ: { recommended: 'az_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in the Small Claims Division of Arizona Justice Court.', confidence: 'high' },
+    CO: { recommended: 'co_small_claims', reasoning: 'Small claims cases up to $7,500 are filed in the Small Claims Division of Colorado County Court.', confidence: 'high' },
+    TN: { recommended: 'tn_general_sessions', reasoning: 'Small claims cases up to $25,000 are filed in Tennessee General Sessions Court.', confidence: 'high' },
+    IN: { recommended: 'in_small_claims', reasoning: 'Small claims cases up to $10,000 are filed on the Small Claims Docket of Indiana Circuit/Superior Court.', confidence: 'high' },
+    MO: { recommended: 'mo_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in the Small Claims Division of Missouri Associate Circuit Court.', confidence: 'high' },
+    MD: { recommended: 'md_district', reasoning: 'Small claims cases up to $5,000 use the Small Claims track in Maryland District Court.', confidence: 'high' },
+    WI: { recommended: 'wi_small_claims', reasoning: 'Small claims cases up to $10,000 are filed under Chapter 799 procedure in Wisconsin Circuit Court.', confidence: 'high' },
+    MN: { recommended: 'mn_conciliation', reasoning: 'Small claims cases up to $20,000 are filed in Minnesota Conciliation Court.', confidence: 'high' },
+    SC: { recommended: 'sc_magistrate', reasoning: 'Small claims cases up to $7,500 are filed in South Carolina Magistrate Court.', confidence: 'high' },
+    AL: { recommended: 'al_small_claims', reasoning: 'Small claims cases up to $6,000 are filed on the Small Claims Docket of Alabama District Court.', confidence: 'high' },
+    LA: { recommended: 'la_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in the Small Claims Division of Louisiana City Court.', confidence: 'high' },
+    KY: { recommended: 'ky_small_claims', reasoning: 'Small claims cases up to $2,500 are filed in the Small Claims Division of Kentucky District Court.', confidence: 'high' },
+    OR: { recommended: 'or_small_claims', reasoning: 'Small claims cases up to $10,000 are filed in the Small Claims Department of Oregon Circuit Court. No attorneys permitted at the hearing; judgment is final.', confidence: 'high' },
+    NV: { recommended: 'nv_small_claims', reasoning: 'Small claims cases up to $10,000 are filed in Nevada Small Claims Court (a division of Justice Court).', confidence: 'high' },
+    CT: { recommended: 'ct_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in the Small Claims Session of Connecticut Superior Court.', confidence: 'high' },
+    MA: { recommended: 'ma_small_claims', reasoning: 'Small claims cases up to $7,000 are filed in the Small Claims Session of Massachusetts District Court.', confidence: 'high' },
+    OK: { recommended: 'ok_small_claims', reasoning: 'Small claims cases up to $10,000 are filed on the Small Claims Docket of Oklahoma District Court.', confidence: 'high' },
+    AR: { recommended: 'ar_small_claims', reasoning: 'Small claims cases under $5,000 are filed in Arkansas Small Claims Court. Note: no attorneys allowed.', confidence: 'high' },
+    MS: { recommended: 'ms_justice', reasoning: 'Small claims cases up to $3,500 are filed in Mississippi Justice Court — one of the lowest limits in the U.S.', confidence: 'high' },
+    UT: { recommended: 'ut_small_claims', reasoning: 'Small claims cases up to $20,000 are filed in Utah Justice Court Small Claims Division. Limit rises to $25,000 in 2030.', confidence: 'high' },
+    NM: { recommended: 'nm_magistrate', reasoning: 'Small claims cases up to $10,000 are filed in New Mexico Magistrate Court (or Metropolitan Court in Bernalillo County).', confidence: 'high' },
+    WV: { recommended: 'wv_magistrate', reasoning: 'Small claims cases up to $20,000 are filed in West Virginia Magistrate Court (doubled from $10,000 effective July 2025).', confidence: 'high' },
+    DE: { recommended: 'de_jp', reasoning: 'Small claims cases up to $25,000 are filed in Delaware Justice of the Peace Court — the highest small claims limit in the U.S. No attorneys in JP Court.', confidence: 'high' },
+    RI: { recommended: 'ri_small_claims', reasoning: 'Small claims cases up to $2,500 are filed in Rhode Island District Court Small Claims Division. Note: plaintiff cannot appeal a small claims judgment.', confidence: 'high' },
+    NH: { recommended: 'nh_small_claims', reasoning: 'Small claims cases up to $10,000 are filed in New Hampshire Circuit Court Small Claims Division. Mandatory e-filing; mediation required for claims over $5,000.', confidence: 'high' },
+    VT: { recommended: 'vt_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in Vermont Small Claims Court.', confidence: 'high' },
+    ME: { recommended: 'me_small_claims', reasoning: 'Small claims cases up to $6,000 are filed in Maine District Court Small Claims. Asymmetric appeal rights: plaintiff can appeal only on law; defendant can appeal law and fact.', confidence: 'high' },
+    IA: { recommended: 'ia_small_claims', reasoning: 'Small claims cases up to $6,500 are filed in Iowa Small Claims Court.', confidence: 'high' },
+    KS: { recommended: 'ks_small_claims', reasoning: 'Small claims cases up to $4,000 are filed in Kansas Small Claims Court. No attorneys unless opposing party also has one; max 20 filings per year.', confidence: 'high' },
+    NE: { recommended: 'ne_small_claims', reasoning: 'Small claims cases up to $3,600 are filed in Nebraska County Court Small Claims. Strict no-attorneys rule; max 2 filings per week, 10 per year.', confidence: 'high' },
+    SD: { recommended: 'sd_small_claims', reasoning: 'Small claims cases up to $12,000 are filed in South Dakota Small Claims Court.', confidence: 'high' },
+    ND: { recommended: 'nd_small_claims', reasoning: 'Small claims cases up to $15,000 are filed in North Dakota Small Claims Court. Individuals cannot have attorneys; corporations must have attorneys.', confidence: 'high' },
+    MT: { recommended: 'mt_justice', reasoning: 'Small claims cases up to $7,000 are filed in Montana Justice Court Small Claims Division. "All or none" attorney rule applies.', confidence: 'high' },
+    WY: { recommended: 'wy_small_claims', reasoning: 'Small claims cases up to $6,000 are filed in Wyoming Circuit Court Small Claims. Filing fee is only $10 — the lowest in the U.S.', confidence: 'high' },
+    ID: { recommended: 'id_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in Idaho Small Claims Court. No attorneys AND no counterclaims permitted.', confidence: 'high' },
+    HI: { recommended: 'hi_small_claims', reasoning: 'Small claims cases up to $5,000 are filed in Hawaii Small Claims Court. Important: NO right to appeal a small claims judgment.', confidence: 'high' },
+    AK: { recommended: 'ak_small_claims', reasoning: 'Small claims cases up to $10,000 are filed in Alaska District Court Small Claims (SCG track). Claims ≤$2,500 use the SCL track.', confidence: 'high' },
+  }
+  const STATE_EVICTION_RECOMMENDATION: Record<string, { recommended: CourtType; reasoning: string; confidence: 'high' | 'moderate' }> = {
+    TX: { recommended: 'jp', reasoning: 'Eviction cases are filed in Justice of the Peace (JP) Court.', confidence: 'high' },
+    CA: { recommended: 'unlimited_civil', reasoning: 'Unlawful detainer (eviction) cases are heard in California Superior Court.', confidence: 'high' },
+    NY: { recommended: 'ny_civil', reasoning: 'Eviction proceedings are heard in Housing Court, part of New York Civil Court.', confidence: 'high' },
+    FL: { recommended: 'fl_county', reasoning: 'Eviction proceedings are filed in Florida County Court.', confidence: 'high' },
+    PA: { recommended: 'pa_magisterial', reasoning: 'Eviction proceedings are filed in Pennsylvania Magisterial District Court.', confidence: 'high' },
+    IL: { recommended: 'il_circuit', reasoning: 'Eviction (forcible entry and detainer) cases are filed in Illinois Circuit Court.', confidence: 'high' },
+    OH: { recommended: 'oh_municipal', reasoning: 'Eviction (FED) cases are filed in Ohio Municipal or County Court.', confidence: 'high' },
+    GA: { recommended: 'ga_magistrate', reasoning: 'Dispossessory (eviction) proceedings are filed in Georgia Magistrate Court.', confidence: 'high' },
+    NC: { recommended: 'nc_small_claims', reasoning: 'Summary ejectment (eviction) cases are heard before a Magistrate in North Carolina District Court.', confidence: 'high' },
+    MI: { recommended: 'mi_district', reasoning: 'Eviction cases are filed in Michigan District Court.', confidence: 'high' },
+    NJ: { recommended: 'nj_special_civil', reasoning: 'Eviction proceedings are heard in the Landlord/Tenant Section of New Jersey Superior Court Special Civil Part.', confidence: 'high' },
+    VA: { recommended: 'va_general_district', reasoning: 'Unlawful detainer (eviction) cases are filed in Virginia General District Court.', confidence: 'high' },
+    WA: { recommended: 'wa_superior', reasoning: 'Unlawful detainer (eviction) proceedings are filed in Washington Superior Court.', confidence: 'high' },
+    AZ: { recommended: 'az_justice', reasoning: 'Eviction (FED) cases are filed in Arizona Justice Court.', confidence: 'high' },
+    CO: { recommended: 'co_county', reasoning: 'Eviction (FED) cases are filed in Colorado County Court.', confidence: 'high' },
+    TN: { recommended: 'tn_general_sessions', reasoning: 'Unlawful detainer (eviction) cases are filed in Tennessee General Sessions Court.', confidence: 'high' },
+    IN: { recommended: 'in_circuit', reasoning: 'Eviction (FED) cases are filed in Indiana Circuit/Superior Court.', confidence: 'high' },
+    MO: { recommended: 'mo_associate_circuit', reasoning: 'Unlawful detainer (eviction) cases are filed in Missouri Associate Circuit Court.', confidence: 'high' },
+    MD: { recommended: 'md_district', reasoning: 'Eviction (summary ejectment) proceedings are filed in Maryland District Court.', confidence: 'high' },
+    WI: { recommended: 'wi_small_claims', reasoning: 'Eviction (FED) cases are filed as small claims actions in Wisconsin Circuit Court (no dollar limit for evictions).', confidence: 'high' },
+    MN: { recommended: 'mn_district', reasoning: 'Eviction (unlawful detainer) proceedings are filed in Minnesota District Court.', confidence: 'high' },
+    SC: { recommended: 'sc_magistrate', reasoning: 'Ejectment (eviction) proceedings are filed in South Carolina Magistrate Court.', confidence: 'high' },
+    AL: { recommended: 'al_district', reasoning: 'Eviction proceedings are filed in Alabama District Court.', confidence: 'high' },
+    LA: { recommended: 'la_district', reasoning: 'Eviction proceedings are filed in Louisiana City Court or District Court.', confidence: 'high' },
+    KY: { recommended: 'ky_district', reasoning: 'Eviction (FED) proceedings are filed in Kentucky District Court.', confidence: 'high' },
+    OR: { recommended: 'or_circuit', reasoning: 'Eviction (FED) proceedings are filed in Oregon Circuit Court.', confidence: 'high' },
+    NV: { recommended: 'nv_district', reasoning: 'Summary eviction proceedings are filed in Nevada Justice Court.', confidence: 'high' },
+    CT: { recommended: 'ct_superior', reasoning: 'Summary process (eviction) proceedings are filed in Connecticut Superior Court Housing Session.', confidence: 'high' },
+    MA: { recommended: 'ma_district', reasoning: 'Summary process (eviction) proceedings are filed in Massachusetts Housing Court or District Court.', confidence: 'high' },
+    OK: { recommended: 'ok_district', reasoning: 'Forcible entry and detainer (eviction) proceedings are filed in Oklahoma District Court.', confidence: 'high' },
+    AR: { recommended: 'ar_circuit', reasoning: 'Unlawful detainer (eviction) proceedings are filed in Arkansas Circuit Court or District Court.', confidence: 'high' },
+    MS: { recommended: 'ms_justice', reasoning: 'Eviction proceedings are filed in Mississippi Justice Court.', confidence: 'high' },
+    UT: { recommended: 'ut_district', reasoning: 'Eviction (unlawful detainer) proceedings are filed in Utah Justice Court or District Court.', confidence: 'high' },
+    NM: { recommended: 'nm_magistrate', reasoning: 'Eviction (restitution) proceedings are filed in New Mexico Magistrate Court.', confidence: 'high' },
+    WV: { recommended: 'wv_magistrate', reasoning: 'Eviction proceedings are filed in West Virginia Magistrate Court.', confidence: 'high' },
+    DE: { recommended: 'de_jp', reasoning: 'Eviction (summary possession) proceedings are filed in Delaware Justice of the Peace Court.', confidence: 'high' },
+    RI: { recommended: 'ri_district', reasoning: 'Eviction proceedings are filed in Rhode Island District Court.', confidence: 'high' },
+    NH: { recommended: 'nh_small_claims', reasoning: 'Eviction (landlord-tenant) proceedings are filed in New Hampshire Circuit Court.', confidence: 'high' },
+    VT: { recommended: 'vt_superior', reasoning: 'Eviction (ejectment) proceedings are filed in Vermont Superior Court.', confidence: 'high' },
+    ME: { recommended: 'me_small_claims', reasoning: 'Forcible entry and detainer (eviction) proceedings are filed in Maine District Court.', confidence: 'high' },
+    IA: { recommended: 'ia_small_claims', reasoning: 'Eviction (FED) proceedings are filed in Iowa Small Claims Court.', confidence: 'high' },
+    KS: { recommended: 'ks_district', reasoning: 'Eviction (unlawful detainer) proceedings are filed in Kansas District Court.', confidence: 'high' },
+    NE: { recommended: 'ne_county', reasoning: 'Eviction proceedings are filed in Nebraska County Court.', confidence: 'high' },
+    SD: { recommended: 'sd_small_claims', reasoning: 'Eviction proceedings are filed in South Dakota Small Claims Court (for residential) or Circuit Court.', confidence: 'high' },
+    ND: { recommended: 'nd_district', reasoning: 'Eviction proceedings are filed in North Dakota District Court.', confidence: 'high' },
+    MT: { recommended: 'mt_justice', reasoning: 'Eviction (unlawful detainer) proceedings are filed in Montana Justice Court.', confidence: 'high' },
+    WY: { recommended: 'wy_district', reasoning: 'Eviction (unlawful detainer) proceedings are filed in Wyoming Circuit Court.', confidence: 'high' },
+    ID: { recommended: 'id_magistrate', reasoning: 'Eviction proceedings are filed in Idaho Magistrate Division.', confidence: 'high' },
+    HI: { recommended: 'hi_district', reasoning: 'Eviction (summary possession) proceedings are filed in Hawaii District Court.', confidence: 'high' },
+    AK: { recommended: 'ak_district', reasoning: 'Eviction (FED) proceedings are filed in Alaska District Court.', confidence: 'high' },
+  }
+  const STATE_BUSINESS_RECOMMENDATION: Record<string, { recommended: CourtType; reasoning: string; confidence: 'high' | 'moderate' }> = {
+    TX: { recommended: 'district', reasoning: 'Business disputes are filed in District Court.', confidence: 'high' },
+    CA: { recommended: 'unlimited_civil', reasoning: 'Business disputes are heard in California Superior Court (Unlimited Civil division).', confidence: 'high' },
+    NY: { recommended: 'ny_supreme', reasoning: 'Business disputes are heard in New York Supreme Court.', confidence: 'high' },
+    FL: { recommended: 'fl_circuit', reasoning: 'Business disputes are heard in Florida Circuit Court.', confidence: 'high' },
+    PA: { recommended: 'pa_common_pleas', reasoning: 'Business disputes are heard in Pennsylvania Court of Common Pleas.', confidence: 'high' },
+    IL: { recommended: 'il_circuit', reasoning: 'Business disputes are heard in Illinois Circuit Court.', confidence: 'high' },
+    OH: { recommended: 'oh_common_pleas', reasoning: 'Business disputes are heard in Ohio Court of Common Pleas.', confidence: 'high' },
+    GA: { recommended: 'ga_superior', reasoning: 'Business disputes are heard in Georgia Superior Court.', confidence: 'high' },
+    NC: { recommended: 'nc_superior', reasoning: 'Business disputes are heard in North Carolina Superior Court.', confidence: 'high' },
+    MI: { recommended: 'mi_circuit', reasoning: 'Business disputes are heard in Michigan Circuit Court.', confidence: 'high' },
+    NJ: { recommended: 'nj_civil', reasoning: 'Business disputes are heard in New Jersey Superior Court — Civil Part.', confidence: 'high' },
+    VA: { recommended: 'va_circuit', reasoning: 'Business disputes are heard in Virginia Circuit Court.', confidence: 'high' },
+    WA: { recommended: 'wa_superior', reasoning: 'Business disputes are heard in Washington Superior Court.', confidence: 'high' },
+    AZ: { recommended: 'az_superior', reasoning: 'Business disputes are heard in Arizona Superior Court.', confidence: 'high' },
+    CO: { recommended: 'co_district', reasoning: 'Business disputes are heard in Colorado District Court.', confidence: 'high' },
+    TN: { recommended: 'tn_circuit', reasoning: 'Business disputes are heard in Tennessee Circuit Court.', confidence: 'high' },
+    IN: { recommended: 'in_circuit', reasoning: 'Business disputes are heard in Indiana Circuit/Superior Court.', confidence: 'high' },
+    MO: { recommended: 'mo_circuit', reasoning: 'Business disputes are heard in Missouri Circuit Court.', confidence: 'high' },
+    MD: { recommended: 'md_circuit', reasoning: 'Business disputes are heard in Maryland Circuit Court.', confidence: 'high' },
+    WI: { recommended: 'wi_circuit', reasoning: 'Business disputes are heard in Wisconsin Circuit Court.', confidence: 'high' },
+    MN: { recommended: 'mn_district', reasoning: 'Business disputes are heard in Minnesota District Court.', confidence: 'high' },
+    SC: { recommended: 'sc_circuit', reasoning: 'Business disputes are heard in South Carolina Circuit Court.', confidence: 'high' },
+    AL: { recommended: 'al_circuit', reasoning: 'Business disputes are heard in Alabama Circuit Court.', confidence: 'high' },
+    LA: { recommended: 'la_district', reasoning: 'Business disputes are heard in Louisiana District Court.', confidence: 'high' },
+    KY: { recommended: 'ky_circuit', reasoning: 'Business disputes are heard in Kentucky Circuit Court.', confidence: 'high' },
+    OR: { recommended: 'or_circuit', reasoning: 'Business disputes are heard in Oregon Circuit Court.', confidence: 'high' },
+    NV: { recommended: 'nv_district', reasoning: 'Business disputes are heard in Nevada District Court.', confidence: 'high' },
+    CT: { recommended: 'ct_superior', reasoning: 'Business disputes are heard in Connecticut Superior Court.', confidence: 'high' },
+    MA: { recommended: 'ma_district', reasoning: 'Business disputes are heard in Massachusetts Superior Court or District Court.', confidence: 'high' },
+    OK: { recommended: 'ok_district', reasoning: 'Business disputes are heard in Oklahoma District Court.', confidence: 'high' },
+    AR: { recommended: 'ar_circuit', reasoning: 'Business disputes are heard in Arkansas Circuit Court.', confidence: 'high' },
+    MS: { recommended: 'ms_county', reasoning: 'Business disputes are heard in Mississippi County Court or Circuit Court.', confidence: 'high' },
+    UT: { recommended: 'ut_district', reasoning: 'Business disputes are heard in Utah District Court.', confidence: 'high' },
+    NM: { recommended: 'nm_district', reasoning: 'Business disputes are heard in New Mexico District Court.', confidence: 'high' },
+    WV: { recommended: 'wv_circuit', reasoning: 'Business disputes are heard in West Virginia Circuit Court.', confidence: 'high' },
+    DE: { recommended: 'de_superior', reasoning: 'Business disputes are heard in Delaware Superior Court.', confidence: 'high' },
+    RI: { recommended: 'ri_superior', reasoning: 'Business disputes are heard in Rhode Island Superior Court.', confidence: 'high' },
+    NH: { recommended: 'nh_superior', reasoning: 'Business disputes are heard in New Hampshire Superior Court.', confidence: 'high' },
+    VT: { recommended: 'vt_superior', reasoning: 'Business disputes are heard in Vermont Superior Court.', confidence: 'high' },
+    ME: { recommended: 'me_superior', reasoning: 'Business disputes are heard in Maine Superior Court.', confidence: 'high' },
+    IA: { recommended: 'ia_district', reasoning: 'Business disputes are heard in Iowa District Court.', confidence: 'high' },
+    KS: { recommended: 'ks_district', reasoning: 'Business disputes are heard in Kansas District Court.', confidence: 'high' },
+    NE: { recommended: 'ne_district', reasoning: 'Business disputes are heard in Nebraska District Court.', confidence: 'high' },
+    SD: { recommended: 'sd_circuit', reasoning: 'Business disputes are heard in South Dakota Circuit Court.', confidence: 'high' },
+    ND: { recommended: 'nd_district', reasoning: 'Business disputes are heard in North Dakota District Court.', confidence: 'high' },
+    MT: { recommended: 'mt_district', reasoning: 'Business disputes are heard in Montana District Court.', confidence: 'high' },
+    WY: { recommended: 'wy_district', reasoning: 'Business disputes are heard in Wyoming District Court.', confidence: 'high' },
+    ID: { recommended: 'id_district', reasoning: 'Business disputes are heard in Idaho District Court.', confidence: 'high' },
+    HI: { recommended: 'hi_circuit', reasoning: 'Business disputes are heard in Hawaii Circuit Court.', confidence: 'high' },
+    AK: { recommended: 'ak_district', reasoning: 'Business disputes are heard in Alaska District Court or Superior Court.', confidence: 'high' },
+  }
 
   const civilRecommendation =
     !isFamily && !isBusiness && !isSmallClaims && !isPersonalInjury && !isLandlordTenant && !isDebtCollection && state.disputeType && state.amount
@@ -494,7 +732,7 @@ export function NewCaseDialog() {
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
-          state: selectedState,
+          state: selectedState as Parameters<typeof recommendCourt>[0]['state'],
         })
       : null
 
@@ -504,7 +742,7 @@ export function NewCaseDialog() {
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
-          state: selectedState,
+          state: selectedState as Parameters<typeof recommendCourt>[0]['state'],
         })
       : null
 
@@ -514,134 +752,22 @@ export function NewCaseDialog() {
           disputeType: state.disputeType,
           amount: state.amount,
           circumstances: state.circumstances,
-          state: selectedState,
+          state: selectedState as Parameters<typeof recommendCourt>[0]['state'],
         })
       : null
 
-  const familyRecommendation = isPA
+  const isNY = selectedState === 'NY'
+  const familyRecommendation = isNY && new Set(['custody', 'child_support', 'visitation', 'protective_order']).has(state.familySubType)
     ? {
-        recommended: 'pa_common_pleas' as const,
-        reasoning: 'Family law matters are heard in the Family Division of Pennsylvania Court of Common Pleas.',
+        recommended: 'ny_family_court' as const,
+        reasoning: 'In New York, custody, child support, visitation, and protective order matters are heard in Family Court — a separate court from Supreme Court.',
         confidence: 'high' as const,
       }
-    : isFL
-      ? {
-          recommended: 'fl_circuit' as const,
-          reasoning: 'Family law matters are heard in Florida Circuit Court.',
-          confidence: 'high' as const,
-        }
-      : isNY
-        ? (() => {
-            const isNYFamilyCourt = new Set(['custody', 'child_support', 'visitation', 'protective_order']).has(state.familySubType)
-            return {
-              recommended: isNYFamilyCourt ? 'ny_family_court' as const : 'ny_supreme' as const,
-              reasoning: isNYFamilyCourt
-                ? 'In New York, custody, child support, visitation, and protective order matters are heard in Family Court — a separate court from Supreme Court. File in Supreme Court instead only if this matter is part of a divorce proceeding.'
-                : 'Divorce and spousal support matters in New York are filed in Supreme Court, which is the main civil trial court (not the highest court).',
-              confidence: 'high' as const,
-            }
-          })()
-        : isCA
-          ? {
-              recommended: 'unlimited_civil' as const,
-              reasoning: 'Family law matters are heard in California Superior Court (Unlimited Civil division).',
-              confidence: 'high' as const,
-            }
-          : {
-              recommended: 'district' as const,
-              reasoning: 'Family law cases are filed in District Court.',
-              confidence: 'high' as const,
-            }
+    : (STATE_FAMILY_RECOMMENDATION[selectedState] ?? STATE_FAMILY_RECOMMENDATION.TX)
 
-  const businessRecommendation = isPA
-    ? {
-        recommended: 'pa_common_pleas' as const,
-        reasoning: 'Business disputes are heard in Pennsylvania Court of Common Pleas.',
-        confidence: 'high' as const,
-      }
-    : isFL
-      ? {
-          recommended: 'fl_circuit' as const,
-          reasoning: 'Business disputes are heard in Florida Circuit Court.',
-          confidence: 'high' as const,
-        }
-      : isNY
-        ? {
-            recommended: 'ny_supreme' as const,
-            reasoning: 'Business disputes are heard in New York Supreme Court.',
-            confidence: 'high' as const,
-          }
-        : isCA
-          ? {
-              recommended: 'unlimited_civil' as const,
-              reasoning: 'Business disputes are heard in California Superior Court (Unlimited Civil division).',
-              confidence: 'high' as const,
-            }
-          : {
-              recommended: 'district' as const,
-              reasoning: 'Business disputes are filed in District Court.',
-              confidence: 'high' as const,
-            }
-
-  const smallClaimsRecommendation = isPA
-    ? {
-        recommended: 'pa_magisterial' as const,
-        reasoning: 'Small claims cases up to $12,000 are filed in Pennsylvania Magisterial District Court.',
-        confidence: 'high' as const,
-      }
-    : isFL
-      ? {
-          recommended: 'fl_small_claims' as const,
-          reasoning: 'Small claims cases up to $8,000 are filed in Florida Small Claims Court.',
-          confidence: 'high' as const,
-        }
-      : isNY
-        ? {
-            recommended: 'ny_small_claims' as const,
-            reasoning: 'Small claims cases up to $10,000 are filed in New York Small Claims Court.',
-            confidence: 'high' as const,
-          }
-        : isCA
-          ? {
-              recommended: 'small_claims' as const,
-              reasoning: 'Small claims cases are filed in California Small Claims Court.',
-              confidence: 'high' as const,
-            }
-          : {
-              recommended: 'jp' as const,
-              reasoning: 'Small claims cases are filed in Justice of the Peace (JP) Court.',
-              confidence: 'high' as const,
-            }
-
-  const evictionRecommendation = isPA
-    ? {
-        recommended: 'pa_magisterial' as const,
-        reasoning: 'Eviction proceedings are filed in Pennsylvania Magisterial District Court.',
-        confidence: 'high' as const,
-      }
-    : isFL
-      ? {
-          recommended: 'fl_county' as const,
-          reasoning: 'Eviction proceedings are filed in Florida County Court.',
-          confidence: 'high' as const,
-        }
-      : isNY
-        ? {
-            recommended: 'ny_civil' as const,
-            reasoning: 'Eviction proceedings are heard in Housing Court, which is part of New York Civil Court.',
-            confidence: 'high' as const,
-          }
-        : isCA
-          ? {
-              recommended: 'unlimited_civil' as const,
-              reasoning: 'Unlawful detainer (eviction) cases are heard in California Superior Court regardless of the amount involved.',
-              confidence: 'high' as const,
-            }
-          : {
-              recommended: 'jp' as const,
-              reasoning: 'Eviction cases are filed in Justice of the Peace (JP) Court.',
-              confidence: 'high' as const,
-            }
+  const businessRecommendation = STATE_BUSINESS_RECOMMENDATION[selectedState] ?? STATE_BUSINESS_RECOMMENDATION.TX
+  const smallClaimsRecommendation = STATE_SMALL_CLAIMS_RECOMMENDATION[selectedState] ?? STATE_SMALL_CLAIMS_RECOMMENDATION.TX
+  const evictionRecommendation = STATE_EVICTION_RECOMMENDATION[selectedState] ?? STATE_EVICTION_RECOMMENDATION.TX
 
   const landlordTenantRecommendation =
     isLandlordTenant && !isEviction && state.disputeType && state.amount
