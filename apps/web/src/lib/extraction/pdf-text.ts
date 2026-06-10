@@ -2,7 +2,9 @@ import Anthropic from '@anthropic-ai/sdk'
 
 export async function extractTextFromPdf(buffer: Uint8Array | ArrayBuffer): Promise<string> {
   const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
-  const base64 = btoa(String.fromCharCode(...bytes))
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+  const base64 = btoa(binary)
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   try {
     const response = await client.messages.create({

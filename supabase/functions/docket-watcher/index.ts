@@ -103,8 +103,8 @@ Deno.serve(async () => {
 
       await supabase.from('task_events').insert({
         case_id: c.id,
-        description: `[Court docket] ${classified.summary}`,
-        source: 'docket_watcher',
+        kind: 'docket_entry',
+        payload: { summary: classified.summary, source: 'docket_watcher' },
       })
 
       if (classified.responseDeadline) {

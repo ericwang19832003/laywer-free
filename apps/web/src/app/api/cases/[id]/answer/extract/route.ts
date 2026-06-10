@@ -194,7 +194,7 @@ export async function POST(
       .insert({
         case_id: caseId,
         court_document_id,
-        extractor: 'anthropic' as const,
+        extractor: 'openai' as const,
         status: 'needs_review' as const,
         confidence: null,
         fields,
@@ -217,7 +217,7 @@ export async function POST(
       payload: {
         extraction_id: extraction.id,
         court_document_id,
-        extractor: 'anthropic',
+        extractor: 'openai',
         status: 'needs_review',
         confidence: null,
       },
