@@ -18,24 +18,80 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Plus } from 'lucide-react'
 
 interface DeadlineFormDialogProps {
   caseId: string
 }
 
-const DEADLINE_TYPES = [
-  { value: 'answer_deadline', label: 'Answer Deadline' },
-  { value: 'hearing_date', label: 'Hearing Date' },
-  { value: 'other', label: 'Other' },
+// Grouped deadline type categories
+const DEADLINE_CATEGORIES = [
+  {
+    label: 'Court-Set Dates',
+    types: [
+      { value: 'hearing_date', label: 'Hearing Date' },
+      { value: 'trial_date', label: 'Trial Date' },
+      { value: 'pretrial_conference', label: 'Pretrial Conference' },
+      { value: 'status_hearing', label: 'Status Conference' },
+      { value: 'settlement_conference', label: 'Settlement Conference' },
+    ],
+  },
+  {
+    label: 'Scheduling Order',
+    types: [
+      { value: 'discovery_cutoff', label: 'Discovery Cutoff' },
+      { value: 'expert_disclosure', label: 'Expert Disclosure Deadline' },
+      { value: 'dispositive_motions', label: 'Dispositive Motions Deadline' },
+    ],
+  },
+  {
+    label: 'Party Deadlines',
+    types: [
+      { value: 'answer_deadline', label: 'Answer Deadline' },
+      { value: 'discovery_response_deadline', label: 'Discovery Response Deadline' },
+      { value: 'demand_response', label: 'Demand Letter Response' },
+    ],
+  },
+  {
+    label: 'Judgment & Appeal',
+    types: [
+      { value: 'judgment_entered', label: 'Judgment Entered' },
+      { value: 'appeal_deadline', label: 'Notice of Appeal Deadline' },
+    ],
+  },
+  {
+    label: 'Case Milestones',
+    types: [
+      { value: 'incident_date', label: 'Incident / Breach Date' },
+    ],
+  },
+  {
+    label: 'Other',
+    types: [
+      { value: 'other', label: 'Other (custom)' },
+    ],
+  },
 ] as const
 
+type DeadlineTypeValue =
+  | (typeof DEADLINE_CATEGORIES)[number]['types'][number]['value']
+
+// Helper hints shown below the type selector for special keys
+const TYPE_HINTS: Partial<Record<string, string>> = {
+  incident_date: "We'll automatically calculate your statute of limitations deadline.",
+  judgment_entered: "We'll automatically add your notice-of-appeal deadline.",
+  discovery_cutoff: 'Marks the last day to request or produce discovery.',
+}
+
 const SOURCE_OPTIONS = [
-  { value: 'user_confirmed', label: 'I confirmed this' },
-  { value: 'court_notice', label: 'From a court notice' },
+  { value: 'user_confirmed', label: 'I confirmed this date' },
+  { value: 'court_notice', label: 'Received from the court' },
 ] as const
 
 export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
@@ -63,9 +119,7 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen)
-    if (!nextOpen) {
-      resetForm()
-    }
+    if (!nextOpen) resetForm()
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -77,7 +131,7 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
       return
     }
     if (!dueDate) {
-      setError('Please select a due date.')
+      setError('Please enter a date.')
       return
     }
     if (!source) {
@@ -92,7 +146,6 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
 
-      // Convert the local datetime-local value to ISO string
       const dueDateISO = new Date(dueDate).toISOString()
 
       const res = await fetch(`/api/cases/${caseId}/deadlines`, {
@@ -118,7 +171,6 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
         return
       }
 
-      // Show brief success state
       setSuccess(true)
       setTimeout(() => {
         setOpen(false)
@@ -131,16 +183,26 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
     }
   }
 
+  const hint = TYPE_HINTS[deadlineType as DeadlineTypeValue]
+  const isDateOnly = deadlineType === 'incident_date'
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="secondary">Add a Deadline</Button>
+        <Button variant="default" size="sm" className="gap-1.5">
+          <Plus className="w-4 h-4" />
+          Add Deadline
+        </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         {success ? (
-          <div className="py-8 text-center">
-            <p className="text-lg font-medium text-warm-text">
-              Got it. We&apos;ll remind you ahead of time.
+          <div className="py-10 text-center">
+            <div className="text-3xl mb-3">✓</div>
+            <p className="text-base font-medium text-warm-text">
+              Deadline saved.
+            </p>
+            <p className="text-sm text-warm-muted mt-1">
+              We&apos;ll send reminders as the date approaches.
             </p>
           </div>
         ) : (
@@ -148,57 +210,69 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
             <DialogHeader>
               <DialogTitle>Add a deadline</DialogTitle>
               <DialogDescription>
-                We&apos;ll create reminders to help you prepare.
+                Court, scheduling, and personal deadlines — we&apos;ll remind you ahead of time.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-5">
+
+            <form onSubmit={handleSubmit} className="space-y-5 pt-1">
               {/* Deadline type */}
-              <div className="space-y-2">
-                <Label htmlFor="deadline-type">Type</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="deadline-type">Deadline type</Label>
                 <Select value={deadlineType} onValueChange={setDeadlineType}>
-                  <SelectTrigger className="w-full" id="deadline-type">
-                    <SelectValue placeholder="Select a deadline type" />
+                  <SelectTrigger id="deadline-type" className="w-full">
+                    <SelectValue placeholder="Choose a type…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEADLINE_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
+                    {DEADLINE_CATEGORIES.map((cat) => (
+                      <SelectGroup key={cat.label}>
+                        <SelectLabel>{cat.label}</SelectLabel>
+                        {cat.types.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     ))}
                   </SelectContent>
                 </Select>
+                {hint && (
+                  <p className="text-xs text-calm-indigo">{hint}</p>
+                )}
               </div>
 
-              {/* Custom key (shown when "Other" is selected) */}
+              {/* Custom key (only for "Other") */}
               {deadlineType === 'other' && (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="custom-key">Deadline name</Label>
                   <Input
                     id="custom-key"
                     value={customKey}
                     onChange={(e) => setCustomKey(e.target.value)}
-                    placeholder="e.g. Discovery response, Motion filing"
+                    placeholder="e.g. Expert report, Mediation session"
                   />
                 </div>
               )}
 
               {/* Due date */}
-              <div className="space-y-2">
-                <Label htmlFor="due-date">Due date</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="due-date">
+                  {deadlineType === 'incident_date' ? 'Date of incident or breach' : 'Date'}
+                </Label>
                 <Input
                   id="due-date"
-                  type="datetime-local"
+                  type={isDateOnly ? 'date' : 'datetime-local'}
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
+                  className="block w-full"
                 />
               </div>
 
               {/* Source */}
-              <div className="space-y-2">
-                <Label htmlFor="source">Source</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="source">How do you know this date?</Label>
                 <Select value={source} onValueChange={setSource}>
-                  <SelectTrigger className="w-full" id="source">
-                    <SelectValue placeholder="How do you know this date?" />
+                  <SelectTrigger id="source" className="w-full">
+                    <SelectValue placeholder="Select a source…" />
                   </SelectTrigger>
                   <SelectContent>
                     {SOURCE_OPTIONS.map((opt) => (
@@ -210,17 +284,18 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
                 </Select>
               </div>
 
-              {/* Rationale */}
-              <div className="space-y-2">
+              {/* Notes */}
+              <div className="space-y-1.5">
                 <Label htmlFor="rationale">
-                  Notes <span className="text-warm-muted font-normal">(optional)</span>
+                  Notes{' '}
+                  <span className="text-warm-muted font-normal text-xs">(optional)</span>
                 </Label>
                 <Textarea
                   id="rationale"
                   value={rationale}
                   onChange={(e) => setRationale(e.target.value)}
-                  placeholder="Any notes about this deadline?"
-                  rows={3}
+                  placeholder="Case number, order reference, or any notes…"
+                  rows={2}
                 />
               </div>
 
@@ -228,9 +303,20 @@ export function DeadlineFormDialog({ caseId }: DeadlineFormDialogProps) {
                 <p className="text-sm text-calm-amber">{error}</p>
               )}
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Saving...' : 'Save Deadline'}
-              </Button>
+              <div className="flex gap-3 pt-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={() => handleOpenChange(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1" disabled={loading}>
+                  {loading ? 'Saving…' : 'Save Deadline'}
+                </Button>
+              </div>
             </form>
           </>
         )}

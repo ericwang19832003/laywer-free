@@ -110,12 +110,13 @@ Deno.serve(async () => {
       if (classified.responseDeadline) {
         await supabase.from('deadlines').upsert({
           case_id: c.id,
-          title: `Response to court filing (${classified.type})`,
-          due_date: classified.responseDeadline,
-          source: 'docket_watcher',
-          is_confirmed: true,
-          notes: classified.summary,
-        }, { onConflict: 'case_id,title,due_date' })
+          key: `court_response_${classified.type}_${classified.responseDeadline}`,
+          label: `Response to court filing (${classified.type})`,
+          due_at: new Date(classified.responseDeadline).toISOString(),
+          source: 'system',
+          rationale: classified.summary,
+          auto_generated: true,
+        }, { onConflict: 'case_id,key' })
       }
     }
 
