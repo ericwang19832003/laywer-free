@@ -3,12 +3,12 @@ import { createDraftDocumentTool } from '../draft-document'
 
 // Mock AIClient so tests don't require a real Anthropic API key
 vi.mock('@/lib/ai/client', () => ({
-  AIClient: vi.fn().mockImplementation(() => ({
-    complete: vi.fn().mockResolvedValue({
+  AIClient: vi.fn().mockImplementation(function (this: { complete: unknown }) {
+    this.complete = vi.fn().mockResolvedValue({
       content: 'Dear [Defendant], I am writing to demand return of the security deposit...',
       raw: 'Dear [Defendant], I am writing to demand return of the security deposit...',
-    }),
-  })),
+    })
+  }),
 }))
 
 describe('createDraftDocumentTool', () => {

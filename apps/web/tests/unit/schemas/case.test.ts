@@ -114,7 +114,7 @@ describe('createCaseSchema', () => {
   })
 
   it('rejects invalid state', () => {
-    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'OH' })
+    const result = createCaseSchema.safeParse({ role: 'plaintiff', state: 'ZZ' })
     expect(result.success).toBe(false)
   })
 

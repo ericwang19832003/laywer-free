@@ -16,8 +16,8 @@ describe('State Config System', () => {
     it('contains PA', () => {
       expect(STATE_CODES).toContain('PA')
     })
-    it('has exactly 5 entries', () => {
-      expect(STATE_CODES).toHaveLength(5)
+    it('has exactly 50 entries', () => {
+      expect(STATE_CODES).toHaveLength(50)
     })
   })
 

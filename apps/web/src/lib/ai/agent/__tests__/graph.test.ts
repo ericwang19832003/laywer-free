@@ -1,6 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, beforeAll } from 'vitest'
 import { buildAgentGraph } from '../graph'
 import { createInitialState } from '../state'
+
+beforeAll(() => {
+  process.env.ANTHROPIC_API_KEY = 'test-key'
+})
 
 // Mock the Anthropic SDK so tests don't require a real API key
 vi.mock('@anthropic-ai/sdk', () => {
@@ -32,11 +36,9 @@ vi.mock('@anthropic-ai/sdk', () => {
   }
 
   return {
-    default: vi.fn().mockImplementation(() => ({
-      messages: {
-        stream: vi.fn().mockResolvedValue(mockStream),
-      },
-    })),
+    default: vi.fn().mockImplementation(function (this: { messages: unknown }) {
+      this.messages = { stream: vi.fn().mockResolvedValue(mockStream) }
+    }),
   }
 })
 
