@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import { z } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
@@ -176,27 +176,19 @@ export async function POST(
 
     const userPrompt = `Please explain this document:\n\nFile name: ${item.file_name}\n\n---\n\n${text.slice(0, 10000)}${questionLine}`
 
-    // Call DeepSeek
+    // Call AI
     let explanation: DocumentExplanation | null = null
 
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
-        const deepseek = new OpenAI({
-          apiKey: process.env.DEEPSEEK_API_KEY,
-          baseURL: 'https://api.deepseek.com',
+        const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
+        const { raw } = await aiClient.complete({
+          systemPrompt: SYSTEM_PROMPT,
+          userPrompt,
+          maxTokens: 1500,
+          jsonMode: true,
+          caller: 'doc-explain',
         })
-
-        const message = await deepseek.chat.completions.create({
-          model: 'deepseek-chat',
-          max_tokens: 1500,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
-        })
-
-        const raw = message.choices[0]?.message?.content ?? ''
         explanation = parseExplanation(raw)
       } catch (err) {
         safeError('doc-explain', err)

@@ -1,4 +1,4 @@
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import type { AgentTool } from '../state'
 
 interface DraftDocumentConfig {
@@ -42,24 +42,14 @@ export function createDraftDocumentTool({ caseId, disputeType, role, saveDraft }
       const documentType = String(args.documentType ?? 'demand_letter')
       const instructions = String(args.instructions ?? '')
 
-      const client = new OpenAI({
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseURL: 'https://api.deepseek.com',
-      })
-
-      const response = await client.chat.completions.create({
-        model: 'deepseek-chat',
+      const client = new AIClient({ model: 'claude-sonnet-4-6' })
+      const { content } = await client.complete({
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt: `Draft a ${documentType} for a ${role} in a ${disputeType} case in Texas.\nAdditional instructions: ${instructions}\n\nFormat the document professionally with proper headings and signature lines.`,
         temperature: 0.3,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: `Draft a ${documentType} for a ${role} in a ${disputeType} case in Texas.\nAdditional instructions: ${instructions}\n\nFormat the document professionally with proper headings and signature lines.`,
-          },
-        ],
+        caller: 'draft-document',
       })
 
-      const content = response.choices[0]?.message?.content ?? ''
       const draftId = await saveDraft({ caseId, documentType, content })
 
       return `Draft ${documentType} created and saved (id: ${draftId}).\n\n${content}`

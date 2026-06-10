@@ -1,8 +1,6 @@
-import { createHash } from 'crypto'
+import { sha256Hex } from '@/lib/edge-crypto'
 
-export function buildQueryHash(question: string, caseId: string): string {
-  return createHash('sha256')
-    // Keep key ordering stable for hash determinism.
-    .update(JSON.stringify({ question, caseId }))
-    .digest('hex')
+export async function buildQueryHash(question: string, caseId: string): Promise<string> {
+  // Keep key ordering stable for hash determinism.
+  return sha256Hex(JSON.stringify({ question, caseId }))
 }

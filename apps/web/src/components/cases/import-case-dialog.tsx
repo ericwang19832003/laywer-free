@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { type DisputeType } from '@lawyer-free/shared/rules/court-recommendation'
+import { type DisputeType, type CourtType } from '@lawyer-free/shared/rules/court-recommendation'
 import type { State, PiSubType } from '@lawyer-free/shared/schemas/case'
 import { getMilestones } from '@lawyer-free/shared/rules/milestones'
 import { WizardProgress } from './wizard/wizard-progress'
@@ -100,26 +100,50 @@ function getRecommendationStepNumber(disputeType: DisputeType | ''): number {
  * Mid-litigation users generally know their court already,
  * so we provide a reasonable default with medium confidence.
  */
+const IMPORT_FAMILY_COURT: Record<string, CourtType> = {
+  TX: 'district', CA: 'unlimited_civil', NY: 'ny_supreme', FL: 'fl_circuit', PA: 'pa_common_pleas',
+  IL: 'il_circuit', OH: 'oh_common_pleas', GA: 'ga_superior', NC: 'nc_district', MI: 'mi_circuit',
+  NJ: 'nj_family', VA: 'va_circuit', WA: 'wa_superior', AZ: 'az_superior', CO: 'co_district',
+  TN: 'tn_circuit', IN: 'in_circuit', MO: 'mo_circuit', MD: 'md_circuit', WI: 'wi_circuit',
+  MN: 'mn_district', SC: 'sc_circuit', AL: 'al_circuit', LA: 'la_district', KY: 'ky_circuit',
+  OR: 'or_circuit', NV: 'nv_district', CT: 'ct_superior', MA: 'ma_district', OK: 'ok_district',
+  AR: 'ar_circuit', MS: 'ms_circuit', UT: 'ut_district', NM: 'nm_district', WV: 'wv_circuit',
+  DE: 'de_superior', RI: 'ri_superior', NH: 'nh_superior', VT: 'vt_superior', ME: 'me_superior',
+  IA: 'ia_district', KS: 'ks_district', NE: 'ne_district', SD: 'sd_circuit', ND: 'nd_district',
+  MT: 'mt_district', WY: 'wy_district', ID: 'id_district', HI: 'hi_circuit', AK: 'ak_district',
+}
+const IMPORT_SMALL_CLAIMS_COURT: Record<string, CourtType> = {
+  TX: 'jp', CA: 'small_claims', NY: 'ny_small_claims', FL: 'fl_small_claims', PA: 'pa_magisterial',
+  IL: 'il_small_claims', OH: 'oh_small_claims', GA: 'ga_magistrate', NC: 'nc_small_claims', MI: 'mi_small_claims',
+  NJ: 'nj_small_claims', VA: 'va_small_claims', WA: 'wa_small_claims', AZ: 'az_small_claims', CO: 'co_small_claims',
+  TN: 'tn_general_sessions', IN: 'in_small_claims', MO: 'mo_small_claims', MD: 'md_district', WI: 'wi_small_claims',
+  MN: 'mn_conciliation', SC: 'sc_magistrate', AL: 'al_small_claims', LA: 'la_small_claims', KY: 'ky_small_claims',
+  OR: 'or_small_claims', NV: 'nv_small_claims', CT: 'ct_small_claims', MA: 'ma_small_claims', OK: 'ok_small_claims',
+  AR: 'ar_small_claims', MS: 'ms_justice', UT: 'ut_small_claims', NM: 'nm_magistrate', WV: 'wv_magistrate',
+  DE: 'de_jp', RI: 'ri_small_claims', NH: 'nh_small_claims', VT: 'vt_small_claims', ME: 'me_small_claims',
+  IA: 'ia_small_claims', KS: 'ks_small_claims', NE: 'ne_small_claims', SD: 'sd_small_claims', ND: 'nd_small_claims',
+  MT: 'mt_justice', WY: 'wy_small_claims', ID: 'id_small_claims', HI: 'hi_small_claims', AK: 'ak_small_claims',
+}
+const IMPORT_DEFAULT_COURT: Record<string, CourtType> = {
+  TX: 'district', CA: 'unlimited_civil', NY: 'ny_supreme', FL: 'fl_circuit', PA: 'pa_common_pleas',
+  IL: 'il_circuit', OH: 'oh_common_pleas', GA: 'ga_superior', NC: 'nc_superior', MI: 'mi_circuit',
+  NJ: 'nj_civil', VA: 'va_circuit', WA: 'wa_superior', AZ: 'az_superior', CO: 'co_district',
+  TN: 'tn_circuit', IN: 'in_circuit', MO: 'mo_circuit', MD: 'md_circuit', WI: 'wi_circuit',
+  MN: 'mn_district', SC: 'sc_circuit', AL: 'al_circuit', LA: 'la_district', KY: 'ky_circuit',
+  OR: 'or_circuit', NV: 'nv_district', CT: 'ct_superior', MA: 'ma_district', OK: 'ok_district',
+  AR: 'ar_circuit', MS: 'ms_county', UT: 'ut_district', NM: 'nm_district', WV: 'wv_circuit',
+  DE: 'de_superior', RI: 'ri_superior', NH: 'nh_superior', VT: 'vt_superior', ME: 'me_superior',
+  IA: 'ia_district', KS: 'ks_district', NE: 'ne_district', SD: 'sd_circuit', ND: 'nd_district',
+  MT: 'mt_district', WY: 'wy_district', ID: 'id_district', HI: 'hi_circuit', AK: 'ak_district',
+}
+
 function getRecommendation(
   disputeType: DisputeType | '',
   selectedState: State
 ) {
-  const isCA = selectedState === 'CA'
-  const isNY = selectedState === 'NY'
-  const isFL = selectedState === 'FL'
-  const isPA = selectedState === 'PA'
-
   if (disputeType === 'family') {
     return {
-      recommended: isPA
-        ? ('pa_common_pleas' as const)
-        : isFL
-          ? ('fl_circuit' as const)
-          : isNY
-            ? ('ny_supreme' as const)
-            : isCA
-              ? ('unlimited_civil' as const)
-              : ('district' as const),
+      recommended: IMPORT_FAMILY_COURT[selectedState] ?? 'district' as CourtType,
       reasoning: 'Family law cases are typically heard in the state\'s primary trial court.',
       confidence: 'high' as const,
     }
@@ -127,31 +151,14 @@ function getRecommendation(
 
   if (disputeType === 'small_claims') {
     return {
-      recommended: isPA
-        ? ('pa_magisterial' as const)
-        : isFL
-          ? ('fl_small_claims' as const)
-          : isNY
-            ? ('ny_small_claims' as const)
-            : isCA
-              ? ('small_claims' as const)
-              : ('jp' as const),
+      recommended: IMPORT_SMALL_CLAIMS_COURT[selectedState] ?? 'jp' as CourtType,
       reasoning: 'Small claims cases are filed in the dedicated small claims court.',
       confidence: 'high' as const,
     }
   }
 
-  // Default: district / primary trial court
   return {
-    recommended: isPA
-      ? ('pa_common_pleas' as const)
-      : isFL
-        ? ('fl_circuit' as const)
-        : isNY
-          ? ('ny_supreme' as const)
-          : isCA
-            ? ('unlimited_civil' as const)
-            : ('district' as const),
+    recommended: IMPORT_DEFAULT_COURT[selectedState] ?? 'district' as CourtType,
     reasoning: 'Most civil cases are heard in the state\'s primary trial court. You can override this if your case is in a different court.',
     confidence: 'moderate' as const,
   }

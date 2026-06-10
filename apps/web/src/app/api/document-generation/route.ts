@@ -14,8 +14,6 @@ import { validateAIInput } from '@/lib/ai/input-validation'
 import { getSubscription, incrementAiUsage } from '@/lib/subscription/check'
 import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/security/rate-limit'
 
-const AI_MODEL = 'deepseek-chat'
-
 const AI_REFUSAL_PATTERNS = [
   'i cannot',
   "i'm sorry, i can't",
@@ -219,7 +217,7 @@ export async function POST(request: NextRequest) {
         success: true,
         document: documentWithWatermark,
         meta: {
-          model: AI_MODEL,
+          model: 'claude-sonnet-4-6',
           documentType: body.documentType,
           tokens: usage?.totalTokens,
         },

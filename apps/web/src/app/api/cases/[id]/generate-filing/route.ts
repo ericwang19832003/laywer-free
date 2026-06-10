@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import { ZodType } from 'zod'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateFilingRequestSchema } from '@lawyer-free/shared/schemas/filing'
@@ -323,37 +323,14 @@ const MOTION_REGISTRY: Record<string, RegistryEntry> = {
 
 export const maxDuration = 60
 
-function getGenerationProvider() {
-  const deepseekKey = process.env.DEEPSEEK_API_KEY?.trim()
-  if (deepseekKey) {
-    return {
-      name: 'deepseek',
-      client: new OpenAI({ apiKey: deepseekKey, baseURL: 'https://api.deepseek.com' }),
-      model: 'deepseek-chat',
-    }
-  }
-
-  const openaiKey = process.env.OPENAI_API_KEY?.trim()
-  if (openaiKey) {
-    return {
-      name: 'openai',
-      client: new OpenAI({ apiKey: openaiKey }),
-      model: process.env.OPENAI_GENERATION_MODEL?.trim() || 'gpt-4o-mini',
-    }
-  }
-
-  return null
-}
-
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const provider = getGenerationProvider()
-  if (!provider) {
+  if (!process.env.ANTHROPIC_API_KEY?.trim()) {
     const message = process.env.NODE_ENV === 'production'
       ? 'Document generation is temporarily unavailable. Please try again later.'
-      : 'Document generation is not configured. Set DEEPSEEK_API_KEY or OPENAI_API_KEY in the server environment, then restart the dev server.'
+      : 'Document generation is not configured. Set ANTHROPIC_API_KEY in the server environment, then restart the dev server.'
     return NextResponse.json(
       { error: message },
       { status: 503 }
@@ -482,17 +459,16 @@ export async function POST(
 
     let fullText: string
     try {
-      const completion = await provider.client.chat.completions.create({
-        model: provider.model,
-        max_tokens: 4096,
-        messages: [
-          { role: 'system', content: prompt.system },
-          { role: 'user', content: prompt.user },
-        ],
+      const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
+      const { content } = await aiClient.complete({
+        systemPrompt: prompt.system,
+        userPrompt: prompt.user,
+        maxTokens: 4096,
+        caller: 'generate-filing',
       })
-      fullText = completion.choices[0]?.message?.content ?? ''
+      fullText = content
     } catch (err) {
-      console.error(`[generate-filing] ${provider.name} API error:`, err)
+      console.error('[generate-filing] AI API error:', err)
       return NextResponse.json(
         { error: 'Document generation failed. Please check your inputs and try again.' },
         { status: 502 }
@@ -554,8 +530,8 @@ export async function POST(
 
     const durationMs = Date.now() - startTime
     metrics.increment(METRIC.AI_GENERATION_SUCCESS)
-    metrics.timing(METRIC.AI_GENERATION_DURATION, durationMs, { document_type: auditDocType, provider: provider.name })
-    logger.info('ai.generate-filing succeeded', { caseId, auditDocType, durationMs, provider: provider.name })
+    metrics.timing(METRIC.AI_GENERATION_DURATION, durationMs, { document_type: auditDocType, provider: 'anthropic' })
+    logger.info('ai.generate-filing succeeded', { caseId, auditDocType, durationMs, provider: 'anthropic' })
 
     return NextResponse.json({ draft, annotations })
   } catch (err) {

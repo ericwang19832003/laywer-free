@@ -1,12 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createDraftDocumentTool } from '../draft-document'
 
-vi.mock('@langchain/openai', () => ({
-  ChatOpenAI: vi.fn().mockImplementation(function () {
-    return {
-      invoke: vi.fn().mockResolvedValue({ content: 'Dear [Defendant], I am writing to demand return of the security deposit...' }),
-    }
-  }),
+// Mock AIClient so tests don't require a real Anthropic API key
+vi.mock('@/lib/ai/client', () => ({
+  AIClient: vi.fn().mockImplementation(() => ({
+    complete: vi.fn().mockResolvedValue({
+      content: 'Dear [Defendant], I am writing to demand return of the security deposit...',
+      raw: 'Dear [Defendant], I am writing to demand return of the security deposit...',
+    }),
+  })),
 }))
 
 describe('createDraftDocumentTool', () => {

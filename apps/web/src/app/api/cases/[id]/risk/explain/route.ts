@@ -12,7 +12,6 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 
 export const maxDuration = 60
 
-const AI_MODEL = 'deepseek-chat'
 const PROMPT_VERSION = '1.0.0'
 
 export async function POST(
@@ -79,7 +78,7 @@ export async function POST(
     let source: 'ai' | 'static' = 'static'
 
     // Try AI generation if configured
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         const userPrompt = buildExplanationPrompt(riskInput)
 
@@ -114,7 +113,7 @@ export async function POST(
       items: breakdown,
       ai_explanation: explanation,
       _meta: {
-        model: source === 'ai' ? AI_MODEL : null,
+        model: source === 'ai' ? 'claude-sonnet-4-6' : null,
         prompt_version: PROMPT_VERSION,
         source,
       },
@@ -132,7 +131,7 @@ export async function POST(
     return NextResponse.json({
       ...explanation,
       _meta: {
-        model: source === 'ai' ? AI_MODEL : null,
+        model: source === 'ai' ? 'claude-sonnet-4-6' : null,
         prompt_version: PROMPT_VERSION,
         source,
       },

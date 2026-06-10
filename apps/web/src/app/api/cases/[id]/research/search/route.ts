@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash } from 'crypto'
+import { sha256Hex } from '@/lib/edge-crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { getCourtListenerClient } from '@/lib/courtlistener/client'
 import type { CLSearchFilters } from '@/lib/courtlistener/types'
@@ -45,9 +45,7 @@ export async function POST(
     })
 
     // Check search cache
-    const queryHash = createHash('sha256')
-      .update(JSON.stringify({ query: enrichedQuery, filters: filters ?? {} }))
-      .digest('hex')
+    const queryHash = await sha256Hex(JSON.stringify({ query: enrichedQuery, filters: filters ?? {} }))
 
     const { data: cached } = await supabase
       .from('cl_search_cache')

@@ -13,7 +13,6 @@ import { checkDistributedRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib
 
 export const maxDuration = 30
 
-const AI_MODEL = 'deepseek-chat'
 const CACHE_KEY = 'timeline_summary'
 const STALE_HOURS = 24
 const MIN_EVENTS = 3
@@ -85,7 +84,7 @@ export async function GET(
     let source: 'ai' | 'static' = 'static'
 
     // Try AI
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         const userPrompt = buildTimelineSummaryPrompt(eventList)
 
@@ -123,7 +122,7 @@ export async function GET(
 
     return NextResponse.json({
       ...result,
-      _meta: { source, model: source === 'ai' ? AI_MODEL : null },
+      _meta: { source, model: source === 'ai' ? 'claude-sonnet-4-6' : null },
     })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

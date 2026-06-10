@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash } from 'crypto'
+import { sha256Hex } from '@/lib/edge-crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { generateMeetAndConferNote } from '@/lib/templates/meet-and-confer-note'
 import type { MeetAndConferItem } from '@/lib/templates/meet-and-confer-note'
@@ -90,7 +90,7 @@ export async function POST(
     })
 
     // Compute sha256
-    const sha256 = createHash('sha256').update(body, 'utf8').digest('hex')
+    const sha256 = await sha256Hex(body)
 
     // Insert meet_and_confer_drafts row
     const { data: draft, error: insertError } = await supabase

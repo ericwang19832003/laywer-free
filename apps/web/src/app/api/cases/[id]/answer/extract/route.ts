@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AIClient } from '@/lib/ai/client'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { extractRequestSchema } from '@lawyer-free/shared/schemas/document-extraction'
 import { extractTextFromPdf } from '@/lib/extraction/pdf-text'
@@ -174,17 +174,13 @@ export async function POST(
 
     if (text.length > 0) {
       try {
-        const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' })
-        const message = await deepseek.chat.completions.create({
-          model: 'deepseek-chat',
-          max_tokens: 1024,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: text },
-          ],
+        const aiClient = new AIClient({ model: 'claude-sonnet-4-6' })
+        const { content: responseText } = await aiClient.complete({
+          systemPrompt: SYSTEM_PROMPT,
+          userPrompt: text,
+          maxTokens: 1024,
+          caller: 'answer-extract',
         })
-
-        const responseText = message.choices[0]?.message?.content ?? ''
 
         fields = parseAnswerFields(responseText)
       } catch {
@@ -198,7 +194,7 @@ export async function POST(
       .insert({
         case_id: caseId,
         court_document_id,
-        extractor: 'openai' as const,
+        extractor: 'anthropic' as const,
         status: 'needs_review' as const,
         confidence: null,
         fields,
@@ -221,7 +217,7 @@ export async function POST(
       payload: {
         extraction_id: extraction.id,
         court_document_id,
-        extractor: 'openai',
+        extractor: 'anthropic',
         status: 'needs_review',
         confidence: null,
       },

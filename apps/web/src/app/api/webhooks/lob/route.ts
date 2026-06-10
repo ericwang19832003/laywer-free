@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import crypto from 'crypto'
+import { hmacSha256Hex, safeEquals } from '@/lib/edge-crypto'
 
 const STATUS_MAP: Record<string, string> = {
   'letter.created': 'created',
@@ -14,12 +14,12 @@ const STATUS_MAP: Record<string, string> = {
   'letter.returned_to_sender': 'returned',
 }
 
-function verifyWebhookSignature(payload: string, signature: string): boolean {
+async function verifyWebhookSignature(payload: string, signature: string): Promise<boolean> {
   const secret = process.env.LOB_WEBHOOK_SECRET
   if (!secret) return false
   try {
-    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+    const expected = await hmacSha256Hex(secret, payload)
+    return safeEquals(signature, expected)
   } catch {
     return false
   }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       console.error('LOB_WEBHOOK_SECRET not configured — rejecting webhook')
       return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
     }
-    if (!verifyWebhookSignature(rawBody, signature)) {
+    if (!await verifyWebhookSignature(rawBody, signature)) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 

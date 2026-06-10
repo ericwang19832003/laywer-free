@@ -42,7 +42,7 @@ OUTPUT FORMAT — respond with valid JSON only:
   ]
 }`
 
-// POST /api/objections/reviews/:reviewId/classify — classify objections via OpenAI
+// POST /api/objections/reviews/:reviewId/classify — classify objections via AI (Claude)
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ reviewId: string }> }
@@ -56,8 +56,8 @@ export async function POST(
     const rl = await checkDistributedRateLimit(supabase, user.id, 'ai', RATE_LIMITS.ai.maxRequests, RATE_LIMITS.ai.windowMs)
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs)
 
-    // Check if OpenAI is configured
-    if (!process.env.DEEPSEEK_API_KEY) {
+    // Check if AI is configured
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
         { error: 'AI classification is not configured', fallback: true },
         { status: 503 }
@@ -204,7 +204,7 @@ export async function POST(
         .from('objection_reviews')
         .update({
           status: 'needs_review',
-        model: 'deepseek-chat',
+        model: 'claude-sonnet-4-6',
         prompt_version: PROMPT_VERSION,
         error: 'AI output failed validation',
         })
@@ -255,7 +255,7 @@ export async function POST(
       .from('objection_reviews')
       .update({
         status: 'needs_review',
-        model: 'deepseek-chat',
+        model: 'claude-sonnet-4-6',
         prompt_version: PROMPT_VERSION,
         error: null,
       })
@@ -278,7 +278,7 @@ export async function POST(
         review_id: reviewId,
         status: 'needs_review',
         items_count: validated.data.items.length,
-        model: 'deepseek-chat',
+        model: 'claude-sonnet-4-6',
         prompt_version: PROMPT_VERSION,
       },
     })
@@ -309,7 +309,7 @@ async function setErrorStatus(
     .from('objection_reviews')
     .update({
       status: 'needs_review',
-      model: 'deepseek-chat',
+      model: 'claude-sonnet-4-6',
       prompt_version: PROMPT_VERSION,
       error: errorMessage,
     })

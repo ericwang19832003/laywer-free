@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash } from 'crypto'
+import { sha256Hex } from '@/lib/edge-crypto'
 import { getAuthenticatedClient } from '@/lib/supabase/route-handler'
 import { evidenceUploadSchema } from '@lawyer-free/shared/schemas/evidence'
 
@@ -160,7 +160,7 @@ export async function POST(
 
     // Read file buffer for SHA256 and upload
     const buffer = Buffer.from(await file.arrayBuffer())
-    const sha256 = createHash('sha256').update(buffer).digest('hex')
+    const sha256 = await sha256Hex(buffer)
 
     // Upload file to Storage
     const fileId = crypto.randomUUID()
