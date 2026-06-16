@@ -23,11 +23,13 @@ export async function POST(
     })
   }
 
-  const [caseResult, tasksResult, deadlinesResult, evidenceResult] = await Promise.all([
+  const [caseResult, tasksResult, deadlinesResult, evidenceResult, { data: evidenceItems }, { data: courtDocs }] = await Promise.all([
     supabase.from('cases').select('dispute_type, role, county').eq('id', caseId).single(),
     supabase.from('tasks').select('task_key, title, status').eq('case_id', caseId).limit(20),
     supabase.from('deadlines').select('key, due_at, label').eq('case_id', caseId).order('due_at'),
     supabase.from('evidence_items').select('id', { count: 'exact', head: true }).eq('case_id', caseId),
+    supabase.from('evidence_items').select('id, file_name').eq('case_id', caseId).order('created_at', { ascending: false }),
+    supabase.from('court_documents').select('id, file_name').eq('case_id', caseId),
   ])
 
   if (caseResult.error) {
@@ -45,6 +47,11 @@ export async function POST(
   }
 
   const { dispute_type, role, county } = caseResult.data
+
+  const allEvidenceItems = [
+    ...(courtDocs ?? []).map((d) => ({ id: d.id, file_name: d.file_name, source_type: 'court_document' as const })),
+    ...(evidenceItems ?? []).map((e) => ({ id: e.id, file_name: e.file_name, source_type: 'evidence_item' as const })),
+  ]
 
   let existingCheckpoint = null
   try {
@@ -71,7 +78,7 @@ export async function POST(
     tasks: tasksResult.data ?? [],
     deadlines: deadlinesResult.data ?? [],
     evidenceCount: evidenceResult.count ?? 0,
-    evidenceItems: [],
+    evidenceItems: allEvidenceItems,
   })
 
   if (existingCheckpoint?.messages) {
