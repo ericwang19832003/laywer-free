@@ -51,8 +51,10 @@ RETURNS TABLE (
   content     text,
   similarity  float
 )
-LANGUAGE sql STABLE
+LANGUAGE plpgsql STABLE
 AS $$
+BEGIN
+  RETURN QUERY
   SELECT
     cdc.id,
     cdc.source_type,
@@ -66,6 +68,7 @@ AS $$
     AND (source_types IS NULL OR cdc.source_type = ANY(source_types))
   ORDER BY cdc.embedding <=> query_embedding
   LIMIT match_count;
+END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.match_case_documents TO authenticated;
