@@ -30,6 +30,7 @@ export async function generateDocumentEmbeddings(texts: string[]): Promise<numbe
 
 export async function generateDocumentEmbedding(text: string): Promise<number[]> {
   const [embedding] = await generateDocumentEmbeddings([text])
+  if (!embedding) throw new Error('OpenAI returned no embedding for the input text')
   return embedding
 }
 
