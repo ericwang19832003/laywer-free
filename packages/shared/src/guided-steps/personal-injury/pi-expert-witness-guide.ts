@@ -4,81 +4,65 @@ import { isPropertyDamageSubType } from './constants'
 const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
   title: 'Do You Need Expert Witnesses?',
   reassurance:
-    'Expert witnesses can strengthen your case significantly. This guide helps you determine if you need one and how to find affordable options.',
+    'Three quick questions. Your answers determine exactly which experts (if any) you need — and we\'ll show you affordable options.',
 
   questions: [
     {
-      id: 'when_experts_needed',
-      type: 'info',
-      prompt:
-        "WHEN ARE EXPERT WITNESSES NEEDED?\nExperts are not required in every PI case, but they can be critical when:\n\u2022 Liability is disputed \u2014 an accident reconstruction expert can prove who was at fault\n\u2022 Causation is disputed \u2014 a medical expert can testify your injuries were caused by the accident (not pre-existing)\n\u2022 Future damages are claimed \u2014 a life care planner or vocational expert can project future medical costs or lost earning capacity\n\u2022 The injuries are complex \u2014 a medical specialist can explain your condition to the jury in understandable terms\n\nWithout expert testimony on causation, the defense may file a motion for summary judgment arguing there is no competent evidence linking the accident to your injuries.",
-      acknowledgeLabel: 'I understand when experts are needed →',
-    },
-    {
       id: 'liability_disputed',
-      type: 'yes_no',
+      type: 'single_choice',
       prompt: 'Is there a dispute about who caused the accident?',
-      helpText:
-        'If the other driver admits fault or the police report is clear, you may not need a liability expert. But if fault is contested, an accident reconstruction expert can be very persuasive.',
+      helpText: 'If a police report or admission clearly shows the other party was at fault, you likely won\'t need a liability expert.',
+      options: [
+        { value: 'no', label: 'No — fault is clear or admitted', description: 'Police report, witnesses, or the other party already acknowledged fault.' },
+        { value: 'yes', label: 'Yes — the other side disputes fault', description: 'The other driver or their insurer is blaming you or denying responsibility.' },
+        { value: 'unsure', label: 'Not sure yet', description: 'Fault hasn\'t been clearly established.' },
+      ],
     },
     {
       id: 'accident_reconstruction_info',
       type: 'info',
       prompt:
-        "ACCIDENT RECONSTRUCTION EXPERT:\n\u2022 What they do: Analyze physical evidence (skid marks, vehicle damage, road conditions, sight lines) and physics to determine how the accident occurred and who was at fault\n\u2022 When needed: Disputed liability, multi-vehicle accidents, hit-and-runs with physical evidence, accidents with no witnesses\n\u2022 Typical cost: $2,000\u2013$5,000 for a report; $3,000\u2013$5,000+ for trial testimony\n\u2022 Where to find: University engineering departments, retired law enforcement accident investigators, professional engineering firms\n\u2022 Budget option: Some retired highway patrol officers do accident reconstruction at lower rates ($1,500\u2013$2,500)",
-      acknowledgeLabel: 'I\u2019ll consider a reconstruction expert →',
-      showIf: (answers) => answers.liability_disputed === 'yes',
+        "ACCIDENT RECONSTRUCTION EXPERT\nAn accident reconstruction expert analyzes physical evidence — skid marks, vehicle damage, road conditions, sight lines — to determine who was at fault.\n• Best for: Multi-vehicle accidents, hit-and-runs with physical evidence, no-witness disputes\n• Typical cost: $2,000–$5,000 for a report; $3,000–$5,000+ for trial testimony\n• Budget option: Retired highway patrol officers often do reconstruction at $1,500–$2,500\n• Where to find: University engineering departments, retired law enforcement, professional engineering firms",
+      acknowledgeLabel: 'Got it — I\'ll look into a reconstruction expert →',
+      showIf: (answers) => answers.liability_disputed === 'yes' || answers.liability_disputed === 'unsure',
     },
     {
       id: 'causation_concern',
-      type: 'yes_no',
-      prompt: 'Might the defense argue your injuries were pre-existing or not caused by this accident?',
-      helpText:
-        'This is common when you had prior injuries to the same body part, there was a gap in treatment, or the accident seemed minor relative to your claimed injuries.',
+      type: 'single_choice',
+      prompt: 'Do you have any prior injuries or health conditions in the same area that was hurt?',
+      helpText: 'The defense commonly argues injuries were "pre-existing." If you had prior issues in the same body part, a medical expert can clarify what the accident actually caused.',
+      options: [
+        { value: 'no', label: 'No — this area was healthy before the accident', description: 'No prior injuries, surgeries, or conditions affecting the same body part.' },
+        { value: 'yes', label: 'Yes — I had prior issues in the same area', description: 'A medical expert can explain what the accident worsened or newly caused.' },
+        { value: 'unsure', label: 'Not sure — the defense might argue it anyway', description: 'Minor gap in treatment, a low-impact crash, or any reason they might push back.' },
+      ],
     },
     {
       id: 'medical_expert_info',
       type: 'info',
       prompt:
-        "MEDICAL EXPERT (CAUSATION):\n\u2022 What they do: Review your medical records and testify that your injuries were caused (or worsened) by the accident, not a pre-existing condition\n\u2022 When needed: Prior injuries to the same area, \"low impact\" accidents with significant injuries, complex injuries, defense medical exam (DME) disputes\n\u2022 Typical cost: $1,500\u2013$3,000 for a records review and written report; $2,500\u2013$5,000 for deposition or trial testimony\n\u2022 Where to find: Your treating physician may serve as your expert (often cheaper). Otherwise, look for board-certified specialists in the relevant field.\n\u2022 Budget option: Your treating doctor is the cheapest expert \u2014 they already know your case. Ask if they will write a causation letter or testify.",
-      acknowledgeLabel: 'I\u2019ll pursue a medical expert →',
-      showIf: (answers) => answers.causation_concern === 'yes',
+        "MEDICAL EXPERT (CAUSATION)\nA medical expert reviews your records and testifies that your injuries were caused (or worsened) by the accident — not by a pre-existing condition.\n• Best for: Prior injuries to the same area, low-impact accidents with significant injuries, complex diagnoses\n• Typical cost: $1,500–$3,000 for a records review and written report; $2,500–$5,000 for deposition or trial\n• Cheapest option: Your treating doctor already knows your case — ask if they'll write a causation letter or testify\n• Without this: The defense may seek summary judgment arguing there's no expert evidence linking the accident to your injuries",
+      acknowledgeLabel: 'Got it — I\'ll contact my treating doctor first →',
+      showIf: (answers) => answers.causation_concern === 'yes' || answers.causation_concern === 'unsure',
     },
     {
       id: 'lost_earning_capacity',
-      type: 'yes_no',
-      prompt: 'Are you claiming long-term or permanent lost earning capacity?',
-      helpText:
-        'If your injuries prevent you from returning to your previous job or reduce your future earning ability, a vocational expert can quantify that loss.',
+      type: 'single_choice',
+      prompt: 'Have your injuries affected your ability to work or earn income going forward?',
+      helpText: 'This covers lost earning capacity — long-term or permanent impacts, not just time off work while recovering.',
+      options: [
+        { value: 'no', label: 'No — I\'ve fully recovered or expect to return to my previous work', description: 'Short-term missed work while healing, but no lasting impact on earning ability.' },
+        { value: 'yes', label: 'Yes — I can\'t return to my previous job or my earning ability is reduced', description: 'Permanent disability, career change, or significant ongoing limitations.' },
+        { value: 'unsure', label: 'I\'m still figuring this out', description: 'Still in treatment or unclear about long-term impact.' },
+      ],
     },
     {
       id: 'vocational_expert_info',
       type: 'info',
       prompt:
-        "VOCATIONAL EXPERT (LOST EARNING CAPACITY):\n\u2022 What they do: Evaluate your education, work history, skills, and physical limitations to determine how the injury affects your future earning ability\n\u2022 When needed: Permanent disability, career change required due to injury, significant gap in work history due to recovery\n\u2022 Typical cost: $2,000\u2013$4,000 for evaluation and report\n\u2022 Where to find: Vocational rehabilitation counselors, university professors in rehabilitation or economics departments\n\u2022 They calculate: pre-injury earning capacity vs. post-injury earning capacity, multiplied by your remaining work-life expectancy\n\nNote: Without a vocational expert, the jury must guess at future lost earnings \u2014 and they often underestimate.",
-      acknowledgeLabel: 'I\u2019ll find a vocational expert →',
-      showIf: (answers) => answers.lost_earning_capacity === 'yes',
-    },
-    {
-      id: 'finding_affordable_experts',
-      type: 'info',
-      prompt:
-        "FINDING AFFORDABLE EXPERTS:\n\u2022 University professors \u2014 often willing to serve as experts at lower rates ($1,500\u2013$3,000) than private consultants\n\u2022 Retired professionals \u2014 retired doctors, engineers, or law enforcement can provide expert testimony at reduced rates\n\u2022 Your treating physician \u2014 already familiar with your case, so less time reviewing records = lower cost\n\u2022 Expert witness directories \u2014 the Texas Bar Association, SEAK, and ExpertPages.com list experts by specialty and location\n\u2022 Payment timing \u2014 many experts will defer payment until your case settles (especially in PI cases). Ask about contingency or deferred fee arrangements.\n\nTypical total expert costs: $1,500\u2013$5,000 per expert for reports. Trial testimony adds $2,000\u2013$5,000 per day.",
-      acknowledgeLabel: 'Got the cost guidance →',
-    },
-    {
-      id: 'without_experts_risk',
-      type: 'info',
-      prompt:
-        "WHAT HAPPENS WITHOUT EXPERT WITNESSES?\n\u2022 Causation: If the defense argues your injuries are pre-existing and you have no medical expert to say otherwise, the court may grant summary judgment and dismiss your case. In Texas, lay testimony alone is often insufficient to establish medical causation.\n\u2022 Liability: Without an accident reconstruction expert in a disputed-fault case, it becomes your word against theirs.\n\u2022 Damages: Without a vocational expert, the jury has no framework for calculating future lost earnings and may award far less than you deserve.\n\nBottom line: In straightforward cases (clear liability, well-documented injuries), you may not need experts. In contested cases, the cost of an expert is almost always worth it compared to the risk of losing.",
-      acknowledgeLabel: 'I understand the risks →',
-    },
-    {
-      id: 'expert_reports_at_trial',
-      type: 'info',
-      prompt:
-        "HOW EXPERT REPORTS ARE USED AT TRIAL:\n\u2022 Expert reports must be disclosed to the opposing party during discovery (usually 30 days before trial per local rules)\n\u2022 The expert may testify live at trial, by deposition video, or their written report may be admitted as evidence\n\u2022 The defense can cross-examine your expert and hire their own expert to contradict the findings\n\u2022 Judges may hold a \"Daubert\" or \"Robinson\" hearing (in Texas, Robinson v. Allied Chem. Corp.) to determine if your expert's methodology is reliable before allowing testimony\n\u2022 Prepare your expert by reviewing likely cross-examination questions\n\u2022 The expert should be able to explain their opinions in plain language the jury can understand",
-      acknowledgeLabel: 'I\'m ready to prepare my expert →',
+        "VOCATIONAL EXPERT (LOST EARNING CAPACITY)\nA vocational expert evaluates your education, work history, skills, and physical limitations to calculate how the injury affects your future earning ability.\n• Best for: Permanent disability, required career change, significant ongoing limitations\n• Typical cost: $2,000–$4,000 for evaluation and report\n• Where to find: Vocational rehabilitation counselors, university professors in rehabilitation or economics\n• What they calculate: Pre-injury earning capacity vs. post-injury capacity × remaining work-life expectancy\n• Without this: The jury has no framework for future lost earnings and often underestimates",
+      acknowledgeLabel: 'Got it — I\'ll find a vocational expert →',
+      showIf: (answers) => answers.lost_earning_capacity === 'yes' || answers.lost_earning_capacity === 'unsure',
     },
   ],
 
@@ -88,52 +72,52 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
     if (answers.liability_disputed === 'yes') {
       items.push({
         status: 'needed',
-        text: 'Liability is disputed \u2014 consider an accident reconstruction expert ($2,000\u2013$5,000 for report).',
+        text: 'Fault is disputed — consider an accident reconstruction expert ($2,000–$5,000 for a report). Retired highway patrol officers are a budget option.',
       })
-    } else if (answers.liability_disputed === 'no') {
+    } else if (answers.liability_disputed === 'unsure') {
+      items.push({
+        status: 'needed',
+        text: 'Fault isn\'t established yet — monitor closely. If the other side disputes it, you\'ll likely need a reconstruction expert.',
+      })
+    } else {
       items.push({
         status: 'done',
-        text: 'Liability is clear \u2014 accident reconstruction expert likely not needed.',
+        text: 'Fault is clear — an accident reconstruction expert is probably not needed.',
       })
     }
 
-    if (answers.causation_concern === 'yes') {
+    if (answers.causation_concern === 'yes' || answers.causation_concern === 'unsure') {
       items.push({
         status: 'needed',
-        text: 'Causation may be challenged \u2014 get a medical expert opinion. Your treating doctor is the most affordable option.',
+        text: 'Causation may be challenged — contact your treating doctor first. Ask if they\'ll write a causation letter or testify. This is your most affordable expert option.',
       })
-    } else if (answers.causation_concern === 'no') {
+    } else {
       items.push({
         status: 'done',
-        text: 'Causation not disputed \u2014 medical expert may not be necessary.',
+        text: 'No prior injuries in the affected area — a causation expert may not be necessary unless the defense raises it.',
       })
     }
 
     if (answers.lost_earning_capacity === 'yes') {
       items.push({
         status: 'needed',
-        text: 'Claiming lost earning capacity \u2014 a vocational expert ($2,000\u2013$4,000) can quantify future losses.',
+        text: 'Claiming lost earning capacity — a vocational expert ($2,000–$4,000) can quantify future losses. Without one, the jury must estimate, and they usually underestimate.',
       })
-    } else if (answers.lost_earning_capacity === 'no') {
+    } else if (answers.lost_earning_capacity === 'unsure') {
+      items.push({
+        status: 'info',
+        text: 'Earning impact is unclear — hold off on a vocational expert for now, but revisit once treatment is complete and your prognosis is known.',
+      })
+    } else {
       items.push({
         status: 'done',
-        text: 'Not claiming long-term lost earning capacity \u2014 vocational expert not needed.',
+        text: 'No permanent earning impact claimed — a vocational expert is not needed.',
       })
     }
 
     items.push({
       status: 'info',
-      text: 'Budget options: university professors, retired professionals, and your treating physician. Many experts defer payment until settlement.',
-    })
-
-    items.push({
-      status: 'info',
-      text: 'Without a causation expert, the defense may seek summary judgment. Weigh the cost of an expert against the risk of losing.',
-    })
-
-    items.push({
-      status: 'info',
-      text: "Expert reports must be disclosed during discovery. Experts may face cross-examination and a Robinson reliability hearing.",
+      text: 'Finding experts affordably: University professors ($1,500–$3,000), retired professionals, and your treating physician. Many experts in PI cases defer payment until settlement — ask.',
     })
 
     return items
@@ -143,67 +127,65 @@ const bodilyInjuryExpertWitnessGuideConfig: GuidedStepConfig = {
 const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
   title: 'Do You Need Expert Witnesses?',
   reassurance:
-    'Expert witnesses can help prove repair cost, diminished value, causation, and responsibility in property damage cases.',
+    'Three questions about your property damage dispute. Your answers will show which experts (if any) you need and affordable ways to find them.',
 
   questions: [
     {
-      id: 'when_experts_needed',
-      type: 'info',
-      prompt:
-        "WHEN ARE EXPERT WITNESSES NEEDED?\nExperts are not required in every property damage case, but they can be important when:\n• The repair estimate is disputed — an independent mechanic, contractor, engineer, or estimator can explain the reasonable cost of repair\n• The property lost market value after repair — an appraiser can support a diminished value claim\n• The cause of the damage is disputed — an accident reconstructionist, engineer, or qualified inspector can connect the damage to the incident\n• The defendant argues the damage was old, unrelated, or caused by normal wear — an expert can compare photos, inspections, repair records, and physical evidence\n\nStraightforward cases with photos, receipts, and a clear admission of fault may not need an expert.",
-      acknowledgeLabel: 'I understand when experts are needed →',
-    },
-    {
       id: 'repair_disputed',
-      type: 'yes_no',
-      prompt: 'Is the other side disputing your repair estimate or replacement cost?',
-      helpText:
-        'This is common when the estimate is high, the defendant says repairs are unnecessary, or the insurer offers much less than your repair shop or contractor.',
+      type: 'single_choice',
+      prompt: 'Is the other side disputing your repair cost or replacement estimate?',
+      helpText: 'Common when the insurer offers much less than your repair estimate, or the defendant claims the damage was minor.',
+      options: [
+        { value: 'no', label: 'No — the repair cost is agreed upon', description: 'The other side accepted your estimate.' },
+        { value: 'yes', label: 'Yes — they\'re disputing the amount or necessity of repairs', description: 'Independent estimates can counter their position.' },
+        { value: 'unsure', label: 'Not settled yet', description: 'Still in negotiation.' },
+      ],
     },
     {
       id: 'repair_expert_info',
       type: 'info',
       prompt:
-        "REPAIR COST EXPERT:\n• What they do: Inspect the damaged property and explain the reasonable repair or replacement cost\n• Vehicle damage: independent auto appraiser, body shop estimator, or mechanic\n• Home/property damage: licensed contractor, engineer, remediation specialist, or property inspector\n• Typical cost: often $250–$1,500 for an estimate or report; more for deposition or trial testimony\n• Budget option: Get 2–3 independent written estimates and ask the estimator whether they can testify if needed.",
-      acknowledgeLabel: 'I\'ll get an independent estimate →',
-      showIf: (answers) => answers.repair_disputed === 'yes',
+        "REPAIR COST EXPERT\nAn independent appraiser or estimator inspects the damage and explains the reasonable cost of repair or replacement.\n• Vehicle damage: independent auto appraiser, body shop estimator, or mechanic\n• Home or property: licensed contractor, engineer, remediation specialist, or inspector\n• Typical cost: $250–$1,500 for an estimate or report\n• Budget option: Get 2–3 written estimates from independent shops and ask each whether they can testify if needed",
+      acknowledgeLabel: 'Got it — I\'ll get independent estimates →',
+      showIf: (answers) => answers.repair_disputed === 'yes' || answers.repair_disputed === 'unsure',
     },
     {
       id: 'diminished_value',
-      type: 'yes_no',
-      prompt: 'Are you claiming diminished value after repairs are completed?',
-      helpText:
-        'Diminished value means the property is worth less even after repair, such as a vehicle with accident history or a structure with repaired but market-affecting damage.',
+      type: 'single_choice',
+      prompt: 'Is the property worth less now, even after repairs?',
+      helpText: 'Known as "diminished value" — a repaired vehicle with accident history, or a house with a disclosed structural repair, is often worth less on the market.',
+      options: [
+        { value: 'no', label: 'No — repairs fully restored the value', description: 'No loss in market value after repairs.' },
+        { value: 'yes', label: 'Yes — it\'s worth less even though it\'s repaired', description: 'An appraiser can document and quantify this loss.' },
+        { value: 'unsure', label: 'I\'m not sure', description: 'An appraiser can assess this for you.' },
+      ],
     },
     {
       id: 'appraiser_info',
       type: 'info',
       prompt:
-        "APPRAISER / DIMINISHED VALUE EXPERT:\n• What they do: Compare the property value before and after the damage and repair history\n• Vehicle damage: diminished value appraiser or licensed independent adjuster\n• Real property: licensed real estate appraiser or broker price opinion when allowed\n• Typical cost: $300–$1,500 for a report, depending on property type and complexity\n• Bring: photos, repair invoices, prior condition records, market listings, and any insurer valuation.",
-      acknowledgeLabel: 'I\'ll get a diminished value appraisal →',
-      showIf: (answers) => answers.diminished_value === 'yes',
+        "DIMINISHED VALUE APPRAISER\nAn appraiser compares the property\'s pre-damage value to its current value, accounting for the repair history.\n• Vehicle: diminished value appraiser or licensed independent adjuster\n• Real property: licensed real estate appraiser or broker price opinion\n• Typical cost: $300–$1,500 for a report\n• Bring: photos, repair invoices, prior condition records, market listings, and any insurer valuation",
+      acknowledgeLabel: 'Got it — I\'ll get a diminished value appraisal →',
+      showIf: (answers) => answers.diminished_value === 'yes' || answers.diminished_value === 'unsure',
     },
     {
       id: 'causation_disputed',
-      type: 'yes_no',
-      prompt: 'Might the defense argue the damage was old, unrelated, or caused by normal wear?',
-      helpText:
-        'If causation is disputed, expert analysis can connect the damage pattern to the incident and rule out unrelated causes.',
+      type: 'single_choice',
+      prompt: 'Is the other side arguing the damage was already there, unrelated, or caused by wear and tear?',
+      helpText: 'If the defendant or insurer is claiming the damage predates the incident, or isn\'t related to it, a causation expert can counter that.',
+      options: [
+        { value: 'no', label: 'No — they agree the incident caused this damage', description: 'Causation is not in dispute.' },
+        { value: 'yes', label: 'Yes — they\'re blaming prior damage or normal wear', description: 'An expert can connect the damage pattern to the incident.' },
+        { value: 'unsure', label: 'Not clear yet', description: 'They haven\'t taken a clear position.' },
+      ],
     },
     {
       id: 'causation_expert_info',
       type: 'info',
       prompt:
-        "CAUSATION EXPERT:\n• What they do: Explain how the incident caused the specific damage pattern\n• Vehicle cases: accident reconstruction expert, mechanic, or auto damage analyst\n• Building/property cases: engineer, contractor, remediation specialist, or inspector\n• Best evidence: before/after photos, inspection reports, maintenance records, repair invoices, weather or incident records, and witness statements\n• Budget option: A detailed written estimate that explains causation may be enough for negotiation, even if you do not retain a formal expert.",
-      acknowledgeLabel: 'I\'ll gather causation evidence →',
-      showIf: (answers) => answers.causation_disputed === 'yes',
-    },
-    {
-      id: 'finding_affordable_experts',
-      type: 'info',
-      prompt:
-        "FINDING AFFORDABLE EXPERTS:\n• Start with the professionals already involved: repair shop, contractor, inspector, adjuster, or appraiser\n• Ask for a written report that explains scope, cause, and cost in plain language\n• Get more than one estimate when possible\n• Ask whether the expert can appear remotely, by affidavit, or only live in court\n• Confirm fees for inspection, written report, deposition, and trial separately.",
-      acknowledgeLabel: 'Got the expert guidance →',
+        "CAUSATION EXPERT\nA causation expert explains how the incident produced the specific damage pattern observed, distinguishing incident damage from prior wear and tear.\n• Vehicle cases: accident reconstruction expert, mechanic, or auto damage analyst\n• Building/property: engineer, contractor, remediation specialist, or inspector\n• Best evidence to gather now: before/after photos, maintenance records, repair invoices, weather or incident reports, witness statements\n• Budget option: A detailed written estimate explaining causation may be sufficient for negotiation even without a formal retained expert",
+      acknowledgeLabel: 'Got it — I\'ll start gathering causation evidence →',
+      showIf: (answers) => answers.causation_disputed === 'yes' || answers.causation_disputed === 'unsure',
     },
   ],
 
@@ -213,42 +195,47 @@ const propertyDamageExpertWitnessGuideConfig: GuidedStepConfig = {
     if (answers.repair_disputed === 'yes') {
       items.push({
         status: 'needed',
-        text: 'Repair cost is disputed — consider an independent repair estimate or property damage expert.',
+        text: 'Repair cost is disputed — get 2–3 independent written estimates. Ask each estimator if they can testify. Cost: typically $250–$1,500.',
       })
-    } else if (answers.repair_disputed === 'no') {
+    } else if (answers.repair_disputed === 'unsure') {
+      items.push({
+        status: 'info',
+        text: 'Repair cost negotiations are ongoing — get independent estimates now so you\'re ready if they dispute the amount.',
+      })
+    } else {
       items.push({
         status: 'done',
-        text: 'Repair cost is not disputed — a repair-cost expert may not be needed.',
+        text: 'Repair cost agreed — a repair expert may not be needed.',
       })
     }
 
-    if (answers.diminished_value === 'yes') {
+    if (answers.diminished_value === 'yes' || answers.diminished_value === 'unsure') {
       items.push({
         status: 'needed',
-        text: 'Diminished value is claimed — consider an appraiser or diminished value report.',
+        text: 'Diminished value claim — get a written appraisal. Cost: $300–$1,500. Bring photos, repair invoices, and market listings.',
       })
-    } else if (answers.diminished_value === 'no') {
+    } else {
       items.push({
         status: 'done',
-        text: 'No diminished value claim — an appraiser may not be needed for that issue.',
+        text: 'No diminished value claim — an appraiser is not needed for that issue.',
       })
     }
 
-    if (answers.causation_disputed === 'yes') {
+    if (answers.causation_disputed === 'yes' || answers.causation_disputed === 'unsure') {
       items.push({
         status: 'needed',
-        text: 'Causation may be disputed — gather before/after evidence and consider a causation expert.',
+        text: 'Causation may be challenged — gather before/after photos, maintenance records, and incident reports now. A written estimate explaining causation may be enough for negotiation.',
       })
-    } else if (answers.causation_disputed === 'no') {
+    } else {
       items.push({
         status: 'done',
-        text: 'Causation is not disputed — photos, receipts, and estimates may be enough.',
+        text: 'Causation not disputed — photos, receipts, and estimates should be sufficient.',
       })
     }
 
     items.push({
       status: 'info',
-      text: 'Budget options: start with repair shops, contractors, inspectors, adjusters, or appraisers already familiar with the damage.',
+      text: 'Start with professionals already involved: your repair shop, contractor, inspector, or adjuster. Ask for a written report explaining scope, cause, and cost in plain language.',
     })
 
     return items
