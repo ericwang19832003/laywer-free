@@ -4,7 +4,9 @@ vi.stubEnv('OPENAI_API_KEY', 'test-key')
 vi.stubEnv('ANTHROPIC_API_KEY', 'test-key')
 
 vi.mock('../embeddings', () => ({
-  generateDocumentEmbeddings: vi.fn().mockResolvedValue([new Array(1536).fill(0.1)]),
+  generateDocumentEmbeddings: vi.fn().mockImplementation((texts: string[]) =>
+    Promise.resolve(texts.map(() => new Array(1536).fill(0.1)))
+  ),
 }))
 
 vi.mock('@/lib/extraction/pdf-text', () => ({

@@ -63,6 +63,14 @@ export async function embedCaseDocument(params: EmbedCaseDocumentParams): Promis
     const texts = chunks.map((c) => c.content)
     const embeddings = await generateDocumentEmbeddings(texts)
 
+    if (embeddings.length !== texts.length) {
+      return {
+        status: 'failed',
+        chunksInserted: 0,
+        error: `Embedding count mismatch: got ${embeddings.length} for ${texts.length} chunks`,
+      }
+    }
+
     // Delete old chunks for this source before inserting new ones
     await supabase
       .from('case_document_chunks')
