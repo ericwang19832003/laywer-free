@@ -8,6 +8,7 @@ export interface CaseContext {
   tasks: Array<{ task_key: string; status: string; title: string }>
   deadlines: Array<{ key: string; due_at: string; label: string }>
   evidenceCount: number
+  evidenceItems: Array<{ id: string; file_name: string; source_type: 'court_document' | 'evidence_item' | 'generated_document' }>
 }
 
 export interface AgentToolDefinition {
@@ -41,6 +42,7 @@ export interface InitialStateInput {
   tasks: CaseContext['tasks']
   deadlines: CaseContext['deadlines']
   evidenceCount: number
+  evidenceItems: CaseContext['evidenceItems']
 }
 
 export function createInitialState(input: InitialStateInput): AgentState {
@@ -56,6 +58,7 @@ export function createInitialState(input: InitialStateInput): AgentState {
       tasks: input.tasks,
       deadlines: input.deadlines,
       evidenceCount: input.evidenceCount,
+      evidenceItems: input.evidenceItems,
     },
   }
 }

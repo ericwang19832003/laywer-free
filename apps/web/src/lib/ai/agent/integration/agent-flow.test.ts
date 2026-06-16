@@ -64,6 +64,7 @@ async function runAgent(question: string): Promise<{
       },
     ],
     evidenceCount: 3,
+    evidenceItems: [],
   })
 
   state.messages = [{ role: 'user', content: question }]

@@ -42,6 +42,7 @@ const EVAL_STATE_INPUT = {
     { key: 'discovery_request', label: 'Send discovery', due_at: new Date(Date.now() + 3 * 86400000).toISOString() },
   ],
   evidenceCount: 3,
+  evidenceItems: [],
 }
 
 interface EvalResult extends EvalCase {

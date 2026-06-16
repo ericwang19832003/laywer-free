@@ -58,6 +58,7 @@ describe('buildAgentGraph', () => {
       tasks: [],
       deadlines: [],
       evidenceCount: 0,
+      evidenceItems: [],
     })
     state.messages = [{ role: 'user', content: 'What should I organize first?' }]
 

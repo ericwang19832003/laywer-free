@@ -12,6 +12,7 @@ describe('createInitialState', () => {
       tasks: [],
       deadlines: [],
       evidenceCount: 3,
+      evidenceItems: [],
     })
 
     expect(state.caseId).toBe('case-123')

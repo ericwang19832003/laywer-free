@@ -71,6 +71,7 @@ export async function POST(
     tasks: tasksResult.data ?? [],
     deadlines: deadlinesResult.data ?? [],
     evidenceCount: evidenceResult.count ?? 0,
+    evidenceItems: [],
   })
 
   if (existingCheckpoint?.messages) {

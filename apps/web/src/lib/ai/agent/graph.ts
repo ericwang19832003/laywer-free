@@ -4,6 +4,7 @@ import { createSearchCaseLawTool } from './tools/search-case-law'
 import { createAnalyzeDeadlinesTool } from './tools/analyze-deadlines'
 import { createReviewEvidenceTool } from './tools/review-evidence'
 import { createDraftDocumentTool } from './tools/draft-document'
+import { createSearchCaseDocumentsTool } from './tools/search-case-documents'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 const MAX_TOOL_CALLS = 10
@@ -23,7 +24,8 @@ This is general legal information — not legal advice.
 Tool grounding rules — follow strictly:
 - For any question about deadlines, days remaining, filing status, or what is overdue: use the "Current case deadline status" section injected into this prompt — it contains the actual case deadlines already fetched from the database. NEVER answer deadline questions from general Texas procedural knowledge or memory. Always cite the specific deadline data provided (e.g., "Your serve defendant deadline is OVERDUE by X days"). If no deadline status is provided in context, call analyze_deadlines.
 - For any question about evidence organization, evidence quality, or whether the user has documents for a court presentation: use the "Current case evidence review" section injected into this prompt. Do not predict outcomes, evaluate whether the user will win, or give a legal sufficiency opinion. If no evidence review is provided in context, call review_evidence.
-- For any document drafting request (letter, motion, notice, interrogatories): call draft_document immediately using reasonable assumptions. Do not ask for more context before drafting — draft first, offer to refine after. After draft_document returns, present the COMPLETE document text to the user — do not summarize or describe it.`
+- For any document drafting request (letter, motion, notice, interrogatories): call draft_document immediately using reasonable assumptions. Do not ask for more context before drafting — draft first, offer to refine after. After draft_document returns, present the COMPLETE document text to the user — do not summarize or describe it.
+- For any question about the user's specific documents, contracts, photos, emails, letters, or evidence content: call search_case_documents before answering. Never assume or invent file contents — always retrieve.`
 
 export type AgentEvent =
   | { type: 'token'; content: string }
@@ -36,7 +38,7 @@ export interface BuildGraphConfig {
   saveDraft: (params: { caseId: string; documentType: string; content: string }) => Promise<string>
 }
 
-function buildTools(caseContext: CaseContext, config: BuildGraphConfig): AgentTool[] {
+function buildTools(caseContext: CaseContext, caseId: string, config: BuildGraphConfig): AgentTool[] {
   return [
     createSearchCaseLawTool({
       disputeType: caseContext.disputeType,
@@ -52,6 +54,10 @@ function buildTools(caseContext: CaseContext, config: BuildGraphConfig): AgentTo
       disputeType: caseContext.disputeType,
       role: caseContext.role,
       saveDraft: config.saveDraft,
+    }),
+    createSearchCaseDocumentsTool({
+      caseId,
+      supabaseClient: config.supabaseClient,
     }),
   ]
 }
@@ -73,7 +79,7 @@ export function buildAgentGraph(config: BuildGraphConfig) {
 
       const anthropic = new Anthropic({ apiKey })
 
-      const tools = buildTools(state.caseContext, config)
+      const tools = buildTools(state.caseContext, state.caseId, config)
       // Patch caseId into draft tool (can't pass it at build time because state carries it)
       const draftTool = tools.find((t) => t.name === 'draft_document')
       if (draftTool) {
@@ -87,10 +93,23 @@ export function buildAgentGraph(config: BuildGraphConfig) {
       const toolMap = Object.fromEntries(tools.map((t) => [t.name, t]))
       const anthropicTools = tools.map(toAnthropicTool)
 
+      const taskSummary = state.caseContext.tasks
+        .map((t) => `  ${t.status === 'completed' ? '✓' : '→'} ${t.title} (${t.status})`)
+        .join('\n')
+
+      const evidenceSummary = state.caseContext.evidenceItems.length > 0
+        ? state.caseContext.evidenceItems
+            .map((e) => `  • ${e.file_name} [${e.source_type}]`)
+            .join('\n')
+        : '  None uploaded yet'
+
       const contextSummary =
-        `Case context: ${state.caseContext.disputeType} case, ${state.caseContext.role} in ${state.caseContext.county} County.\n` +
-        `Task completion score: ${state.caseContext.healthScore}/100 (task-completion only — NOT case strength). Evidence items uploaded: ${state.caseContext.evidenceCount} (raw upload count — DO NOT use this to assess sufficiency or strength; call review_evidence).\n` +
-        `Tasks: ${state.caseContext.tasks.map((t) => `${t.title} (${t.status})`).join(', ')}.`
+        `CASE CONTEXT\n` +
+        `Type: ${state.caseContext.disputeType} | Role: ${state.caseContext.role} | County: ${state.caseContext.county}\n` +
+        `Health Score: ${state.caseContext.healthScore}/100 (task-completion score — NOT case strength)\n\n` +
+        `TASKS (${state.caseContext.tasks.length} total)\n${taskSummary}\n\n` +
+        `UPLOADED DOCUMENTS AND EVIDENCE (${state.caseContext.evidenceItems.length} items)\n${evidenceSummary}\n\n` +
+        `Use search_case_documents to read the actual content of any uploaded file before giving advice about it.`
 
       const lastUserMsg = [...state.messages].reverse().find((m) => m.role === 'user')
       const msgText = typeof lastUserMsg?.content === 'string' ? lastUserMsg.content : ''
