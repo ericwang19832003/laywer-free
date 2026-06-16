@@ -10,13 +10,13 @@ CREATE TABLE public.case_document_chunks (
   source_id   uuid NOT NULL,
   chunk_index int NOT NULL,
   content     text NOT NULL,
-  embedding   vector(1536) NOT NULL,
+  embedding   extensions.vector(1536) NOT NULL,
   token_count int NOT NULL,
   created_at  timestamptz DEFAULT now()
 );
 
 CREATE INDEX ON public.case_document_chunks
-  USING ivfflat (embedding vector_cosine_ops) WITH (lists = 50);
+  USING ivfflat (embedding extensions.vector_cosine_ops) WITH (lists = 50);
 
 CREATE INDEX ON public.case_document_chunks (source_type, source_id);
 CREATE INDEX ON public.case_document_chunks (case_id);
@@ -39,7 +39,7 @@ ALTER TABLE public.evidence_items
 -- 3. RPC for vector similarity search scoped to a single case
 CREATE OR REPLACE FUNCTION public.match_case_documents(
   p_case_id       uuid,
-  query_embedding vector(1536),
+  query_embedding extensions.vector(1536),
   match_count     int DEFAULT 5,
   source_types    text[] DEFAULT NULL
 )
