@@ -221,6 +221,19 @@ export async function POST(
       },
     })
 
+    // Fire-and-forget embedding (does not delay response)
+    const embedUrl = new URL(`/api/cases/${caseId}/documents/embed`, request.url)
+    fetch(embedUrl.toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sourceType: 'evidence_item',
+        sourceId: evidence.id,
+        storagePath: evidence.storage_path,
+        mimeType: evidence.mime_type,
+      }),
+    }).catch(() => { /* non-critical background job */ })
+
     return NextResponse.json({ evidence }, { status: 201 })
   } catch {
     return NextResponse.json(
