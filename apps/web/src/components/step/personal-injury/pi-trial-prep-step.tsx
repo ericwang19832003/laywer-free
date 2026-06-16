@@ -1,20 +1,21 @@
 'use client'
 
 import { GuidedStep } from '../guided-step'
-import { piTrialPrepConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-trial-prep'
+import { createPiTrialPrepConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-trial-prep'
 
 interface PITrialPrepStepProps {
   caseId: string
   taskId: string
   existingAnswers?: Record<string, string>
+  piSubType?: string
 }
 
-export function PITrialPrepStep({ caseId, taskId, existingAnswers }: PITrialPrepStepProps) {
+export function PITrialPrepStep({ caseId, taskId, existingAnswers, piSubType }: PITrialPrepStepProps) {
   return (
     <GuidedStep
       caseId={caseId}
       taskId={taskId}
-      config={piTrialPrepConfig}
+      config={createPiTrialPrepConfig(piSubType)}
       existingAnswers={existingAnswers}
     />
   )

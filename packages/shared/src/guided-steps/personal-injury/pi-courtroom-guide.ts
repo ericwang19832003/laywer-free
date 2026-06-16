@@ -1,4 +1,154 @@
 import type { GuidedStepConfig } from '../types'
+import { isPropertyDamageSubType } from './constants'
+
+const propertyDamageCourtroomGuideConfig: GuidedStepConfig = {
+  title: 'What to Expect at Your Property Damage Trial',
+  reassurance:
+    'Understanding the trial process removes the mystery. Organized evidence and a clear damages number are your greatest advantages.',
+
+  questions: [
+    {
+      id: 'trial_type',
+      type: 'single_choice',
+      prompt: 'What type of trial are you expecting?',
+      options: [
+        { value: 'jury', label: 'Jury trial' },
+        { value: 'bench', label: 'Bench trial (judge decides)' },
+        { value: 'not_sure', label: 'Not sure yet' },
+      ],
+    },
+    {
+      id: 'jury_trial_info',
+      type: 'info',
+      prompt:
+        "JURY TRIAL STRUCTURE:\n1. JURY SELECTION (Voir Dire) — You and the defendant's attorney question potential jurors to identify bias.\n2. OPENING STATEMENTS — You go first. Briefly tell the jury what happened and what damage was caused.\n3. PLAINTIFF'S CASE — You present your evidence: your testimony, witness testimony, photos, repair estimates, invoices, and appraiser reports.\n4. DEFENDANT'S CASE — The defense presents their evidence and may call witnesses to dispute your damages.\n5. CLOSING ARGUMENTS — Summarize your case and ask for a specific dollar amount.\n6. JURY DELIBERATION & VERDICT — The jury decides liability and damages.",
+      acknowledgeLabel: 'I understand the jury trial process',
+      showIf: (answers) => answers.trial_type === 'jury',
+    },
+    {
+      id: 'bench_trial_info',
+      type: 'info',
+      prompt:
+        "BENCH TRIAL STRUCTURE:\n1. OPENING STATEMENTS — Brief overview of your case to the judge.\n2. PLAINTIFF'S CASE — Present your testimony, documents, estimates, and witnesses.\n3. DEFENDANT'S CASE — Defense presents their side.\n4. CLOSING ARGUMENTS — Summarize the evidence and the law.\n5. JUDGE'S RULING — The judge decides both liability and damages.\n\nBench trials are typically faster and more focused on legal arguments than emotional appeals. Judges appreciate organized, concise presentations with clear numbers.",
+      acknowledgeLabel: 'I understand the bench trial process',
+      showIf: (answers) => answers.trial_type === 'bench',
+    },
+    {
+      id: 'testimony_script',
+      type: 'info',
+      prompt:
+        "PROPERTY DAMAGE TESTIMONY — WHAT TO COVER:\n\"I was [explain the situation — parked / at my home / at my business]. The defendant [ran into my vehicle / damaged my property by...]. The damage occurred on [date] at [location].\n\nBefore the incident, my [vehicle/property] was in [describe condition — excellent/good condition, no prior damage]. After the incident, [describe the damage]. I [obtained repair estimates / had repairs done] at a cost of $[amount].\n\nMy total losses include: $[repairs], $[rental/loss of use], $[diminished value if applicable].\"\n\nTip: Practice this until it feels natural. Be specific about dollar amounts — judges and jurors need clear numbers.",
+      acknowledgeLabel: "I'll practice my testimony",
+    },
+    {
+      id: 'damage_evidence_prepared',
+      type: 'multi_select',
+      prompt: 'Which of these have you prepared for your damages presentation?',
+      options: [
+        { value: 'photos_before', label: 'Before-the-incident photos showing prior condition' },
+        { value: 'photos_after', label: 'After-the-incident photos showing all damage' },
+        { value: 'repair_estimates', label: 'Written repair estimates (2–3 independent estimates are strongest)' },
+        { value: 'repair_invoices', label: 'Paid repair invoices with itemized breakdown' },
+        { value: 'rental_receipts', label: 'Rental car or loss-of-use receipts' },
+        { value: 'appraisal_report', label: 'Appraisal or diminished value report (if claiming reduced market value)' },
+      ],
+      noneLabel: "Haven't prepared any yet",
+    },
+    {
+      id: 'presenting_damages',
+      type: 'info',
+      prompt:
+        "PRESENTING PROPERTY DAMAGES:\n• REPAIR COST — Introduce estimates and invoices as numbered exhibits with a total. Multiple independent estimates are more persuasive than one.\n• LOSS OF USE — Document rental costs or the daily value of not having access to the property during repairs.\n• DIMINISHED VALUE — If the property is worth less after repair, an appraiser's report documents this loss.\n• PRE-INCIDENT VALUE — Relevant for total-loss claims. Use market listings, prior appraisals, or Kelly Blue Book/comparable sales.\n\nTip: Ask the judge or jury for a specific dollar amount in closing. They need a number to anchor their decision.",
+      acknowledgeLabel: "I'll prepare my damages presentation",
+    },
+    {
+      id: 'what_not_to_say',
+      type: 'info',
+      prompt:
+        "WHAT NOT TO SAY:\n• Do not exaggerate the damage — the defense will test you with photos and records\n• Do not guess about repair amounts — use written estimates and invoices\n• Do not argue with the defense attorney — answer calmly and factually\n• Do not volunteer extra information — answer the question asked, then stop\n• Do not say \"I think\" when you mean \"I know\" — be definitive about what you personally saw\n• Do not discuss your case on social media during the lawsuit",
+      acknowledgeLabel: 'I understand what to avoid',
+    },
+    {
+      id: 'comparative_fault_argument',
+      type: 'info',
+      prompt:
+        "COMPARATIVE FAULT ARGUMENT:\nThe defense will likely argue you were partially at fault for the damage. Be prepared to explain:\n\"Even if I was partially at fault, the defendant was primarily responsible because [they hit my vehicle / they damaged my property through negligence / they failed to exercise reasonable care]. Under Texas law, I can still recover damages as long as I was less than 51% at fault.\"\n\nFocus on the defendant's actions. Do not concede fault beyond what the evidence actually shows.",
+      acknowledgeLabel: 'I understand comparative fault',
+    },
+    {
+      id: 'courtroom_ready',
+      type: 'multi_select',
+      prompt: 'Which of these courtroom preparation steps have you completed?',
+      options: [
+        { value: 'arriving_early', label: 'Planning to arrive at least 30 minutes early' },
+        { value: 'professional_attire', label: 'Business attire selected' },
+        { value: 'know_your_honor', label: 'Know to address the judge as "Your Honor" and stand when speaking' },
+        { value: 'phone_off', label: 'Will turn off phone completely before entering' },
+        { value: 'practiced_calm', label: 'Prepared to stay calm when the defense challenges testimony' },
+        { value: 'three_copies', label: 'Will bring 3 copies of all documents (you, judge, defendant)' },
+      ],
+      noneLabel: "Haven't prepared any of these yet",
+    },
+  ],
+
+  generateSummary(answers) {
+    const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
+
+    if (answers.trial_type && answers.trial_type !== 'not_sure') {
+      const typeLabels: Record<string, string> = {
+        jury: 'Jury trial — jury selection, opening statements, cases, closing, verdict',
+        bench: 'Bench trial — judge decides liability and damages',
+      }
+      items.push({
+        status: 'done',
+        text: `Trial type: ${typeLabels[answers.trial_type] ?? answers.trial_type}`,
+      })
+    } else {
+      items.push({ status: 'needed', text: 'Determine whether you will have a jury or bench trial.' })
+    }
+
+    items.push({
+      status: 'info',
+      text: 'Practice your testimony. Describe what happened factually, with specific dollar amounts for each category of damage.',
+    })
+
+    if (answers.damage_evidence_prepared && answers.damage_evidence_prepared !== 'none') {
+      items.push({
+        status: 'done',
+        text: 'Damage evidence preparation started.',
+      })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Organize before/after photos, repair estimates, and invoices as numbered exhibits.',
+      })
+    }
+
+    items.push({
+      status: 'info',
+      text: 'Do NOT exaggerate damages — use written estimates and invoices. Answer questions calmly and factually.',
+    })
+
+    items.push({
+      status: 'info',
+      text: 'Be ready for comparative fault arguments. You can recover if you were less than 51% at fault.',
+    })
+
+    if (answers.courtroom_ready && answers.courtroom_ready !== 'none') {
+      items.push({
+        status: 'done',
+        text: 'Courtroom preparation underway.',
+      })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Arrive 30 minutes early. Dress professionally. Address the judge as "Your Honor." Bring 3 copies of everything.',
+      })
+    }
+
+    return items
+  },
+}
 
 export const piCourtroomGuideConfig: GuidedStepConfig = {
   title: 'What to Expect at Your PI Trial',
@@ -147,4 +297,10 @@ export const piCourtroomGuideConfig: GuidedStepConfig = {
 
     return items
   },
+}
+
+export function createPiCourtroomGuideConfig(piSubType?: string): GuidedStepConfig {
+  return isPropertyDamageSubType(piSubType)
+    ? propertyDamageCourtroomGuideConfig
+    : piCourtroomGuideConfig
 }

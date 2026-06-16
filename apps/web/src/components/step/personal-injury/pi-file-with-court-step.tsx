@@ -8,6 +8,7 @@ interface PIFileWithCourtStepProps {
   caseId: string
   taskId: string
   existingAnswers?: Record<string, string>
+  piSubType?: string
   caseData?: {
     state: string
     court_type: string
@@ -15,15 +16,16 @@ interface PIFileWithCourtStepProps {
   }
 }
 
-export function PIFileWithCourtStep({ caseId, taskId, existingAnswers, caseData }: PIFileWithCourtStepProps) {
+export function PIFileWithCourtStep({ caseId, taskId, existingAnswers, piSubType, caseData }: PIFileWithCourtStepProps) {
   const config = useMemo(
     () =>
       createPiFileWithCourtConfig(
         caseData?.state ?? 'TX',
-        caseData?.court_type ?? 'district',
-        caseData?.county ?? null
+        caseData?.court_type ?? '',
+        caseData?.county ?? null,
+        piSubType
       ),
-    [caseData?.state, caseData?.court_type, caseData?.county]
+    [caseData?.state, caseData?.court_type, caseData?.county, piSubType]
   )
 
   return (

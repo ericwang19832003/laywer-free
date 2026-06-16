@@ -103,6 +103,30 @@ function buildDocumentsPrompt(
   )
 }
 
+function buildCourtIdentificationPrompt(
+  stateInfo: StateFilingInfo | undefined,
+  courtInfo: CourtFilingInfo | undefined,
+  courtType: string,
+  county: string | null
+): string {
+  if (courtInfo) {
+    const countyText = county ? ` in ${county} County` : ''
+    const lines: string[] = [`YOUR FILING COURT: ${courtInfo.label}${countyText}`]
+    if (stateInfo?.courtSelectionGuide) {
+      lines.push('')
+      lines.push(stateInfo.courtSelectionGuide)
+    }
+    return lines.join('\n')
+  }
+
+  // Court type known but not in STATE_FILING_INFO — use the selection guide or generic guidance
+  if (stateInfo?.courtSelectionGuide) {
+    return stateInfo.courtSelectionGuide
+  }
+
+  return 'File in the county where the incident occurred or where the defendant resides. The correct court tier depends on the amount of your claim — contact your local court clerk to confirm.'
+}
+
 function buildSolPrompt(
   stateInfo: StateFilingInfo | undefined,
   piSubType?: string
@@ -144,22 +168,10 @@ export function createPiFileWithCourtConfig(
 
     questions: [
       {
-        id: 'know_which_court',
-        type: 'single_choice',
-        prompt: 'Do you know which court to file in?',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'not_sure', label: "I'm not sure" },
-        ],
-      },
-      {
-        id: 'court_info',
+        id: 'your_filing_court',
         type: 'info',
-        prompt:
-          stateInfo?.courtSelectionGuide ??
-          'File in the county where the incident occurred or where the defendant resides. Contact your local court clerk for specific jurisdiction rules.',
-        acknowledgeLabel: "I'll contact the court clerk to confirm the correct venue for my case",
-        showIf: (a) => a.know_which_court === 'not_sure',
+        prompt: buildCourtIdentificationPrompt(stateInfo, courtInfo, courtType, county),
+        acknowledgeLabel: "Got it — I know where to file →",
       },
       {
         id: 'efile_info',
@@ -168,16 +180,10 @@ export function createPiFileWithCourtConfig(
         acknowledgeLabel: "I'll follow the e-filing steps and save my confirmation receipt",
       },
       {
-        id: 'know_filing_fee',
-        type: 'yes_no',
-        prompt: 'Do you know the filing fee for your court?',
-      },
-      {
         id: 'fee_info',
         type: 'info',
         prompt: buildFeePrompt(stateInfo, courtInfo, courtType),
-        acknowledgeLabel: "I'll contact the court clerk to confirm the exact filing fee",
-        showIf: (a) => a.know_filing_fee === 'no',
+        acknowledgeLabel: "Got it — I'll confirm the exact filing fee with the court clerk",
       },
       {
         id: 'need_fee_waiver',
@@ -200,11 +206,6 @@ export function createPiFileWithCourtConfig(
         acknowledgeLabel: "I'll gather all required documents before going to file",
       },
       {
-        id: 'know_sol_deadline',
-        type: 'yes_no',
-        prompt: 'Do you know your statute of limitations deadline?',
-      },
-      {
         id: 'sol_critical',
         type: 'info',
         prompt: buildSolPrompt(stateInfo, piSubType),
@@ -215,17 +216,18 @@ export function createPiFileWithCourtConfig(
     generateSummary(answers) {
       const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
 
-      if (answers.know_which_court === 'yes') {
+      if (courtInfo) {
+        const countyText = county ? ` in ${county} County` : ''
         items.push({
           status: 'done',
-          text: 'You know which court to file in.',
+          text: `Filing court confirmed: ${courtInfo.label}${countyText}.`,
         })
       } else {
         items.push({
-          status: 'needed',
+          status: 'info',
           text:
             stateInfo?.courtSelectionGuide ??
-            'Determine the correct court based on where the incident occurred and the amount of your claim.',
+            'File in the county where the incident occurred. Court tier depends on the amount of your claim.',
         })
       }
 
@@ -244,19 +246,12 @@ export function createPiFileWithCourtConfig(
         })
       }
 
-      if (answers.know_filing_fee === 'yes') {
-        items.push({
-          status: 'done',
-          text: 'You know the filing fee for your court.',
-        })
-      } else {
-        items.push({
-          status: 'needed',
-          text: courtInfo
-            ? `Look up the filing fee for ${courtInfo.label}: ${courtInfo.feeRange}.`
-            : 'Contact your local court clerk for the exact filing fee.',
-        })
-      }
+      items.push({
+        status: 'info',
+        text: courtInfo
+          ? `Filing fee for ${courtInfo.label}: ${courtInfo.feeRange}. Confirm the exact amount with the court clerk.`
+          : 'Contact your local court clerk for the exact filing fee.',
+      })
 
       if (answers.need_fee_waiver === 'yes') {
         items.push({
@@ -265,23 +260,16 @@ export function createPiFileWithCourtConfig(
         })
       }
 
-      if (answers.know_sol_deadline === 'yes') {
-        items.push({
-          status: 'done',
-          text: 'You know your statute of limitations deadline.',
-        })
-      } else {
-        const isProperty = isPropertyDamageSubType(piSubType)
-        const solYears = stateInfo
-          ? isProperty
-            ? stateInfo.sol.propertyDamage
-            : stateInfo.sol.personalInjury
-          : 'varies by state'
-        items.push({
-          status: 'needed',
-          text: `Determine your statute of limitations deadline. In ${stateInfo?.name ?? 'your state'}, it is ${solYears} from the date of the incident.`,
-        })
-      }
+      const isProperty = isPropertyDamageSubType(piSubType)
+      const solYears = stateInfo
+        ? isProperty
+          ? stateInfo.sol.propertyDamage
+          : stateInfo.sol.personalInjury
+        : 'varies by state'
+      items.push({
+        status: 'needed',
+        text: `File before your statute of limitations deadline. In ${stateInfo?.name ?? 'your state'}, it is ${solYears} from the date of the incident.`,
+      })
 
       items.push({
         status: 'info',

@@ -1,4 +1,170 @@
 import type { GuidedStepConfig } from '../types'
+import { isPropertyDamageSubType } from './constants'
+
+const propertyDamageTrialPrepConfig: GuidedStepConfig = {
+  title: 'Prepare for Trial',
+  reassurance:
+    'Being well-prepared gives you the best chance of presenting your case effectively.',
+
+  questions: [
+    {
+      id: 'has_repair_docs',
+      type: 'single_choice',
+      prompt: 'Do you have your repair estimates and invoices organized?',
+      helpText: 'Organized cost documentation makes it much easier to present your damages clearly.',
+      options: [
+        { value: 'all_organized', label: 'Yes, all organized' },
+        { value: 'some_not_all', label: 'Some, but not all' },
+        { value: 'not_started', label: "I haven't started collecting them" },
+      ],
+    },
+    {
+      id: 'has_photos',
+      type: 'yes_no',
+      prompt: 'Do you have before and after photos of the property damage?',
+      helpText: 'Visual evidence is very persuasive in court. Before-the-incident photos establish prior condition.',
+    },
+    {
+      id: 'has_police_report',
+      type: 'yes_no',
+      prompt: 'Do you have a copy of the police or incident report?',
+      helpText: 'The incident report documents key facts. You can request a copy from the responding agency.',
+    },
+    {
+      id: 'has_demand_letter_copies',
+      type: 'yes_no',
+      prompt: 'Do you have copies of your demand letter and insurance correspondence?',
+      helpText: 'This shows the judge you attempted to resolve the case before trial.',
+    },
+    {
+      id: 'has_loss_of_use_proof',
+      type: 'single_choice',
+      prompt: 'Do you have documentation for any loss of use (rental car, lost income from property, etc.)?',
+      helpText: 'If the damage prevented you from using your property, you may be entitled to loss-of-use compensation.',
+      options: [
+        { value: 'yes', label: 'Yes, I have documentation' },
+        { value: 'not_applicable', label: "I didn't incur any loss of use" },
+        { value: 'no', label: "No, I don't have proof yet" },
+      ],
+    },
+    {
+      id: 'damages_summary_prepared',
+      type: 'yes_no',
+      prompt:
+        'Have you prepared a damages summary organized by category (repairs, replacement, loss of use, diminished value)?',
+      helpText: 'A clear summary sheet helps the judge follow your case and see your total damages.',
+    },
+    {
+      id: 'direct_exam_outline',
+      type: 'yes_no',
+      prompt:
+        'Have you written an outline of your testimony (what happened, the damage caused, your repair efforts and costs)?',
+      helpText: 'Telling your story in chronological order is the most effective approach.',
+    },
+    {
+      id: 'cross_exam_info',
+      type: 'info',
+      prompt:
+        "During cross-examination: stay calm, answer only the question asked, and never volunteer extra information. It is okay to say \"I don't remember\" if you genuinely don't. Do not argue with the other side's attorney.",
+      helpText:
+        "If you don't understand a question, ask for clarification before answering.",
+      acknowledgeLabel: "I'm ready for cross-examination →",
+    },
+    {
+      id: 'three_copies',
+      type: 'info',
+      prompt:
+        'Bring 3 copies of ALL documents: one for you, one for the judge, and one for the defendant.',
+      helpText:
+        'This is standard court procedure and shows you are well-prepared.',
+      acknowledgeLabel: "I'll bring 3 copies of everything →",
+    },
+  ],
+
+  generateSummary(answers) {
+    const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
+
+    if (answers.has_repair_docs === 'all_organized') {
+      items.push({ status: 'done', text: 'Repair estimates and invoices are organized.' })
+    } else if (answers.has_repair_docs === 'some_not_all') {
+      items.push({
+        status: 'needed',
+        text: 'Finish collecting all repair estimates and invoices.',
+      })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Collect repair estimates and invoices from every provider.',
+      })
+    }
+
+    if (answers.has_photos === 'yes') {
+      items.push({ status: 'done', text: 'Before/after photos of damage are ready.' })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Gather before-the-incident and after-the-incident photos of the damage.',
+      })
+    }
+
+    if (answers.has_police_report === 'yes') {
+      items.push({ status: 'done', text: 'Incident report obtained.' })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Request a copy of the incident or police report.',
+      })
+    }
+
+    if (answers.has_demand_letter_copies === 'yes') {
+      items.push({ status: 'done', text: 'Demand letter and insurance correspondence ready.' })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Collect copies of your demand letter and all insurance correspondence.',
+      })
+    }
+
+    if (answers.has_loss_of_use_proof === 'yes') {
+      items.push({ status: 'done', text: 'Loss-of-use documentation ready.' })
+    } else if (answers.has_loss_of_use_proof === 'no') {
+      items.push({
+        status: 'needed',
+        text: 'Get proof of loss of use: rental receipts, business records, or other documentation.',
+      })
+    }
+
+    if (answers.damages_summary_prepared === 'yes') {
+      items.push({ status: 'done', text: 'Damages summary organized by category.' })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Prepare a damages summary organized by category (repairs, replacement, loss of use, diminished value).',
+      })
+    }
+
+    if (answers.direct_exam_outline === 'yes') {
+      items.push({ status: 'done', text: 'Testimony outline written.' })
+    } else {
+      items.push({
+        status: 'needed',
+        text: 'Write an outline of your testimony covering what happened, the damage, and your repair efforts and costs.',
+      })
+    }
+
+    items.push({
+      status: 'info',
+      text: 'Remember: bring 3 copies of ALL documents (you, judge, defendant).',
+    })
+
+    items.push({
+      status: 'info',
+      text: "During cross-examination, stay calm, answer only the question asked, and don't volunteer extra information.",
+    })
+
+    return items
+  },
+}
 
 export const piTrialPrepConfig: GuidedStepConfig = {
   title: 'Prepare for Trial',
@@ -210,4 +376,10 @@ export const piTrialPrepConfig: GuidedStepConfig = {
 
     return items
   },
+}
+
+export function createPiTrialPrepConfig(piSubType?: string): GuidedStepConfig {
+  return isPropertyDamageSubType(piSubType)
+    ? propertyDamageTrialPrepConfig
+    : piTrialPrepConfig
 }

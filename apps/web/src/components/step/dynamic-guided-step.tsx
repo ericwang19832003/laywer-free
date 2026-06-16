@@ -120,8 +120,8 @@ import { piDamagesCalculationConfig, createPiDamagesCalculationConfig } from '@l
 import { piPipClaimConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-pip-claim'
 import { createPiFilingGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-filing-guide'
 import { piServiceGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-service-guide'
-import { piCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-courtroom-guide'
-import { piComparativeFaultConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-comparative-fault'
+import { createPiCourtroomGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-courtroom-guide'
+import { createPiComparativeFaultConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-comparative-fault'
 import { piLienResolutionConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-lien-resolution'
 import { createPiExpertWitnessGuideConfig } from '@lawyer-free/shared/guided-steps/personal-injury/pi-expert-witness-guide'
 
@@ -415,8 +415,8 @@ function resolveConfig(
     case 'pi_medical_improvement': return piMedicalImprovementConfig
     case 'pi_filing_guide': return createPiFilingGuideConfig(piSubType)
     case 'pi_service_guide': return piServiceGuideConfig
-    case 'pi_courtroom_guide': return piCourtroomGuideConfig
-    case 'pi_comparative_fault': return piComparativeFaultConfig
+    case 'pi_courtroom_guide': return createPiCourtroomGuideConfig(piSubType)
+    case 'pi_comparative_fault': return createPiComparativeFaultConfig(piSubType)
     case 'pi_lien_resolution': return piLienResolutionConfig
     case 'pi_expert_witness_guide': return createPiExpertWitnessGuideConfig(piSubType)
 

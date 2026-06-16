@@ -1086,10 +1086,14 @@ export default async function StepPage({
           filing_county: caseCounty,
         })}
         state={caseState} />
-    case 'pi_courtroom_guide':
-      return <DynamicGuidedStep taskKey="pi_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
-    case 'pi_comparative_fault':
-      return <DynamicGuidedStep taskKey="pi_comparative_fault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
+    case 'pi_courtroom_guide': {
+      const piSubType = await getPiSubType()
+      return <DynamicGuidedStep taskKey="pi_courtroom_guide" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piSubType} />
+    }
+    case 'pi_comparative_fault': {
+      const piSubType = await getPiSubType()
+      return <DynamicGuidedStep taskKey="pi_comparative_fault" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} piSubType={piSubType} />
+    }
     case 'pi_lien_resolution':
       return <DynamicGuidedStep taskKey="pi_lien_resolution" caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} state={caseState} />
     case 'pi_expert_witness_guide': {
@@ -1408,16 +1412,16 @@ export default async function StepPage({
       )
     }
     case 'pi_file_with_court': {
-      const { data: caseRow } = await supabase
-        .from('cases')
-        .select('state, court_type, county')
-        .eq('id', id)
-        .single()
+      const [{ data: caseRow }, piSubType] = await Promise.all([
+        supabase.from('cases').select('state, court_type, county').eq('id', id).single(),
+        getPiSubType(),
+      ])
       return (
         <PIFileWithCourtStep
           caseId={id}
           taskId={taskId}
           existingAnswers={task.metadata?.guided_answers}
+          piSubType={piSubType}
           caseData={caseRow ?? undefined}
         />
       )
@@ -1440,10 +1444,14 @@ export default async function StepPage({
       return <PISchedulingConferenceStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
     case 'pi_pretrial_motions':
       return <PIPretrialMotionsStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_mediation':
-      return <PIMediationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
-    case 'pi_trial_prep':
-      return <PITrialPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} />
+    case 'pi_mediation': {
+      const piSubType = await getPiSubType()
+      return <PIMediationStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piSubType} />
+    }
+    case 'pi_trial_prep': {
+      const piSubType = await getPiSubType()
+      return <PITrialPrepStep caseId={id} taskId={taskId} existingAnswers={task.metadata?.guided_answers} piSubType={piSubType} />
+    }
     case 'pi_post_resolution': {
       const { data: piDetails } = await supabase
         .from('personal_injury_details').select('pi_sub_type').eq('case_id', id).maybeSingle()

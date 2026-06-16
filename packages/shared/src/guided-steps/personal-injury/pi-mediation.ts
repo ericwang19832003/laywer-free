@@ -1,4 +1,103 @@
 import type { GuidedStepConfig } from '../types'
+import { isPropertyDamageSubType } from './constants'
+
+const propertyDamageMediationConfig: GuidedStepConfig = {
+  title: 'Mediation & Settlement Conference',
+  reassurance:
+    'Most property damage cases settle before trial. Mediation is a structured negotiation with a neutral mediator to help both sides reach an agreement.',
+
+  questions: [
+    {
+      id: 'mediation_status',
+      type: 'single_choice',
+      prompt: 'Is mediation ordered by the court or voluntary?',
+      options: [
+        { value: 'ordered', label: 'Court-ordered' },
+        { value: 'voluntary', label: 'Voluntary' },
+        { value: 'no_mediation', label: 'No mediation planned' },
+      ],
+    },
+    {
+      id: 'no_mediation_info',
+      type: 'info',
+      prompt:
+        "Even without formal mediation, you can still negotiate a settlement directly with the defendant's attorney or insurance company at any time. Many property damage cases settle through informal negotiations.",
+      acknowledgeLabel: "I'll negotiate directly →",
+      showIf: (answers) => answers.mediation_status === 'no_mediation',
+    },
+    {
+      id: 'settlement_demand_prepared',
+      type: 'single_choice',
+      prompt: 'Have you prepared your settlement demand for mediation?',
+      showIf: (answers) => answers.mediation_status !== 'no_mediation',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+        { value: 'working_on_it', label: 'Working on it' },
+      ],
+    },
+    {
+      id: 'demand_prep_info',
+      type: 'info',
+      prompt:
+        'Your settlement demand should include: repair or replacement costs, diminished value (if applicable), loss of use or rental costs, and any other out-of-pocket expenses caused by the damage. Organize these into a clear demand package with supporting estimates and invoices.',
+      acknowledgeLabel: "I'll prepare my demand package →",
+      showIf: (answers) => answers.settlement_demand_prepared === 'no' || answers.settlement_demand_prepared === 'working_on_it',
+    },
+    {
+      id: 'minimum_settlement',
+      type: 'single_choice',
+      prompt: 'Have you thought about your minimum acceptable settlement amount?',
+      showIf: (answers) => answers.mediation_status !== 'no_mediation',
+      options: [
+        { value: 'yes', label: 'Yes, I have a number in mind' },
+        { value: 'no', label: 'No, I need to think about this' },
+      ],
+    },
+    {
+      id: 'minimum_info',
+      type: 'info',
+      prompt:
+        "Before mediation, know your bottom line. Consider: your total out-of-pocket repair or replacement costs, the strength of your evidence, the risk of losing at trial, and how long trial would take. The mediator is neutral and will try to find middle ground.",
+      acknowledgeLabel: "I'll determine my bottom line →",
+      showIf: (answers) => answers.minimum_settlement === 'no',
+    },
+    {
+      id: 'mediation_tips',
+      type: 'info',
+      prompt:
+        "Mediation tips: Be prepared to compromise — your first offer won't be accepted. The mediator will go back and forth between rooms. Stay patient, stay calm, and don't take it personally. Most mediations last a full day. Bring all relevant documents including estimates, invoices, photos, and appraisals.",
+      acknowledgeLabel: "I'm ready for mediation →",
+      showIf: (answers) => answers.mediation_status !== 'no_mediation',
+    },
+  ],
+
+  generateSummary(answers) {
+    const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
+
+    if (answers.mediation_status === 'ordered') {
+      items.push({ status: 'info', text: 'Court-ordered mediation. Attendance is required.' })
+    } else if (answers.mediation_status === 'voluntary') {
+      items.push({ status: 'info', text: 'Voluntary mediation planned.' })
+    } else {
+      items.push({ status: 'info', text: 'No formal mediation. You can still negotiate a settlement at any time.' })
+    }
+
+    if (answers.settlement_demand_prepared === 'yes') {
+      items.push({ status: 'done', text: 'Settlement demand prepared for mediation.' })
+    } else if (answers.mediation_status !== 'no_mediation') {
+      items.push({ status: 'needed', text: 'Prepare your settlement demand: repair costs, replacement value, diminished value, loss of use.' })
+    }
+
+    if (answers.minimum_settlement === 'yes') {
+      items.push({ status: 'done', text: 'Minimum acceptable settlement amount determined.' })
+    } else if (answers.mediation_status !== 'no_mediation') {
+      items.push({ status: 'needed', text: 'Determine your minimum acceptable settlement before mediation.' })
+    }
+
+    return items
+  },
+}
 
 export const piMediationConfig: GuidedStepConfig = {
   title: 'Mediation & Settlement Conference',
@@ -96,4 +195,10 @@ export const piMediationConfig: GuidedStepConfig = {
 
     return items
   },
+}
+
+export function createPiMediationConfig(piSubType?: string): GuidedStepConfig {
+  return isPropertyDamageSubType(piSubType)
+    ? propertyDamageMediationConfig
+    : piMediationConfig
 }

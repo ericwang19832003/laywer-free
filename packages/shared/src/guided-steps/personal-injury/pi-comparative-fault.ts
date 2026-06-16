@@ -1,4 +1,147 @@
 import type { GuidedStepConfig } from '../types'
+import { isPropertyDamageSubType } from './constants'
+
+const propertyDamageComparativeFaultConfig: GuidedStepConfig = {
+  title: 'Understanding Comparative Fault in Texas',
+  reassurance:
+    'Texas comparative fault rules apply to property damage claims too. Knowing your fault exposure shapes your settlement strategy.',
+
+  questions: [
+    {
+      id: 'comparative_fault_overview',
+      type: 'info',
+      prompt:
+        "TEXAS MODIFIED COMPARATIVE FAULT (Tex. Civ. Prac. & Rem. Code §33.001):\nTexas uses a \"modified comparative fault\" system with a 51% bar. This means:\n• If you are 50% or less at fault, you CAN recover damages — but your award is reduced by your percentage of fault\n• If you are 51% or more at fault, you recover NOTHING\n\nExample: Your vehicle repairs cost $10,000 and the jury finds you 20% at fault. You recover $8,000 ($10,000 minus 20%).\n\nExample: Your repairs cost $10,000 but the jury finds you 51% at fault. You recover $0.",
+      acknowledgeLabel: "I understand the 51% bar — I'll build my case to keep fault below 51%",
+    },
+    {
+      id: 'fault_percentage_concern',
+      type: 'single_choice',
+      prompt: 'How concerned are you about being found partially at fault for the property damage?',
+      options: [
+        { value: 'not_at_fault', label: 'I was clearly not at fault', description: 'The other party caused all of the damage.' },
+        { value: 'minor_fault', label: 'I may have been slightly at fault', description: 'A small contributing factor on my side.' },
+        { value: 'significant_fault', label: 'I may have been significantly at fault', description: 'My actions may have substantially contributed.' },
+        { value: 'not_sure', label: "I'm not sure about fault allocation", description: 'The facts are unclear or contested.' },
+      ],
+    },
+    {
+      id: 'not_at_fault_info',
+      type: 'info',
+      prompt:
+        "EVEN IF YOU WERE CLEARLY NOT AT FAULT:\nThe defense will almost always argue you share some blame. Common tactics in property damage cases:\n• \"The property was already in poor condition\"\n• \"You failed to move or protect the property\"\n• \"You contributed to the situation through your own negligence\"\n• \"The damage occurred before the incident\"\n\nPrepare to counter each argument with evidence: photos taken before the incident, maintenance records, repair history, and witness statements.",
+      acknowledgeLabel: "I'm ready to counter these arguments",
+      showIf: (answers) => answers.fault_percentage_concern === 'not_at_fault',
+    },
+    {
+      id: 'minor_fault_info',
+      type: 'info',
+      prompt:
+        "IF YOU WERE SLIGHTLY AT FAULT:\nThis does NOT destroy your claim. For example, if you were 20% at fault and your property damage is $10,000, you still recover $8,000.\n\nStrategy:\n• Be honest about your role — judges and jurors respect honesty\n• Emphasize the defendant's greater fault\n• Focus on evidence that shows the defendant's actions were the PRIMARY cause of the damage\n• Do not volunteer fault, but do not deny what the evidence clearly shows",
+      acknowledgeLabel: "I'll be honest about my role and focus evidence on the defendant's primary fault",
+      showIf: (answers) => answers.fault_percentage_concern === 'minor_fault',
+    },
+    {
+      id: 'significant_fault_info',
+      type: 'info',
+      prompt:
+        "IF YOU MAY HAVE BEEN SIGNIFICANTLY AT FAULT:\nThis is where your strategy becomes critical. Remember the 51% bar — if the jury finds you 51%+ at fault, you get nothing.\n\nStrategy:\n• Gather every piece of evidence that supports the defendant's fault\n• Focus on what the DEFENDANT did wrong, not on defending your own actions\n• Consider settlement — a guaranteed partial recovery may be better than the risk of a 51% finding\n• Highlight aggravating factors on the defendant's side: ignoring warnings, reckless behavior, prior incidents\n• Consult with an attorney if possible — cases with significant shared fault require careful strategy",
+      acknowledgeLabel: "I'll gather evidence of the defendant's fault and seriously consider settlement",
+      showIf: (answers) => answers.fault_percentage_concern === 'significant_fault',
+    },
+    {
+      id: 'evidence_for_fault',
+      type: 'multi_select',
+      prompt: 'Which of these do you have access to right now?',
+      helpText: 'Check everything you currently have or can get. This shapes the next steps in your case.',
+      noneLabel: 'None of these yet — I need to gather evidence',
+      options: [
+        { value: 'police_report', label: 'Police or incident report' },
+        { value: 'photos_before', label: 'Photos showing the property before the damage' },
+        { value: 'photos_after', label: 'Photos showing the property after the damage' },
+        { value: 'witnesses', label: 'Witness names or contact info' },
+        { value: 'defendant_cited', label: 'Defendant was cited or found responsible' },
+        { value: 'maintenance_records', label: 'Maintenance or condition records for the property' },
+        { value: 'security_footage', label: 'Security or traffic camera footage' },
+      ],
+    },
+    {
+      id: 'common_defense_arguments',
+      type: 'info',
+      prompt:
+        "COMMON DEFENSE ARGUMENTS TO PREPARE FOR:\n• \"The property was already damaged\" — Counter: before-the-incident photos and maintenance records\n• \"The damage is less than claimed\" — Counter: multiple independent repair estimates\n• \"The plaintiff failed to mitigate\" — Counter: show you acted promptly to prevent further damage\n• \"The damage was caused by wear and tear\" — Counter: expert or contractor testimony on cause\n• \"There were multiple causes\" — Counter: even with multiple causes, if the defendant was primarily at fault, you recover",
+      acknowledgeLabel: "I'll prepare specific counter-evidence for each of these defense arguments",
+    },
+    {
+      id: 'case_strategy_impact',
+      type: 'info',
+      prompt:
+        "HOW COMPARATIVE FAULT AFFECTS YOUR STRATEGY:\n• In settlement negotiations: the defense will argue your fault percentage to reduce the offer. Know your realistic fault exposure.\n• In mediation: the mediator will discuss fault allocation openly. Be prepared with your best arguments.\n• At trial: the jury assigns specific percentages to each party on the verdict form. Your closing argument should suggest a specific percentage split.\n• Multiple defendants: if there are multiple defendants, fault is allocated among ALL parties, which can reduce your percentage.",
+      acknowledgeLabel: "I'll prepare my fault percentage argument for settlement, mediation, and trial",
+    },
+  ],
+
+  generateSummary(answers) {
+    const items: { status: 'done' | 'needed' | 'info'; text: string }[] = []
+
+    items.push({
+      status: 'info',
+      text: 'Texas 51% bar: if you are 51%+ at fault, you recover nothing. Under 51%, damages are reduced by your fault percentage.',
+    })
+
+    if (answers.fault_percentage_concern) {
+      const labels: Record<string, string> = {
+        not_at_fault: 'Clearly not at fault — but prepare for defense arguments that you share blame.',
+        minor_fault: 'Minor fault — you can still recover. Honesty about small fault increases credibility.',
+        significant_fault: 'Significant fault risk — focus on defendant\'s actions, consider settlement to avoid 51% bar.',
+        not_sure: "Fault allocation uncertain — gather evidence to establish defendant's primary responsibility.",
+      }
+      items.push({
+        status: answers.fault_percentage_concern === 'significant_fault' ? 'needed' : 'info',
+        text: labels[answers.fault_percentage_concern] ?? '',
+      })
+    }
+
+    if (answers.evidence_for_fault) {
+      const have = new Set(answers.evidence_for_fault === 'none' ? [] : answers.evidence_for_fault.split(','))
+      if (have.has('police_report')) {
+        items.push({ status: 'done', text: 'Police/incident report secured — the official at-fault determination is your strongest single piece of evidence.' })
+      } else {
+        items.push({ status: 'needed', text: 'No police/incident report yet — request a copy from the responding agency.' })
+      }
+      if (have.has('photos_before') && have.has('photos_after')) {
+        items.push({ status: 'done', text: 'Before and after photos secured — visual evidence of the damage and its cause is highly persuasive.' })
+      } else if (have.has('photos_after')) {
+        items.push({ status: 'needed', text: 'Have post-damage photos, but pre-damage photos missing — check for prior photos, insurance records, or appraisal reports.' })
+      } else {
+        items.push({ status: 'needed', text: 'No damage photos yet — gather photos of the property condition before and after the incident.' })
+      }
+      if (have.has('witnesses')) {
+        items.push({ status: 'done', text: 'Witnesses identified — collect written or recorded statements as soon as possible.' })
+      }
+      if (have.has('defendant_cited')) {
+        items.push({ status: 'done', text: 'Defendant was cited — an official finding of responsibility strongly supports your claim.' })
+      }
+      if (answers.evidence_for_fault === 'none') {
+        items.push({ status: 'needed', text: 'No evidence gathered yet — start with the incident report and before/after photos.' })
+      }
+    }
+
+    items.push({
+      status: 'info',
+      text: 'Prepare for common defenses: "pre-existing damage," "wear and tear," "failure to mitigate," "damage less than claimed."',
+    })
+
+    return items
+  },
+
+  references: [
+    {
+      label: 'Tex. Civ. Prac. & Rem. Code Ch. 33 — Proportionate Responsibility',
+      url: 'https://statutes.capitol.texas.gov/Docs/CP/htm/CP.33.htm',
+    },
+  ],
+}
 
 export const piComparativeFaultConfig: GuidedStepConfig = {
   title: 'Understanding Comparative Fault in Texas',
@@ -149,4 +292,10 @@ export const piComparativeFaultConfig: GuidedStepConfig = {
       url: 'https://texaslawhelp.org/resource/proportionate-responsibility',
     },
   ],
+}
+
+export function createPiComparativeFaultConfig(piSubType?: string): GuidedStepConfig {
+  return isPropertyDamageSubType(piSubType)
+    ? propertyDamageComparativeFaultConfig
+    : piComparativeFaultConfig
 }

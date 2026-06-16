@@ -261,6 +261,13 @@ export function GuidedStep({
     ? Math.round(((currentIndex + (phase === 'summary' ? 1 : 0)) / totalQuestions) * 100)
     : 100
 
+  // For the "Question X of Y" label, only count non-info decision questions
+  const decisionQuestions = visibleQuestions.filter((q) => q.type !== 'info')
+  const totalDecisions = decisionQuestions.length
+  const currentDecisionNumber = currentQuestion?.type === 'info'
+    ? null
+    : decisionQuestions.findIndex((q) => q.id === currentQuestion?.id) + 1
+
   // Auto-save answers to task metadata (non-fatal)
   const autoSave = useCallback(
     async (updatedAnswers: Record<string, string>) => {
@@ -386,7 +393,11 @@ export function GuidedStep({
           {/* Progress bar */}
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm text-warm-muted mb-2">
-              <span>{`Question ${currentIndex + 1} of ${totalQuestions}`}</span>
+              <span>
+                {currentDecisionNumber !== null && totalDecisions > 0
+                  ? `Question ${currentDecisionNumber} of ${totalDecisions}`
+                  : 'More information'}
+              </span>
               <span>{progress}%</span>
             </div>
             <div className="h-2 rounded-full bg-warm-border">
